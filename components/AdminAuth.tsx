@@ -44,7 +44,7 @@ const AdminAuth = ({ children }: AdminAuthProps) => {
             setIsLoading(false)
             setIsAuthenticated(false)
             router.push('/admin/login')
-          }, 5000) // 5 second timeout
+          }, 3000) // 3 second timeout
 
           // Listen for Firebase auth state changes
           const unsubscribe = onAuthStateChanged(auth, (user) => {
