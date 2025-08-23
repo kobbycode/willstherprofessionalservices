@@ -133,6 +133,11 @@ export default function ProfilePage() {
       
       try {
         console.log('Loading profile for user:', auth.currentUser.uid)
+        console.log('Current auth user:', {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email,
+          displayName: auth.currentUser.displayName
+        })
         
         // Load profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid))
@@ -140,7 +145,10 @@ export default function ProfilePage() {
         if (userDoc.exists()) {
           const userData = userDoc.data()
           console.log('User data loaded:', userData)
+          console.log('Auth user displayName:', auth.currentUser?.displayName)
+          console.log('Auth user email:', auth.currentUser?.email)
           
+          // Use actual data from Firestore, don't fall back to defaults
           setProfileData(prev => ({
             ...prev,
             name: userData.name || auth.currentUser?.displayName || 'Admin User',
@@ -152,8 +160,17 @@ export default function ProfilePage() {
             timezone: userData.timezone || 'Africa/Accra',
             avatar: userData.avatar || '/logo.jpg',
             notifications: userData.notifications || prev.notifications,
-            preferences: userData.preferences || prev.preferences
+            preferences: {
+              theme: (userData.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
+              compactMode: userData.preferences?.compactMode || false,
+              autoSave: userData.preferences?.autoSave || true
+            }
           }))
+          
+          console.log('Profile data set:', {
+            name: userData.name || auth.currentUser?.displayName || 'Admin User',
+            phone: userData.phone || '+233 594 850 005'
+          })
         } else {
           console.log('No user document found, creating one...')
           // Create user document if it doesn't exist

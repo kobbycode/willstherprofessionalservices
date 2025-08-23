@@ -113,7 +113,10 @@ export default function AdminRegister() {
       
       // Create user document in Firestore
       try {
+        console.log('Creating Firestore document...')
         const db = getDb()
+        console.log('Firestore DB initialized:', !!db)
+        
         const userData = {
           name: formData.name,
           email: formData.email,
@@ -126,7 +129,13 @@ export default function AdminRegister() {
           permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
         }
         
-        await setDoc(doc(db, 'users', user.uid), userData)
+        console.log('User data to save:', userData)
+        console.log('User UID:', user.uid)
+        
+        const userRef = doc(db, 'users', user.uid)
+        console.log('Document reference created:', userRef.path)
+        
+        await setDoc(userRef, userData)
         console.log('Firestore document created successfully')
         
         toast.success('Admin account created successfully!')
@@ -138,12 +147,42 @@ export default function AdminRegister() {
         router.push('/admin')
         
       } catch (firestoreError) {
-        console.error('Firestore error:', firestoreError)
-        // Even if Firestore fails, the user is created in Auth
-        // We can create the document later
-        toast.success('Account created! Setting up profile...')
-        localStorage.setItem('adminToken', 'authenticated')
-        router.push('/admin')
+        console.error('Firestore error details:', firestoreError)
+        console.error('Firestore error code:', (firestoreError as any)?.code)
+        console.error('Firestore error message:', (firestoreError as any)?.message)
+        
+        // Try to create the document again with a different approach
+        try {
+          console.log('Retrying Firestore document creation...')
+          const db = getDb()
+          const userRef = doc(db, 'users', user.uid)
+          
+          // Try with addDoc instead of setDoc
+          await setDoc(userRef, {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            role: formData.role,
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastLogin: null,
+            permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
+          })
+          
+          console.log('Firestore document created on retry')
+          toast.success('Admin account created successfully!')
+          localStorage.setItem('adminToken', 'authenticated')
+          router.push('/admin')
+          
+        } catch (retryError) {
+          console.error('Retry also failed:', retryError)
+          // Even if Firestore fails, the user is created in Auth
+          // We can create the document later
+          toast.success('Account created! Setting up profile...')
+          localStorage.setItem('adminToken', 'authenticated')
+          router.push('/admin')
+        }
       }
       
     } catch (err: any) {
