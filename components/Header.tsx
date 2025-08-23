@@ -8,6 +8,8 @@ import { useSiteConfig } from '@/lib/site-config'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [logoLoaded, setLogoLoaded] = useState(false)
+  const [logoError, setLogoError] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -67,20 +69,22 @@ const Header = () => {
             {/* Logo */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center group">
-                <img 
-                  src="/logo.jpg" 
-                  alt="Willsther Logo" 
-                  className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement
-                    target.style.display = 'none'
-                    const fallback = target.nextElementSibling as HTMLElement
-                    if (fallback) {
-                      fallback.style.display = 'flex'
-                    }
-                  }}
-                />
-                <span className="text-primary-600 font-bold text-base sm:text-lg md:text-xl hidden">W</span>
+                {!logoError ? (
+                  <img 
+                    src="/logo.jpg" 
+                    alt="Willsther Logo" 
+                    className={`w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setLogoLoaded(true)}
+                    onError={() => setLogoError(true)}
+                  />
+                ) : (
+                  <div className="text-white font-bold text-base sm:text-lg md:text-xl bg-primary-700 px-3 py-1 rounded-lg">
+                    Willsther
+                  </div>
+                )}
+                {!logoLoaded && !logoError && (
+                  <div className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 bg-gray-200 animate-pulse rounded"></div>
+                )}
               </Link>
             </div>
 
