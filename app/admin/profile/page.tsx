@@ -109,11 +109,21 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!auth || !db) return
 
-    const checkAuth = () => {
-      if (auth.currentUser) {
-        setIsAuthenticated(true)
-        loadProfile()
-      } else {
+    const checkAuth = async () => {
+      try {
+        // Wait for auth state to be ready
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        if (auth.currentUser) {
+          console.log('User authenticated:', auth.currentUser.email)
+          setIsAuthenticated(true)
+          await loadProfile()
+        } else {
+          console.log('No user authenticated, redirecting to login')
+          router.push('/admin/login')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
         router.push('/admin/login')
       }
     }
@@ -122,10 +132,15 @@ export default function ProfilePage() {
       if (!auth.currentUser) return
       
       try {
+        console.log('Loading profile for user:', auth.currentUser.uid)
+        
         // Load profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid))
+        
         if (userDoc.exists()) {
           const userData = userDoc.data()
+          console.log('User data loaded:', userData)
+          
           setProfileData(prev => ({
             ...prev,
             name: userData.name || auth.currentUser?.displayName || 'Admin User',
@@ -135,12 +150,71 @@ export default function ProfilePage() {
             bio: userData.bio || 'System Administrator at Willsther Professional Services',
             location: userData.location || 'Accra, Ghana',
             timezone: userData.timezone || 'Africa/Accra',
+            avatar: userData.avatar || '/logo.jpg',
             notifications: userData.notifications || prev.notifications,
             preferences: userData.preferences || prev.preferences
+          }))
+        } else {
+          console.log('No user document found, creating one...')
+          // Create user document if it doesn't exist
+          const userData = {
+            name: auth.currentUser?.displayName || 'Admin User',
+            email: auth.currentUser?.email || 'admin@willsther.com',
+            phone: '+233 594 850 005',
+            role: 'admin',
+            status: 'active',
+            bio: 'System Administrator at Willsther Professional Services',
+            location: 'Accra, Ghana',
+            timezone: 'Africa/Accra',
+            avatar: '/logo.jpg',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastLogin: null,
+            permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content'],
+            notifications: {
+              email: true,
+              push: true,
+              sms: false
+            },
+            preferences: {
+              theme: 'light',
+              compactMode: false,
+              autoSave: true
+            }
+          }
+          
+          await setDoc(doc(db, 'users', auth.currentUser.uid), userData)
+          setProfileData(prev => ({
+            ...prev,
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone,
+            role: userData.role,
+            bio: userData.bio,
+            location: userData.location,
+            timezone: userData.timezone,
+            avatar: userData.avatar,
+            notifications: userData.notifications,
+            preferences: {
+              theme: userData.preferences.theme as 'light' | 'dark' | 'auto',
+              compactMode: userData.preferences.compactMode,
+              autoSave: userData.preferences.autoSave
+            }
           }))
         }
       } catch (error) {
         console.error('Error loading profile:', error)
+        // Set basic data from auth user
+        setProfileData(prev => ({
+          ...prev,
+          name: auth.currentUser?.displayName || 'Admin User',
+          email: auth.currentUser?.email || 'admin@willsther.com',
+          phone: '+233 594 850 005',
+          role: 'Administrator',
+          bio: 'System Administrator at Willsther Professional Services',
+          location: 'Accra, Ghana',
+          timezone: 'Africa/Accra'
+        }))
       }
     }
 
