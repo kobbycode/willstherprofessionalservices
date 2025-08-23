@@ -25,7 +25,7 @@ import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { getAuth, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, signOut, type Auth } from 'firebase/auth'
-import { doc, updateDoc, getDoc, type Firestore } from 'firebase/firestore'
+import { doc, updateDoc, getDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
 
 
@@ -212,9 +212,11 @@ export default function ProfilePage() {
         photoURL: profileData.avatar
       })
 
-      // Update Firestore user document
+      // Update or create Firestore user document
       const userRef = doc(db, 'users', auth.currentUser.uid)
-      await updateDoc(userRef, {
+      const userDoc = await getDoc(userRef)
+      
+      const updateData = {
         name: profileData.name,
         phone: profileData.phone,
         bio: profileData.bio,
@@ -223,12 +225,27 @@ export default function ProfilePage() {
         notifications: profileData.notifications,
         preferences: profileData.preferences,
         updatedAt: new Date()
-      })
+      }
+
+      if (userDoc.exists()) {
+        // Update existing document
+        await updateDoc(userRef, updateData)
+      } else {
+        // Create new document if it doesn't exist
+        await setDoc(userRef, {
+          ...updateData,
+          email: auth.currentUser.email,
+          role: 'admin',
+          status: 'active',
+          createdAt: new Date(),
+          permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
+        })
+      }
 
       toast.success('Profile updated successfully!')
     } catch (error) {
       console.error('Error updating profile:', error)
-      toast.error('Failed to update profile')
+      toast.error('Failed to update profile. Please try again.')
     } finally {
       setIsSaving(false)
     }
