@@ -198,17 +198,25 @@ const AdminLogin = () => {
           )}
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">Firebase Authentication</h3>
-            <div className="text-xs text-blue-700 space-y-1">
-              <p><strong>Email:</strong> admin@willsther.com</p>
-              <p><strong>Password:</strong> admin123</p>
-              <p className="mt-2 text-blue-600">Run setup script first to create admin user</p>
-            </div>
-          </div>
+                          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="text-sm font-medium text-blue-800 mb-2">Admin Access</h3>
+                  <div className="text-xs text-blue-700 space-y-1">
+                    <p>Use your individual admin credentials</p>
+                    <p className="mt-2 text-blue-600">Contact system administrator for access</p>
+                  </div>
+                </div>
 
-          {/* Back to Website */}
+          {/* Registration Link */}
           <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Need an admin account?{' '}
+              <Link 
+                href="/admin/register" 
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Register here
+              </Link>
+            </p>
             <Link 
               href="/" 
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors"

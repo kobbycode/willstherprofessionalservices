@@ -1,7 +1,7 @@
 'use client'
 
 import { getDb } from './firebase'
-import { collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, type DocumentData } from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, setDoc, type DocumentData } from 'firebase/firestore'
 
 export type User = {
   id: string
@@ -21,6 +21,7 @@ export type User = {
 export type NewUserInput = {
   name: string
   email: string
+  password?: string
   role?: 'admin' | 'editor' | 'user'
   status?: 'active' | 'inactive' | 'pending'
   phone?: string
@@ -89,19 +90,83 @@ export async function fetchUserById(id: string): Promise<User | null> {
   }
 }
 
-// Create new user
+// Create new user with Firebase Auth
+export async function createUserWithAuth(userData: NewUserInput): Promise<string | null> {
+  try {
+    const { getAuth, createUserWithEmailAndPassword } = await import('firebase/auth')
+    const { getFirebaseApp } = await import('./firebase')
+    
+    const firebaseApp = getFirebaseApp()
+    const auth = getAuth(firebaseApp)
+    const db = getDb()
+    
+    // Create Firebase Auth user if password is provided
+    let authUid = null
+    if (userData.password) {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        userData.email,
+        userData.password
+      )
+      authUid = userCredential.user.uid
+    }
+    
+    // Create user document in Firestore
+    const usersRef = collection(db, 'users')
+    const userDocData = {
+      name: userData.name,
+      email: userData.email,
+      role: userData.role || 'user',
+      status: userData.status || 'pending',
+      phone: userData.phone || '',
+      department: userData.department || '',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastLogin: null,
+      permissions: userData.role === 'admin' 
+        ? ['read', 'write', 'delete', 'manage_users', 'manage_content']
+        : userData.role === 'editor'
+        ? ['read', 'write', 'manage_content']
+        : ['read']
+    }
+    
+    // Use auth UID if available, otherwise create new document
+    let docRef
+    if (authUid) {
+      await setDoc(doc(db, 'users', authUid), userDocData)
+      docRef = { id: authUid }
+    } else {
+      docRef = await addDoc(usersRef, userDocData)
+    }
+    
+    return docRef.id
+  } catch (error) {
+    console.error('Error creating user with auth:', error)
+    return null
+  }
+}
+
+// Create new user (legacy function)
 export async function createUser(userData: NewUserInput): Promise<string | null> {
   try {
     const db = getDb()
     const usersRef = collection(db, 'users')
+    
+    // Create user document
     const docRef = await addDoc(usersRef, {
       ...userData,
       role: userData.role || 'user',
       status: userData.status || 'pending',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      lastLogin: null
+      lastLogin: null,
+      permissions: userData.role === 'admin' 
+        ? ['read', 'write', 'delete', 'manage_users', 'manage_content']
+        : userData.role === 'editor'
+        ? ['read', 'write', 'manage_content']
+        : ['read']
     })
+    
     return docRef.id
   } catch (error) {
     console.error('Error creating user:', error)

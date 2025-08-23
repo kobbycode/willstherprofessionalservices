@@ -6,7 +6,7 @@ import { ArrowLeft, Save, UserPlus, Shield, Eye, Edit, Trash2, Settings, FileTex
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { createUser, type NewUserInput } from '@/lib/users'
+import { createUserWithAuth, type NewUserInput } from '@/lib/users'
 
 const permissions = {
   admin: {
@@ -46,6 +46,7 @@ export default function AddUserPage() {
   const [formData, setFormData] = useState<NewUserInput>({
     name: '',
     email: '',
+    password: '',
     role: 'user',
     status: 'pending',
     phone: '',
@@ -99,13 +100,18 @@ export default function AddUserPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.name.trim() || !formData.email.trim()) {
-      toast.error('Name and email are required')
+    if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
+      toast.error('Name, email, and password are required')
       return
     }
 
     if (!formData.email.includes('@')) {
       toast.error('Please enter a valid email address')
+      return
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters long')
       return
     }
 
@@ -116,7 +122,7 @@ export default function AddUserPage() {
         permissions: selectedPermissions
       }
 
-      const userId = await createUser(userData)
+      const userId = await createUserWithAuth(userData)
       
       if (userId) {
         toast.success('User created successfully!')
@@ -201,6 +207,18 @@ export default function AddUserPage() {
                       placeholder="Enter email address"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                      placeholder="Enter password (min 6 characters)"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                      required
+                      minLength={6}
                     />
                   </div>
                   <div>
