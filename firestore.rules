@@ -1,0 +1,10 @@
+// Firestore rules (dev-safe for all collections)
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    // Allow all operations for development
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
