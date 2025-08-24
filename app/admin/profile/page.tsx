@@ -116,8 +116,17 @@ export default function ProfilePage() {
 
     const checkAuth = async () => {
       try {
-        // Wait for auth state to be ready
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Wait for auth state to be ready with timeout
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Auth check timeout'))
+          }, 5000) // 5 second timeout
+          
+          setTimeout(() => {
+            clearTimeout(timeout)
+            resolve(true)
+          }, 100)
+        })
         
         if (auth.currentUser) {
           console.log('User authenticated:', auth.currentUser.email)
@@ -129,11 +138,16 @@ export default function ProfilePage() {
         }
       } catch (error) {
         console.error('Auth check error:', error)
-        router.push('/admin/login')
+        // Don't redirect on timeout, let user click the button
+        if (error.message === 'Auth check timeout') {
+          console.log('Auth check timed out, showing manual login option')
+        } else {
+          router.push('/admin/login')
+        }
       }
     }
 
-        const loadProfile = async () => {
+    const loadProfile = async () => {
       if (!auth.currentUser) return
       
       try {
@@ -568,6 +582,12 @@ export default function ProfilePage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Verifying access...</p>
+          <button 
+            onClick={() => router.push('/admin/login')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     )
