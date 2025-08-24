@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation'
 import { getAuth, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, signOut, type Auth } from 'firebase/auth'
 import { doc, updateDoc, getDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
+import { uploadImage } from '@/lib/storage'
 
 
 interface ProfileData {
@@ -58,6 +59,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [imageLoading, setImageLoading] = useState(false)
 
   const [activeTab, setActiveTab] = useState('profile')
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -84,6 +86,8 @@ export default function ProfilePage() {
       autoSave: true
     }
   })
+
+  const [originalEmail, setOriginalEmail] = useState('')
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -149,10 +153,12 @@ export default function ProfilePage() {
           console.log('Auth user email:', auth.currentUser?.email)
           
           // Use actual data from Firestore, don't fall back to defaults
+          const userEmail = auth.currentUser?.email || 'admin@willsther.com'
+          setOriginalEmail(userEmail)
           setProfileData(prev => ({
             ...prev,
             name: userData.name || auth.currentUser?.displayName || 'Admin User',
-            email: auth.currentUser?.email || 'admin@willsther.com',
+            email: userEmail,
             phone: userData.phone || '+233 594 850 005',
             role: userData.role || 'Administrator',
             bio: userData.bio || 'System Administrator at Willsther Professional Services',
@@ -289,14 +295,57 @@ export default function ProfilePage() {
     }))
   }
 
+  const validateProfileData = () => {
+    if (!profileData.name.trim()) {
+      toast.error('Name is required')
+      return false
+    }
+    
+    if (!profileData.email.trim()) {
+      toast.error('Email is required')
+      return false
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(profileData.email)) {
+      toast.error('Please enter a valid email address')
+      return false
+    }
+    
+    if (profileData.phone && profileData.phone.trim()) {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
+      const cleanPhone = profileData.phone.replace(/[\s\-\(\)]/g, '')
+      if (!phoneRegex.test(cleanPhone)) {
+        toast.error('Please enter a valid phone number')
+        return false
+      }
+    }
+    
+    return true
+  }
+
   const handleSaveProfile = async () => {
     if (!auth?.currentUser || !db) {
       toast.error('You must be logged in to update your profile')
       return
     }
 
+    if (!validateProfileData()) {
+      return
+    }
+
     setIsSaving(true)
     try {
+      // Check if email has changed and handle re-authentication
+      if (profileData.email !== originalEmail && auth.currentUser.email) {
+        // For email changes, we would need to implement updateEmail with re-authentication
+        // This is a complex process that requires current password verification
+        toast.error('Email changes require additional verification. Please contact support.')
+        setProfileData(prev => ({ ...prev, email: originalEmail }))
+        setIsSaving(false)
+        return
+      }
+
       // Update Firebase Auth profile
       await updateProfile(auth.currentUser, {
         displayName: profileData.name,
@@ -313,6 +362,7 @@ export default function ProfilePage() {
         bio: profileData.bio,
         location: profileData.location,
         timezone: profileData.timezone,
+        avatar: profileData.avatar,
         notifications: profileData.notifications,
         preferences: profileData.preferences,
         updatedAt: new Date()
@@ -353,18 +403,42 @@ export default function ProfilePage() {
       return
     }
 
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file')
+      return
+    }
+
+    setImageLoading(true)
     try {
-      // For now, we'll use a placeholder. In a real app, you'd upload to Firebase Storage
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
-        setProfileData(prev => ({ ...prev, avatar: result }))
-        toast.success('Avatar updated!')
+      // Upload to Firebase Storage
+      const downloadURL = await uploadImage(file, 'profile-pictures')
+      
+      // Update profile data
+      setProfileData(prev => ({ ...prev, avatar: downloadURL }))
+      
+      // Update Firebase Auth profile
+      if (auth?.currentUser) {
+        await updateProfile(auth.currentUser, {
+          photoURL: downloadURL
+        })
       }
-      reader.readAsDataURL(file)
+
+      // Update Firestore document
+      if (auth?.currentUser && db) {
+        const userRef = doc(db, 'users', auth.currentUser.uid)
+        await updateDoc(userRef, {
+          avatar: downloadURL,
+          updatedAt: new Date()
+        })
+      }
+
+      toast.success('Profile picture updated successfully!')
     } catch (error) {
       console.error('Error uploading avatar:', error)
-      toast.error('Failed to upload avatar')
+      toast.error('Failed to upload profile picture. Please try again.')
+    } finally {
+      setImageLoading(false)
     }
   }
 
@@ -538,20 +612,69 @@ export default function ProfilePage() {
                           src={profileData.avatar}
                           alt="Profile"
                           className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/logo.jpg'; // Fallback image
+                          }}
                         />
-                        <label className="absolute -bottom-1 -right-1 p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors cursor-pointer">
-                          <Camera className="w-3 h-3" />
+                        <label className={`absolute -bottom-1 -right-1 p-1.5 rounded-full transition-colors cursor-pointer ${
+                          imageLoading 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-blue-600 hover:bg-blue-700'
+                        }`}>
+                          {imageLoading ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                          ) : (
+                            <Camera className="w-3 h-3 text-white" />
+                          )}
                           <input
                             type="file"
                             accept="image/*"
                             onChange={handleAvatarUpload}
                             className="hidden"
+                            disabled={imageLoading}
                           />
                         </label>
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm text-gray-600">Upload a new profile picture</p>
                         <p className="text-xs text-gray-500">JPG, PNG or GIF. Max 2MB.</p>
+                        {imageLoading && (
+                          <p className="text-xs text-blue-600 mt-1">Uploading...</p>
+                        )}
+                        {profileData.avatar !== '/logo.jpg' && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                setProfileData(prev => ({ ...prev, avatar: '/logo.jpg' }))
+                                
+                                // Update Firebase Auth profile
+                                if (auth?.currentUser) {
+                                  await updateProfile(auth.currentUser, {
+                                    photoURL: '/logo.jpg'
+                                  })
+                                }
+
+                                // Update Firestore document
+                                if (auth?.currentUser && db) {
+                                  const userRef = doc(db, 'users', auth.currentUser.uid)
+                                  await updateDoc(userRef, {
+                                    avatar: '/logo.jpg',
+                                    updatedAt: new Date()
+                                  })
+                                }
+
+                                toast.success('Profile picture reset to default')
+                              } catch (error) {
+                                console.error('Error resetting profile picture:', error)
+                                toast.error('Failed to reset profile picture')
+                              }
+                            }}
+                            className="text-xs text-red-600 hover:text-red-700 mt-1 underline"
+                          >
+                            Reset to default
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -577,10 +700,12 @@ export default function ProfilePage() {
                         <input
                           type="email"
                           value={profileData.email}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm"
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {profileData.email !== originalEmail ? 'Email change will require re-authentication' : 'Current email address'}
+                        </p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
