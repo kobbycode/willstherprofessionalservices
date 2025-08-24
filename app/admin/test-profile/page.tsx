@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { getAuth } from 'firebase/auth'
-import { getDb } from '@/lib/firebase'
+import { getDb, getStorageClient } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { uploadImage } from '@/lib/storage'
 
 export default function TestProfilePage() {
   const [auth, setAuth] = useState<any>(null)
   const [db, setDb] = useState<any>(null)
+  const [storage, setStorage] = useState<any>(null)
   const [userData, setUserData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [uploadStatus, setUploadStatus] = useState('')
@@ -18,8 +19,17 @@ export default function TestProfilePage() {
       try {
         const authInstance = getAuth()
         const dbInstance = getDb()
+        const storageInstance = getStorageClient()
+        
         setAuth(authInstance)
         setDb(dbInstance)
+        setStorage(storageInstance)
+        
+        console.log('Firebase services initialized:', {
+          auth: !!authInstance,
+          db: !!dbInstance,
+          storage: !!storageInstance
+        })
         
         if (authInstance.currentUser) {
           const userDoc = await getDoc(doc(dbInstance, 'users', authInstance.currentUser.uid))
@@ -43,10 +53,15 @@ export default function TestProfilePage() {
 
     setUploadStatus('Uploading...')
     try {
+      console.log('Test upload starting...')
+      console.log('File:', file.name, file.size, file.type)
+      
       const url = await uploadImage(file, 'test-uploads')
       setUploadStatus(`Upload successful: ${url}`)
-    } catch (error) {
-      setUploadStatus(`Upload failed: ${error}`)
+      console.log('Test upload completed:', url)
+    } catch (error: any) {
+      console.error('Test upload failed:', error)
+      setUploadStatus(`Upload failed: ${error.code || error.message || error}`)
     }
   }
 
@@ -64,7 +79,9 @@ export default function TestProfilePage() {
           <div className="space-y-2">
             <p><strong>Auth:</strong> {auth ? '✅ Connected' : '❌ Not connected'}</p>
             <p><strong>Firestore:</strong> {db ? '✅ Connected' : '❌ Not connected'}</p>
+            <p><strong>Storage:</strong> {storage ? '✅ Connected' : '❌ Not connected'}</p>
             <p><strong>Current User:</strong> {auth?.currentUser?.email || 'Not logged in'}</p>
+            <p><strong>User ID:</strong> {auth?.currentUser?.uid || 'N/A'}</p>
           </div>
         </div>
 

@@ -434,9 +434,25 @@ export default function ProfilePage() {
       }
 
       toast.success('Profile picture updated successfully!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error)
-      toast.error('Failed to upload profile picture. Please try again.')
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to upload profile picture. Please try again.'
+      
+      if (error.code === 'storage/unauthorized') {
+        errorMessage = 'Upload failed: You are not authorized to upload files.'
+      } else if (error.code === 'storage/quota-exceeded') {
+        errorMessage = 'Upload failed: Storage quota exceeded.'
+      } else if (error.code === 'storage/unauthenticated') {
+        errorMessage = 'Upload failed: Please log in to upload files.'
+      } else if (error.code === 'storage/retry-limit-exceeded') {
+        errorMessage = 'Upload failed: Network error. Please try again.'
+      } else if (error.message) {
+        errorMessage = `Upload failed: ${error.message}`
+      }
+      
+      toast.error(errorMessage)
     } finally {
       setImageLoading(false)
     }
