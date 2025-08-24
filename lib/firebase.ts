@@ -13,7 +13,7 @@ const firebaseConfig = {
   apiKey: 'AIzaSyB4XxvcqkCGS6IgwkDQSKEr8XFKJgodCIU',
   authDomain: 'wilsther-profesional-services.firebaseapp.com',
   projectId: 'wilsther-profesional-services',
-  storageBucket: 'wilsther-profesional-services.firebasestorage.app',
+  storageBucket: 'wilsther-profesional-services.appspot.com',
   messagingSenderId: '484189314031',
   appId: '1:484189314031:web:cc4f556f31e37757eab41a',
   measurementId: 'G-BGVH0BFR5Y'
@@ -88,6 +88,27 @@ export async function getClientAnalytics(): Promise<Analytics | undefined> {
     return undefined
   }
   return undefined
+}
+
+// Debug function to verify Firebase configuration
+export function debugFirebaseConfig() {
+  console.log('=== FIREBASE CONFIG DEBUG ===')
+  console.log('Firebase config:', firebaseConfig)
+  console.log('App initialized:', !!app)
+  console.log('Auth initialized:', !!auth)
+  console.log('DB initialized:', !!db)
+  console.log('Storage initialized:', !!storage)
+  
+  if (auth?.currentUser) {
+    console.log('Current user:', {
+      uid: auth.currentUser.uid,
+      email: auth.currentUser.email,
+      emailVerified: auth.currentUser.emailVerified
+    })
+  } else {
+    console.log('No current user')
+  }
+  console.log('=== END FIREBASE CONFIG DEBUG ===')
 }
 
 

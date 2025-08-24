@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAuth } from 'firebase/auth'
-import { getDb, getStorageClient } from '@/lib/firebase'
+import { getDb, getStorageClient, debugFirebaseConfig } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { uploadImage } from '@/lib/storage'
 
@@ -30,6 +30,9 @@ export default function TestProfilePage() {
           db: !!dbInstance,
           storage: !!storageInstance
         })
+        
+        // Run debug function
+        debugFirebaseConfig()
         
         if (authInstance.currentUser) {
           const userDoc = await getDoc(doc(dbInstance, 'users', authInstance.currentUser.uid))
