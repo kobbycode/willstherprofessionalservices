@@ -145,59 +145,60 @@ export default function ProfilePage() {
         })
         
         // Load profile from Firestore
-        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid))
-        
-        if (userDoc.exists()) {
-          const userData = userDoc.data()
-          console.log('User data loaded:', userData)
-          console.log('Auth user displayName:', auth.currentUser?.displayName)
-          console.log('Auth user email:', auth.currentUser?.email)
+        try {
+          const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid))
           
-          // Use actual data from Firestore, don't fall back to defaults
-          const userEmail = auth.currentUser?.email || 'admin@willsther.com'
-          setOriginalEmail(userEmail)
-          setProfileData(prev => ({
-            ...prev,
-            name: userData.name || auth.currentUser?.displayName || 'Admin User',
-            email: userEmail,
-            phone: userData.phone || '+233 594 850 005',
-            role: userData.role || 'Administrator',
-            bio: userData.bio || 'System Administrator at Willsther Professional Services',
-            location: userData.location || 'Accra, Ghana',
-            timezone: userData.timezone || 'Africa/Accra',
-            avatar: userData.avatar || '/logo.jpg',
-            notifications: userData.notifications || prev.notifications,
-            preferences: {
-              theme: (userData.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
-              compactMode: userData.preferences?.compactMode || false,
-              autoSave: userData.preferences?.autoSave || true
-            }
-          }))
-          
-          console.log('Profile data set:', {
-            name: userData.name || auth.currentUser?.displayName || 'Admin User',
-            phone: userData.phone || '+233 594 850 005'
-          })
-        } else {
-          console.log('No user document found, creating one...')
-          // Create user document if it doesn't exist
-          const userData = {
-            name: auth.currentUser?.displayName || 'Admin User',
-            email: auth.currentUser?.email || 'admin@willsther.com',
-            phone: '+233 594 850 005',
-            role: 'admin',
-            status: 'active',
-            bio: 'System Administrator at Willsther Professional Services',
-            location: 'Accra, Ghana',
-            timezone: 'Africa/Accra',
-            avatar: '/logo.jpg',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            lastLogin: null,
-            permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content'],
-            notifications: {
-              email: true,
-              push: true,
+          if (userDoc.exists()) {
+            const userData = userDoc.data()
+            console.log('User data loaded:', userData)
+            console.log('Auth user displayName:', auth.currentUser?.displayName)
+            console.log('Auth user email:', auth.currentUser?.email)
+            
+            // Use actual data from Firestore, don't fall back to defaults
+            const userEmail = auth.currentUser?.email || 'admin@willsther.com'
+            setOriginalEmail(userEmail)
+            setProfileData(prev => ({
+              ...prev,
+              name: userData.name || auth.currentUser?.displayName || 'Admin User',
+              email: userEmail,
+              phone: userData.phone || '+233 594 850 005',
+              role: userData.role || 'Administrator',
+              bio: userData.bio || 'System Administrator at Willsther Professional Services',
+              location: userData.location || 'Accra, Ghana',
+              timezone: userData.timezone || 'Africa/Accra',
+              avatar: userData.avatar || '/logo.jpg',
+              notifications: userData.notifications || prev.notifications,
+              preferences: {
+                theme: (userData.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
+                compactMode: userData.preferences?.compactMode || false,
+                autoSave: userData.preferences?.autoSave || true
+              }
+            }))
+            
+            console.log('Profile data set:', {
+              name: userData.name || auth.currentUser?.displayName || 'Admin User',
+              phone: userData.phone || '+233 594 850 005'
+            })
+          } else {
+            console.log('No user document found, creating one...')
+            // Create user document if it doesn't exist
+            const userData = {
+              name: auth.currentUser?.displayName || 'Admin User',
+              email: auth.currentUser?.email || 'admin@willsther.com',
+              phone: '+233 594 850 005',
+              role: 'admin',
+              status: 'active',
+              bio: 'System Administrator at Willsther Professional Services',
+              location: 'Accra, Ghana',
+              timezone: 'Africa/Accra',
+              avatar: '/logo.jpg',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              lastLogin: null,
+              permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content'],
+              notifications: {
+                email: true,
+                push: true,
               sms: false
             },
             preferences: {
@@ -225,6 +226,20 @@ export default function ProfilePage() {
               autoSave: userData.preferences.autoSave
             }
           }))
+        } catch (firestoreError) {
+          console.error('Firestore error:', firestoreError)
+          // Set basic data from auth user if Firestore fails
+          setProfileData(prev => ({
+            ...prev,
+            name: auth.currentUser?.displayName || 'Admin User',
+            email: auth.currentUser?.email || 'admin@willsther.com',
+            phone: '+233 594 850 005',
+            role: 'Administrator',
+            bio: 'System Administrator at Willsther Professional Services',
+            location: 'Accra, Ghana',
+            timezone: 'Africa/Accra',
+            avatar: '/logo.jpg'
+          }))
         }
       } catch (error) {
         console.error('Error loading profile:', error)
@@ -243,7 +258,7 @@ export default function ProfilePage() {
     }
 
     checkAuth()
-  }, [auth, db, router])
+  }, [])
 
   // Handle escape key to close logout dialog
   useEffect(() => {
@@ -427,12 +442,6 @@ export default function ProfilePage() {
     try {
       console.log('Starting profile picture upload via API...')
       
-      // Get auth token
-      const token = await auth.currentUser.getIdToken()
-      if (!token) {
-        throw new Error('Authentication token not available')
-      }
-
       // Create form data
       const formData = new FormData()
       formData.append('file', file)
@@ -440,9 +449,6 @@ export default function ProfilePage() {
       // Upload via API route
       const response = await fetch('/api/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       })
 

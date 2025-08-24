@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { initializeApp, getApps } from 'firebase/app'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB4XxvcqkCGS6IgwkDQSKEr8XFKJgodCIU',
@@ -27,18 +26,16 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const authHeader = request.headers.get('authorization')
     
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
     
-    if (!authHeader) {
-      return NextResponse.json({ error: 'No authorization header' }, { status: 401 })
-    }
-    
-    // Verify the authorization header (you might want to verify the token here)
-    const token = authHeader.replace('Bearer ', '')
+    console.log('File received:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    })
     
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
@@ -49,14 +46,20 @@ export async function POST(request: NextRequest) {
     const filename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
     const path = `profile-pictures/${filename}`
     
+    console.log('Uploading to path:', path)
+    
     // Upload to Firebase Storage
     const storageRef = ref(storage, path)
     const snapshot = await uploadBytes(storageRef, buffer, {
       contentType: file.type
     })
     
+    console.log('Upload completed, getting download URL...')
+    
     // Get download URL
     const downloadURL = await getDownloadURL(snapshot.ref)
+    
+    console.log('Download URL obtained:', downloadURL)
     
     return NextResponse.json({ 
       success: true, 
