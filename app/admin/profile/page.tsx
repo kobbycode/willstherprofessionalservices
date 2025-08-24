@@ -139,7 +139,7 @@ export default function ProfilePage() {
       } catch (error) {
         console.error('Auth check error:', error)
         // Don't redirect on timeout, let user click the button
-        if (error.message === 'Auth check timeout') {
+        if ((error as Error).message === 'Auth check timeout') {
           console.log('Auth check timed out, showing manual login option')
         } else {
           router.push('/admin/login')
