@@ -16,9 +16,9 @@ service firebase.storage {
       allow read, write: if request.auth != null;
     }
     
-    // Default rule - deny all
+    // Allow all authenticated users to read/write (for debugging)
     match /{allPaths=**} {
-      allow read, write: if false;
+      allow read, write: if request.auth != null;
     }
   }
 }

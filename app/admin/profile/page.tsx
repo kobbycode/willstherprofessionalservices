@@ -409,6 +409,18 @@ export default function ProfilePage() {
       return
     }
 
+    // Check authentication status before upload
+    if (!auth?.currentUser) {
+      toast.error('You must be logged in to upload files')
+      return
+    }
+
+    console.log('Current auth user before upload:', {
+      uid: auth.currentUser.uid,
+      email: auth.currentUser.email,
+      emailVerified: auth.currentUser.emailVerified
+    })
+
     setImageLoading(true)
     try {
       // Upload to Firebase Storage

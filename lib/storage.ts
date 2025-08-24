@@ -1,6 +1,6 @@
 'use client'
 
-import { getStorageClient } from './firebase'
+import { getStorageClient, getAuth } from './firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<string> {
@@ -11,6 +11,21 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
       size: file.size,
       type: file.type
     })
+    
+    // Check authentication status
+    const auth = getAuth()
+    console.log('Auth state:', {
+      currentUser: auth.currentUser ? {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        emailVerified: auth.currentUser.emailVerified
+      } : null,
+      isAuthenticated: !!auth.currentUser
+    })
+    
+    if (!auth.currentUser) {
+      throw new Error('User must be authenticated to upload files')
+    }
     
     const storage = getStorageClient()
     console.log('Storage client initialized:', !!storage)
