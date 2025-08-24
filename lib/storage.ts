@@ -50,7 +50,14 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
     console.log('Storage reference created')
     
     console.log('Starting upload...')
-    const snap = await uploadBytes(r, file, { contentType: file.type })
+    
+    // Add timeout to prevent forever loading
+    const uploadPromise = uploadBytes(r, file, { contentType: file.type })
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Upload timeout after 30 seconds')), 30000)
+    })
+    
+    const snap = await Promise.race([uploadPromise, timeoutPromise]) as any
     console.log('Upload completed, getting download URL...')
     
     const downloadURL = await getDownloadURL(snap.ref)

@@ -60,6 +60,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [imageLoading, setImageLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const [activeTab, setActiveTab] = useState('profile')
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -422,7 +423,10 @@ export default function ProfilePage() {
     })
 
     setImageLoading(true)
+    setUploadProgress(0)
     try {
+      console.log('Starting profile picture upload...')
+      
       // Upload to Firebase Storage
       const downloadURL = await uploadImage(file, 'profile-pictures')
       
@@ -460,6 +464,8 @@ export default function ProfilePage() {
         errorMessage = 'Upload failed: Please log in to upload files.'
       } else if (error.code === 'storage/retry-limit-exceeded') {
         errorMessage = 'Upload failed: Network error. Please try again.'
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = 'Upload failed: Request timed out. Please check your internet connection and try again.'
       } else if (error.message) {
         errorMessage = `Upload failed: ${error.message}`
       }
@@ -467,6 +473,7 @@ export default function ProfilePage() {
       toast.error(errorMessage)
     } finally {
       setImageLoading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -668,7 +675,12 @@ export default function ProfilePage() {
                         <p className="text-sm text-gray-600">Upload a new profile picture</p>
                         <p className="text-xs text-gray-500">JPG, PNG or GIF. Max 2MB.</p>
                         {imageLoading && (
-                          <p className="text-xs text-blue-600 mt-1">Uploading...</p>
+                          <div className="mt-2">
+                            <p className="text-xs text-blue-600 mb-1">Uploading...</p>
+                            <div className="w-full bg-gray-200 rounded-full h-1">
+                              <div className="bg-blue-600 h-1 rounded-full animate-pulse" style={{ width: '100%' }}></div>
+                            </div>
+                          </div>
                         )}
                         {profileData.avatar !== '/logo.jpg' && (
                           <button
