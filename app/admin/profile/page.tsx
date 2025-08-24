@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation'
 import { getAuth, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, signOut, type Auth } from 'firebase/auth'
 import { doc, updateDoc, getDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
-import { uploadImage } from '@/lib/storage'
+
 
 
 interface ProfileData {
@@ -399,8 +399,8 @@ export default function ProfilePage() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-      toast.error('Image size must be less than 2MB')
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error('Image size must be less than 5MB')
       return
     }
 
@@ -425,10 +425,35 @@ export default function ProfilePage() {
     setImageLoading(true)
     setUploadProgress(0)
     try {
-      console.log('Starting profile picture upload...')
+      console.log('Starting profile picture upload via API...')
       
-      // Upload to Firebase Storage
-      const downloadURL = await uploadImage(file, 'profile-pictures')
+      // Get auth token
+      const token = await auth.currentUser.getIdToken()
+      if (!token) {
+        throw new Error('Authentication token not available')
+      }
+
+      // Create form data
+      const formData = new FormData()
+      formData.append('file', file)
+
+      // Upload via API route
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Upload failed')
+      }
+
+      const result = await response.json()
+      const downloadURL = result.downloadURL
+      console.log('Upload successful, download URL:', downloadURL)
       
       // Update profile data
       setProfileData(prev => ({ ...prev, avatar: downloadURL }))
@@ -456,16 +481,10 @@ export default function ProfilePage() {
       // Provide more specific error messages
       let errorMessage = 'Failed to upload profile picture. Please try again.'
       
-      if (error.code === 'storage/unauthorized') {
-        errorMessage = 'Upload failed: You are not authorized to upload files.'
-      } else if (error.code === 'storage/quota-exceeded') {
-        errorMessage = 'Upload failed: Storage quota exceeded.'
-      } else if (error.code === 'storage/unauthenticated') {
+      if (error.message?.includes('Authentication token not available')) {
         errorMessage = 'Upload failed: Please log in to upload files.'
-      } else if (error.code === 'storage/retry-limit-exceeded') {
-        errorMessage = 'Upload failed: Network error. Please try again.'
-      } else if (error.message?.includes('timeout')) {
-        errorMessage = 'Upload failed: Request timed out. Please check your internet connection and try again.'
+      } else if (error.message?.includes('Upload failed')) {
+        errorMessage = error.message
       } else if (error.message) {
         errorMessage = `Upload failed: ${error.message}`
       }
