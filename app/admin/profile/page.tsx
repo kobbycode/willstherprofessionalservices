@@ -112,22 +112,20 @@ export default function ProfilePage() {
 
   // Check authentication and load user profile data
   useEffect(() => {
-    if (!auth || !db) return
+    if (!auth || !db) {
+      console.log('Auth or DB not initialized yet')
+      return
+    }
+
+    console.log('Auth and DB initialized, checking authentication...')
+    console.log('Current auth state:', {
+      currentUser: auth.currentUser ? 'exists' : 'null',
+      email: auth.currentUser?.email
+    })
 
     const checkAuth = async () => {
       try {
-        // Wait for auth state to be ready with timeout
-        await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error('Auth check timeout'))
-          }, 5000) // 5 second timeout
-          
-          setTimeout(() => {
-            clearTimeout(timeout)
-            resolve(true)
-          }, 100)
-        })
-        
+        // Simple check without complex timeout
         if (auth.currentUser) {
           console.log('User authenticated:', auth.currentUser.email)
           setIsAuthenticated(true)
@@ -138,12 +136,7 @@ export default function ProfilePage() {
         }
       } catch (error) {
         console.error('Auth check error:', error)
-        // Don't redirect on timeout, let user click the button
-        if ((error as Error).message === 'Auth check timeout') {
-          console.log('Auth check timed out, showing manual login option')
-        } else {
-          router.push('/admin/login')
-        }
+        router.push('/admin/login')
       }
     }
 
@@ -258,6 +251,18 @@ export default function ProfilePage() {
 
           loadProfile()
     }, []);
+
+  // Add timeout to redirect if authentication takes too long
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isAuthenticated) {
+        console.log('Authentication timeout, redirecting to login')
+        router.push('/admin/login')
+      }
+    }, 10000) // 10 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [isAuthenticated, router])
 
   // Handle escape key to close logout dialog
   useEffect(() => {
@@ -582,6 +587,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Verifying access...</p>
+          <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
           <button 
             onClick={() => router.push('/admin/login')}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
