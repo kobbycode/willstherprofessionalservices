@@ -135,6 +135,10 @@ if (typeof window !== 'undefined') {
     // Pre-initialize Firebase to ensure it's ready
     getFirebaseApp()
     console.log('Firebase pre-initialized successfully')
+    
+    // Also pre-initialize auth to maintain session
+    const auth = getAuth()
+    console.log('Firebase auth pre-initialized, current user:', auth.currentUser?.email)
   } catch (error) {
     console.error('Failed to pre-initialize Firebase:', error)
   }

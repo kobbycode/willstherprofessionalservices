@@ -64,7 +64,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const db = getDb()
           
           console.log('Firebase initialized successfully in AuthContext')
+          console.log('Current Firebase user on init:', auth.currentUser?.email)
           setFirebaseReady(true)
+          
+          // Check if user is already authenticated
+          if (auth.currentUser) {
+            console.log('User already authenticated, loading user data...')
+            const userData = await loadUserData(auth.currentUser)
+            setUser(userData)
+            setLoading(false)
+          }
         }
       } catch (error) {
         console.error('Failed to initialize Firebase in AuthContext:', error)

@@ -14,13 +14,18 @@ const AdminAuth = ({ children }: AdminAuthProps) => {
   const { user, loading } = useAuth()
   const router = useRouter()
 
+  console.log('AdminAuth: Current state:', { user, loading })
+
   useEffect(() => {
+    console.log('AdminAuth: useEffect triggered:', { user, loading })
     if (!loading && !user) {
+      console.log('AdminAuth: Redirecting to login - no user and not loading')
       router.push('/admin/login')
     }
   }, [user, loading, router])
 
   if (loading) {
+    console.log('AdminAuth: Showing loading state')
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <motion.div
@@ -45,9 +50,11 @@ const AdminAuth = ({ children }: AdminAuthProps) => {
   }
 
   if (!user) {
+    console.log('AdminAuth: No user, returning null')
     return null
   }
 
+  console.log('AdminAuth: User authenticated, rendering children')
   return <>{children}</>
 }
 
