@@ -193,10 +193,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user?.role === role
   }
 
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<AuthUser | null> => {
     if (!firebaseReady) {
       console.log('Firebase not ready yet, skipping refresh')
-      return
+      return null
     }
 
     try {
