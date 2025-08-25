@@ -1,84 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Loader2, Shield } from 'lucide-react'
+import { useAuth } from '@/lib/auth-context'
 
 interface AdminAuthProps {
   children: React.ReactNode
 }
 
 const AdminAuth = ({ children }: AdminAuthProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    // Check if we're on the client side
-    if (typeof window === 'undefined') {
-      setIsLoading(false)
-      return
+    if (!loading && !user) {
+      router.push('/admin/login')
     }
+  }, [user, loading, router])
 
-    // Check for admin token in localStorage
-    const adminToken = localStorage.getItem('adminToken')
-    
-    if (adminToken) {
-      setIsAuthenticated(true)
-      setIsLoading(false)
-    } else {
-      // Try to initialize Firebase auth
-      const initFirebase = async () => {
-        try {
-          const { getAuth, onAuthStateChanged } = await import('firebase/auth')
-          const { getFirebaseApp } = await import('@/lib/firebase')
-          
-          // Initialize Firebase app first
-          const firebaseApp = getFirebaseApp()
-          const auth = getAuth(firebaseApp)
-          
-          // Add a timeout to prevent infinite loading
-          const timeoutId = setTimeout(() => {
-            console.warn('Firebase auth timeout - redirecting to login')
-            setIsLoading(false)
-            setIsAuthenticated(false)
-            router.push('/admin/login')
-          }, 3000) // 3 second timeout
-
-          // Listen for Firebase auth state changes
-          const unsubscribe = onAuthStateChanged(auth, (user) => {
-            clearTimeout(timeoutId)
-            if (user) {
-              console.log('User authenticated:', user.email)
-              setIsAuthenticated(true)
-              localStorage.setItem('adminToken', 'authenticated')
-            } else {
-              console.log('No user authenticated')
-              setIsAuthenticated(false)
-              localStorage.removeItem('adminToken')
-              router.push('/admin/login')
-            }
-            setIsLoading(false)
-          })
-
-          return () => {
-            clearTimeout(timeoutId)
-            unsubscribe()
-          }
-        } catch (error) {
-          console.error('Failed to initialize Firebase auth:', error)
-          setIsLoading(false)
-          setIsAuthenticated(false)
-          router.push('/admin/login')
-        }
-      }
-
-      initFirebase()
-    }
-  }, [router])
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <motion.div
@@ -102,7 +44,7 @@ const AdminAuth = ({ children }: AdminAuthProps) => {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return null
   }
 

@@ -40,6 +40,7 @@ import toast from 'react-hot-toast'
 import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, type ContactSubmission } from '@/lib/contacts'
 import { BlogPost } from '@/lib/blog'
 import { type User } from '@/lib/users'
+import { useAuth } from '@/lib/auth-context'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -54,24 +55,10 @@ const AdminDashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const router = useRouter()
   const { config, setConfig } = useSiteConfig()
+  const { user, signOut: authSignOut } = useAuth()
 
-  const handleLogout = () => {
-    // Clear admin token
-    localStorage.removeItem('adminToken')
-    
-    // Sign out from Firebase
-    const signOut = async () => {
-      try {
-        const { getAuth, signOut: firebaseSignOut } = await import('firebase/auth')
-        const auth = getAuth()
-        await firebaseSignOut(auth)
-      } catch (error) {
-        console.error('Error signing out from Firebase:', error)
-      }
-    }
-    signOut()
-    
-    router.push('/admin/login')
+  const handleLogout = async () => {
+    await authSignOut()
     toast.success('Logged out successfully')
   }
 
@@ -152,11 +139,21 @@ const AdminDashboard = () => {
                 </Link>
                 <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 rounded-xl px-3 py-2 sm:px-4">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
-                    <span className="text-white text-xs sm:text-sm font-bold">A</span>
+                    {user?.photoURL ? (
+                      <img 
+                        src={user.photoURL} 
+                        alt="Profile" 
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-xs sm:text-sm font-bold">
+                        {user?.displayName?.charAt(0) || 'A'}
+                      </span>
+                    )}
                   </div>
                   <div className="hidden sm:block">
-                    <p className="text-sm font-semibold text-gray-900">Admin User</p>
-                    <p className="text-xs text-gray-500">Administrator</p>
+                    <p className="text-sm font-semibold text-gray-900">{user?.displayName || 'Admin User'}</p>
+                    <p className="text-xs text-gray-500">{user?.role === 'admin' ? 'Administrator' : user?.role === 'editor' ? 'Editor' : 'User'}</p>
                   </div>
                 </div>
                 <button

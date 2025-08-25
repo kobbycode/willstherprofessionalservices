@@ -24,10 +24,11 @@ import {
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
-import { getAuth, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, signOut, type Auth } from 'firebase/auth'
-import { doc, updateDoc, getDoc, setDoc, type Firestore } from 'firebase/firestore'
+import { getAuth, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, type Auth } from 'firebase/auth'
+import { doc, updateDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
 import { uploadImage } from '@/lib/storage'
+import { useAuth } from '@/lib/auth-context'
 
 
 interface ProfileData {
@@ -54,7 +55,6 @@ interface ProfileData {
 
 export default function ProfilePage() {
   const router = useRouter()
-  const [auth, setAuth] = useState<Auth | null>(null)
   const [db, setDb] = useState<Firestore | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -66,7 +66,7 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState('profile')
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { user, signOut: authSignOut, refreshUser } = useAuth()
   
   const [profileData, setProfileData] = useState<ProfileData>({
     name: 'Admin User',
@@ -103,212 +103,49 @@ export default function ProfilePage() {
   // Initialize Firebase services when component mounts
   useEffect(() => {
     try {
-      const authInstance = getAuth()
       const dbInstance = getDb()
-      setAuth(authInstance)
       setDb(dbInstance)
     } catch (error) {
       console.error('Failed to initialize Firebase services:', error)
     }
   }, [])
 
-    // Check authentication and load user profile data
+  // Load user profile data from auth context
   useEffect(() => {
-    if (!auth || !db) {
-      console.log('Auth or DB not initialized yet')
-      return
+    if (user) {
+      console.log('Loading profile data from auth context:', user)
+      setOriginalEmail(user.email || 'admin@willsther.com')
+      setProfileData(prev => ({
+        ...prev,
+        name: user.displayName || 'Admin User',
+        email: user.email || 'admin@willsther.com',
+        phone: user.phone || '+233 594 850 005',
+        role: user.role === 'admin' ? 'Administrator' : user.role === 'editor' ? 'Editor' : 'User',
+        bio: user.bio || 'System Administrator at Willsther Professional Services',
+        location: user.location || 'Accra, Ghana',
+        timezone: user.timezone || 'Africa/Accra',
+        avatar: user.photoURL || '/logo.jpg',
+        notifications: user.notifications || prev.notifications,
+        preferences: {
+          theme: (user.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
+          compactMode: user.preferences?.compactMode || false,
+          autoSave: user.preferences?.autoSave ?? true
+        }
+      }))
     }
-
-    console.log('Auth and DB initialized, checking authentication...')
-    console.log('Current auth state:', {
-      currentUser: auth.currentUser ? 'exists' : 'null',
-      email: auth.currentUser?.email
-    })
-
-    // Listen for auth state changes
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      console.log('Auth state changed:', user ? user.email : 'null')
-      
-      if (user) {
-        console.log('User authenticated:', user.email)
-        setIsAuthenticated(true)
-        
-        try {
-          console.log('Loading profile for user:', user.uid)
-          
-          // Load profile from Firestore
-          const userDoc = await getDoc(doc(db, 'users', user.uid))
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data()
-            console.log('User data loaded:', userData)
-            
-            // Use actual data from Firestore
-            const userEmail = user.email || 'admin@willsther.com'
-            setOriginalEmail(userEmail)
-            setProfileData(prev => ({
-              ...prev,
-              name: userData.name || user.displayName || 'Admin User',
-              email: userEmail,
-              phone: userData.phone || '+233 594 850 005',
-              role: userData.role || 'Administrator',
-              bio: userData.bio || 'System Administrator at Willsther Professional Services',
-              location: userData.location || 'Accra, Ghana',
-              timezone: userData.timezone || 'Africa/Accra',
-              avatar: userData.avatar || '/logo.jpg',
-              notifications: userData.notifications || prev.notifications,
-              preferences: {
-                theme: (userData.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
-                compactMode: userData.preferences?.compactMode || false,
-                autoSave: userData.preferences?.autoSave || true
-              }
-            }))
-          } else {
-            console.log('No user document found, creating one...')
-            // Create user document if it doesn't exist
-            const userData = {
-              name: user.displayName || 'Admin User',
-              email: user.email || 'admin@willsther.com',
-              phone: '+233 594 850 005',
-              role: 'admin',
-              status: 'active',
-              bio: 'System Administrator at Willsther Professional Services',
-              location: 'Accra, Ghana',
-              timezone: 'Africa/Accra',
-              avatar: '/logo.jpg',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              lastLogin: null,
-              permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content'],
-              notifications: {
-                email: true,
-                push: true,
-                sms: false
-              },
-              preferences: {
-                theme: 'light',
-                compactMode: false,
-                autoSave: true
-              }
-            }
-            
-            await setDoc(doc(db, 'users', user.uid), userData)
-            setProfileData(prev => ({
-              ...prev,
-              name: userData.name,
-              email: userData.email,
-              phone: userData.phone,
-              role: userData.role,
-              bio: userData.bio,
-              location: userData.location,
-              timezone: userData.timezone,
-              avatar: userData.avatar,
-              notifications: userData.notifications,
-              preferences: {
-                theme: userData.preferences.theme as 'light' | 'dark' | 'auto',
-                compactMode: userData.preferences.compactMode,
-                autoSave: userData.preferences.autoSave
-              }
-            }))
-          }
-        } catch (error) {
-          console.error('Error loading profile:', error)
-          // Set basic data from auth user
-          setProfileData(prev => ({
-            ...prev,
-            name: user.displayName || 'Admin User',
-            email: user.email || 'admin@willsther.com',
-            phone: '+233 594 850 005',
-            role: 'Administrator',
-            bio: 'System Administrator at Willsther Professional Services',
-            location: 'Accra, Ghana',
-            timezone: 'Africa/Accra'
-          }))
-        }
-      } else {
-        console.log('No user authenticated, loading fallback users/admin document')
-        setIsAuthenticated(true)
-        try {
-          const adminRef = doc(db, 'users', 'admin')
-          const adminSnap = await getDoc(adminRef)
-          if (adminSnap.exists()) {
-            const userData: any = adminSnap.data()
-            setOriginalEmail(userData.email || 'admin@willsther.com')
-            setProfileData(prev => ({
-              ...prev,
-              name: userData.name || 'Admin User',
-              email: userData.email || 'admin@willsther.com',
-              phone: userData.phone || '+233 594 850 005',
-              role: userData.role || 'Administrator',
-              bio: userData.bio || 'System Administrator at Willsther Professional Services',
-              location: userData.location || 'Accra, Ghana',
-              timezone: userData.timezone || 'Africa/Accra',
-              avatar: userData.avatar || '/logo.jpg',
-              notifications: userData.notifications || prev.notifications,
-              preferences: {
-                theme: (userData.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
-                compactMode: userData.preferences?.compactMode || false,
-                autoSave: userData.preferences?.autoSave ?? true
-              }
-            }))
-          } else {
-            const userData = {
-              name: 'Admin User',
-              email: 'admin@willsther.com',
-              phone: '+233 594 850 005',
-              role: 'admin',
-              status: 'active',
-              bio: 'System Administrator at Willsther Professional Services',
-              location: 'Accra, Ghana',
-              timezone: 'Africa/Accra',
-              avatar: '/logo.jpg',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              lastLogin: null,
-              permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content'],
-              notifications: { email: true, push: true, sms: false },
-              preferences: { theme: 'light', compactMode: false, autoSave: true }
-            }
-            await setDoc(adminRef, userData, { merge: true })
-            setProfileData(prev => ({
-              ...prev,
-              name: userData.name,
-              email: userData.email,
-              phone: userData.phone,
-              role: userData.role,
-              bio: userData.bio,
-              location: userData.location,
-              timezone: userData.timezone,
-              avatar: userData.avatar,
-              notifications: userData.notifications,
-              preferences: {
-                theme: userData.preferences.theme as 'light' | 'dark' | 'auto',
-                compactMode: userData.preferences.compactMode,
-                autoSave: userData.preferences.autoSave
-              }
-            }))
-          }
-        } catch (e) {
-          console.error('Failed to load fallback admin document:', e)
-        }
-      }
-    })
-
-    // Cleanup subscription
-    return () => unsubscribe()
-  }, [auth, db, router]);
+  }, [user])
 
   // Add timeout to redirect if authentication takes too long
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!isAuthenticated) {
+      if (!user) {
         console.log('Authentication timeout, redirecting to login')
         router.push('/admin/login')
       }
     }, 10000) // 10 second timeout
 
     return () => clearTimeout(timeout)
-  }, [isAuthenticated, router])
+  }, [user, router])
 
   // Handle escape key to close logout dialog
   useEffect(() => {
@@ -416,7 +253,7 @@ export default function ProfilePage() {
       }
 
       // Update or create Firestore user document
-      const userRef = doc(db, 'users', auth?.currentUser?.uid || 'admin')
+      const userRef = doc(db, 'users', user?.uid || 'admin')
       const updateData = {
         name: profileData.name,
         phone: profileData.phone,
@@ -485,7 +322,7 @@ export default function ProfilePage() {
   }
 
   const handleChangePassword = async () => {
-    if (!auth?.currentUser) {
+    if (!user) {
       toast.error('You must be logged in to change your password')
       return
     }
@@ -500,7 +337,7 @@ export default function ProfilePage() {
       return
     }
 
-    if (!auth.currentUser.email) {
+    if (!user.email) {
       toast.error('Email address is required to change password')
       return
     }
@@ -508,15 +345,18 @@ export default function ProfilePage() {
     setIsSaving(true)
     try {
       // Re-authenticate user before changing password
+      const auth = getAuth()
       const credential = EmailAuthProvider.credential(
-        auth.currentUser.email,
+        user.email,
         passwordData.currentPassword
       )
       
-      await reauthenticateWithCredential(auth.currentUser, credential)
-      
-      // Change password
-      await updatePassword(auth.currentUser, passwordData.newPassword)
+      if (auth.currentUser) {
+        await reauthenticateWithCredential(auth.currentUser, credential)
+        
+        // Change password
+        await updatePassword(auth.currentUser, passwordData.newPassword)
+      }
       
       toast.success('Password changed successfully!')
       setPasswordData({
@@ -539,16 +379,8 @@ export default function ProfilePage() {
   }
 
   const handleLogout = async () => {
-    if (!auth) return
-    
-    try {
-      await signOut(auth)
-      toast.success('Logged out successfully!')
-      router.push('/admin/login')
-    } catch (error) {
-      console.error('Error logging out:', error)
-      toast.error('Failed to log out')
-    }
+    await authSignOut()
+    toast.success('Logged out successfully!')
   }
 
   const tabs = [
@@ -559,7 +391,7 @@ export default function ProfilePage() {
   ]
 
   // Show loading state while checking authentication
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -703,19 +535,21 @@ export default function ProfilePage() {
                                 setProfileData(prev => ({ ...prev, avatar: '/logo.jpg' }))
                                 
                                 // Update Firebase Auth profile
-                                if (auth?.currentUser) {
+                                const auth = getAuth()
+                                if (auth.currentUser) {
                                   await updateProfile(auth.currentUser, {
                                     photoURL: '/logo.jpg'
                                   })
                                 }
 
                                 // Update Firestore document
-                                if (db) {
-                                  const userRef = doc(db, 'users', auth?.currentUser?.uid || 'admin')
+                                if (db && user) {
+                                  const userRef = doc(db, 'users', user.uid)
                                   await setDoc(userRef, {
                                     avatar: '/logo.jpg',
                                     updatedAt: new Date()
                                   }, { merge: true })
+                                  await refreshUser()
                                 }
 
                                 toast.success('Profile picture reset to default')
