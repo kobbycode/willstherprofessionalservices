@@ -87,12 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUserData = async (firebaseUser: FirebaseUser): Promise<AuthUser | null> => {
     try {
+      console.log('Loading user data for UID:', firebaseUser.uid)
       const db = getDb()
       const userRef = doc(db, 'users', firebaseUser.uid)
+      console.log('User document reference:', userRef.path)
+      
       const userDoc = await getDoc(userRef)
-
+      console.log('User document exists:', userDoc.exists())
+      
       if (userDoc.exists()) {
         const data = userDoc.data()
+        console.log('User document data:', data)
         return {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
@@ -112,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updatedAt: data.updatedAt || new Date().toISOString()
         }
       } else {
+        console.log('User document does not exist, creating new one...')
         // Create user document if it doesn't exist
         const defaultUser: AuthUser = {
           uid: firebaseUser.uid,
@@ -132,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updatedAt: new Date().toISOString()
         }
 
+        console.log('Creating user document with data:', defaultUser)
         await setDoc(userRef, {
           name: defaultUser.displayName,
           email: defaultUser.email,
@@ -149,11 +156,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: defaultUser.createdAt,
           updatedAt: defaultUser.updatedAt
         })
+        console.log('User document created successfully')
 
         return defaultUser
       }
     } catch (error) {
       console.error('Error loading user data:', error)
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        stack: error.stack
+      })
       return null
     }
   }

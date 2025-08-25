@@ -12,7 +12,7 @@ import { getAuth as getFirebaseAuth, type Auth } from 'firebase/auth'
 const firebaseConfig = {
   apiKey: 'AIzaSyB4XxvcqkCGS6IgwkDQSKEr8XFKJgodCIU',
   authDomain: 'wilsther-profesional-services.firebaseapp.com',
-  projectId: 'wilsther-profesional-services',
+  projectId: 'wilsther-professional-services',
   storageBucket: 'wilsther-profesional-services.appspot.com',
   messagingSenderId: '484189314031',
   appId: '1:484189314031:web:cc4f556f31e37757eab41a',
@@ -32,6 +32,7 @@ export function getFirebaseApp(): FirebaseApp {
   
   if (!app) {
     console.log('Initializing Firebase app...')
+    console.log('Firebase config:', firebaseConfig)
     const existingApps = getApps()
     if (existingApps.length > 0) {
       app = existingApps[0]!
@@ -40,6 +41,7 @@ export function getFirebaseApp(): FirebaseApp {
       try {
         app = initializeApp(firebaseConfig)
         console.log('Created new Firebase app successfully')
+        console.log('Firebase app project ID:', app.options.projectId)
       } catch (error) {
         console.error('Failed to initialize Firebase app:', error)
         throw error
