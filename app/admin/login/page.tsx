@@ -6,6 +6,8 @@ import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { getDb } from '@/lib/firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -46,7 +48,34 @@ const AdminLogin = () => {
 
     try {
       // Sign in with Firebase
-      await signInWithEmailAndPassword(auth, formData.email, formData.password)
+      const credential = await signInWithEmailAndPassword(auth, formData.email, formData.password)
+      const user = credential.user
+      try {
+        const db = getDb()
+        const userRef = doc(db, 'users', user.uid)
+        const snap = await getDoc(userRef)
+        if (!snap.exists()) {
+          await setDoc(userRef, {
+            name: user.displayName || 'Admin User',
+            email: user.email || formData.email,
+            phone: '',
+            role: 'admin',
+            status: 'active',
+            avatar: '/logo.jpg',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString(),
+            permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
+          }, { merge: true })
+        } else {
+          await setDoc(userRef, {
+            updatedAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+          }, { merge: true })
+        }
+      } catch (docError) {
+        console.error('Failed to ensure user document on login:', docError)
+      }
       
       // Set admin token in localStorage
       localStorage.setItem('adminToken', 'authenticated')
