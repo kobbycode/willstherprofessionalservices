@@ -1,24 +1,9 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow authenticated users to upload images
-    match /profile-pictures/{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Allow authenticated users to upload test images
-    match /test-uploads/{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Allow authenticated users to upload general uploads
-    match /uploads/{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Allow all authenticated users to read/write (for debugging)
+    // TEMP: Allow all reads/writes without auth (requested no-auth setup)
     match /{allPaths=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }
