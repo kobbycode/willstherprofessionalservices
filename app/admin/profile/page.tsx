@@ -370,8 +370,6 @@ export default function ProfilePage() {
 
       // Update or create Firestore user document
       const userRef = doc(db, 'users', auth.currentUser.uid)
-      const userDoc = await getDoc(userRef)
-      
       const updateData = {
         name: profileData.name,
         phone: profileData.phone,
@@ -383,21 +381,8 @@ export default function ProfilePage() {
         preferences: profileData.preferences,
         updatedAt: new Date()
       }
-
-      if (userDoc.exists()) {
-        // Update existing document
-        await updateDoc(userRef, updateData)
-      } else {
-        // Create new document if it doesn't exist
-        await setDoc(userRef, {
-          ...updateData,
-          email: auth.currentUser.email,
-          role: 'admin',
-          status: 'active',
-          createdAt: new Date(),
-          permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
-        })
-      }
+      // Use merge to create the document if it doesn't exist
+      await setDoc(userRef, updateData, { merge: true })
 
       // Clear pending avatar selection after successful save
       if (pendingAvatarPreview) {
@@ -691,10 +676,10 @@ export default function ProfilePage() {
                                 // Update Firestore document
                                 if (auth?.currentUser && db) {
                                   const userRef = doc(db, 'users', auth.currentUser.uid)
-                                  await updateDoc(userRef, {
+                                  await setDoc(userRef, {
                                     avatar: '/logo.jpg',
                                     updatedAt: new Date()
-                                  })
+                                  }, { merge: true })
                                 }
 
                                 toast.success('Profile picture reset to default')
