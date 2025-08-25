@@ -15,9 +15,9 @@ import {
   CheckCircle
 } from 'lucide-react'
 import Link from 'next/link'
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { getDb } from '@/lib/firebase'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 import toast from 'react-hot-toast'
 
 export default function AdminRegister() {
@@ -110,80 +110,40 @@ export default function AdminRegister() {
       
       const user = userCredential.user
       console.log('Firebase Auth user created:', user.uid)
-      
-      // Create user document in Firestore
+
+      // Set display name in Auth
       try {
-        console.log('Creating Firestore document...')
-        const db = getDb()
-        console.log('Firestore DB initialized:', !!db)
-        
-        const userData = {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          role: formData.role,
-          status: 'active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          lastLogin: null,
-          permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
-        }
-        
-        console.log('User data to save:', userData)
-        console.log('User UID:', user.uid)
-        
-        const userRef = doc(db, 'users', user.uid)
-        console.log('Document reference created:', userRef.path)
-        
-        await setDoc(userRef, userData)
-        console.log('Firestore document created successfully')
-        
-        toast.success('Admin account created successfully!')
-        
-        // Set admin token for immediate access
-        localStorage.setItem('adminToken', 'authenticated')
-        
-        // Redirect to admin dashboard
-        router.push('/admin')
-        
-      } catch (firestoreError) {
-        console.error('Firestore error details:', firestoreError)
-        console.error('Firestore error code:', (firestoreError as any)?.code)
-        console.error('Firestore error message:', (firestoreError as any)?.message)
-        
-        // Try to create the document again with a different approach
-        try {
-          console.log('Retrying Firestore document creation...')
-          const db = getDb()
-          const userRef = doc(db, 'users', user.uid)
-          
-          // Try with addDoc instead of setDoc
-          await setDoc(userRef, {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            role: formData.role,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            lastLogin: null,
-            permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
-          })
-          
-          console.log('Firestore document created on retry')
-          toast.success('Admin account created successfully!')
-          localStorage.setItem('adminToken', 'authenticated')
-          router.push('/admin')
-          
-        } catch (retryError) {
-          console.error('Retry also failed:', retryError)
-          // Even if Firestore fails, the user is created in Auth
-          // We can create the document later
-          toast.success('Account created! Setting up profile...')
-          localStorage.setItem('adminToken', 'authenticated')
-          router.push('/admin')
-        }
+        await updateProfile(user, { displayName: formData.name })
+      } catch (profileErr) {
+        console.warn('Failed to set display name:', profileErr)
       }
+      
+      // Create/merge user document in Firestore and verify
+      console.log('Creating Firestore document...')
+      const db = getDb()
+      const userRef = doc(db, 'users', user.uid)
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        status: 'active',
+        avatar: '/logo.jpg',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastLogin: null,
+        permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
+      }
+      await setDoc(userRef, userData, { merge: true })
+      const verifySnap = await getDoc(userRef)
+      if (!verifySnap.exists()) {
+        throw new Error('Verification read failed: user document does not exist after creation')
+      }
+      console.log('Firestore document created and verified:', userRef.path)
+
+      toast.success('Admin account created successfully!')
+      localStorage.setItem('adminToken', 'authenticated')
+      router.push('/admin')
       
     } catch (err: any) {
       console.error('Registration error:', err)
