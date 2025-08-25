@@ -17,14 +17,23 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
-  const { user, refreshUser } = useAuth()
+  const { user, loading, refreshUser } = useAuth()
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
+      console.log('User authenticated, redirecting to dashboard')
       router.push('/admin')
     }
   }, [user, router])
+
+  // Handle loading state when user is being loaded
+  useEffect(() => {
+    if (user && !loading) {
+      console.log('User loaded and not loading, redirecting to dashboard')
+      router.push('/admin')
+    }
+  }, [user, loading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,12 +43,27 @@ const AdminLogin = () => {
     try {
       // Sign in with Firebase
       const auth = getAuth()
+      console.log('Attempting to sign in with:', formData.email)
+      
       await signInWithEmailAndPassword(auth, formData.email, formData.password)
+      console.log('Firebase sign in successful')
       
-      // AuthContext will automatically handle user document creation and state management
+      // Wait a bit for the auth state to update
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Refresh user data
+      console.log('Refreshing user data...')
       await refreshUser()
+      console.log('User data refreshed')
       
-      router.push('/admin')
+      // Check if user is now available
+      if (user) {
+        console.log('User available, redirecting to dashboard')
+        router.push('/admin')
+      } else {
+        console.log('User not available yet, waiting for auth state change...')
+        // The redirect will happen automatically when the user state changes
+      }
     } catch (err: any) {
       console.error('Login error:', err)
       if (err.code === 'auth/user-not-found') {
@@ -92,7 +116,9 @@ const AdminLogin = () => {
                 {user ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Redirecting to admin dashboard...</p>
+                    <p className="text-gray-600">
+                      {loading ? 'Loading user data...' : 'Redirecting to admin dashboard...'}
+                    </p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">

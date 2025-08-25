@@ -194,17 +194,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const refreshUser = async () => {
-    if (!firebaseReady) return
+    if (!firebaseReady) {
+      console.log('Firebase not ready yet, skipping refresh')
+      return
+    }
 
     try {
+      console.log('Refreshing user data...')
       const auth = getAuth()
       const currentUser = auth.currentUser
+      
       if (currentUser) {
+        console.log('Current Firebase user found:', currentUser.email)
         const userData = await loadUserData(currentUser)
+        console.log('User data loaded:', userData)
         setUser(userData)
+        return userData
+      } else {
+        console.log('No current Firebase user found')
+        setUser(null)
+        return null
       }
     } catch (error) {
       console.error('Error refreshing user:', error)
+      setUser(null)
+      return null
     }
   }
 
