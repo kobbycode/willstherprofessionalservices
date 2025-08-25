@@ -409,7 +409,9 @@ export default function ProfilePage() {
       toast.success('Profile updated successfully!')
     } catch (error) {
       console.error('Error updating profile:', error)
-      toast.error('Failed to update profile. Please try again.')
+      const err: any = error
+      const details = [err?.code, err?.message].filter(Boolean).join(' - ')
+      toast.error(`Failed to update profile${details ? `: ${details}` : ''}`)
     } finally {
       setIsSaving(false)
     }
