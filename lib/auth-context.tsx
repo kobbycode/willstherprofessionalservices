@@ -39,7 +39,7 @@ interface AuthContextType {
   signOut: () => Promise<void>
   hasPermission: (permission: string) => boolean
   hasRole: (role: 'admin' | 'editor' | 'user') => boolean
-  refreshUser: () => Promise<void>
+  refreshUser: () => Promise<AuthUser | null>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
