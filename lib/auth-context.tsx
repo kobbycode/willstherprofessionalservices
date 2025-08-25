@@ -92,7 +92,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userRef = doc(db, 'users', firebaseUser.uid)
       console.log('User document reference:', userRef.path)
       
-      const userDoc = await getDoc(userRef)
+      // Add timeout for Firestore operations
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore operation timeout')), 10000)
+      })
+      
+      const userDocPromise = getDoc(userRef)
+      const userDoc = await Promise.race([userDocPromise, timeoutPromise]) as any
+      
       console.log('User document exists:', userDoc.exists())
       
       if (userDoc.exists()) {
@@ -139,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         console.log('Creating user document with data:', defaultUser)
-        await setDoc(userRef, {
+        const setDocPromise = setDoc(userRef, {
           name: defaultUser.displayName,
           email: defaultUser.email,
           phone: defaultUser.phone,
@@ -156,6 +163,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: defaultUser.createdAt,
           updatedAt: defaultUser.updatedAt
         })
+        
+        await Promise.race([setDocPromise, timeoutPromise])
         console.log('User document created successfully')
 
         return defaultUser
@@ -167,6 +176,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : 'No stack trace'
       })
+      
+      // If it's a timeout or connection error, return a basic user object
+      if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('400'))) {
+        console.log('Firestore connection issue, creating basic user object')
+        return {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName || 'Admin User',
+          photoURL: firebaseUser.photoURL || '/logo.jpg',
+          role: 'user',
+          status: 'pending',
+          permissions: ['read'],
+          phone: '',
+          bio: '',
+          location: '',
+          timezone: 'Africa/Accra',
+          notifications: { email: true, push: true, sms: false },
+          preferences: { theme: 'light', compactMode: false, autoSave: true },
+          lastLogin: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      }
+      
       return null
     }
   }
