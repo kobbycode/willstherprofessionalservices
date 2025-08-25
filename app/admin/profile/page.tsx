@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation'
 import { getAuth, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, signOut, type Auth } from 'firebase/auth'
 import { doc, updateDoc, getDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
-
+import { uploadImage } from '@/lib/storage'
 
 
 interface ProfileData {
@@ -61,6 +61,8 @@ export default function ProfilePage() {
   const [showPassword, setShowPassword] = useState(false)
   const [imageLoading, setImageLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null)
+  const [pendingAvatarPreview, setPendingAvatarPreview] = useState<string | null>(null)
 
   const [activeTab, setActiveTab] = useState('profile')
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -337,6 +339,19 @@ export default function ProfilePage() {
 
     setIsSaving(true)
     try {
+      // If there is a pending avatar file, upload it first and use its URL
+      let avatarUrlToUse = profileData.avatar
+      if (pendingAvatarFile) {
+        try {
+          setImageLoading(true)
+          const uploadedUrl = await uploadImage(pendingAvatarFile, 'profile-pictures')
+          avatarUrlToUse = uploadedUrl
+          setProfileData(prev => ({ ...prev, avatar: uploadedUrl }))
+        } finally {
+          setImageLoading(false)
+        }
+      }
+
       // Check if email has changed and handle re-authentication
       if (profileData.email !== originalEmail && auth.currentUser.email) {
         // For email changes, we would need to implement updateEmail with re-authentication
@@ -350,7 +365,7 @@ export default function ProfilePage() {
       // Update Firebase Auth profile
       await updateProfile(auth.currentUser, {
         displayName: profileData.name,
-        photoURL: profileData.avatar
+        photoURL: avatarUrlToUse
       })
 
       // Update or create Firestore user document
@@ -363,7 +378,7 @@ export default function ProfilePage() {
         bio: profileData.bio,
         location: profileData.location,
         timezone: profileData.timezone,
-        avatar: profileData.avatar,
+        avatar: avatarUrlToUse,
         notifications: profileData.notifications,
         preferences: profileData.preferences,
         updatedAt: new Date()
@@ -383,6 +398,13 @@ export default function ProfilePage() {
           permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
         })
       }
+
+      // Clear pending avatar selection after successful save
+      if (pendingAvatarPreview) {
+        try { URL.revokeObjectURL(pendingAvatarPreview) } catch {}
+      }
+      setPendingAvatarPreview(null)
+      setPendingAvatarFile(null)
 
       toast.success('Profile updated successfully!')
     } catch (error) {
@@ -416,74 +438,26 @@ export default function ProfilePage() {
       return
     }
 
-    console.log('Current auth user before upload:', {
+    console.log('Current auth user before selection:', {
       uid: auth.currentUser.uid,
       email: auth.currentUser.email,
       emailVerified: auth.currentUser.emailVerified
     })
 
-    setImageLoading(true)
-    setUploadProgress(0)
+    // Only set a local preview and mark as pending. Upload will happen on Save.
     try {
-      console.log('Starting profile picture upload via API...')
-      
-      // Create form data
-      const formData = new FormData()
-      formData.append('file', file)
-
-      // Upload via API route
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Upload failed')
+      // Revoke previous preview if any
+      if (pendingAvatarPreview) {
+        try { URL.revokeObjectURL(pendingAvatarPreview) } catch {}
       }
-
-      const result = await response.json()
-      const downloadURL = result.downloadURL
-      console.log('Upload successful, download URL:', downloadURL)
-      
-      // Update profile data
-      setProfileData(prev => ({ ...prev, avatar: downloadURL }))
-      
-      // Update Firebase Auth profile
-      if (auth?.currentUser) {
-        await updateProfile(auth.currentUser, {
-          photoURL: downloadURL
-        })
-      }
-
-      // Update Firestore document
-      if (auth?.currentUser && db) {
-        const userRef = doc(db, 'users', auth.currentUser.uid)
-        await updateDoc(userRef, {
-          avatar: downloadURL,
-          updatedAt: new Date()
-        })
-      }
-
-      toast.success('Profile picture updated successfully!')
-    } catch (error: any) {
-      console.error('Error uploading avatar:', error)
-      
-      // Provide more specific error messages
-      let errorMessage = 'Failed to upload profile picture. Please try again.'
-      
-      if (error.message?.includes('Authentication token not available')) {
-        errorMessage = 'Upload failed: Please log in to upload files.'
-      } else if (error.message?.includes('Upload failed')) {
-        errorMessage = error.message
-      } else if (error.message) {
-        errorMessage = `Upload failed: ${error.message}`
-      }
-      
-      toast.error(errorMessage)
-    } finally {
-      setImageLoading(false)
-      setUploadProgress(0)
+      const previewUrl = URL.createObjectURL(file)
+      setPendingAvatarFile(file)
+      setPendingAvatarPreview(previewUrl)
+      setProfileData(prev => ({ ...prev, avatar: previewUrl }))
+      toast.success('Image selected. Click "Save Changes" to upload.')
+    } catch (error) {
+      console.error('Error preparing avatar preview:', error)
+      toast.error('Failed to prepare image preview')
     }
   }
 
