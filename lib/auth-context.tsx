@@ -47,7 +47,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [firebaseReady, setFirebaseReady] = useState(false)
   const router = useRouter()
+
+  // Initialize Firebase first
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      try {
+        if (typeof window !== 'undefined') {
+          // Import Firebase functions dynamically to ensure they're only called on client
+          const { getAuth } = await import('firebase/auth')
+          const { getDb } = await import('./firebase')
+          
+          // Test Firebase initialization
+          const auth = getAuth()
+          const db = getDb()
+          
+          console.log('Firebase initialized successfully in AuthContext')
+          setFirebaseReady(true)
+        }
+      } catch (error) {
+        console.error('Failed to initialize Firebase in AuthContext:', error)
+        setFirebaseReady(false)
+        setLoading(false)
+      }
+    }
+
+    initializeFirebase()
+  }, [])
 
   const loadUserData = async (firebaseUser: FirebaseUser): Promise<AuthUser | null> => {
     try {
@@ -99,20 +126,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await setDoc(userRef, {
           name: defaultUser.displayName,
           email: defaultUser.email,
+          phone: defaultUser.phone,
           role: defaultUser.role,
           status: defaultUser.status,
           avatar: defaultUser.photoURL,
-          phone: defaultUser.phone,
+          permissions: defaultUser.permissions,
           bio: defaultUser.bio,
           location: defaultUser.location,
           timezone: defaultUser.timezone,
           notifications: defaultUser.notifications,
           preferences: defaultUser.preferences,
-          permissions: defaultUser.permissions,
           lastLogin: defaultUser.lastLogin,
           createdAt: defaultUser.createdAt,
           updatedAt: defaultUser.updatedAt
-        }, { merge: true })
+        })
 
         return defaultUser
       }
@@ -122,61 +149,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const handleSignOut = async () => {
+  // Listen to auth state changes
+  useEffect(() => {
+    if (!firebaseReady) return
+
+    const auth = getAuth()
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          console.log('User authenticated:', firebaseUser.email)
+          const userData = await loadUserData(firebaseUser)
+          setUser(userData)
+        } else {
+          console.log('User signed out')
+          setUser(null)
+        }
+      } catch (error) {
+        console.error('Error in auth state change:', error)
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [firebaseReady])
+
+  const authSignOut = async () => {
     try {
       const auth = getAuth()
       await signOut(auth)
       setUser(null)
-      localStorage.removeItem('adminToken')
-      router.push('/admin/login')
     } catch (error) {
       console.error('Error signing out:', error)
     }
   }
 
   const hasPermission = (permission: string): boolean => {
-    if (!user) return false
-    return user.permissions.includes(permission) || user.permissions.includes('all') || user.role === 'admin'
+    return user?.permissions?.includes(permission) || false
   }
 
   const hasRole = (role: 'admin' | 'editor' | 'user'): boolean => {
-    if (!user) return false
-    const roleHierarchy = { admin: 3, editor: 2, user: 1 }
-    return roleHierarchy[user.role] >= roleHierarchy[role]
+    return user?.role === role
   }
 
   const refreshUser = async () => {
-    const auth = getAuth()
-    if (auth.currentUser) {
-      const userData = await loadUserData(auth.currentUser)
-      setUser(userData)
+    if (!firebaseReady) return
+
+    try {
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+      if (currentUser) {
+        const userData = await loadUserData(currentUser)
+        setUser(userData)
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error)
     }
   }
 
-  useEffect(() => {
-    const auth = getAuth()
-    
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        console.log('User authenticated:', firebaseUser.email)
-        const userData = await loadUserData(firebaseUser)
-        setUser(userData)
-        localStorage.setItem('adminToken', 'authenticated')
-      } else {
-        console.log('No user authenticated')
-        setUser(null)
-        localStorage.removeItem('adminToken')
-      }
-      setLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [])
-
   const value: AuthContextType = {
     user,
-    loading,
-    signOut: handleSignOut,
+    loading: loading || !firebaseReady,
+    signOut: authSignOut,
     hasPermission,
     hasRole,
     refreshUser

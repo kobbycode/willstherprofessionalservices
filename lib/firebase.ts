@@ -37,8 +37,13 @@ export function getFirebaseApp(): FirebaseApp {
       app = existingApps[0]!
       console.log('Using existing Firebase app')
     } else {
-      app = initializeApp(firebaseConfig)
-      console.log('Created new Firebase app')
+      try {
+        app = initializeApp(firebaseConfig)
+        console.log('Created new Firebase app successfully')
+      } catch (error) {
+        console.error('Failed to initialize Firebase app:', error)
+        throw error
+      }
     }
   }
   return app
@@ -50,14 +55,28 @@ export function getDb(): Firestore {
   }
   
   if (!db) {
-    db = getFirestore(getFirebaseApp())
+    try {
+      const firebaseApp = getFirebaseApp()
+      db = getFirestore(firebaseApp)
+      console.log('Firestore initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize Firestore:', error)
+      throw error
+    }
   }
   return db
 }
 
 export function getStorageClient(): FirebaseStorage {
   if (!storage) {
-    storage = getStorage(getFirebaseApp())
+    try {
+      const firebaseApp = getFirebaseApp()
+      storage = getStorage(firebaseApp)
+      console.log('Firebase Storage initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize Firebase Storage:', error)
+      throw error
+    }
   }
   return storage
 }
@@ -68,10 +87,15 @@ export function getAuth(): Auth {
   }
   
   if (!auth) {
-    console.log('Initializing Firebase auth...')
-    const app = getFirebaseApp()
-    auth = getFirebaseAuth(app)
-    console.log('Firebase auth initialized')
+    try {
+      console.log('Initializing Firebase auth...')
+      const firebaseApp = getFirebaseApp()
+      auth = getFirebaseAuth(firebaseApp)
+      console.log('Firebase auth initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize Firebase auth:', error)
+      throw error
+    }
   }
   return auth
 }
@@ -81,10 +105,12 @@ export async function getClientAnalytics(): Promise<Analytics | undefined> {
   try {
     if (typeof window === 'undefined') return undefined
     if (await isSupported()) {
-      analytics = getAnalytics(getFirebaseApp())
+      const firebaseApp = getFirebaseApp()
+      analytics = getAnalytics(firebaseApp)
       return analytics
     }
-  } catch {
+  } catch (error) {
+    console.error('Failed to initialize Analytics:', error)
     return undefined
   }
   return undefined
@@ -98,17 +124,20 @@ export function debugFirebaseConfig() {
   console.log('Auth initialized:', !!auth)
   console.log('DB initialized:', !!db)
   console.log('Storage initialized:', !!storage)
-  
-  if (auth?.currentUser) {
-    console.log('Current user:', {
-      uid: auth.currentUser.uid,
-      email: auth.currentUser.email,
-      emailVerified: auth.currentUser.emailVerified
-    })
-  } else {
-    console.log('No current user')
+  console.log('Analytics initialized:', !!analytics)
+  console.log('Window available:', typeof window !== 'undefined')
+  console.log('Existing apps:', getApps().length)
+}
+
+// Initialize Firebase immediately when this module is imported
+if (typeof window !== 'undefined') {
+  try {
+    // Pre-initialize Firebase to ensure it's ready
+    getFirebaseApp()
+    console.log('Firebase pre-initialized successfully')
+  } catch (error) {
+    console.error('Failed to pre-initialize Firebase:', error)
   }
-  console.log('=== END FIREBASE CONFIG DEBUG ===')
 }
 
 
