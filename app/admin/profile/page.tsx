@@ -112,13 +112,13 @@ export default function ProfilePage() {
 
   // Load user profile data from auth context
   useEffect(() => {
-    if (user) {
+      if (user) {
       console.log('Loading profile data from auth context:', user)
       setOriginalEmail(user.email || 'admin@willsther.com')
-      setProfileData(prev => ({
-        ...prev,
-        name: user.displayName || 'Admin User',
-        email: user.email || 'admin@willsther.com',
+            setProfileData(prev => ({
+              ...prev,
+              name: user.displayName || 'Admin User',
+              email: user.email || 'admin@willsther.com',
         phone: user.phone || '+233 594 850 005',
         role: user.role === 'admin' ? 'Administrator' : user.role === 'editor' ? 'Editor' : 'User',
         bio: user.bio || 'System Administrator at Willsther Professional Services',
@@ -126,13 +126,13 @@ export default function ProfilePage() {
         timezone: user.timezone || 'Africa/Accra',
         avatar: user.photoURL || '/logo.jpg',
         notifications: user.notifications || prev.notifications,
-        preferences: {
+              preferences: {
           theme: (user.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
           compactMode: user.preferences?.compactMode || false,
           autoSave: user.preferences?.autoSave ?? true
-        }
-      }))
-    }
+              }
+            }))
+          }
   }, [user])
 
   // Add timeout to redirect if authentication takes too long
@@ -352,10 +352,10 @@ export default function ProfilePage() {
       )
       
       if (auth.currentUser) {
-        await reauthenticateWithCredential(auth.currentUser, credential)
-        
-        // Change password
-        await updatePassword(auth.currentUser, passwordData.newPassword)
+      await reauthenticateWithCredential(auth.currentUser, credential)
+      
+      // Change password
+      await updatePassword(auth.currentUser, passwordData.newPassword)
       }
       
       toast.success('Password changed successfully!')
@@ -380,7 +380,7 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     await authSignOut()
-    toast.success('Logged out successfully!')
+      toast.success('Logged out successfully!')
   }
 
   const tabs = [

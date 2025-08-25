@@ -163,9 +163,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error loading user data:', error)
       console.error('Error details:', {
-        code: error.code,
-        message: error.message,
-        stack: error.stack
+        code: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
       })
       return null
     }

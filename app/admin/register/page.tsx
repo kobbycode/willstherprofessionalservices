@@ -83,7 +83,7 @@ export default function AdminRegister() {
     e.preventDefault()
     
     if (!validateForm()) return
-    
+
     setIsLoading(true)
     setError('')
 
@@ -108,9 +108,9 @@ export default function AdminRegister() {
       
       // AuthContext will automatically handle user document creation and state management
       await refreshUser()
-
-      toast.success('Admin account created successfully!')
-      router.push('/admin')
+        
+        toast.success('Admin account created successfully!')
+          router.push('/admin')
       
     } catch (err: any) {
       console.error('Registration error:', err)
