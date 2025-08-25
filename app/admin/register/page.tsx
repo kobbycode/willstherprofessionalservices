@@ -16,9 +16,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { getDb } from '@/lib/firebase'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
 import toast from 'react-hot-toast'
+import { useAuth } from '@/lib/auth-context'
 
 export default function AdminRegister() {
   const [formData, setFormData] = useState({
@@ -33,22 +32,15 @@ export default function AdminRegister() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [auth, setAuth] = useState<any>(null)
   const router = useRouter()
+  const { user, refreshUser } = useAuth()
 
+  // Redirect if already authenticated
   useEffect(() => {
-    try {
-      console.log('Register page: Initializing Firebase auth...')
-      const { getFirebaseApp } = require('@/lib/firebase')
-      const firebaseApp = getFirebaseApp()
-      const authInstance = getAuth(firebaseApp)
-      console.log('Register page: Firebase auth initialized successfully')
-      setAuth(authInstance)
-    } catch (error) {
-      console.error('Register page: Failed to initialize Firebase auth:', error)
-      setError('Failed to initialize authentication system')
+    if (user) {
+      router.push('/admin')
     }
-  }, [])
+  }, [user, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -92,57 +84,32 @@ export default function AdminRegister() {
     
     if (!validateForm()) return
     
-    if (!auth) {
-      setError('Authentication system not ready. Please refresh the page.')
-      return
-    }
-
     setIsLoading(true)
     setError('')
 
     try {
       // Create user in Firebase Auth
+      const auth = getAuth()
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
         formData.email, 
         formData.password
       )
       
-      const user = userCredential.user
-      console.log('Firebase Auth user created:', user.uid)
+      const firebaseUser = userCredential.user
+      console.log('Firebase Auth user created:', firebaseUser.uid)
 
       // Set display name in Auth
       try {
-        await updateProfile(user, { displayName: formData.name })
+        await updateProfile(firebaseUser, { displayName: formData.name })
       } catch (profileErr) {
         console.warn('Failed to set display name:', profileErr)
       }
       
-      // Create/merge user document in Firestore and verify
-      console.log('Creating Firestore document...')
-      const db = getDb()
-      const userRef = doc(db, 'users', user.uid)
-      const userData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        role: formData.role,
-        status: 'active',
-        avatar: '/logo.jpg',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        lastLogin: null,
-        permissions: ['read', 'write', 'delete', 'manage_users', 'manage_content']
-      }
-      await setDoc(userRef, userData, { merge: true })
-      const verifySnap = await getDoc(userRef)
-      if (!verifySnap.exists()) {
-        throw new Error('Verification read failed: user document does not exist after creation')
-      }
-      console.log('Firestore document created and verified:', userRef.path)
+      // AuthContext will automatically handle user document creation and state management
+      await refreshUser()
 
       toast.success('Admin account created successfully!')
-      localStorage.setItem('adminToken', 'authenticated')
       router.push('/admin')
       
     } catch (err: any) {
@@ -196,11 +163,10 @@ export default function AdminRegister() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8"
         >
-          {!auth ? (
+          {user ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Initializing authentication system...</p>
-              <p className="text-xs text-gray-500 mt-2">Check browser console for details</p>
+              <p className="text-gray-600">Redirecting to admin dashboard...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
