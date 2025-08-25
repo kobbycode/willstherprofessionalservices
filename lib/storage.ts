@@ -30,8 +30,9 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
     }
 
     // Check if user has a valid token
+    let token: string | null = null
     try {
-      const token = await auth.currentUser.getIdToken()
+      token = await auth.currentUser.getIdToken()
       console.log('User token obtained:', !!token)
     } catch (tokenError) {
       console.error('Failed to get user token:', tokenError)
@@ -52,7 +53,15 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
     console.log('Starting upload...')
     
     // Add timeout to prevent forever loading
-    const uploadPromise = uploadBytes(r, file, { contentType: file.type })
+    const uploadPromise = uploadBytes(r, file, { 
+      contentType: file.type,
+      customMetadata: {
+        uploadedBy: auth.currentUser.uid,
+        uploadedAt: new Date().toISOString(),
+        originalName: file.name
+      }
+    })
+    
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Upload timeout after 30 seconds')), 30000)
     })
@@ -68,11 +77,31 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
   } catch (error) {
     console.error('=== UPLOAD ERROR ===')
     console.error('Upload error details:', error)
-    console.error('Error code:', (error as any)?.code)
-    console.error('Error message:', (error as any)?.message)
-    console.error('Error stack:', (error as any)?.stack)
+    const err: any = error
+    console.error('Error code:', err?.code)
+    console.error('Error message:', err?.message)
+    console.error('Error stack:', err?.stack)
     console.error('=== END UPLOAD ERROR ===')
-    throw error
+    
+    // Handle specific error types
+    if (err?.message?.includes('CORS') || err?.message?.includes('403') || err?.message?.includes('503')) {
+      throw new Error('Storage service is currently unavailable. Please try again later.')
+    }
+    
+    if (err?.message?.includes('timeout')) {
+      throw new Error('Upload timed out. Please check your connection and try again.')
+    }
+    
+    if (err?.code === 'storage/unauthorized') {
+      throw new Error('You are not authorized to upload files. Please check your permissions.')
+    }
+    
+    if (err?.code === 'storage/quota-exceeded') {
+      throw new Error('Storage quota exceeded. Please contact support.')
+    }
+    
+    // Generic error
+    throw new Error(`Upload failed: ${err?.message || 'Unknown error occurred'}`)
   }
 }
 

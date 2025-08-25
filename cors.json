@@ -1,0 +1,19 @@
+[
+  {
+    "origin": [
+      "https://willsther-professional-services.vercel.app",
+      "https://willstherprofessionalservices.com",
+      "https://willsther-professional-services.vercel.app",
+      "http://localhost:3000"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "Content-Length",
+      "User-Agent",
+      "x-goog-*"
+    ]
+  }
+]

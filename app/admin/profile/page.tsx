@@ -244,15 +244,35 @@ export default function ProfilePage() {
       if (pendingAvatarFile) {
         try {
           setImageLoading(true)
+          console.log('=== UPLOAD DEBUG START ===')
+          console.log('Starting upload process...')
+          console.log('File details:', {
+            name: pendingAvatarFile.name,
+            size: pendingAvatarFile.size,
+            type: pendingAvatarFile.type
+          })
+          
           const uploadedUrl = await uploadImage(pendingAvatarFile, 'profile-pictures')
           avatarUrlToUse = uploadedUrl
           setProfileData(prev => ({ ...prev, avatar: uploadedUrl }))
+          console.log('Upload successful:', uploadedUrl)
+        } catch (uploadError) {
+          console.error('=== UPLOAD ERROR ===')
+          console.error('Upload error details:', uploadError)
+          const err: any = uploadError
+          console.error('Error code:', err?.code)
+          console.error('Error message:', err?.message)
+          console.error('Error stack:', err?.stack)
+          console.error('=== END UPLOAD ERROR ===')
+          
+          // If upload fails, continue with the current avatar
+          toast.error('Image upload failed, but profile can still be updated')
         } finally {
           setImageLoading(false)
         }
       }
 
-      // Update or create Firestore user document
+      // Update or create Firestore user document with retry logic
       const userRef = doc(db, 'users', user?.uid || 'admin')
       const updateData = {
         name: profileData.name,
@@ -265,7 +285,31 @@ export default function ProfilePage() {
         preferences: profileData.preferences,
         updatedAt: new Date()
       }
-      await setDoc(userRef, updateData, { merge: true })
+      
+      // Try to update Firestore with retry logic
+      let firestoreSuccess = false
+      let retryCount = 0
+      const maxRetries = 3
+      
+      while (!firestoreSuccess && retryCount < maxRetries) {
+        try {
+          await setDoc(userRef, updateData, { merge: true })
+          firestoreSuccess = true
+          console.log('Profile updated in Firestore successfully')
+        } catch (firestoreError) {
+          retryCount++
+          console.error(`Firestore update attempt ${retryCount} failed:`, firestoreError)
+          
+          if (retryCount >= maxRetries) {
+            // If all retries fail, show error but don't crash
+            toast.error('Profile update failed due to database connection issues. Please try again later.')
+            throw firestoreError
+          }
+          
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
+        }
+      }
 
       // Clear pending avatar selection after successful save
       if (pendingAvatarPreview) {
@@ -275,6 +319,14 @@ export default function ProfilePage() {
       setPendingAvatarFile(null)
 
       toast.success('Profile updated successfully!')
+      
+      // Refresh user data to ensure consistency
+      try {
+        await refreshUser()
+      } catch (refreshError) {
+        console.error('Failed to refresh user data:', refreshError)
+        // This is not critical, so we don't show an error to the user
+      }
     } catch (error) {
       console.error('Error updating profile:', error)
       const err: any = error
