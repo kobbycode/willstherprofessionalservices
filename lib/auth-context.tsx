@@ -157,15 +157,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          console.log('User authenticated:', firebaseUser.email)
+          console.log('AuthContext: User authenticated:', firebaseUser.email)
           const userData = await loadUserData(firebaseUser)
+          console.log('AuthContext: User data loaded:', userData)
           setUser(userData)
+          console.log('AuthContext: User state updated to:', userData)
         } else {
-          console.log('User signed out')
+          console.log('AuthContext: User signed out')
           setUser(null)
         }
       } catch (error) {
-        console.error('Error in auth state change:', error)
+        console.error('AuthContext: Error in auth state change:', error)
         setUser(null)
       } finally {
         setLoading(false)

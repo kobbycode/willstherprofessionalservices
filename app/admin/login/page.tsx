@@ -21,6 +21,8 @@ const AdminLogin = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
+    console.log('Login page - User state changed:', user)
+    console.log('Login page - Loading state:', loading)
     if (user) {
       console.log('User authenticated, redirecting to dashboard')
       router.push('/admin')
@@ -29,6 +31,7 @@ const AdminLogin = () => {
 
   // Handle loading state when user is being loaded
   useEffect(() => {
+    console.log('Login page - User and loading check:', { user, loading })
     if (user && !loading) {
       console.log('User loaded and not loading, redirecting to dashboard')
       router.push('/admin')
@@ -53,16 +56,25 @@ const AdminLogin = () => {
       
       // Refresh user data
       console.log('Refreshing user data...')
-      await refreshUser()
-      console.log('User data refreshed')
+      const userData = await refreshUser()
+      console.log('User data refreshed:', userData)
       
       // Check if user is now available
-      if (user) {
+      if (userData) {
         console.log('User available, redirecting to dashboard')
         router.push('/admin')
       } else {
         console.log('User not available yet, waiting for auth state change...')
-        // The redirect will happen automatically when the user state changes
+        // Force a redirect after a short delay
+        setTimeout(() => {
+          if (user) {
+            console.log('User state updated, redirecting to dashboard')
+            router.push('/admin')
+          } else {
+            console.log('Still no user, redirecting anyway...')
+            router.push('/admin')
+          }
+        }, 2000)
       }
     } catch (err: any) {
       console.error('Login error:', err)
