@@ -285,7 +285,7 @@ export default function ProfilePage() {
         preferences: profileData.preferences,
         updatedAt: new Date()
       }
-      
+
       // Try to update Firestore with retry logic
       let firestoreSuccess = false
       let retryCount = 0
