@@ -11,7 +11,7 @@ import { getAuth as getFirebaseAuth, type Auth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB4XxvcqkCGS6IgwkDQSKEr8XFKJgodCIU',
-  authDomain: 'wilsther-profesional-services.firebaseapp.com',
+  authDomain: 'wilsther-professional-services.firebaseapp.com',
   projectId: 'wilsther-professional-services',
   storageBucket: 'wilsther-professional-services.appspot.com',
   messagingSenderId: '484189314031',

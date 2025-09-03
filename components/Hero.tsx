@@ -6,6 +6,7 @@ import Link from 'next/link'
 // Using native img to support any URL (including Firebase, data/blob URLs)
 import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useSiteConfig } from '@/lib/site-config'
+import { testImageAccessibility, getFallbackImageUrl } from '@/lib/storage'
 
 const Hero = memo(() => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -113,32 +114,23 @@ const Hero = memo(() => {
     }
   }, [slides.length])
 
-  // Test image accessibility
-  const testImageAccessibility = useCallback(async (imageUrl: string) => {
-    try {
-      const response = await fetch(imageUrl, { method: 'HEAD' })
-      console.log(`Image accessibility test for ${imageUrl}:`, {
-        status: response.status,
-        statusText: response.statusText,
-        accessible: response.ok
-      })
-      return response.ok
-    } catch (error) {
-      console.warn(`Image accessibility test failed for ${imageUrl}:`, error)
-      return false
-    }
-  }, [])
-
   // Test all images when slides change
   useEffect(() => {
     if (isLoaded && slides.length > 0) {
-      slides.forEach(slide => {
+      slides.forEach(async (slide) => {
         if (slide.image) {
-          testImageAccessibility(slide.image)
+          const accessibility = await testImageAccessibility(slide.image)
+          console.log(`Pre-flight image accessibility test for ${slide.image}:`, accessibility)
+          
+          // If image is not accessible, replace it with a fallback
+          if (!accessibility.accessible) {
+            console.log(`Image ${slide.image} is not accessible, replacing with fallback`)
+            slide.image = getFallbackImageUrl()
+          }
         }
       })
     }
-  }, [slides, isLoaded, testImageAccessibility])
+  }, [slides, isLoaded])
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -220,22 +212,34 @@ const Hero = memo(() => {
                       src={slide.image}
                       alt={slide.title}
                       className="absolute inset-0 w-full h-full object-cover"
-                      onError={(e) => {
+                      onError={async (e) => {
                         console.warn(`Image failed to load: ${slide.image}`, e)
-                        // Try to use fallback images
                         const target = e.currentTarget as HTMLImageElement
-                        const currentSrc = target.src
                         
-                        // Find next fallback image
-                        const fallbackIndex = slide.fallbackImages?.findIndex(fb => fb === currentSrc) ?? -1
-                        const nextFallback = slide.fallbackImages?.[(fallbackIndex + 1) % (slide.fallbackImages?.length ?? 1)]
+                        // Test if the image is accessible
+                        const accessibility = await testImageAccessibility(slide.image)
+                        console.log(`Image accessibility test for ${slide.image}:`, accessibility)
                         
-                        if (nextFallback && !currentSrc.includes('fallback')) {
-                          console.log(`Trying fallback image: ${nextFallback}`)
-                          target.src = nextFallback
-                        } else if (slide.fallbackImages?.[0]) {
-                          console.log(`Using first fallback image: ${slide.fallbackImages[0]}`)
-                          target.src = slide.fallbackImages[0]
+                        if (!accessibility) {
+                          console.log(`Image ${slide.image} is not accessible, using fallback`)
+                          // Use the reliable fallback image
+                          target.src = getFallbackImageUrl()
+                        } else {
+                          // Image is accessible but failed to load, try fallback images
+                          const currentSrc = target.src
+                          const fallbackIndex = slide.fallbackImages?.findIndex(fb => fb === currentSrc) ?? -1
+                          const nextFallback = slide.fallbackImages?.[(fallbackIndex + 1) % (slide.fallbackImages?.length ?? 1)]
+                          
+                          if (nextFallback && !currentSrc.includes('fallback')) {
+                            console.log(`Trying fallback image: ${nextFallback}`)
+                            target.src = nextFallback
+                          } else if (slide.fallbackImages?.[0]) {
+                            console.log(`Using first fallback image: ${slide.fallbackImages[0]}`)
+                            target.src = slide.fallbackImages[0]
+                          } else {
+                            // Use the reliable fallback
+                            target.src = getFallbackImageUrl()
+                          }
                         }
                       }}
                       onLoad={() => {
