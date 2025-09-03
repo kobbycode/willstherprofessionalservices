@@ -56,6 +56,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/logo.jpg', sizes: 'any', type: 'image/jpeg' },
+      { url: 'https://via.placeholder.com/64x64.jpg?text=W', sizes: '64x64', type: 'image/jpeg' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
     shortcut: '/logo.jpg',

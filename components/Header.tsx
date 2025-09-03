@@ -78,9 +78,11 @@ const Header = () => {
                     onError={() => setLogoError(true)}
                   />
                 ) : (
-                  <div className="text-white font-bold text-base sm:text-lg md:text-xl bg-primary-700 px-3 py-1 rounded-lg">
-                    Willsther
-                  </div>
+                  <img
+                    src="https://via.placeholder.com/160x64.png?text=Willsther"
+                    alt="Willsther Logo"
+                    className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
+                  />
                 )}
                 {!logoLoaded && !logoError && (
                   <div className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 bg-gray-200 animate-pulse rounded"></div>
