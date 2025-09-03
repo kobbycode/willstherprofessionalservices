@@ -113,8 +113,8 @@ export default function RootLayout({
               "name": "Willsther Professional Services",
               "description": "Professional maintenance and cleaning services in Accra, Ghana",
               "url": "https://willstherprofessionalservices.com",
-              "logo": "https://willstherprofessionalservices.com/logo.jpg",
-              "image": "https://willstherprofessionalservices.com/logo.jpg",
+              "logo": "https://willstherprofessionalservices.com/logo-v2.jpg",
+              "image": "https://willstherprofessionalservices.com/logo-v2.jpg",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "Accra",

@@ -73,7 +73,7 @@ export default function ProfilePage() {
     email: 'admin@willsther.com',
     phone: '+233 594 850 005',
     role: 'Administrator',
-    avatar: '/logo.jpg',
+    avatar: '/logo-v2.jpg',
     bio: 'System Administrator at Willsther Professional Services',
     location: 'Accra, Ghana',
     timezone: 'Africa/Accra',
@@ -124,7 +124,7 @@ export default function ProfilePage() {
         bio: user.bio || 'System Administrator at Willsther Professional Services',
         location: user.location || 'Accra, Ghana',
         timezone: user.timezone || 'Africa/Accra',
-        avatar: user.photoURL || '/logo.jpg',
+        avatar: user.photoURL || '/logo-v2.jpg',
         notifications: user.notifications || prev.notifications,
               preferences: {
           theme: (user.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
@@ -547,7 +547,7 @@ export default function ProfilePage() {
                           className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/logo.jpg'; // Fallback image
+                            target.src = '/logo-v2.jpg'; // Fallback image
                           }}
                         />
                         <label className={`absolute -bottom-1 -right-1 p-1.5 rounded-full transition-colors cursor-pointer ${
@@ -580,25 +580,23 @@ export default function ProfilePage() {
                             </div>
                           </div>
                         )}
-                        {profileData.avatar !== '/logo.jpg' && (
+                        {profileData.avatar !== '/logo-v2.jpg' && (
                           <button
                             onClick={async () => {
                               try {
-                                setProfileData(prev => ({ ...prev, avatar: '/logo.jpg' }))
+                                setProfileData(prev => ({ ...prev, avatar: '/logo-v2.jpg' }))
                                 
                                 // Update Firebase Auth profile
                                 const auth = getAuth()
                                 if (auth.currentUser) {
-                                  await updateProfile(auth.currentUser, {
-                                    photoURL: '/logo.jpg'
-                                  })
+                                  await updateProfile(auth.currentUser, { photoURL: '/logo-v2.jpg' })
                                 }
 
                                 // Update Firestore document
                                 if (db && user) {
                                   const userRef = doc(db, 'users', user.uid)
                                   await setDoc(userRef, {
-                                    avatar: '/logo.jpg',
+                                    avatar: '/logo-v2.jpg',
                                     updatedAt: new Date()
                                   }, { merge: true })
                                   await refreshUser()
