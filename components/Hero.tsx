@@ -27,7 +27,13 @@ const Hero = memo(() => {
         title: s.title || 'Professional Maintenance Services',
         description: s.subtitle || 'Trusted, reliable and affordable services',
         ctaLabel: s.ctaLabel || 'Get Started Today',
-        ctaLink: s.ctaHref || '#contact'
+        ctaLink: s.ctaHref || '#contact',
+        // Add fallback images for better reliability
+        fallbackImages: [
+          'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=1200&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=600&fit=crop&crop=center'
+        ]
       }))
     }
     
@@ -39,7 +45,11 @@ const Hero = memo(() => {
         title: 'Professional Cleaning',
         description: 'Trusted, reliable and affordable services',
         ctaLabel: 'Get Started Today',
-        ctaLink: '#contact'
+        ctaLink: '#contact',
+        fallbackImages: [
+          'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=600&fit=crop&crop=center'
+        ]
       }
     ]
   }, [config.heroSlides])
@@ -102,6 +112,33 @@ const Hero = memo(() => {
       setIsLoading(true)
     }
   }, [slides.length])
+
+  // Test image accessibility
+  const testImageAccessibility = useCallback(async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl, { method: 'HEAD' })
+      console.log(`Image accessibility test for ${imageUrl}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        accessible: response.ok
+      })
+      return response.ok
+    } catch (error) {
+      console.warn(`Image accessibility test failed for ${imageUrl}:`, error)
+      return false
+    }
+  }, [])
+
+  // Test all images when slides change
+  useEffect(() => {
+    if (isLoaded && slides.length > 0) {
+      slides.forEach(slide => {
+        if (slide.image) {
+          testImageAccessibility(slide.image)
+        }
+      })
+    }
+  }, [slides, isLoaded, testImageAccessibility])
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -184,10 +221,29 @@ const Hero = memo(() => {
                       alt={slide.title}
                       className="absolute inset-0 w-full h-full object-cover"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'
+                        console.warn(`Image failed to load: ${slide.image}`, e)
+                        // Try to use fallback images
+                        const target = e.currentTarget as HTMLImageElement
+                        const currentSrc = target.src
+                        
+                        // Find next fallback image
+                        const fallbackIndex = slide.fallbackImages?.findIndex(fb => fb === currentSrc) ?? -1
+                        const nextFallback = slide.fallbackImages?.[(fallbackIndex + 1) % (slide.fallbackImages?.length ?? 1)]
+                        
+                        if (nextFallback && !currentSrc.includes('fallback')) {
+                          console.log(`Trying fallback image: ${nextFallback}`)
+                          target.src = nextFallback
+                        } else if (slide.fallbackImages?.[0]) {
+                          console.log(`Using first fallback image: ${slide.fallbackImages[0]}`)
+                          target.src = slide.fallbackImages[0]
+                        }
+                      }}
+                      onLoad={() => {
+                        console.log(`Image loaded successfully: ${slide.image}`)
                       }}
                       loading={index === 0 ? 'eager' : 'lazy'}
                       decoding="async"
+                      crossOrigin="anonymous"
                     />
                     
                     {/* Enhanced Overlay */}

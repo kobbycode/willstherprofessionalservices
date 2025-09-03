@@ -1,26 +1,57 @@
 'use client'
 
-// Uploads images to imgbb instead of Firebase Storage
-// Requires NEXT_PUBLIC_IMGBB_API_KEY to be set at build time
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getApp } from 'firebase/app'
 
-// Note: imgbb supports raw binary in multipart 'image' field; no need to convert to base64
-
-export async function uploadImage(file: File, _pathPrefix = 'uploads'): Promise<string> {
+// Primary: Firebase Storage (more reliable across devices)
+// Fallback: ImgBB if Firebase fails
+export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<string> {
   try {
-    console.log('=== UPLOAD (imgbb) START ===')
+    console.log('=== UPLOAD START ===')
     console.log('File details:', { name: file.name, size: file.size, type: file.type })
 
-    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY
-    if (!apiKey) {
-      throw new Error('Missing NEXT_PUBLIC_IMGBB_API_KEY')
+    // Try Firebase Storage first
+    try {
+      const app = getApp()
+      const storage = getStorage(app)
+      const timestamp = Date.now()
+      const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
+      const storageRef = ref(storage, `${pathPrefix}/${fileName}`)
+      
+      console.log('Attempting Firebase Storage upload...')
+      const snapshot = await uploadBytes(storageRef, file)
+      const downloadURL = await getDownloadURL(snapshot.ref)
+      
+      console.log('Firebase Storage upload successful:', downloadURL)
+      return downloadURL
+    } catch (firebaseError) {
+      console.warn('Firebase Storage upload failed, trying ImgBB fallback:', firebaseError)
+      
+      // Fallback to ImgBB
+      return await uploadToImgBB(file)
     }
-    const form = new FormData()
-    form.append('image', file, file.name)
-    form.append('name', `${Date.now()}_${file.name.replace(/\s+/g, '_')}`)
+  } catch (error: any) {
+    console.error('=== UPLOAD ERROR ===')
+    console.error('Error details:', error)
+    throw new Error(error?.message || 'Upload failed')
+  }
+}
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 45000)
+// ImgBB fallback upload
+async function uploadToImgBB(file: File): Promise<string> {
+  const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY
+  if (!apiKey) {
+    throw new Error('Missing NEXT_PUBLIC_IMGBB_API_KEY for fallback upload')
+  }
 
+  const form = new FormData()
+  form.append('image', file, file.name)
+  form.append('name', `${Date.now()}_${file.name.replace(/\s+/g, '_')}`)
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 45000)
+
+  try {
     const url = `https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`
     const res = await fetch(url, {
       method: 'POST',
@@ -34,27 +65,27 @@ export async function uploadImage(file: File, _pathPrefix = 'uploads'): Promise<
       data = await res.json()
     } catch {
       const text = await res.text().catch(() => '')
-      throw new Error(`imgbb upload failed: ${res.status} ${res.statusText} ${text}`)
+      throw new Error(`ImgBB upload failed: ${res.status} ${res.statusText} ${text}`)
     }
 
     if (!res.ok) {
       const errMsg = data?.error?.message || data?.error || res.statusText
-      throw new Error(`imgbb upload failed: ${res.status} ${errMsg}`)
-    }
-    const imageUrl: string | undefined = data?.data?.display_url || data?.data?.url
-    if (!imageUrl) {
-      throw new Error('imgbb response missing URL')
+      throw new Error(`ImgBB upload failed: ${res.status} ${errMsg}`)
     }
 
-    console.log('=== UPLOAD (imgbb) END ===')
+    const imageUrl: string | undefined = data?.data?.display_url || data?.data?.url
+    if (!imageUrl) {
+      throw new Error('ImgBB response missing URL')
+    }
+
+    console.log('ImgBB fallback upload successful:', imageUrl)
     return imageUrl
   } catch (error: any) {
-    console.error('=== UPLOAD ERROR (imgbb) ===')
-    console.error(error)
+    clearTimeout(timeout)
     if (error?.name === 'AbortError') {
       throw new Error('Upload timed out. Please check your connection and try again.')
     }
-    throw new Error(error?.message || 'Upload failed')
+    throw error
   }
 }
 
