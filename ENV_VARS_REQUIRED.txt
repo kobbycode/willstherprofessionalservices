@@ -1,0 +1,29 @@
+Vercel Environment Variables to add (Project Settings -> Environment Variables)
+
+1) NEXT_PUBLIC_IMGBB_API_KEY
+   - Value: YOUR_IMGBB_API_KEY
+   - Scope: Production (and Preview if needed)
+
+2) FIREBASE_PROJECT_ID
+   - Value: wilsther-professional-services (or your actual Project ID)
+
+3) FIREBASE_CLIENT_EMAIL
+   - Value: The client_email from your Firebase service account JSON
+     Example: firebase-adminsdk-xxxxx@wilsther-professional-services.iam.gserviceaccount.com
+
+4) FIREBASE_PRIVATE_KEY
+   - Value: The private_key from your Firebase service account JSON
+   - IMPORTANT: Keep the key formatted with line breaks. In Vercel you can paste it as-is (multiline).
+     If you must store with literal \n, that’s also supported by the code (it converts \n to newlines).
+
+Notes
+- Never commit real secrets to the repo.
+- After adding, redeploy the project and hard-refresh the Admin page (Ctrl+F5).
+
+Optional: .env.local (for local development only; do NOT commit)
+
+NEXT_PUBLIC_IMGBB_API_KEY=YOUR_IMGBB_API_KEY
+FIREBASE_PROJECT_ID=wilsther-professional-services
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@wilsther-professional-services.iam.gserviceaccount.com
+# If using literal \n for local files, wrap in quotes
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
