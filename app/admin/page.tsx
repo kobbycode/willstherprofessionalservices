@@ -41,6 +41,7 @@ import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, 
 import { BlogPost } from '@/lib/blog'
 import { type User } from '@/lib/users'
 import { useAuth } from '@/lib/auth-context'
+import { uploadImage } from '@/lib/storage'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -2280,6 +2281,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                     setUploadingSlides(prev => ({ ...prev, [i]: true }))
                     try {
                       // Add timeout to prevent hanging
+                      const { uploadImage } = await import('@/lib/storage')
                       const uploadPromise = uploadImage(pending, `hero-slides/slide-${Date.now()}-${i}`)
                       const timeoutPromise = new Promise((_, reject) => 
                         setTimeout(() => reject(new Error('Upload timeout')), 45000)
@@ -2329,9 +2331,10 @@ const HeroConfig = ({ config, onChange }: any) => {
                 setPendingPreviews({})
                 onChange({ ...config, heroSlides: nextSlides })
                 toast.success('Hero carousel settings saved successfully!')
-              } catch (err) {
+              } catch (err: unknown) {
                 console.error('Failed to save hero settings:', err)
-                toast.error(`Failed to save hero settings: ${err.message}`)
+                const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+                toast.error(`Failed to save hero settings: ${errorMessage}`)
               } finally {
                 setSaving(false)
               }
