@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Phone, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
+// Using native img to support any URL (including Firebase, data/blob URLs)
 import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useSiteConfig } from '@/lib/site-config'
 
@@ -144,17 +144,15 @@ const Hero = memo(() => {
                   className="absolute inset-0"
                 >
                   <div className="relative w-full h-full">
-                    <Image
+                    <img
                       src={slide.image}
                       alt={slide.title}
-                      fill
-                      priority={index === 0}
-                      className="object-cover"
-                      sizes="100vw"
-                      quality={85}
+                      className="absolute inset-0 w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'
+                        (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'
                       }}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
                     />
                     
                     {/* Enhanced Overlay */}

@@ -2254,11 +2254,20 @@ const HeroConfig = ({ config, onChange }: any) => {
         {/* Save Button */}
         <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
           <button 
-            onClick={() => {
-              console.log('Saving hero config:', config)
-              console.log('Hero slides:', config.heroSlides)
-              onChange(config)
-              toast.success('Hero carousel settings saved successfully!')
+            onClick={async () => {
+              try {
+                console.log('Saving hero config:', config)
+                const { getDb } = await import('@/lib/firebase')
+                const { doc, setDoc } = await import('firebase/firestore')
+                const db = getDb()
+                const ref = doc(db, 'config', 'site')
+                await setDoc(ref, { heroSlides: config.heroSlides }, { merge: true })
+                onChange({ ...config })
+                toast.success('Hero carousel settings saved successfully!')
+              } catch (err) {
+                console.error('Failed to save hero settings:', err)
+                toast.error('Failed to save hero settings. Please try again.')
+              }
             }}
             className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 hover:shadow-lg"
           >
