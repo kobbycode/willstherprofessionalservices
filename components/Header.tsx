@@ -79,7 +79,7 @@ const Header = () => {
                   />
                 ) : (
                   <img
-                    src="https://via.placeholder.com/160x64.png?text=Willsther"
+                    src="/logo-fallback.svg"
                     alt="Willsther Logo"
                     className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
                   />
