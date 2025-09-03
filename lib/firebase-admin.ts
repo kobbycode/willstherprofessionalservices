@@ -1,39 +1,34 @@
-'use server'
+import { initializeApp, getApps, cert } from 'firebase-admin/app'
+import { getFirestore } from 'firebase-admin/firestore'
+import { getAuth } from 'firebase-admin/auth'
 
-import admin from 'firebase-admin'
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID
+const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL
+const FIREBASE_PRIVATE_KEY = process.env.FIREBASE_PRIVATE_KEY
 
-// Initialize Firebase Admin SDK once per runtime
-if (!admin.apps.length) {
-  const projectId = process.env.FIREBASE_PROJECT_ID
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY
-
-  if (!projectId || !clientEmail || !privateKey) {
-    console.warn('Firebase Admin env vars are missing. Admin features will be disabled.')
-  } else {
-    // Vercel stores multiline secrets with \n; convert to real newlines
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n')
-    }
-
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey
-      })
-    })
-  }
+if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
+  throw new Error('Missing Firebase Admin environment variables')
 }
 
-export function getAdminDb() {
-  if (!admin.apps.length) throw new Error('Firebase Admin not initialized')
-  return admin.firestore()
+// Initialize Firebase Admin if not already initialized
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
+      projectId: FIREBASE_PROJECT_ID,
+      clientEmail: FIREBASE_CLIENT_EMAIL,
+      privateKey: FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
+  })
+}
+
+export async function getAdminDb() {
+  if (!getApps().length) throw new Error('Firebase Admin not initialized')
+  return getFirestore()
 }
 
 export async function verifyIdToken(idToken: string) {
-  if (!admin.apps.length) throw new Error('Firebase Admin not initialized')
-  return admin.auth().verifyIdToken(idToken)
+  if (!getApps().length) throw new Error('Firebase Admin not initialized')
+  return getAuth().verifyIdToken(idToken)
 }
 
 
