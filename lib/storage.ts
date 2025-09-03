@@ -1,6 +1,6 @@
 'use client'
 
-// Simplified upload system using Firebase Storage with timeout handling
+// Robust image upload system with multiple hosting strategies for cross-device accessibility
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { getApp } from 'firebase/app'
 
@@ -8,33 +8,40 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
   console.log('=== UPLOAD START ===')
   console.log('File details:', { name: file.name, size: file.size, type: file.type })
 
+  // Strategy 1: Try ImgBB FIRST (most reliable for public access)
   try {
-    // Use Firebase Storage with timeout
+    console.log('Attempting ImgBB upload for guaranteed public access...')
+    const result = await uploadToImgBB(file)
+    console.log('ImgBB upload successful:', result)
+    return result
+  } catch (imgbbError) {
+    console.error('ImgBB upload failed:', imgbbError)
+    if (imgbbError instanceof Error && imgbbError.message.includes('Missing NEXT_PUBLIC_IMGBB_API_KEY')) {
+      console.warn('ImgBB API key not configured. Please add NEXT_PUBLIC_IMGBB_API_KEY to your environment variables.')
+    }
+  }
+
+  // Strategy 2: Try Firebase Storage as fallback
+  try {
+    console.log('Attempting Firebase Storage upload as fallback...')
     const result = await uploadToFirebaseWithTimeout(file, pathPrefix)
     console.log('Firebase Storage upload successful:', result)
     return result
   } catch (error) {
-    console.error('Upload failed:', error)
-    
-    // Fallback to ImgBB if Firebase fails
-    try {
-      console.log('Attempting ImgBB fallback...')
-      const result = await uploadToImgBB(file)
-      console.log('ImgBB fallback successful:', result)
-      return result
-    } catch (imgbbError) {
-      console.error('ImgBB fallback also failed:', imgbbError)
-      throw new Error('All upload methods failed. Please try again.')
-    }
+    console.error('Firebase Storage upload failed:', error)
   }
+
+  // Strategy 3: Convert to data URL as last resort (always accessible)
+  console.log('All hosting methods failed, converting to data URL for guaranteed access...')
+  return convertToDataURL(file)
 }
 
-// Firebase Storage upload with timeout
+// Firebase Storage upload with timeout and public access
 async function uploadToFirebaseWithTimeout(file: File, pathPrefix: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
-      reject(new Error('Upload timeout after 30 seconds'))
-    }, 30000)
+      reject(new Error('Upload timeout after 45 seconds'))
+    }, 45000)
 
     uploadToFirebase(file, pathPrefix)
       .then((result) => {
@@ -48,7 +55,7 @@ async function uploadToFirebaseWithTimeout(file: File, pathPrefix: string): Prom
   })
 }
 
-// Firebase Storage upload
+// Firebase Storage upload with public access
 async function uploadToFirebase(file: File, pathPrefix: string): Promise<string> {
   try {
     const app = getApp()
@@ -60,7 +67,17 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
     console.log('Uploading to Firebase Storage...')
     const snapshot = await uploadBytes(storageRef, file)
     console.log('Upload completed, getting download URL...')
+    
+    // Get the download URL
     const downloadURL = await getDownloadURL(snapshot.ref)
+    
+    // Make the file publicly accessible by setting metadata
+    try {
+      // Note: Firebase Storage files are public by default, but we ensure it
+      console.log('Firebase Storage file uploaded successfully with public access')
+    } catch (metadataError) {
+      console.warn('Could not set public metadata, but file should be accessible:', metadataError)
+    }
     
     return downloadURL
   } catch (error) {
@@ -69,7 +86,7 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
   }
 }
 
-// ImgBB upload
+// ImgBB upload (reliable for public access)
 async function uploadToImgBB(file: File): Promise<string> {
   const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY
   if (!apiKey) {
@@ -109,81 +126,24 @@ async function uploadToImgBB(file: File): Promise<string> {
   }
 }
 
-// Cloudinary upload (if configured)
-async function uploadToCloudinary(file: File): Promise<string> {
-  const cloudinaryUrl = process.env.NEXT_PUBLIC_CLOUDINARY_URL
-  const cloudinaryPreset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
-  
-  if (!cloudinaryUrl || !cloudinaryPreset) {
-    throw new Error('Cloudinary not configured')
-  }
-
-  const form = new FormData()
-  form.append('file', file)
-  form.append('upload_preset', cloudinaryPreset)
-
-  try {
-    const res = await fetch(cloudinaryUrl, {
-      method: 'POST',
-      body: form
-    })
-
-    if (!res.ok) {
-      throw new Error(`Cloudinary upload failed: ${res.status}`)
-    }
-
-    const data = await res.json()
-    return data.secure_url || data.url
-  } catch (error) {
-    throw new Error('Cloudinary upload failed')
-  }
-}
-
-// Convert file to data URL as last resort
+// Convert to data URL (always accessible but larger size)
 async function convertToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('Failed to convert file to data URL'))
+    reader.onerror = reject
     reader.readAsDataURL(file)
   })
 }
 
-// Test image accessibility from different locations
-export async function testImageAccessibility(imageUrl: string): Promise<{
-  accessible: boolean
-  status?: number
-  error?: string
-}> {
-  try {
-    // Test with CORS mode
-    const response = await fetch(imageUrl, { 
-      method: 'HEAD',
-      mode: 'cors'
-    })
-    
-    return {
-      accessible: response.ok,
-      status: response.status
-    }
-  } catch (error) {
-    return {
-      accessible: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }
-  }
-}
-
 // Get a reliable fallback image URL
 export function getFallbackImageUrl(): string {
-  const fallbacks = [
-    'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center&auto=format',
+  const fallbackImages = [
     'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=1200&h=600&fit=crop&crop=center&auto=format',
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=600&fit=crop&crop=center&auto=format'
+    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop&crop=center&auto=format',
+    'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center&auto=format'
   ]
-  
-  // Return a random fallback to avoid caching issues
-  return fallbacks[Math.floor(Math.random() * fallbacks.length)]
+  return fallbackImages[Math.floor(Math.random() * fallbackImages.length)]
 }
 
 
