@@ -2291,6 +2291,16 @@ const HeroConfig = ({ config, onChange }: any) => {
                   }
                 }
 
+                // Ensure default CTA values for all slides
+                for (let i = 0; i < nextSlides.length; i++) {
+                  const s = nextSlides[i] || {}
+                  nextSlides[i] = {
+                    ...s,
+                    ctaLabel: s.ctaLabel || 'Get Started Today',
+                    ctaHref: s.ctaHref || '#contact'
+                  }
+                }
+
                 // Persist to Firestore with timeout to avoid hanging
                 const refDoc = doc(db, 'config', 'site')
                 const writePromise = setDoc(refDoc, { heroSlides: nextSlides }, { merge: true })
