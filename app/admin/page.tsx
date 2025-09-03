@@ -2072,6 +2072,9 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
 const HeroConfig = ({ config, onChange }: any) => {
   const slides = config.heroSlides || []
   const [uploadingSlides, setUploadingSlides] = useState<{ [key: number]: boolean }>({})
+  // Defer uploads: keep selected files and previews until save
+  const [pendingFiles, setPendingFiles] = useState<Record<number, File | undefined>>({})
+  const [pendingPreviews, setPendingPreviews] = useState<Record<number, string | undefined>>({})
   
   const updateSlide = (index: number, key: string, value: string) => {
     const next = { ...config }
@@ -2081,27 +2084,28 @@ const HeroConfig = ({ config, onChange }: any) => {
   }
   
   const addSlide = () => onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
-  const removeSlide = (index: number) => onChange({ ...config, heroSlides: slides.filter((_: any, i: number) => i !== index) })
+  const removeSlide = (index: number) => {
+    const nextSlides = slides.filter((_: any, i: number) => i !== index)
+    onChange({ ...config, heroSlides: nextSlides })
+    // Clean any pending state for removed index
+    setPendingFiles(prev => {
+      const copy = { ...prev }
+      delete copy[index]
+      return copy
+    })
+    setPendingPreviews(prev => {
+      const copy = { ...prev }
+      delete copy[index]
+      return copy
+    })
+  }
   
-  const handleImageUpload = async (index: number, file: File) => {
+  // On file choose: only set preview and store file; do NOT upload yet
+  const handleImageChoose = (index: number, file: File) => {
     if (!file) return
-    
-    setUploadingSlides(prev => ({ ...prev, [index]: true }))
-    
-    try {
-      const { uploadImage } = await import('@/lib/storage')
-      const imageUrl = await uploadImage(file, `hero-slides/slide-${Date.now()}`)
-      console.log('Uploaded image URL:', imageUrl)
-      console.log('Updating slide at index:', index)
-      updateSlide(index, 'imageUrl', imageUrl)
-      console.log('Slide updated, new config:', config)
-      toast.success('Image uploaded successfully!')
-    } catch (error) {
-      console.error('Failed to upload image:', error)
-      toast.error('Failed to upload image. Please try again.')
-    } finally {
-      setUploadingSlides(prev => ({ ...prev, [index]: false }))
-    }
+    setPendingFiles(prev => ({ ...prev, [index]: file }))
+    const previewUrl = URL.createObjectURL(file)
+    setPendingPreviews(prev => ({ ...prev, [index]: previewUrl }))
   }
   
   return (
@@ -2116,18 +2120,18 @@ const HeroConfig = ({ config, onChange }: any) => {
             <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
                   
-                  {/* Image Preview */}
-                  {s.imageUrl && (
+                  {/* Image Preview (pending preview first, then saved URL) */}
+                  {(pendingPreviews[i] || s.imageUrl) && (
                     <div className="mb-3">
                       <img 
-                        src={s.imageUrl} 
+                        src={pendingPreviews[i] || s.imageUrl}
                         alt={`Slide ${i + 1}`}
                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop'
                         }}
                       />
-            </div>
+                    </div>
                   )}
                   
                   {/* Upload Section */}
@@ -2143,16 +2147,20 @@ const HeroConfig = ({ config, onChange }: any) => {
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0]
-                            if (file) handleImageUpload(i, file)
+                            if (file) handleImageChoose(i, file)
                           }}
                           disabled={uploadingSlides[i]}
                         />
                       </label>
                       
-                      {s.imageUrl && (
+                      {(pendingPreviews[i] || s.imageUrl) && (
                         <button
                           type="button"
-                          onClick={() => updateSlide(i, 'imageUrl', '')}
+                          onClick={() => {
+                            updateSlide(i, 'imageUrl', '')
+                            setPendingFiles(prev => ({ ...prev, [i]: undefined }))
+                            setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
+                          }}
                           className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
                           disabled={uploadingSlides[i]}
                         >
@@ -2256,13 +2264,42 @@ const HeroConfig = ({ config, onChange }: any) => {
           <button 
             onClick={async () => {
               try {
-                console.log('Saving hero config:', config)
-                const { getDb } = await import('@/lib/firebase')
+                console.log('Saving hero config with deferred uploads:', config)
+                const { getDb, getStorageClient } = await import('@/lib/firebase')
                 const { doc, setDoc } = await import('firebase/firestore')
+                const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage')
                 const db = getDb()
-                const ref = doc(db, 'config', 'site')
-                await setDoc(ref, { heroSlides: config.heroSlides }, { merge: true })
-                onChange({ ...config })
+                const storage = getStorageClient()
+
+                // Upload any pending files first, update imageUrl to Storage URL
+                const nextSlides = [...(config.heroSlides || [])]
+                for (let i = 0; i < nextSlides.length; i++) {
+                  const pending = pendingFiles[i]
+                  if (pending) {
+                    setUploadingSlides(prev => ({ ...prev, [i]: true }))
+                    const path = `hero-slides/slide-${Date.now()}-${i}-${pending.name}`
+                    const storageRef = ref(storage, path)
+                    await uploadBytes(storageRef, pending, {
+                      contentType: pending.type,
+                      customMetadata: {
+                        uploadedBy: 'admin-panel',
+                        originalName: pending.name
+                      }
+                    })
+                    const url = await getDownloadURL(storageRef)
+                    nextSlides[i] = { ...nextSlides[i], imageUrl: url }
+                    setUploadingSlides(prev => ({ ...prev, [i]: false }))
+                  }
+                }
+
+                // Persist to Firestore
+                const refDoc = doc(db, 'config', 'site')
+                await setDoc(refDoc, { heroSlides: nextSlides }, { merge: true })
+
+                // Clear pending state and update local config
+                setPendingFiles({})
+                setPendingPreviews({})
+                onChange({ ...config, heroSlides: nextSlides })
                 toast.success('Hero carousel settings saved successfully!')
               } catch (err) {
                 console.error('Failed to save hero settings:', err)
