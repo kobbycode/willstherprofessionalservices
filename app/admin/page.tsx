@@ -2262,27 +2262,37 @@ const HeroConfig = ({ config, onChange }: any) => {
         
         {/* Save Button */}
         <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-          <button 
-            disabled={saving}
+          <button
             onClick={async () => {
+              if (saving) return // Prevent double-clicking
+              
+              setSaving(true)
+              const startTime = Date.now()
+              
               try {
-                setSaving(true)
-                console.log('Saving hero config with deferred uploads:', config)
-                const { uploadImage } = await import('@/lib/storage')
+                console.log('Starting hero settings save...')
+                const nextSlides = [...slides]
                 
-
-                // Upload any pending files first, update imageUrl to Storage URL
-                const nextSlides = [...(config.heroSlides || [])]
+                // Upload pending images with timeout and progress
                 for (let i = 0; i < nextSlides.length; i++) {
                   const pending = pendingFiles[i]
                   if (pending) {
                     setUploadingSlides(prev => ({ ...prev, [i]: true }))
                     try {
-                      const url = await uploadImage(pending, `hero-slides/slide-${Date.now()}-${i}`)
+                      // Add timeout to prevent hanging
+                      const uploadPromise = uploadImage(pending, `hero-slides/slide-${Date.now()}-${i}`)
+                      const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Upload timeout')), 45000)
+                      )
+                      
+                      const url = await Promise.race([uploadPromise, timeoutPromise])
                       nextSlides[i] = { ...nextSlides[i], imageUrl: url }
-                    } catch (uploadErr) {
+                      console.log(`Slide ${i + 1} uploaded successfully`)
+                    } catch (uploadErr: unknown) {
                       console.error('Upload failed for slide', i, uploadErr)
-                      toast.error(`Failed to upload slide ${i + 1}`)
+                      const errorMessage = uploadErr instanceof Error ? uploadErr.message : 'Unknown error'
+                      toast.error(`Failed to upload slide ${i + 1}: ${errorMessage}`)
+                      // Continue with other slides instead of failing completely
                     } finally {
                       setUploadingSlides(prev => ({ ...prev, [i]: false }))
                     }
@@ -2299,6 +2309,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                   }
                 }
 
+                console.log('Saving to server...')
                 // Persist via server route to avoid client networking issues
                 const saveRes = await fetch('/api/config/save', {
                   method: 'POST',
@@ -2310,21 +2321,36 @@ const HeroConfig = ({ config, onChange }: any) => {
                   throw new Error(`Save failed: ${saveRes.status} ${errText}`)
                 }
 
+                const totalTime = Date.now() - startTime
+                console.log(`Save completed in ${totalTime}ms`)
+
                 // Clear pending state and update local config
                 setPendingFiles({})
                 setPendingPreviews({})
                 onChange({ ...config, heroSlides: nextSlides })
-              toast.success('Hero carousel settings saved successfully!')
+                toast.success('Hero carousel settings saved successfully!')
               } catch (err) {
                 console.error('Failed to save hero settings:', err)
-                toast.error('Failed to save hero settings. Please try again.')
+                toast.error(`Failed to save hero settings: ${err.message}`)
               } finally {
                 setSaving(false)
               }
             }}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 hover:shadow-lg"
+            disabled={saving}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors duration-200 hover:shadow-lg ${
+              saving 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
           >
-            {saving ? 'Saving…' : '💾 Save Hero Settings'}
+            {saving ? (
+              <span className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Saving...</span>
+              </span>
+            ) : (
+              '💾 Save Hero Settings'
+            )}
           </button>
         </div>
       </div>

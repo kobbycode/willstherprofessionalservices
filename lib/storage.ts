@@ -1,11 +1,6 @@
 'use client'
 
-// Multiple image upload strategies for maximum reliability
-// 1. Try Firebase Storage first
-// 2. Fallback to ImgBB
-// 3. Fallback to Cloudinary (if configured)
-// 4. Final fallback to data URL (base64)
-
+// Simplified upload system using Firebase Storage with timeout handling
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { getApp } from 'firebase/app'
 
@@ -13,39 +8,44 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
   console.log('=== UPLOAD START ===')
   console.log('File details:', { name: file.name, size: file.size, type: file.type })
 
-  // Strategy 1: Try Firebase Storage
   try {
-    console.log('Attempting Firebase Storage upload...')
-    const result = await uploadToFirebase(file, pathPrefix)
+    // Use Firebase Storage with timeout
+    const result = await uploadToFirebaseWithTimeout(file, pathPrefix)
     console.log('Firebase Storage upload successful:', result)
     return result
-  } catch (firebaseError) {
-    console.warn('Firebase Storage upload failed:', firebaseError)
+  } catch (error) {
+    console.error('Upload failed:', error)
+    
+    // Fallback to ImgBB if Firebase fails
+    try {
+      console.log('Attempting ImgBB fallback...')
+      const result = await uploadToImgBB(file)
+      console.log('ImgBB fallback successful:', result)
+      return result
+    } catch (imgbbError) {
+      console.error('ImgBB fallback also failed:', imgbbError)
+      throw new Error('All upload methods failed. Please try again.')
+    }
   }
+}
 
-  // Strategy 2: Try ImgBB
-  try {
-    console.log('Attempting ImgBB upload...')
-    const result = await uploadToImgBB(file)
-    console.log('ImgBB upload successful:', result)
-    return result
-  } catch (imgbbError) {
-    console.warn('ImgBB upload failed:', imgbbError)
-  }
+// Firebase Storage upload with timeout
+async function uploadToFirebaseWithTimeout(file: File, pathPrefix: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Upload timeout after 30 seconds'))
+    }, 30000)
 
-  // Strategy 3: Try Cloudinary (if configured)
-  try {
-    console.log('Attempting Cloudinary upload...')
-    const result = await uploadToCloudinary(file)
-    console.log('Cloudinary upload successful:', result)
-    return result
-  } catch (cloudinaryError) {
-    console.warn('Cloudinary upload failed:', cloudinaryError)
-  }
-
-  // Strategy 4: Convert to data URL as last resort
-  console.log('All upload methods failed, converting to data URL...')
-  return convertToDataURL(file)
+    uploadToFirebase(file, pathPrefix)
+      .then((result) => {
+        clearTimeout(timeout)
+        resolve(result)
+      })
+      .catch((error) => {
+        clearTimeout(timeout)
+        reject(error)
+      })
+  })
 }
 
 // Firebase Storage upload
@@ -57,7 +57,9 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
     const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
     const storageRef = ref(storage, `${pathPrefix}/${fileName}`)
     
+    console.log('Uploading to Firebase Storage...')
     const snapshot = await uploadBytes(storageRef, file)
+    console.log('Upload completed, getting download URL...')
     const downloadURL = await getDownloadURL(snapshot.ref)
     
     return downloadURL
