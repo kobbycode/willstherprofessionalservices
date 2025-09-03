@@ -185,6 +185,32 @@ export function useSiteConfig() {
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [lastFetch, setLastFetch] = useState(0)
 
+	const loadFromFirestore = useCallback(async () => {
+		try {
+			// Check if we're on the client side
+			if (typeof window === 'undefined') {
+				return
+			}
+			
+			const db = getDb()
+			const ref = doc(db, 'config', 'site')
+			const snap = await getDoc(ref)
+			if (snap.exists()) {
+				const remote = snap.data() as SiteConfig
+				const merged = { ...defaultSiteConfig, ...remote }
+				setConfig(merged)
+				saveSiteConfigToLocal(merged)
+				setLastFetch(Date.now())
+				console.log('Site config loaded from Firestore:', merged)
+			} else {
+				console.log('No site config found in Firestore')
+			}
+		} catch (error) {
+			console.warn('Failed to load site config from Firebase:', error)
+			// ignore, rely on local
+		}
+	}, [])
+
 	useEffect(() => {
 		// Load from local cache immediately
 		const cached = loadSiteConfigFromLocal()
@@ -194,33 +220,10 @@ export function useSiteConfig() {
 		// Only fetch from Firestore if we haven't fetched recently (within 5 minutes)
 		const now = Date.now()
 		if (now - lastFetch > 5 * 60 * 1000) {
-			const load = async () => {
-				try {
-					// Check if we're on the client side
-					if (typeof window === 'undefined') {
-						return
-					}
-					
-					const db = getDb()
-					const ref = doc(db, 'config', 'site')
-					const snap = await getDoc(ref)
-					if (snap.exists()) {
-						const remote = snap.data() as SiteConfig
-						const merged = { ...defaultSiteConfig, ...remote }
-						setConfig(merged)
-						saveSiteConfigToLocal(merged)
-						setLastFetch(now)
-					}
-				} catch (error) {
-					console.warn('Failed to load site config from Firebase:', error)
-					// ignore, rely on local
-				}
-			}
-			
 			// Delay Firebase fetch to avoid blocking initial render
-			setTimeout(load, 100)
+			setTimeout(loadFromFirestore, 100)
 		}
-	}, [lastFetch])
+	}, [lastFetch, loadFromFirestore])
 
 	const save = useCallback((next: SiteConfig) => {
 		setConfig(next)
@@ -239,9 +242,13 @@ export function useSiteConfig() {
 		})()
 	}, [])
 
+	const refresh = useCallback(() => {
+		loadFromFirestore()
+	}, [loadFromFirestore])
+
 	const memoizedConfig = useMemo(() => config, [config])
 
-	return { config: memoizedConfig, setConfig: save, isLoaded }
+	return { config: memoizedConfig, setConfig: save, isLoaded, refresh }
 }
 
 

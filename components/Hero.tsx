@@ -10,22 +10,28 @@ import { useSiteConfig } from '@/lib/site-config'
 const Hero = memo(() => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const { config } = useSiteConfig()
+  const { config, isLoaded, refresh } = useSiteConfig()
 
   const slides = useMemo(() => {
-    const configured = (config.heroSlides || []).map((s, idx) => ({
-      id: idx + 1,
-      image: s.imageUrl,
-      title: s.title || '',
-      description: s.subtitle || '',
-      ctaLabel: s.ctaLabel || '',
-      ctaLink: s.ctaHref || ''
-    }))
+    // Only use configured slides if they exist and have images
+    const configured = (config.heroSlides || []).filter(s => s.imageUrl && s.imageUrl.trim() !== '')
     
-    if (configured.length > 0 && configured.some(s => s.image)) {
-      return configured
+    console.log('Hero component - Config loaded:', config)
+    console.log('Hero component - Hero slides from config:', config.heroSlides)
+    console.log('Hero component - Filtered configured slides:', configured)
+    
+    if (configured.length > 0) {
+      return configured.map((s, idx) => ({
+        id: idx + 1,
+        image: s.imageUrl,
+        title: s.title || 'Professional Maintenance Services',
+        description: s.subtitle || 'Trusted, reliable and affordable services',
+        ctaLabel: s.ctaLabel || 'Get Started Today',
+        ctaLink: s.ctaHref || '#contact'
+      }))
     }
     
+    // Fallback to default slide only if no configured slides exist
     return [
       {
         id: 1,
@@ -43,7 +49,7 @@ const Hero = memo(() => {
   }, [slides.length])
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+    setCurrentSlide((prev) => (prev + 1 + slides.length) % slides.length)
   }, [slides.length])
 
   const goToSlide = useCallback((index: number) => {
@@ -58,15 +64,44 @@ const Hero = memo(() => {
   }, [nextSlide, slides.length])
 
   useEffect(() => {
+    // Only start loading when config is loaded
+    if (!isLoaded) return
+    
     // Preload images for better performance
+    let loadedCount = 0
+    const totalImages = slides.length
+    
     slides.forEach(slide => {
       if (slide.image) {
         const img = new window.Image()
         img.src = slide.image
-        img.onload = () => setIsLoading(false)
+        img.onload = () => {
+          loadedCount++
+          if (loadedCount === totalImages) {
+            setIsLoading(false)
+          }
+        }
+        img.onerror = () => {
+          loadedCount++
+          if (loadedCount === totalImages) {
+            setIsLoading(false)
+          }
+        }
       }
     })
-  }, [slides])
+    
+    // Fallback: if no images to load, stop loading after a short delay
+    if (totalImages === 0) {
+      setTimeout(() => setIsLoading(false), 500)
+    }
+  }, [slides, isLoaded])
+
+  // Reset loading state when slides change
+  useEffect(() => {
+    if (slides.length > 0) {
+      setIsLoading(true)
+    }
+  }, [slides.length])
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -285,6 +320,27 @@ const Hero = memo(() => {
           </svg>
         </a>
       </motion.div>
+
+      {/* Debug/Refresh Button - Only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 2 }}
+          className="fixed bottom-4 sm:bottom-8 left-4 sm:left-8 z-40"
+        >
+          <button
+            onClick={refresh}
+            className="bg-gray-600 hover:bg-gray-700 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 flex items-center justify-center"
+            aria-label="Refresh Configuration"
+            title="Refresh configuration from database"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </motion.div>
+      )}
     </section>
   )
 })

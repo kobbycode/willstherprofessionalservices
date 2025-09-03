@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
 
     const db = await getAdminDb()
     
-    // Save to Firestore
-    await db.collection('site-config').doc('hero').set({
+    // Save to Firestore in the structure expected by useSiteConfig
+    await db.collection('config').doc('site').set({
       heroSlides,
       updatedAt: new Date().toISOString()
     }, { merge: true })
