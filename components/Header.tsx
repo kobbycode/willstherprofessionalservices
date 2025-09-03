@@ -72,13 +72,9 @@ const Header = () => {
                 <img 
                   src="/logo-v2.jpg" 
                   alt="Willsther Logo" 
-                  className={`w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  onLoad={() => setLogoLoaded(true)}
-                  onError={() => setLogoError(true)}
+                  className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
                 />
-                {!logoLoaded && !logoError && (
-                  <div className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 bg-gray-200 animate-pulse rounded"></div>
-                )}
+                {/* Removed loading placeholder to ensure logo is always visible */}
               </Link>
             </div>
 
