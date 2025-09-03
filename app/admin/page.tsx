@@ -2132,7 +2132,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop'
                         }}
                       />
-                    </div>
+            </div>
                   )}
                   
                   {/* Upload Section */}
@@ -2291,15 +2291,19 @@ const HeroConfig = ({ config, onChange }: any) => {
                   }
                 }
 
-                // Persist to Firestore
+                // Persist to Firestore with timeout to avoid hanging
                 const refDoc = doc(db, 'config', 'site')
-                await setDoc(refDoc, { heroSlides: nextSlides }, { merge: true })
+                const writePromise = setDoc(refDoc, { heroSlides: nextSlides }, { merge: true })
+                const writeTimeout = new Promise((_, reject) => {
+                  setTimeout(() => reject(new Error('Firestore save timeout')), 10000)
+                })
+                await Promise.race([writePromise, writeTimeout])
 
                 // Clear pending state and update local config
                 setPendingFiles({})
                 setPendingPreviews({})
                 onChange({ ...config, heroSlides: nextSlides })
-                toast.success('Hero carousel settings saved successfully!')
+              toast.success('Hero carousel settings saved successfully!')
               } catch (err) {
                 console.error('Failed to save hero settings:', err)
                 toast.error('Failed to save hero settings. Please try again.')
