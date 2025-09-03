@@ -55,12 +55,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/logo.jpg', sizes: 'any', type: 'image/jpeg' },
+      { url: '/logo-v2.jpg', sizes: 'any', type: 'image/jpeg' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
-    shortcut: '/logo.jpg',
+    shortcut: '/logo-v2.jpg',
     apple: [
-      { url: '/logo.jpg', sizes: '180x180', type: 'image/jpeg' },
+      { url: '/logo-v2.jpg', sizes: '180x180', type: 'image/jpeg' },
     ],
   },
   openGraph: {
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/logo.jpg',
+        url: '/logo-v2.jpg',
         width: 1200,
         height: 630,
         alt: 'Willsther Professional Services Logo',
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Willsther Professional Services',
     description: 'Professional maintenance and cleaning services in Accra, Ghana',
-    images: ['/logo.jpg'],
+    images: ['/logo-v2.jpg'],
   },
   alternates: {
     canonical: 'https://willstherprofessionalservices.com',
