@@ -2268,10 +2268,8 @@ const HeroConfig = ({ config, onChange }: any) => {
               try {
                 setSaving(true)
                 console.log('Saving hero config with deferred uploads:', config)
-                const { getDb } = await import('@/lib/firebase')
-                const { doc, setDoc } = await import('firebase/firestore')
                 const { uploadImage } = await import('@/lib/storage')
-                const db = getDb()
+                
 
                 // Upload any pending files first, update imageUrl to Storage URL
                 const nextSlides = [...(config.heroSlides || [])]
@@ -2301,13 +2299,16 @@ const HeroConfig = ({ config, onChange }: any) => {
                   }
                 }
 
-                // Persist to Firestore with timeout to avoid hanging
-                const refDoc = doc(db, 'config', 'site')
-                const writePromise = setDoc(refDoc, { heroSlides: nextSlides }, { merge: true })
-                const writeTimeout = new Promise((_, reject) => {
-                  setTimeout(() => reject(new Error('Firestore save timeout')), 10000)
+                // Persist via server route to avoid client networking issues
+                const saveRes = await fetch('/api/config/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ heroSlides: nextSlides })
                 })
-                await Promise.race([writePromise, writeTimeout])
+                if (!saveRes.ok) {
+                  const errText = await saveRes.text().catch(() => '')
+                  throw new Error(`Save failed: ${saveRes.status} ${errText}`)
+                }
 
                 // Clear pending state and update local config
                 setPendingFiles({})
