@@ -2077,6 +2077,8 @@ const HeroConfig = ({ config, onChange }: any) => {
   // Defer uploads: keep selected files and previews until save
   const [pendingFiles, setPendingFiles] = useState<Record<number, File | undefined>>({})
   const [pendingPreviews, setPendingPreviews] = useState<Record<number, string | undefined>>({})
+  const [isAddingSlide, setIsAddingSlide] = useState(false)
+  const urlDebounceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [autoOpenNewIndex, setAutoOpenNewIndex] = useState<number | null>(null)
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({})
@@ -2142,11 +2144,14 @@ const HeroConfig = ({ config, onChange }: any) => {
   }
   
   const addSlide = () => {
+    if (isAddingSlide) return
+    setIsAddingSlide(true)
     const newIndex = slides.length
     onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
     // After render, scroll to the new slide and open file picker
     setAutoOpenNewIndex(newIndex)
     toast.success('New slide added')
+    setTimeout(() => setIsAddingSlide(false), 400)
   }
   useEffect(() => {
     if (autoOpenNewIndex !== null) {
@@ -2164,6 +2169,30 @@ const HeroConfig = ({ config, onChange }: any) => {
       return () => clearTimeout(tid)
     }
   }, [autoOpenNewIndex])
+
+  // Reconcile pending state when slides change via realtime updates
+  useEffect(() => {
+    const nextPendingPreviews: Record<number, string | undefined> = { ...pendingPreviews }
+    const nextPendingFiles: Record<number, File | undefined> = { ...pendingFiles }
+    // Remove any pending entries beyond current slides length
+    Object.keys(nextPendingPreviews).forEach((k) => {
+      const idx = Number(k)
+      if (Number.isFinite(idx) && idx >= slides.length) delete nextPendingPreviews[idx]
+    })
+    Object.keys(nextPendingFiles).forEach((k) => {
+      const idx = Number(k)
+      if (Number.isFinite(idx) && idx >= slides.length) delete nextPendingFiles[idx]
+    })
+    // If a slide now has a saved image, clear its pending preview/file
+    slides.forEach((s: any, i: number) => {
+      if (s?.imageUrl) {
+        if (nextPendingPreviews[i]) delete nextPendingPreviews[i]
+        if (nextPendingFiles[i]) delete nextPendingFiles[i]
+      }
+    })
+    if (JSON.stringify(nextPendingPreviews) !== JSON.stringify(pendingPreviews)) setPendingPreviews(nextPendingPreviews)
+    if (JSON.stringify(nextPendingFiles) !== JSON.stringify(pendingFiles)) setPendingFiles(nextPendingFiles)
+  }, [slides])
   const removeSlide = (index: number) => {
     const nextSlides = slides.filter((_: any, i: number) => i !== index)
     // Update UI immediately
@@ -2277,18 +2306,45 @@ const HeroConfig = ({ config, onChange }: any) => {
                           Remove
                         </button>
                       )}
+                      {(pendingPreviews[i] || s.imageUrl) && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const next = { ...config }
+                            next.heroSlides = [...slides]
+                            next.heroSlides[i] = { ...next.heroSlides[i], imageUrl: '' }
+                            onChange(next)
+                            await persistSlides(next.heroSlides)
+                            setPendingFiles(prev => ({ ...prev, [i]: undefined }))
+                            setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
+                            toast.success(`Slide ${i + 1} image cleared`)
+                          }}
+                          className="px-3 py-2 text-amber-700 hover:bg-amber-50 rounded-lg border border-amber-200 transition-colors duration-200"
+                          disabled={uploadingSlides[i]}
+                        >
+                          Clear Image
+                        </button>
+                      )}
                     </div>
                     
-                    {/* URL Input as fallback */}
-            <div>
+                    {/* URL Input as fallback with debounce auto-save */}
+                    <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
                       <input 
                         value={s.imageUrl} 
-                        onChange={(e) => updateSlide(i, 'imageUrl', e.target.value)} 
+                        onChange={(e) => {
+                          const val = e.target.value
+                          updateSlide(i, 'imageUrl', val)
+                          if (urlDebounceTimerRef.current) clearTimeout(urlDebounceTimerRef.current)
+                          urlDebounceTimerRef.current = setTimeout(async () => {
+                            await persistSlides((config.heroSlides || []).map((x: any, idx: number) => idx === i ? { ...x, imageUrl: val } : x))
+                            toast.success('Image URL saved')
+                          }, 500)
+                        }} 
                         placeholder="https://example.com/image.jpg"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                       />
-            </div>
+                    </div>
                   </div>
                 </div>
               </div>
