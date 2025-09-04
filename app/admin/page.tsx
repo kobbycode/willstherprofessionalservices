@@ -2115,7 +2115,9 @@ const HeroConfig = ({ config, onChange }: any) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ heroSlides: sanitizedSlides })
       })
-      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      if (!res.ok) {
+        throw new Error(`Save failed: ${res.status}`)
+      }
 
       // After saving, fetch authoritative server config to avoid local/server drift
       const getRes = await fetch('/api/config/get', { cache: 'no-store' })
@@ -2132,6 +2134,7 @@ const HeroConfig = ({ config, onChange }: any) => {
       }
     } catch (err) {
       console.error('Immediate save failed:', err)
+      toast.error('Failed to save hero slides. Please check your connection and try again.')
     }
   }, [config, onChange])
   
@@ -2253,10 +2256,15 @@ const HeroConfig = ({ config, onChange }: any) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
                   
                   {/* Image Preview (pending preview first, then saved URL) */}
-                  {(pendingPreviews[i] || s.imageUrl) && (
+                  {(() => {
+                    const pp = pendingPreviews[i]
+                    const url = s.imageUrl
+                    const hasImage = !!((typeof pp === 'string' && pp.trim() !== '') || (typeof url === 'string' && url.trim() !== ''))
+                    return hasImage
+                  })() && (
                     <div className="mb-3">
                       <img 
-                        src={pendingPreviews[i] || s.imageUrl}
+                        src={(pendingPreviews[i] && pendingPreviews[i]!.trim() !== '' ? pendingPreviews[i] : s.imageUrl) as string}
                         alt={`Slide ${i + 1}`}
                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         onError={(e) => {
@@ -2286,7 +2294,12 @@ const HeroConfig = ({ config, onChange }: any) => {
                         />
                       </label>
                       
-                      {(pendingPreviews[i] || s.imageUrl) && (
+                      {(() => {
+                        const pp = pendingPreviews[i]
+                        const url = s.imageUrl
+                        const hasImage = !!((typeof pp === 'string' && pp.trim() !== '') || (typeof url === 'string' && url.trim() !== ''))
+                        return hasImage
+                      })() && (
                         <button
                           type="button"
                           onClick={async () => {
@@ -2297,15 +2310,20 @@ const HeroConfig = ({ config, onChange }: any) => {
                             // Then clear any local pending preview/file
                             setPendingFiles(prev => ({ ...prev, [i]: undefined }))
                             setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
-                            toast.success(`Slide ${i + 1} image removed`)
+                            toast.success(`Slide ${i + 1} removed`)
                           }}
                           className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
                           disabled={uploadingSlides[i]}
                         >
-                          Remove
+                          Remove Slide
                         </button>
                       )}
-                      {(pendingPreviews[i] || s.imageUrl) && (
+                      {(() => {
+                        const pp = pendingPreviews[i]
+                        const url = s.imageUrl
+                        const hasImage = !!((typeof pp === 'string' && pp.trim() !== '') || (typeof url === 'string' && url.trim() !== ''))
+                        return hasImage
+                      })() && (
                         <button
                           type="button"
                           onClick={async () => {
