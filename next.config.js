@@ -48,7 +48,7 @@ const nextConfig = {
     return config
   },
   
-  // Headers for better caching
+  // Headers for better caching and MIME types
   async headers() {
     return [
       {
@@ -65,6 +65,32 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/css/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/js/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
