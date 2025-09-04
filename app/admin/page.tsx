@@ -2109,7 +2109,6 @@ const HeroConfig = ({ config, onChange }: any) => {
             ctaHref: (s.ctaHref || '').trim()
           }
         })
-        .filter((s) => s.imageUrl !== '')
 
       const res = await fetch('/api/config/save', {
         method: 'POST',
