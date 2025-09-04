@@ -2236,13 +2236,10 @@ const HeroConfig = ({ config, onChange }: any) => {
                         <button
                           type="button"
                           onClick={async () => {
-                            // Build next state and persist first to avoid race
-                            const next = { ...config }
-                            next.heroSlides = [...slides]
-                            next.heroSlides[i] = { ...next.heroSlides[i], imageUrl: '' }
-                            // Optimistically update UI so preview disappears immediately
-                            onChange(next)
-                            await persistSlides(next.heroSlides)
+                            // Remove the slide entirely locally to match server persistence
+                            const nextSlides = slides.filter((_: any, idx: number) => idx !== i)
+                            onChange({ ...config, heroSlides: nextSlides })
+                            await persistSlides(nextSlides)
                             // Then clear any local pending preview/file
                             setPendingFiles(prev => ({ ...prev, [i]: undefined }))
                             setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
