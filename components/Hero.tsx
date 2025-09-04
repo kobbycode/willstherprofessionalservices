@@ -86,33 +86,6 @@ const Hero = memo(() => {
     }
   }, [isLoaded, config.heroSlides])
 
-  // Remove the problematic effect that resets loading state
-  // useEffect(() => {
-  //   if (slides.length > 0) {
-  //     setIsLoading(true)
-  //   }
-  // }, [slides.length])
-
-  // Test all images when slides change
-  useEffect(() => {
-    if (isLoaded && slides.length > 0) {
-      // Preload images and check accessibility
-      slides.forEach((slide) => {
-        if (slide.image) {
-          const img = new window.Image()
-          img.src = slide.image
-          img.onload = () => {
-            console.log(`Preloaded image: ${slide.image}`)
-          }
-          img.onerror = () => {
-            console.warn(`Failed to preload image: ${slide.image}, will use fallback`)
-            // If image fails to preload, it will use fallback when displayed
-          }
-        }
-      })
-    }
-  }, [slides, isLoaded])
-
   const slideVariants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 1000 : -1000,
