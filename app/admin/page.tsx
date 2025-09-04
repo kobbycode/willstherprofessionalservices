@@ -2263,7 +2263,7 @@ const HeroConfig = ({ config, onChange }: any) => {
         
         {/* Save Button */}
         <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-          <button
+          <button 
             onClick={async () => {
               if (saving) return // Prevent double-clicking
               
@@ -2330,7 +2330,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                 setPendingFiles({})
                 setPendingPreviews({})
                 onChange({ ...config, heroSlides: nextSlides })
-                toast.success('Hero carousel settings saved successfully!')
+              toast.success('Hero carousel settings saved successfully!')
               } catch (err: unknown) {
                 console.error('Failed to save hero settings:', err)
                 const errorMessage = err instanceof Error ? err.message : 'Unknown error'

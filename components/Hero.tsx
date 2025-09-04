@@ -23,8 +23,8 @@ const Hero = memo(() => {
     
     if (configured.length > 0) {
       return configured.map((s, idx) => ({
-        id: idx + 1,
-        image: s.imageUrl,
+      id: idx + 1,
+      image: s.imageUrl,
         title: s.title || 'Professional Maintenance Services',
         description: s.subtitle || 'Trusted, reliable and affordable services',
         ctaLabel: s.ctaLabel || 'Get Started Today',

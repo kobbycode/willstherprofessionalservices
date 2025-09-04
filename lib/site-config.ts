@@ -178,36 +178,28 @@ export function saveSiteConfigToLocal(config: SiteConfig) {
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { getDb } from './firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 
 export function useSiteConfig() {
 	const [config, setConfig] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [lastFetch, setLastFetch] = useState(0)
 
-	const loadFromFirestore = useCallback(async () => {
+	const loadFromServer = useCallback(async () => {
 		try {
-			// Check if we're on the client side
-			if (typeof window === 'undefined') {
-				return
-			}
-			
-			const db = getDb()
-			const ref = doc(db, 'config', 'site')
-			const snap = await getDoc(ref)
-			if (snap.exists()) {
-				const remote = snap.data() as SiteConfig
+			if (typeof window === 'undefined') return
+			const res = await fetch('/api/config/get', { cache: 'no-store' })
+			if (!res.ok) throw new Error(`HTTP ${res.status}`)
+			const { config: remote } = await res.json()
+			if (remote && typeof remote === 'object') {
 				const merged = { ...defaultSiteConfig, ...remote }
 				setConfig(merged)
 				saveSiteConfigToLocal(merged)
 				setLastFetch(Date.now())
-				console.log('Site config loaded from Firestore:', merged)
-			} else {
-				console.log('No site config found in Firestore')
+				console.log('Site config loaded from server:', merged)
 			}
 		} catch (error) {
-			console.warn('Failed to load site config from Firebase:', error)
-			// ignore, rely on local
+			console.warn('Failed to load site config from server:', error)
 		}
 	}, [])
 
@@ -217,13 +209,13 @@ export function useSiteConfig() {
 		setConfig(cached)
 		setIsLoaded(true)
 
-		// Only fetch from Firestore if we haven't fetched recently (within 5 minutes)
+		// Only fetch from server if we haven't fetched recently (within 5 minutes)
 		const now = Date.now()
 		if (now - lastFetch > 5 * 60 * 1000) {
-			// Delay Firebase fetch to avoid blocking initial render
-			setTimeout(loadFromFirestore, 100)
+			// Delay server fetch to avoid blocking initial render
+			setTimeout(loadFromServer, 100)
 		}
-	}, [lastFetch, loadFromFirestore])
+	}, [lastFetch, loadFromServer])
 
 	const save = useCallback((next: SiteConfig) => {
 		setConfig(next)
@@ -243,8 +235,8 @@ export function useSiteConfig() {
 	}, [])
 
 	const refresh = useCallback(() => {
-		loadFromFirestore()
-	}, [loadFromFirestore])
+		loadFromServer()
+	}, [loadFromServer])
 
 	const memoizedConfig = useMemo(() => config, [config])
 
