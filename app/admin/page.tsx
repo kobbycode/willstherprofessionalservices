@@ -2181,7 +2181,7 @@ const HeroConfig = ({ config, onChange }: any) => {
         ctaHref: '#contact'
       }
       const nextSlides = [...slides, newSlide]
-      onChange({ ...config, heroSlides: nextSlides })
+      // Persist first to avoid flicker from realtime snapshots overriding optimistic state
       await persistSlides(nextSlides)
       toast.success('Slide created')
       setIsAddModalOpen(false)
