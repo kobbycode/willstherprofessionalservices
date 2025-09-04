@@ -2313,14 +2313,33 @@ const HeroConfig = ({ config, onChange }: any) => {
 
                 console.log('Saving to server...')
                 // Sanitize slides: trim strings, drop empty imageUrls
+                const version = Date.now().toString()
+                const appendCacheBust = (url: string) => {
+                  try {
+                    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url
+                    const u = new URL(url)
+                    // Only add if not already present
+                    if (!u.searchParams.has('v')) {
+                      u.searchParams.set('v', version)
+                    }
+                    return u.toString()
+                  } catch {
+                    // If invalid URL, return as-is
+                    return url
+                  }
+                }
+
                 const sanitizedSlides = nextSlides
-                  .map((s) => ({
-                    imageUrl: (s.imageUrl || '').trim(),
-                    title: (s.title || '').trim(),
-                    subtitle: (s.subtitle || '').trim(),
-                    ctaLabel: (s.ctaLabel || '').trim(),
-                    ctaHref: (s.ctaHref || '').trim()
-                  }))
+                  .map((s) => {
+                    const imageUrl = (s.imageUrl || '').trim()
+                    return {
+                      imageUrl: imageUrl ? appendCacheBust(imageUrl) : '',
+                      title: (s.title || '').trim(),
+                      subtitle: (s.subtitle || '').trim(),
+                      ctaLabel: (s.ctaLabel || '').trim(),
+                      ctaHref: (s.ctaHref || '').trim()
+                    }
+                  })
                   .filter((s) => s.imageUrl !== '')
 
                 // Persist via server route to avoid client networking issues
