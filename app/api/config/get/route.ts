@@ -4,7 +4,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 export async function GET() {
   try {
     const db = await getAdminDb()
-    const doc = await db.collection('config').doc('site').get()
+    const doc = await db.collection('config').doc('hero').get()
     if (!doc.exists) {
       return NextResponse.json({ config: null })
     }

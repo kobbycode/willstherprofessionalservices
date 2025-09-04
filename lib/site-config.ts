@@ -218,7 +218,7 @@ export function useSiteConfig() {
 		let unsubscribe: (() => void) | undefined
 		try {
 			const db = getDb()
-			const ref = doc(db, 'config', 'site')
+			const ref = doc(db, 'config', 'hero')
 			unsubscribe = onSnapshot(ref, (snap) => {
 				const data = snap.data()
 				if (data && typeof data === 'object') {
@@ -262,7 +262,7 @@ export function useSiteConfig() {
 				if (typeof window === 'undefined') return
 				
 				const db = getDb()
-				const ref = doc(db, 'config', 'site')
+				const ref = doc(db, 'config', 'hero')
 				await setDoc(ref, next, { merge: true })
 			} catch {
 				// no-op
