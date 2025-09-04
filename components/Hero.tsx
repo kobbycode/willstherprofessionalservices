@@ -84,37 +84,10 @@ const Hero = memo(() => {
   }, [nextSlide, slides.length])
 
   useEffect(() => {
-    // Only start loading when config is loaded
+    // Mark ready as soon as config is loaded; rendering will handle image errors/fallbacks
     if (!isLoaded) return
-    
-    // Preload images for better performance
-    let loadedCount = 0
-    const totalImages = slides.length
-    
-    slides.forEach(slide => {
-      if (slide.image) {
-        const img = new window.Image()
-        img.src = slide.image
-        img.onload = () => {
-          loadedCount++
-          if (loadedCount === totalImages) {
-            setIsLoading(false)
-          }
-        }
-        img.onerror = () => {
-          loadedCount++
-          if (loadedCount === totalImages) {
-            setIsLoading(false)
-          }
-        }
-      }
-    })
-    
-    // Fallback: if no images to load, stop loading after a short delay
-    if (totalImages === 0) {
-      setTimeout(() => setIsLoading(false), 500)
-    }
-  }, [slides, isLoaded])
+    setIsLoading(false)
+  }, [isLoaded, slides.length])
 
   // Reset loading state when slides change
   useEffect(() => {
