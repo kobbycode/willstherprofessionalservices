@@ -10,7 +10,7 @@ import { getFallbackImageUrl } from '@/lib/storage'
 
 const Hero = memo(() => {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false) // Start as false, only show loading if explicitly needed
   const { config, isLoaded, refresh } = useSiteConfig()
 
   const slides = useMemo(() => {
@@ -78,17 +78,20 @@ const Hero = memo(() => {
   }, [nextSlide, slides.length])
 
   useEffect(() => {
-    // Mark ready as soon as config is loaded; rendering will handle image errors/fallbacks
-    if (!isLoaded) return
-    setIsLoading(false)
-  }, [isLoaded, slides.length])
-
-  // Reset loading state when slides change
-  useEffect(() => {
-    if (slides.length > 0) {
+    // Only show loading if config is not loaded and we have no slides
+    if (!isLoaded && (!config.heroSlides || config.heroSlides.length === 0)) {
       setIsLoading(true)
+    } else {
+      setIsLoading(false)
     }
-  }, [slides.length])
+  }, [isLoaded, config.heroSlides])
+
+  // Remove the problematic effect that resets loading state
+  // useEffect(() => {
+  //   if (slides.length > 0) {
+  //     setIsLoading(true)
+  //   }
+  // }, [slides.length])
 
   // Test all images when slides change
   useEffect(() => {
