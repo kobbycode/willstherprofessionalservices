@@ -56,16 +56,25 @@ const Hero = memo(() => {
   }, [config.heroSlides])
 
   const nextSlide = useCallback(() => {
+      if (slides.length === 0) return
       setCurrentSlide((prev) => (prev + 1) % slides.length)
   }, [slides.length])
 
   const prevSlide = useCallback(() => {
+    if (slides.length === 0) return
     setCurrentSlide((prev) => (prev + 1 + slides.length) % slides.length)
   }, [slides.length])
 
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index)
   }, [])
+
+  useEffect(() => {
+    // Ensure current index is valid if slides change size
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0)
+    }
+  }, [slides.length, currentSlide])
 
   useEffect(() => {
     if (slides.length <= 1) return
@@ -311,7 +320,7 @@ const Hero = memo(() => {
                 className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 sm:p-3 bg-white/20 hover:bg-white/30 text-white rounded-full transition-all duration-300 backdrop-blur-sm border border-white/30 hover:scale-110"
                 aria-label="Next slide"
               >
-                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
               </button>
             </>
           )}
