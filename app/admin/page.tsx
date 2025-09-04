@@ -2113,7 +2113,19 @@ const HeroConfig = ({ config, onChange }: any) => {
       })
       if (!res.ok) throw new Error(`Save failed: ${res.status}`)
 
-      onChange({ ...config, heroSlides: sanitizedSlides })
+      // After saving, fetch authoritative server config to avoid local/server drift
+      const getRes = await fetch('/api/config/get', { cache: 'no-store' })
+      if (getRes.ok) {
+        const data = await getRes.json().catch(() => null)
+        const serverConfig = data?.config
+        if (serverConfig && typeof serverConfig === 'object') {
+          onChange({ ...config, ...serverConfig })
+        } else {
+          onChange({ ...config, heroSlides: sanitizedSlides })
+        }
+      } else {
+        onChange({ ...config, heroSlides: sanitizedSlides })
+      }
     } catch (err) {
       console.error('Immediate save failed:', err)
     }
