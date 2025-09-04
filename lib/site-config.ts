@@ -184,6 +184,7 @@ export function useSiteConfig() {
 	const [config, setConfig] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [lastFetch, setLastFetch] = useState(0)
+	const [latestServerUpdateIso, setLatestServerUpdateIso] = useState<string | undefined>(undefined)
 
 	const loadFromServer = useCallback(async () => {
 		try {
@@ -196,6 +197,7 @@ export function useSiteConfig() {
 				setConfig(merged)
 				saveSiteConfigToLocal(merged)
 				setLastFetch(Date.now())
+				if ((remote as any).updatedAt) setLatestServerUpdateIso((remote as any).updatedAt)
 				console.log('Site config loaded from server:', merged)
 			}
 		} catch (error) {
@@ -220,10 +222,20 @@ export function useSiteConfig() {
 			unsubscribe = onSnapshot(ref, (snap) => {
 				const data = snap.data()
 				if (data && typeof data === 'object') {
+					// Ignore stale snapshots that are older than the last seen server update
+					const serverUpdatedAtIso = (data as any).updatedAt as string | undefined
+					if (latestServerUpdateIso && serverUpdatedAtIso) {
+						const prev = Date.parse(latestServerUpdateIso)
+						const next = Date.parse(serverUpdatedAtIso)
+						if (!Number.isNaN(prev) && !Number.isNaN(next) && next < prev) {
+							return
+						}
+					}
 					const merged = { ...defaultSiteConfig, ...data }
 					setConfig(merged)
 					saveSiteConfigToLocal(merged)
 					setLastFetch(Date.now())
+					if (serverUpdatedAtIso) setLatestServerUpdateIso(serverUpdatedAtIso)
 				}
 			})
 		} catch {
