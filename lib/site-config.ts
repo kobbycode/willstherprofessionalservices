@@ -209,13 +209,9 @@ export function useSiteConfig() {
 		setConfig(cached)
 		setIsLoaded(true)
 
-		// Only fetch from server if we haven't fetched recently (within 5 minutes)
-		const now = Date.now()
-		if (now - lastFetch > 5 * 60 * 1000) {
-			// Delay server fetch to avoid blocking initial render
-			setTimeout(loadFromServer, 100)
-		}
-	}, [lastFetch, loadFromServer])
+		// Always fetch fresh config from server immediately
+		setTimeout(loadFromServer, 0)
+	}, [loadFromServer])
 
 	const save = useCallback((next: SiteConfig) => {
 		setConfig(next)
