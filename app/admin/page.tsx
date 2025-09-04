@@ -2322,22 +2322,27 @@ const HeroConfig = ({ config, onChange }: any) => {
                   {/* Upload Section */}
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
-                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefs.current[i]?.click()}
+                        className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 disabled:opacity-60"
+                        disabled={uploadingSlides[i]}
+                      >
                         <span className="text-sm font-medium">
                           {uploadingSlides[i] ? 'Uploading...' : 'Upload Image'}
                         </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          ref={(el) => { fileInputRefs.current[i] = el }}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleImageChoose(i, file)
-                          }}
-                          disabled={uploadingSlides[i]}
-                        />
-                      </label>
+                      </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={(el) => { fileInputRefs.current[i] = el }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleImageChoose(i, file)
+                        }}
+                        disabled={uploadingSlides[i]}
+                      />
                       
                       {(() => {
                         const pp = pendingPreviews[i]
