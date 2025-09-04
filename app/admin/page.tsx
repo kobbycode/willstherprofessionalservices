@@ -2261,31 +2261,13 @@ const HeroConfig = ({ config, onChange }: any) => {
     })()
   }
   
-  // On file choose: upload immediately and persist
+  // On file choose: only set local preview and defer upload until Save
   const handleImageChoose = (index: number, file: File) => {
     if (!file) return
     const previewUrl = URL.createObjectURL(file)
     setPendingPreviews(prev => ({ ...prev, [index]: previewUrl }))
-    
-    ;(async () => {
-    setUploadingSlides(prev => ({ ...prev, [index]: true }))
-    try {
-      const { uploadImage } = await import('@/lib/storage')
-        const url = await uploadImage(file, `hero-slides/slide-${Date.now()}-${index}`)
-        const next = { ...config }
-        next.heroSlides = [...slides]
-        next.heroSlides[index] = { ...next.heroSlides[index], imageUrl: url }
-        onChange(next)
-        await persistSlides(next.heroSlides)
-        toast.success(`Slide ${index + 1} image uploaded`)
-      } catch (e) {
-        console.error('Immediate upload failed:', e)
-        toast.error('Failed to upload image')
-    } finally {
-      setUploadingSlides(prev => ({ ...prev, [index]: false }))
-        setPendingFiles(prev => ({ ...prev, [index]: undefined }))
-    }
-    })()
+    setPendingFiles(prev => ({ ...prev, [index]: file }))
+    toast.success(`Image selected for Slide ${index + 1}. Click Save to upload.`)
   }
   
   return (
