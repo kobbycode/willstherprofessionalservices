@@ -2240,6 +2240,8 @@ const HeroConfig = ({ config, onChange }: any) => {
                             const next = { ...config }
                             next.heroSlides = [...slides]
                             next.heroSlides[i] = { ...next.heroSlides[i], imageUrl: '' }
+                            // Optimistically update UI so preview disappears immediately
+                            onChange(next)
                             await persistSlides(next.heroSlides)
                             // Then clear any local pending preview/file
                             setPendingFiles(prev => ({ ...prev, [i]: undefined }))
