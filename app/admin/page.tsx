@@ -2129,7 +2129,6 @@ const HeroConfig = ({ config, onChange }: any) => {
   const addSlide = () => onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
   const removeSlide = (index: number) => {
     const nextSlides = slides.filter((_: any, i: number) => i !== index)
-    onChange({ ...config, heroSlides: nextSlides })
     // Clean any pending state for removed index
     setPendingFiles(prev => {
       const copy = { ...prev }
@@ -2141,8 +2140,10 @@ const HeroConfig = ({ config, onChange }: any) => {
       delete copy[index]
       return copy
     })
-    // Persist deletion immediately
-    persistSlides(nextSlides)
+    // Persist deletion immediately (await inside IIFE to avoid race with polling)
+    ;(async () => {
+      await persistSlides(nextSlides)
+    })()
   }
   
   // On file choose: upload immediately and persist
@@ -2220,16 +2221,16 @@ const HeroConfig = ({ config, onChange }: any) => {
                       {(pendingPreviews[i] || s.imageUrl) && (
                         <button
                           type="button"
-                          onClick={() => {
-                            // Clear locally
-                            updateSlide(i, 'imageUrl', '')
-                            setPendingFiles(prev => ({ ...prev, [i]: undefined }))
-                            setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
-                            // Persist immediately
+                          onClick={async () => {
+                            // Build next state and persist first to avoid race
                             const next = { ...config }
                             next.heroSlides = [...slides]
                             next.heroSlides[i] = { ...next.heroSlides[i], imageUrl: '' }
-                            persistSlides(next.heroSlides)
+                            await persistSlides(next.heroSlides)
+                            // Then clear any local pending preview/file
+                            setPendingFiles(prev => ({ ...prev, [i]: undefined }))
+                            setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
+                            toast.success(`Slide ${i + 1} image removed`)
                           }}
                           className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
                           disabled={uploadingSlides[i]}
