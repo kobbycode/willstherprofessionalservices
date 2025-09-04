@@ -2092,24 +2092,14 @@ const HeroConfig = ({ config, onChange }: any) => {
   // Persist slides to server immediately (sanitize + cache-bust)
   const persistSlides = useCallback(async (slidesToSave: any[]) => {
     try {
-      const version = Date.now().toString()
-      const appendCacheBust = (url: string) => {
-        try {
-          if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url
-          const u = new URL(url)
-          if (!u.searchParams.has('v')) u.searchParams.set('v', version)
-          return u.toString()
-        } catch {
-          return url
-        }
-      }
+      // Avoid modifying remote URLs; rely on natural cache behavior
 
       const sanitizedSlides = slidesToSave
         .map((s) => {
           const imageUrl = (s.imageUrl || '').trim()
           return {
             id: (s as any).id,
-            imageUrl: imageUrl ? appendCacheBust(imageUrl) : '',
+            imageUrl: imageUrl || '',
             title: (s.title || '').trim(),
             subtitle: (s.subtitle || '').trim(),
             ctaLabel: (s.ctaLabel || '').trim(),
@@ -2317,17 +2307,17 @@ const HeroConfig = ({ config, onChange }: any) => {
                           {uploadingSlides[i] ? 'Uploading...' : 'Upload Image'}
                         </span>
                       </button>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
                         ref={(el) => { fileInputRefs.current[i] = el }}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) handleImageChoose(i, file)
-                        }}
-                        disabled={uploadingSlides[i]}
-                      />
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleImageChoose(i, file)
+                          }}
+                          disabled={uploadingSlides[i]}
+                        />
                       
                       {(() => {
                         const pp = pendingPreviews[i]
@@ -2380,7 +2370,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                     </div>
                     
                     {/* URL Input as fallback with debounce auto-save */}
-                    <div>
+            <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
                       <input 
                         value={s.imageUrl} 
@@ -2396,7 +2386,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                         placeholder="https://example.com/image.jpg"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                       />
-                    </div>
+            </div>
                   </div>
                 </div>
               </div>
