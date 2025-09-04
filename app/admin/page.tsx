@@ -2078,6 +2078,47 @@ const HeroConfig = ({ config, onChange }: any) => {
   const [pendingFiles, setPendingFiles] = useState<Record<number, File | undefined>>({})
   const [pendingPreviews, setPendingPreviews] = useState<Record<number, string | undefined>>({})
   
+  // Persist slides to server immediately (sanitize + cache-bust)
+  const persistSlides = useCallback(async (slidesToSave: any[]) => {
+    try {
+      const version = Date.now().toString()
+      const appendCacheBust = (url: string) => {
+        try {
+          if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url
+          const u = new URL(url)
+          if (!u.searchParams.has('v')) u.searchParams.set('v', version)
+          return u.toString()
+        } catch {
+          return url
+        }
+      }
+
+      const sanitizedSlides = slidesToSave
+        .map((s) => {
+          const imageUrl = (s.imageUrl || '').trim()
+          return {
+            imageUrl: imageUrl ? appendCacheBust(imageUrl) : '',
+            title: (s.title || '').trim(),
+            subtitle: (s.subtitle || '').trim(),
+            ctaLabel: (s.ctaLabel || '').trim(),
+            ctaHref: (s.ctaHref || '').trim()
+          }
+        })
+        .filter((s) => s.imageUrl !== '')
+
+      const res = await fetch('/api/config/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ heroSlides: sanitizedSlides })
+      })
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+
+      onChange({ ...config, heroSlides: sanitizedSlides })
+    } catch (err) {
+      console.error('Immediate save failed:', err)
+    }
+  }, [config, onChange])
+
   const updateSlide = (index: number, key: string, value: string) => {
     const next = { ...config }
     next.heroSlides = [...slides]
@@ -2100,14 +2141,35 @@ const HeroConfig = ({ config, onChange }: any) => {
       delete copy[index]
       return copy
     })
+    // Persist deletion immediately
+    persistSlides(nextSlides)
   }
   
-  // On file choose: only set preview and store file; do NOT upload yet
+  // On file choose: upload immediately and persist
   const handleImageChoose = (index: number, file: File) => {
     if (!file) return
-    setPendingFiles(prev => ({ ...prev, [index]: file }))
     const previewUrl = URL.createObjectURL(file)
     setPendingPreviews(prev => ({ ...prev, [index]: previewUrl }))
+
+    ;(async () => {
+      setUploadingSlides(prev => ({ ...prev, [index]: true }))
+      try {
+        const { uploadImage } = await import('@/lib/storage')
+        const url = await uploadImage(file, `hero-slides/slide-${Date.now()}-${index}`)
+        const next = { ...config }
+        next.heroSlides = [...slides]
+        next.heroSlides[index] = { ...next.heroSlides[index], imageUrl: url }
+        onChange(next)
+        await persistSlides(next.heroSlides)
+        toast.success(`Slide ${index + 1} image uploaded`)
+      } catch (e) {
+        console.error('Immediate upload failed:', e)
+        toast.error('Failed to upload image')
+      } finally {
+        setUploadingSlides(prev => ({ ...prev, [index]: false }))
+        setPendingFiles(prev => ({ ...prev, [index]: undefined }))
+      }
+    })()
   }
   
   return (
