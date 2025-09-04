@@ -178,7 +178,7 @@ export function saveSiteConfigToLocal(config: SiteConfig) {
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { getDb } from './firebase'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, onSnapshot } from 'firebase/firestore'
 
 export function useSiteConfig() {
 	const [config, setConfig] = useState<SiteConfig>(defaultSiteConfig)
@@ -212,12 +212,33 @@ export function useSiteConfig() {
 		// Always fetch fresh config from server immediately
 		setTimeout(loadFromServer, 0)
 
-		// Poll periodically for near real-time updates
+		// Real-time updates from Firestore
+		let unsubscribe: (() => void) | undefined
+		try {
+			const db = getDb()
+			const ref = doc(db, 'config', 'site')
+			unsubscribe = onSnapshot(ref, (snap) => {
+				const data = snap.data()
+				if (data && typeof data === 'object') {
+					const merged = { ...defaultSiteConfig, ...data }
+					setConfig(merged)
+					saveSiteConfigToLocal(merged)
+					setLastFetch(Date.now())
+				}
+			})
+		} catch {
+			// ignore subscription errors (e.g., server-side)
+		}
+
+		// Lightweight periodic refresh as a fallback safety net
 		const intervalId = setInterval(() => {
 			loadFromServer()
-		}, 10000) // 10 seconds
+		}, 60000) // 60 seconds
 
-		return () => clearInterval(intervalId)
+		return () => {
+			clearInterval(intervalId)
+			if (unsubscribe) unsubscribe()
+		}
 	}, [loadFromServer])
 
 	const save = useCallback((next: SiteConfig) => {
