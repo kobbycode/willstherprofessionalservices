@@ -2221,9 +2221,15 @@ const HeroConfig = ({ config, onChange }: any) => {
                         <button
                           type="button"
                           onClick={() => {
+                            // Clear locally
                             updateSlide(i, 'imageUrl', '')
                             setPendingFiles(prev => ({ ...prev, [i]: undefined }))
                             setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
+                            // Persist immediately
+                            const next = { ...config }
+                            next.heroSlides = [...slides]
+                            next.heroSlides[i] = { ...next.heroSlides[i], imageUrl: '' }
+                            persistSlides(next.heroSlides)
                           }}
                           className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
                           disabled={uploadingSlides[i]}
