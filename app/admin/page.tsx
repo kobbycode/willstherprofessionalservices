@@ -2108,6 +2108,7 @@ const HeroConfig = ({ config, onChange }: any) => {
         .map((s) => {
           const imageUrl = (s.imageUrl || '').trim()
           return {
+            id: (s as any).id,
             imageUrl: imageUrl ? appendCacheBust(imageUrl) : '',
             title: (s.title || '').trim(),
             subtitle: (s.subtitle || '').trim(),
@@ -2182,6 +2183,7 @@ const HeroConfig = ({ config, onChange }: any) => {
         imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
       }
       const newSlide = {
+        id: Date.now().toString(),
         imageUrl,
         title: newSlideTitle.trim(),
         subtitle: newSlideSubtitle.trim(),
@@ -2241,7 +2243,8 @@ const HeroConfig = ({ config, onChange }: any) => {
     if (JSON.stringify(nextPendingFiles) !== JSON.stringify(pendingFiles)) setPendingFiles(nextPendingFiles)
   }, [slides])
   const removeSlide = (index: number) => {
-    const nextSlides = slides.filter((_: any, i: number) => i !== index)
+    const targetId = slides[index]?.id
+    const nextSlides = slides.filter((s: any, i: number) => (i !== index) && (!targetId || s.id !== targetId))
     // Update UI immediately
     onChange({ ...config, heroSlides: nextSlides })
     // Clean any pending state for removed index
