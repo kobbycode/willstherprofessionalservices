@@ -2312,11 +2312,22 @@ const HeroConfig = ({ config, onChange }: any) => {
                 }
 
                 console.log('Saving to server...')
+                // Sanitize slides: trim strings, drop empty imageUrls
+                const sanitizedSlides = nextSlides
+                  .map((s) => ({
+                    imageUrl: (s.imageUrl || '').trim(),
+                    title: (s.title || '').trim(),
+                    subtitle: (s.subtitle || '').trim(),
+                    ctaLabel: (s.ctaLabel || '').trim(),
+                    ctaHref: (s.ctaHref || '').trim()
+                  }))
+                  .filter((s) => s.imageUrl !== '')
+
                 // Persist via server route to avoid client networking issues
                 const saveRes = await fetch('/api/config/save', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ heroSlides: nextSlides })
+                  body: JSON.stringify({ heroSlides: sanitizedSlides })
                 })
                 if (!saveRes.ok) {
                   const errText = await saveRes.text().catch(() => '')
@@ -2329,7 +2340,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                 // Clear pending state and update local config
                 setPendingFiles({})
                 setPendingPreviews({})
-                onChange({ ...config, heroSlides: nextSlides })
+                onChange({ ...config, heroSlides: sanitizedSlides })
               toast.success('Hero carousel settings saved successfully!')
               } catch (err: unknown) {
                 console.error('Failed to save hero settings:', err)
