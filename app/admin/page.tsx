@@ -2130,7 +2130,7 @@ const HeroConfig = ({ config, onChange }: any) => {
       console.error('Immediate save failed:', err)
     }
   }, [config, onChange])
-
+  
   const updateSlide = (index: number, key: string, value: string) => {
     const next = { ...config }
     next.heroSlides = [...slides]
@@ -2141,6 +2141,8 @@ const HeroConfig = ({ config, onChange }: any) => {
   const addSlide = () => onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
   const removeSlide = (index: number) => {
     const nextSlides = slides.filter((_: any, i: number) => i !== index)
+    // Update UI immediately
+    onChange({ ...config, heroSlides: nextSlides })
     // Clean any pending state for removed index
     setPendingFiles(prev => {
       const copy = { ...prev }
@@ -2163,11 +2165,11 @@ const HeroConfig = ({ config, onChange }: any) => {
     if (!file) return
     const previewUrl = URL.createObjectURL(file)
     setPendingPreviews(prev => ({ ...prev, [index]: previewUrl }))
-
+    
     ;(async () => {
-      setUploadingSlides(prev => ({ ...prev, [index]: true }))
-      try {
-        const { uploadImage } = await import('@/lib/storage')
+    setUploadingSlides(prev => ({ ...prev, [index]: true }))
+    try {
+      const { uploadImage } = await import('@/lib/storage')
         const url = await uploadImage(file, `hero-slides/slide-${Date.now()}-${index}`)
         const next = { ...config }
         next.heroSlides = [...slides]
@@ -2178,10 +2180,10 @@ const HeroConfig = ({ config, onChange }: any) => {
       } catch (e) {
         console.error('Immediate upload failed:', e)
         toast.error('Failed to upload image')
-      } finally {
-        setUploadingSlides(prev => ({ ...prev, [index]: false }))
+    } finally {
+      setUploadingSlides(prev => ({ ...prev, [index]: false }))
         setPendingFiles(prev => ({ ...prev, [index]: undefined }))
-      }
+    }
     })()
   }
   
