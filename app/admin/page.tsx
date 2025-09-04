@@ -2149,7 +2149,15 @@ const HeroConfig = ({ config, onChange }: any) => {
     if (isAddingSlide) return
     setIsAddingSlide(true)
     const newIndex = slides.length
-    onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
+    const nextSlides = [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }]
+    onChange({ ...config, heroSlides: nextSlides })
+    ;(async () => {
+      try {
+        await persistSlides(nextSlides)
+      } catch (e) {
+        console.error('Failed to persist new slide:', e)
+      }
+    })()
     // After render, scroll to the new slide and open file picker
     setAutoOpenNewIndex(newIndex)
     toast.success('New slide added')
