@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Users, 
@@ -2077,6 +2077,9 @@ const HeroConfig = ({ config, onChange }: any) => {
   // Defer uploads: keep selected files and previews until save
   const [pendingFiles, setPendingFiles] = useState<Record<number, File | undefined>>({})
   const [pendingPreviews, setPendingPreviews] = useState<Record<number, string | undefined>>({})
+  const [autoOpenNewIndex, setAutoOpenNewIndex] = useState<number | null>(null)
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
+  const slideRefs = useRef<Record<number, HTMLDivElement | null>>({})
   
   // Persist slides to server immediately (sanitize + cache-bust)
   const persistSlides = useCallback(async (slidesToSave: any[]) => {
@@ -2138,7 +2141,29 @@ const HeroConfig = ({ config, onChange }: any) => {
     onChange(next)
   }
   
-  const addSlide = () => onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
+  const addSlide = () => {
+    const newIndex = slides.length
+    onChange({ ...config, heroSlides: [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }] })
+    // After render, scroll to the new slide and open file picker
+    setAutoOpenNewIndex(newIndex)
+    toast.success('New slide added')
+  }
+  useEffect(() => {
+    if (autoOpenNewIndex !== null) {
+      // Scroll into view first
+      const el = slideRefs.current[autoOpenNewIndex]
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+      // Open file dialog shortly after to ensure element exists
+      const tid = setTimeout(() => {
+        const input = fileInputRefs.current[autoOpenNewIndex]
+        if (input) input.click()
+        setAutoOpenNewIndex(null)
+      }, 250)
+      return () => clearTimeout(tid)
+    }
+  }, [autoOpenNewIndex])
   const removeSlide = (index: number) => {
     const nextSlides = slides.filter((_: any, i: number) => i !== index)
     // Update UI immediately
@@ -2192,7 +2217,7 @@ const HeroConfig = ({ config, onChange }: any) => {
       <ConfigHeader title="Hero Carousel" subtitle="Manage images and texts for the hero slider" />
       <div className="space-y-4">
         {slides.map((s: any, i: number) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
+          <div key={i} ref={(el) => { slideRefs.current[i] = el }} className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Section */}
               <div className="space-y-4">
@@ -2224,6 +2249,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                           type="file"
                           accept="image/*"
                           className="hidden"
+                          ref={(el) => { fileInputRefs.current[i] = el }}
                           onChange={(e) => {
                             const file = e.target.files?.[0]
                             if (file) handleImageChoose(i, file)
