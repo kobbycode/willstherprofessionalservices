@@ -14,17 +14,12 @@ const Hero = memo(() => {
   const { config, isLoaded, refresh } = useSiteConfig()
 
   const slides = useMemo(() => {
-    // Only use configured slides if they exist and have images
-    const configured = (config.heroSlides || []).filter(s => s.imageUrl && s.imageUrl.trim() !== '')
-    
-    console.log('Hero component - Config loaded:', config)
-    console.log('Hero component - Hero slides from config:', config.heroSlides)
-    console.log('Hero component - Filtered configured slides:', configured)
-    
+    const configured = Array.isArray(config.heroSlides) ? config.heroSlides : []
+
     if (configured.length > 0) {
       return configured.map((s, idx) => ({
-      id: idx + 1,
-      image: s.imageUrl,
+        id: idx + 1,
+        image: (s.imageUrl || '').trim() || getFallbackImageUrl(),
         title: s.title || 'Professional Maintenance Services',
         description: s.subtitle || 'Trusted, reliable and affordable services',
         ctaLabel: s.ctaLabel || 'Get Started Today',
@@ -37,8 +32,7 @@ const Hero = memo(() => {
         ]
       }))
     }
-    
-    // Fallback to default slide only if no configured slides exist
+
     return [
       {
         id: 1,
