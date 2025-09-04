@@ -211,6 +211,13 @@ export function useSiteConfig() {
 
 		// Always fetch fresh config from server immediately
 		setTimeout(loadFromServer, 0)
+
+		// Poll periodically for near real-time updates
+		const intervalId = setInterval(() => {
+			loadFromServer()
+		}, 10000) // 10 seconds
+
+		return () => clearInterval(intervalId)
 	}, [loadFromServer])
 
 	const save = useCallback((next: SiteConfig) => {
