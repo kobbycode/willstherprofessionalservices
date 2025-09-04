@@ -2079,6 +2079,12 @@ const HeroConfig = ({ config, onChange }: any) => {
   const [pendingPreviews, setPendingPreviews] = useState<Record<number, string | undefined>>({})
   const [isAddingSlide, setIsAddingSlide] = useState(false)
   const urlDebounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [newSlideTitle, setNewSlideTitle] = useState('')
+  const [newSlideSubtitle, setNewSlideSubtitle] = useState('')
+  const [newSlideFile, setNewSlideFile] = useState<File | null>(null)
+  const [newSlideUrl, setNewSlideUrl] = useState('')
+  const [creatingSlide, setCreatingSlide] = useState(false)
   const [autoOpenNewIndex, setAutoOpenNewIndex] = useState<number | null>(null)
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({})
@@ -2147,21 +2153,52 @@ const HeroConfig = ({ config, onChange }: any) => {
   
   const addSlide = () => {
     if (isAddingSlide) return
-    setIsAddingSlide(true)
-    const newIndex = slides.length
-    const nextSlides = [...slides, { imageUrl: '', title: '', subtitle: '', ctaLabel: '', ctaHref: '' }]
-    onChange({ ...config, heroSlides: nextSlides })
-    ;(async () => {
-      try {
-        await persistSlides(nextSlides)
-      } catch (e) {
-        console.error('Failed to persist new slide:', e)
+    setIsAddModalOpen(true)
+    setNewSlideTitle('')
+    setNewSlideSubtitle('')
+    setNewSlideFile(null)
+    setNewSlideUrl('')
+  }
+
+  const closeAddModal = () => {
+    if (creatingSlide) return
+    setIsAddModalOpen(false)
+  }
+
+  const createNewSlide = async () => {
+    if (creatingSlide) return
+    // Require at least an image file or URL
+    const hasUrl = newSlideUrl.trim() !== ''
+    const hasFile = !!newSlideFile
+    if (!hasUrl && !hasFile) {
+      toast.error('Please select an image or provide an image URL')
+      return
+    }
+    try {
+      setCreatingSlide(true)
+      let imageUrl = newSlideUrl.trim()
+      if (!imageUrl && newSlideFile) {
+        const { uploadImage } = await import('@/lib/storage')
+        imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
       }
-    })()
-    // After render, scroll to the new slide and open file picker
-    setAutoOpenNewIndex(newIndex)
-    toast.success('New slide added')
-    setTimeout(() => setIsAddingSlide(false), 400)
+      const newSlide = {
+        imageUrl,
+        title: newSlideTitle.trim(),
+        subtitle: newSlideSubtitle.trim(),
+        ctaLabel: 'Get Started',
+        ctaHref: '#contact'
+      }
+      const nextSlides = [...slides, newSlide]
+      onChange({ ...config, heroSlides: nextSlides })
+      await persistSlides(nextSlides)
+      toast.success('Slide created')
+      setIsAddModalOpen(false)
+    } catch (e) {
+      console.error('Failed to create slide:', e)
+      toast.error('Failed to create slide')
+    } finally {
+      setCreatingSlide(false)
+    }
   }
   useEffect(() => {
     if (autoOpenNewIndex !== null) {
@@ -2575,6 +2612,83 @@ const HeroConfig = ({ config, onChange }: any) => {
             )}
           </button>
         </div>
+
+        {/* Add Slide Modal */}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={closeAddModal}></div>
+            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Add New Slide</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    value={newSlideTitle}
+                    onChange={(e) => setNewSlideTitle(e.target.value)}
+                    placeholder="Enter slide title"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                  <textarea
+                    value={newSlideSubtitle}
+                    onChange={(e) => setNewSlideSubtitle(e.target.value)}
+                    placeholder="Enter slide subtitle"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Image</label>
+                  <div className="flex items-center gap-3">
+                    <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                      <span className="text-sm font-medium">Choose File</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null
+                          setNewSlideFile(file)
+                        }}
+                        disabled={creatingSlide}
+                      />
+                    </label>
+                    <span className="text-sm text-gray-600 truncate max-w-[50%]">{newSlideFile?.name || 'No file selected'}</span>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Or image URL</label>
+                    <input
+                      value={newSlideUrl}
+                      onChange={(e) => setNewSlideUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      disabled={creatingSlide}
+                    />
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500">CTA Label and CTA Link will default to "Get Started" and "#contact".</div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={closeAddModal}
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300"
+                  disabled={creatingSlide}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createNewSlide}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-60"
+                  disabled={creatingSlide}
+                >
+                  {creatingSlide ? 'Creating...' : 'Create Slide'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   )
