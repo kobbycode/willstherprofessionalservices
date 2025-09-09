@@ -675,6 +675,50 @@ const BlogManagement = () => {
 
   useEffect(() => { load() }, [])
 
+  // Realtime subscription to posts so UI updates immediately
+  useEffect(() => {
+    let unsubscribe: undefined | (() => void)
+    ;(async () => {
+      try {
+        const { getDb } = await import('@/lib/firebase')
+        const { collection, query, orderBy, onSnapshot, limit: fsLimit } = await import('firebase/firestore')
+        const db = getDb()
+        const colRef = collection(db, 'posts')
+        let q: any
+        try {
+          q = query(colRef, orderBy('createdAt', 'desc'), fsLimit(50))
+        } catch {
+          q = query(colRef, fsLimit(50))
+        }
+        unsubscribe = onSnapshot(q, (snap: import('firebase/firestore').QuerySnapshot<import('firebase/firestore').DocumentData>) => {
+          const list = snap.docs.map((d: any) => {
+            const data = d.data() || {}
+            return {
+              id: d.id,
+              title: data.title || '',
+              excerpt: data.excerpt || '',
+              content: data.content || '',
+              author: data.author || 'Willsther Team',
+              date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+              readTime: data.readTime || '1 min read',
+              category: data.category || 'General',
+              image: data.image || '',
+              tags: Array.isArray(data.tags) ? data.tags : [],
+              status: data.status || 'draft',
+              views: data.views || 0,
+              createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+              updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+            } as BlogPost
+          })
+          setPosts(list)
+        })
+      } catch (e) {
+        // ignore subscription errors
+      }
+    })()
+    return () => { if (unsubscribe) unsubscribe() }
+  }, [])
+
   const openCreate = () => {
     setEditingPost(null)
     setForm({ title: '', excerpt: '', content: '', category: '', image: '', tags: '', status: 'draft' })
