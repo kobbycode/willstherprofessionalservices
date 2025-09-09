@@ -695,6 +695,13 @@ const BlogManagement = () => {
     setShowPostModal(true)
   }
 
+  const withTimeout = async <T,>(promise: Promise<T>, ms = 10000): Promise<T> => {
+    return new Promise<T>((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error('Request timed out')), ms)
+      promise.then((v) => { clearTimeout(t); resolve(v) }).catch((e) => { clearTimeout(t); reject(e) })
+    })
+  }
+
   const savePost = async () => {
     if (!form.title.trim() || !form.content.trim()) {
       toast.error('Title and content are required')
@@ -713,19 +720,19 @@ const BlogManagement = () => {
         status: form.status
       }
       if (editingPost) {
-        await updatePost(editingPost.id, payload)
+        await withTimeout(updatePost(editingPost.id, payload))
         setPosts(prev => prev.map(p => p.id === editingPost.id ? { ...p, ...payload } as any : p))
         toast.success('Post updated')
       } else {
-        const { createPost: create } = await import('@/lib/blog')
-        const id = await create(payload)
+        const id = await withTimeout(createPost(payload))
         setPosts(prev => [{ id, author: 'Willsther Team', date: new Date().toISOString(), readTime: '1 min read', views: 0, ...payload } as any, ...prev])
         toast.success('Post created')
       }
       setShowPostModal(false)
     } catch (e) {
-      console.error(e)
-      toast.error('Failed to save post')
+      console.error('Save post failed:', e)
+      const msg = (e as any)?.message || 'Failed to save post'
+      toast.error(msg)
     } finally {
       setSavingPost(false)
     }
