@@ -2079,6 +2079,20 @@ const HeroConfig = ({ config, onChange }: any) => {
   const [newSlideFile, setNewSlideFile] = useState<File | null>(null)
   const [newSlideUrl, setNewSlideUrl] = useState('')
   const [creatingSlide, setCreatingSlide] = useState(false)
+  const [localSlides, setLocalSlides] = useState<any[]>(slides)
+
+  useEffect(() => {
+    setLocalSlides(slides)
+  }, [slides])
+
+  const getLocal = (id: string, key: string) => {
+    const s = localSlides.find((x) => x.id === id)
+    return (s && (s as any)[key]) ?? ''
+  }
+
+  const setLocal = (id: string, key: string, value: any) => {
+    setLocalSlides((prev) => prev.map((s) => (s.id === id ? { ...s, [key]: value } : s)))
+  }
   
   const createNewSlide = async () => {
     if (creatingSlide) return
@@ -2172,6 +2186,7 @@ const HeroConfig = ({ config, onChange }: any) => {
     try {
       const imageUrl = await uploadImage(file, `hero-slides/${slideId}`)
       await updateSlide(slideId, { imageUrl })
+      setLocal(slideId, 'imageUrl', imageUrl)
       } catch (e) {
       console.error('Failed to upload image:', e)
         toast.error('Failed to upload image')
@@ -2179,6 +2194,7 @@ const HeroConfig = ({ config, onChange }: any) => {
   }
 
   const clearImage = async (slideId: string) => {
+    setLocal(slideId, 'imageUrl', '')
     await updateSlide(slideId, { imageUrl: '' })
   }
   
@@ -2237,8 +2253,9 @@ const HeroConfig = ({ config, onChange }: any) => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Or Image URL</label>
                       <input
                         type="url"
-                        value={slide.imageUrl || ''}
-                        onChange={(e) => updateSlide(slide.id, { imageUrl: e.target.value })}
+                        value={getLocal(slide.id, 'imageUrl')}
+                        onChange={(e) => setLocal(slide.id, 'imageUrl', e.target.value)}
+                        onBlur={(e) => updateSlide(slide.id, { imageUrl: e.target.value })}
                         placeholder="https://example.com/image.jpg"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
@@ -2253,8 +2270,9 @@ const HeroConfig = ({ config, onChange }: any) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                   <input
                     type="text"
-                    value={slide.title || ''}
-                    onChange={(e) => updateSlide(slide.id, { title: e.target.value })}
+                    value={getLocal(slide.id, 'title')}
+                    onChange={(e) => setLocal(slide.id, 'title', e.target.value)}
+                    onBlur={(e) => updateSlide(slide.id, { title: e.target.value })}
                     placeholder="Enter slide title"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
@@ -2263,8 +2281,9 @@ const HeroConfig = ({ config, onChange }: any) => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
                   <textarea
-                    value={slide.subtitle || ''}
-                    onChange={(e) => updateSlide(slide.id, { subtitle: e.target.value })}
+                    value={getLocal(slide.id, 'subtitle')}
+                    onChange={(e) => setLocal(slide.id, 'subtitle', e.target.value)}
+                    onBlur={(e) => updateSlide(slide.id, { subtitle: e.target.value })}
                     placeholder="Enter slide subtitle"
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -2276,8 +2295,9 @@ const HeroConfig = ({ config, onChange }: any) => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">CTA Label</label>
                     <input
                       type="text"
-                      value={slide.ctaLabel || ''}
-                      onChange={(e) => updateSlide(slide.id, { ctaLabel: e.target.value })}
+                      value={getLocal(slide.id, 'ctaLabel')}
+                      onChange={(e) => setLocal(slide.id, 'ctaLabel', e.target.value)}
+                      onBlur={(e) => updateSlide(slide.id, { ctaLabel: e.target.value })}
                       placeholder="Get Started"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
@@ -2286,8 +2306,9 @@ const HeroConfig = ({ config, onChange }: any) => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">CTA Link</label>
                     <input
                       type="text"
-                      value={slide.ctaHref || ''}
-                      onChange={(e) => updateSlide(slide.id, { ctaHref: e.target.value })}
+                      value={getLocal(slide.id, 'ctaHref')}
+                      onChange={(e) => setLocal(slide.id, 'ctaHref', e.target.value)}
+                      onBlur={(e) => updateSlide(slide.id, { ctaHref: e.target.value })}
                       placeholder="#contact"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
@@ -2300,21 +2321,30 @@ const HeroConfig = ({ config, onChange }: any) => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
                     <input
                       type="number"
-                      value={typeof slide.order === 'number' ? slide.order : ''}
-                      onChange={(e) => updateSlide(slide.id, { order: parseInt(e.target.value || '0', 10) })}
+                      value={typeof getLocal(slide.id, 'order') === 'number' ? getLocal(slide.id, 'order') : ''}
+                      onChange={(e) => setLocal(slide.id, 'order', parseInt(e.target.value || '0', 10))}
+                      onBlur={(e) => updateSlide(slide.id, { order: parseInt(e.target.value || '0', 10) })}
                       placeholder="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
                   <div className="flex items-end space-x-2">
                     <button
-                      onClick={() => updateSlide(slide.id, { order: (slide.order || 1) - 1 })}
+                      onClick={() => {
+                        const next = (getLocal(slide.id, 'order') || 1) - 1
+                        setLocal(slide.id, 'order', next)
+                        updateSlide(slide.id, { order: next })
+                      }}
                       className="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200"
                     >
                       Move Up
                     </button>
                     <button
-                      onClick={() => updateSlide(slide.id, { order: (slide.order || 1) + 1 })}
+                      onClick={() => {
+                        const next = (getLocal(slide.id, 'order') || 1) + 1
+                        setLocal(slide.id, 'order', next)
+                        updateSlide(slide.id, { order: next })
+                      }}
                       className="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200"
                     >
                       Move Down
