@@ -2079,7 +2079,6 @@ const HeroConfig = ({ config, onChange }: any) => {
   const [newSlideFile, setNewSlideFile] = useState<File | null>(null)
   const [newSlideUrl, setNewSlideUrl] = useState('')
   const [creatingSlide, setCreatingSlide] = useState(false)
-  const [migrating, setMigrating] = useState(false)
   
   const createNewSlide = async () => {
     if (creatingSlide) return
@@ -2129,36 +2128,7 @@ const HeroConfig = ({ config, onChange }: any) => {
     }
   }
 
-  const migrateConfigSlides = async () => {
-    if (migrating) return
-    if (!slides.length) {
-      toast.error('No slides in current config to migrate')
-      return
-    }
-    try {
-      setMigrating(true)
-      for (const s of slides) {
-        const payload = {
-          imageUrl: s.imageUrl || s.image || '',
-          title: s.title || '',
-          subtitle: s.subtitle || s.description || '',
-          ctaLabel: s.ctaLabel || 'Get Started Today',
-          ctaHref: s.ctaHref || '#contact'
-        }
-        await fetch('/api/slides', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        })
-      }
-      toast.success('Migrated config slides to Firestore')
-    } catch (e) {
-      console.error('Migration failed:', e)
-      toast.error('Failed to migrate slides')
-    } finally {
-      setMigrating(false)
-    }
-  }
+  
 
   const updateSlide = async (slideId: string, updates: any) => {
     try {
@@ -2367,8 +2337,8 @@ const HeroConfig = ({ config, onChange }: any) => {
           </div>
         ))}
         
-        {/* Add New Slide / Migrate Buttons */}
-        <div className="flex justify-center gap-3">
+        {/* Add New Slide Button */}
+        <div className="flex justify-center">
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="group bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -2379,13 +2349,6 @@ const HeroConfig = ({ config, onChange }: any) => {
               </div>
               <span className="text-lg">Add New Slide</span>
             </div>
-          </button>
-          <button
-            onClick={migrateConfigSlides}
-            disabled={migrating}
-            className="px-6 py-4 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-semibold disabled:opacity-60"
-          >
-            {migrating ? 'Migrating...' : 'Migrate Config Slides → Firestore'}
           </button>
         </div>
       </div>
