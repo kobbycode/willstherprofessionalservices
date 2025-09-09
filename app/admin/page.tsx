@@ -661,8 +661,10 @@ const BlogManagement = () => {
   const load = async () => {
     setLoading(true)
     try {
-      const { fetchPosts } = await import('@/lib/blog')
-      const list = await fetchPosts(false)
+      // Prefer API to avoid client-side Firestore issues in some environments
+      const res = await fetch('/api/posts', { cache: 'no-store' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const { posts: list } = await res.json()
       setPosts(list)
     } catch (e) {
       console.error('Failed to load posts:', e)
@@ -837,9 +839,9 @@ const BlogManagement = () => {
           </div>
         <button
           onClick={openCreate}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center sm:justify-start space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center sm:justify-start space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>New Post</span>
         </button>
         </div>
