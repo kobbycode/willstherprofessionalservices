@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/firebase-admin'
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const db = await getAdminDb()
     const { id } = params
     const body = await request.json()
     const { imageUrl, title, subtitle, ctaLabel, ctaHref, order } = body
@@ -28,6 +29,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const db = await getAdminDb()
     const { id } = params
     
     await db.collection('heroSlides').doc(id).delete()

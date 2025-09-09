@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
+    const db = await getAdminDb()
     const slidesSnapshot = await db.collection('heroSlides').orderBy('order', 'asc').get()
     const slides = slidesSnapshot.docs.map(doc => ({
       id: doc.id,
@@ -18,13 +19,17 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = await getAdminDb()
     const body = await request.json()
     const { imageUrl, title, subtitle, ctaLabel, ctaHref, order } = body
 
     // Get the next order number if not provided
     let slideOrder = order
     if (slideOrder === undefined) {
-      const lastSlideSnapshot = await db.collection('heroSlides').orderBy('order', 'desc').limit(1).get()
+      const lastSlideSnapshot = await db.collection('heroSlides')
+        .orderBy('order', 'desc')
+        .limit(1)
+        .get()
       slideOrder = lastSlideSnapshot.empty ? 1 : (lastSlideSnapshot.docs[0].data().order || 0) + 1
     }
 
