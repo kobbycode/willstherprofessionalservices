@@ -1,11 +1,15 @@
 'use client'
 
 export type HeroSlide = {
+	id?: string
 	imageUrl: string
 	title?: string
 	subtitle?: string
 	ctaLabel?: string
 	ctaHref?: string
+	order?: number
+	createdAt?: string
+	updatedAt?: string
 }
 
 export type ServiceItem = {
@@ -178,26 +182,36 @@ export function saveSiteConfigToLocal(config: SiteConfig) {
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { getDb } from './firebase'
-import { doc, setDoc, onSnapshot } from 'firebase/firestore'
+import { doc, setDoc, onSnapshot, collection, query, orderBy } from 'firebase/firestore'
 
 export function useSiteConfig() {
 	const [config, setConfig] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [lastFetch, setLastFetch] = useState(0)
-	const [latestServerUpdateIso, setLatestServerUpdateIso] = useState<string | undefined>(undefined)
 
 	const loadFromServer = useCallback(async () => {
 		try {
 			if (typeof window === 'undefined') return
-			const res = await fetch('/api/config/get', { cache: 'no-store' })
-			if (!res.ok) throw new Error(`HTTP ${res.status}`)
-			const { config: remote } = await res.json()
-			if (remote && typeof remote === 'object') {
-				const merged = { ...defaultSiteConfig, ...remote }
+			
+			// Load site config
+			const configRes = await fetch('/api/config/get', { cache: 'no-store' })
+			if (!configRes.ok) throw new Error(`HTTP ${configRes.status}`)
+			const { config: remoteConfig } = await configRes.json()
+			
+			// Load slides separately
+			const slidesRes = await fetch('/api/slides', { cache: 'no-store' })
+			if (!slidesRes.ok) throw new Error(`HTTP ${slidesRes.status}`)
+			const { slides } = await slidesRes.json()
+			
+			if (remoteConfig && typeof remoteConfig === 'object') {
+				const merged = { 
+					...defaultSiteConfig, 
+					...remoteConfig,
+					heroSlides: slides || []
+				}
 				setConfig(merged)
 				saveSiteConfigToLocal(merged)
 				setLastFetch(Date.now())
-				if ((remote as any).updatedAt) setLatestServerUpdateIso((remote as any).updatedAt)
 				console.log('Site config loaded from server:', merged)
 			}
 		} catch (error) {
@@ -214,29 +228,28 @@ export function useSiteConfig() {
 		// Always fetch fresh config from server immediately
 		setTimeout(loadFromServer, 0)
 
-		// Real-time updates from Firestore
+		// Real-time updates from Firestore for slides
 		let unsubscribe: (() => void) | undefined
 		try {
 			const db = getDb()
-			const ref = doc(db, 'config', 'hero')
-			unsubscribe = onSnapshot(ref, (snap) => {
-				const data = snap.data()
-				if (data && typeof data === 'object') {
-					// Ignore stale snapshots that are older than the last seen server update
-					const serverUpdatedAtIso = (data as any).updatedAt as string | undefined
-					if (latestServerUpdateIso && serverUpdatedAtIso) {
-						const prev = Date.parse(latestServerUpdateIso)
-						const next = Date.parse(serverUpdatedAtIso)
-						if (!Number.isNaN(prev) && !Number.isNaN(next) && next < prev) {
-							return
-						}
-					}
-					const merged = { ...defaultSiteConfig, ...data }
-					setConfig(merged)
-					saveSiteConfigToLocal(merged)
-					setLastFetch(Date.now())
-					if (serverUpdatedAtIso) setLatestServerUpdateIso(serverUpdatedAtIso)
-				}
+			const slidesQuery = query(collection(db, 'heroSlides'), orderBy('order', 'asc'))
+			unsubscribe = onSnapshot(slidesQuery, (snapshot) => {
+				const slides = snapshot.docs.map(doc => ({
+					id: doc.id,
+					...doc.data()
+				}))
+				
+				setConfig(prev => ({
+					...prev,
+					heroSlides: slides
+				}))
+				saveSiteConfigToLocal({
+					...config,
+					heroSlides: slides
+				})
+				setLastFetch(Date.now())
+			}, (error) => {
+				console.warn('Realtime slides subscription error, falling back to polling:', error)
 			})
 		} catch {
 			// ignore subscription errors (e.g., server-side)

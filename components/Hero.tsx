@@ -15,10 +15,10 @@ const Hero = memo(() => {
 
   const slides = useMemo(() => {
     const configured = Array.isArray(config.heroSlides) ? config.heroSlides : []
-
+    
     if (configured.length > 0) {
       return configured.map((s, idx) => ({
-        id: idx + 1,
+      id: idx + 1,
         image: (s.imageUrl || '').trim() || getFallbackImageUrl(),
         title: s.title || 'Professional Maintenance Services',
         description: s.subtitle || 'Trusted, reliable and affordable services',
@@ -32,7 +32,7 @@ const Hero = memo(() => {
         ]
       }))
     }
-
+    
     return [
       {
         id: 1,
@@ -82,8 +82,8 @@ const Hero = memo(() => {
     if (!isLoaded && (!config.heroSlides || config.heroSlides.length === 0)) {
       setIsLoading(true)
     } else {
-      setIsLoading(false)
-    }
+            setIsLoading(false)
+          }
   }, [isLoaded, config.heroSlides])
 
   const slideVariants = {

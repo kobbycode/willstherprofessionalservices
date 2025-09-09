@@ -2072,90 +2072,15 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
 // Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
 const HeroConfig = ({ config, onChange }: any) => {
   const slides = config.heroSlides || []
-  const [uploadingSlides, setUploadingSlides] = useState<{ [key: number]: boolean }>({})
   const [saving, setSaving] = useState(false)
-  // Defer uploads: keep selected files and previews until save
-  const [pendingFiles, setPendingFiles] = useState<Record<number, File | undefined>>({})
-  const [pendingPreviews, setPendingPreviews] = useState<Record<number, string | undefined>>({})
-  const [isAddingSlide, setIsAddingSlide] = useState(false)
-  const urlDebounceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [newSlideTitle, setNewSlideTitle] = useState('')
   const [newSlideSubtitle, setNewSlideSubtitle] = useState('')
   const [newSlideFile, setNewSlideFile] = useState<File | null>(null)
   const [newSlideUrl, setNewSlideUrl] = useState('')
   const [creatingSlide, setCreatingSlide] = useState(false)
-  const [autoOpenNewIndex, setAutoOpenNewIndex] = useState<number | null>(null)
-  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
-  const slideRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const [migrating, setMigrating] = useState(false)
   
-  // Persist slides to server immediately (sanitize + cache-bust)
-  const persistSlides = useCallback(async (slidesToSave: any[]) => {
-    try {
-      // Avoid modifying remote URLs; rely on natural cache behavior
-
-      const sanitizedSlides = slidesToSave
-        .map((s) => {
-          const imageUrl = (s.imageUrl || '').trim()
-          return {
-            id: (s as any).id,
-            imageUrl: imageUrl || '',
-            title: (s.title || '').trim(),
-            subtitle: (s.subtitle || '').trim(),
-            ctaLabel: (s.ctaLabel || '').trim(),
-            ctaHref: (s.ctaHref || '').trim()
-          }
-        })
-
-      const res = await fetch('/api/config/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ heroSlides: sanitizedSlides })
-      })
-      if (!res.ok) {
-        throw new Error(`Save failed: ${res.status}`)
-      }
-
-      // After saving, fetch authoritative server config to avoid local/server drift
-      const getRes = await fetch('/api/config/get', { cache: 'no-store' })
-      if (getRes.ok) {
-        const data = await getRes.json().catch(() => null)
-        const serverConfig = data?.config
-        if (serverConfig && typeof serverConfig === 'object') {
-          onChange({ ...config, ...serverConfig })
-        } else {
-          onChange({ ...config, heroSlides: sanitizedSlides })
-        }
-      } else {
-        onChange({ ...config, heroSlides: sanitizedSlides })
-      }
-    } catch (err) {
-      console.error('Immediate save failed:', err)
-      toast.error('Failed to save hero slides. Please check your connection and try again.')
-    }
-  }, [config, onChange])
-  
-  const updateSlide = (index: number, key: string, value: string) => {
-    const next = { ...config }
-    next.heroSlides = [...slides]
-    next.heroSlides[index] = { ...next.heroSlides[index], [key]: value }
-    onChange(next)
-  }
-  
-  const addSlide = () => {
-    if (isAddingSlide) return
-    setIsAddModalOpen(true)
-    setNewSlideTitle('')
-    setNewSlideSubtitle('')
-    setNewSlideFile(null)
-    setNewSlideUrl('')
-  }
-
-  const closeAddModal = () => {
-    if (creatingSlide) return
-    setIsAddModalOpen(false)
-  }
-
   const createNewSlide = async () => {
     if (creatingSlide) return
     // Require at least an image file or URL
@@ -2169,22 +2094,33 @@ const HeroConfig = ({ config, onChange }: any) => {
       setCreatingSlide(true)
       let imageUrl = newSlideUrl.trim()
       if (!imageUrl && newSlideFile) {
-        const { uploadImage } = await import('@/lib/storage')
         imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
       }
-      const newSlide = {
-        id: Date.now().toString(),
+      
+      const slideData = {
         imageUrl,
         title: newSlideTitle.trim(),
         subtitle: newSlideSubtitle.trim(),
-        ctaLabel: 'Get Started',
+        ctaLabel: 'Get Started Today',
         ctaHref: '#contact'
       }
-      const nextSlides = [...slides, newSlide]
-      // Persist first to avoid flicker from realtime snapshots overriding optimistic state
-      await persistSlides(nextSlides)
-      toast.success('Slide created')
+      
+      const res = await fetch('/api/slides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(slideData)
+      })
+      
+      if (!res.ok) {
+        throw new Error(`Failed to create slide: ${res.status}`)
+      }
+      
+      toast.success('Slide created successfully')
       setIsAddModalOpen(false)
+      setNewSlideTitle('')
+      setNewSlideSubtitle('')
+      setNewSlideFile(null)
+      setNewSlideUrl('')
     } catch (e) {
       console.error('Failed to create slide:', e)
       toast.error('Failed to create slide')
@@ -2192,100 +2128,108 @@ const HeroConfig = ({ config, onChange }: any) => {
       setCreatingSlide(false)
     }
   }
-  useEffect(() => {
-    if (autoOpenNewIndex !== null) {
-      // Scroll into view first
-      const el = slideRefs.current[autoOpenNewIndex]
-      if (el && typeof el.scrollIntoView === 'function') {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-      // Open file dialog shortly after to ensure element exists
-      const tid = setTimeout(() => {
-        const input = fileInputRefs.current[autoOpenNewIndex]
-        if (input) input.click()
-        setAutoOpenNewIndex(null)
-      }, 250)
-      return () => clearTimeout(tid)
-    }
-  }, [autoOpenNewIndex])
 
-  // Reconcile pending state when slides change via realtime updates
-  useEffect(() => {
-    const nextPendingPreviews: Record<number, string | undefined> = { ...pendingPreviews }
-    const nextPendingFiles: Record<number, File | undefined> = { ...pendingFiles }
-    // Remove any pending entries beyond current slides length
-    Object.keys(nextPendingPreviews).forEach((k) => {
-      const idx = Number(k)
-      if (Number.isFinite(idx) && idx >= slides.length) delete nextPendingPreviews[idx]
-    })
-    Object.keys(nextPendingFiles).forEach((k) => {
-      const idx = Number(k)
-      if (Number.isFinite(idx) && idx >= slides.length) delete nextPendingFiles[idx]
-    })
-    // If a slide now has a saved image, clear its pending preview/file
-    slides.forEach((s: any, i: number) => {
-      if (s?.imageUrl) {
-        if (nextPendingPreviews[i]) delete nextPendingPreviews[i]
-        if (nextPendingFiles[i]) delete nextPendingFiles[i]
+  const migrateConfigSlides = async () => {
+    if (migrating) return
+    if (!slides.length) {
+      toast.error('No slides in current config to migrate')
+      return
+    }
+    try {
+      setMigrating(true)
+      for (const s of slides) {
+        const payload = {
+          imageUrl: s.imageUrl || s.image || '',
+          title: s.title || '',
+          subtitle: s.subtitle || s.description || '',
+          ctaLabel: s.ctaLabel || 'Get Started Today',
+          ctaHref: s.ctaHref || '#contact'
+        }
+        await fetch('/api/slides', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
       }
-    })
-    if (JSON.stringify(nextPendingPreviews) !== JSON.stringify(pendingPreviews)) setPendingPreviews(nextPendingPreviews)
-    if (JSON.stringify(nextPendingFiles) !== JSON.stringify(pendingFiles)) setPendingFiles(nextPendingFiles)
-  }, [slides])
-  const removeSlide = (index: number) => {
-    const targetId = slides[index]?.id
-    const nextSlides = slides.filter((s: any, i: number) => (i !== index) && (!targetId || s.id !== targetId))
-    // Update UI immediately
-    onChange({ ...config, heroSlides: nextSlides })
-    // Clean any pending state for removed index
-    setPendingFiles(prev => {
-      const copy = { ...prev }
-      delete copy[index]
-      return copy
-    })
-    setPendingPreviews(prev => {
-      const copy = { ...prev }
-      delete copy[index]
-      return copy
-    })
-    // Persist deletion immediately (await inside IIFE to avoid race with polling)
-    ;(async () => {
-      await persistSlides(nextSlides)
-    })()
+      toast.success('Migrated config slides to Firestore')
+    } catch (e) {
+      console.error('Migration failed:', e)
+      toast.error('Failed to migrate slides')
+    } finally {
+      setMigrating(false)
+    }
   }
-  
-  // On file choose: only set local preview and defer upload until Save
-  const handleImageChoose = (index: number, file: File) => {
-    if (!file) return
-    const previewUrl = URL.createObjectURL(file)
-    setPendingPreviews(prev => ({ ...prev, [index]: previewUrl }))
-    setPendingFiles(prev => ({ ...prev, [index]: file }))
-    toast.success(`Image selected for Slide ${index + 1}. Click Save to upload.`)
+
+  const updateSlide = async (slideId: string, updates: any) => {
+    try {
+      const res = await fetch(`/api/slides/${slideId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      })
+      
+      if (!res.ok) {
+        throw new Error(`Failed to update slide: ${res.status}`)
+      }
+      
+      toast.success('Slide updated successfully')
+    } catch (e) {
+      console.error('Failed to update slide:', e)
+      toast.error('Failed to update slide')
+    }
+  }
+
+  const deleteSlide = async (slideId: string) => {
+    if (!confirm('Are you sure you want to delete this slide?')) return
+    
+    try {
+      const res = await fetch(`/api/slides/${slideId}`, {
+        method: 'DELETE'
+      })
+      
+      if (!res.ok) {
+        throw new Error(`Failed to delete slide: ${res.status}`)
+      }
+      
+      toast.success('Slide deleted successfully')
+    } catch (e) {
+      console.error('Failed to delete slide:', e)
+      toast.error('Failed to delete slide')
+    }
+  }
+
+  const handleImageUpload = async (slideId: string, file: File) => {
+    try {
+      const imageUrl = await uploadImage(file, `hero-slides/${slideId}`)
+      await updateSlide(slideId, { imageUrl })
+      } catch (e) {
+      console.error('Failed to upload image:', e)
+        toast.error('Failed to upload image')
+    }
+  }
+
+  const clearImage = async (slideId: string) => {
+    await updateSlide(slideId, { imageUrl: '' })
   }
   
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Hero Carousel" subtitle="Manage images and texts for the hero slider" />
       <div className="space-y-4">
-        {slides.map((s: any, i: number) => (
-          <div key={i} ref={(el) => { slideRefs.current[i] = el }} className="bg-white border border-gray-200 rounded-lg p-6">
+        {slides.map((slide: any) => (
+          <div key={slide.id} className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Section */}
               <div className="space-y-4">
             <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
                   
-                  {/* Image Preview (pending preview first, then saved URL) */}
-                  {(() => {
-                    const pp = pendingPreviews[i]
-                    const url = s.imageUrl
-                    const hasImage = !!((typeof pp === 'string' && pp.trim() !== '') || (typeof url === 'string' && url.trim() !== ''))
-                    return hasImage
-                  })() && (
+                  {/* Image Preview */}
+                  {slide.imageUrl && (
                     <div className="mb-3">
                       <img 
-                        src={(pendingPreviews[i] && pendingPreviews[i]!.trim() !== '' ? pendingPreviews[i] : s.imageUrl) as string}
-                        alt={`Slide ${i + 1}`}
+                        src={slide.imageUrl}
+                        alt={`Slide ${slide.title || 'Untitled'}`}
                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop'
@@ -2297,166 +2241,109 @@ const HeroConfig = ({ config, onChange }: any) => {
                   {/* Upload Section */}
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[i]?.click()}
-                        className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 disabled:opacity-60"
-                        disabled={uploadingSlides[i]}
-                      >
-                        <span className="text-sm font-medium">
-                          {uploadingSlides[i] ? 'Uploading...' : 'Upload Image'}
-                        </span>
-                      </button>
+                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                        <span className="text-sm font-medium">Upload Image</span>
                         <input
                           type="file"
                           accept="image/*"
                           className="hidden"
-                        ref={(el) => { fileInputRefs.current[i] = el }}
                           onChange={(e) => {
                             const file = e.target.files?.[0]
-                            if (file) handleImageChoose(i, file)
+                            if (file) handleImageUpload(slide.id, file)
                           }}
-                          disabled={uploadingSlides[i]}
                         />
-                      
-                      {(() => {
-                        const pp = pendingPreviews[i]
-                        const url = s.imageUrl
-                        const hasImage = !!((typeof pp === 'string' && pp.trim() !== '') || (typeof url === 'string' && url.trim() !== ''))
-                        return hasImage
-                      })() && (
+                      </label>
+                      {slide.imageUrl && (
                         <button
-                          type="button"
-                          onClick={async () => {
-                            // Remove the slide entirely locally to match server persistence
-                            const nextSlides = slides.filter((_: any, idx: number) => idx !== i)
-                            onChange({ ...config, heroSlides: nextSlides })
-                            await persistSlides(nextSlides)
-                            // Then clear any local pending preview/file
-                            setPendingFiles(prev => ({ ...prev, [i]: undefined }))
-                            setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
-                            toast.success(`Slide ${i + 1} removed`)
-                          }}
-                          className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
-                          disabled={uploadingSlides[i]}
-                        >
-                          Remove Slide
-                        </button>
-                      )}
-                      {(() => {
-                        const pp = pendingPreviews[i]
-                        const url = s.imageUrl
-                        const hasImage = !!((typeof pp === 'string' && pp.trim() !== '') || (typeof url === 'string' && url.trim() !== ''))
-                        return hasImage
-                      })() && (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const next = { ...config }
-                            next.heroSlides = [...slides]
-                            next.heroSlides[i] = { ...next.heroSlides[i], imageUrl: '' }
-                            onChange(next)
-                            await persistSlides(next.heroSlides)
-                            setPendingFiles(prev => ({ ...prev, [i]: undefined }))
-                            setPendingPreviews(prev => ({ ...prev, [i]: undefined }))
-                            toast.success(`Slide ${i + 1} image cleared`)
-                          }}
-                          className="px-3 py-2 text-amber-700 hover:bg-amber-50 rounded-lg border border-amber-200 transition-colors duration-200"
-                          disabled={uploadingSlides[i]}
+                          onClick={() => clearImage(slide.id)}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
                         >
                           Clear Image
                         </button>
                       )}
                     </div>
                     
-                    {/* URL Input as fallback with debounce auto-save */}
-            <div>
-                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                      <input 
-                        value={s.imageUrl} 
-                        onChange={(e) => {
-                          const val = e.target.value
-                          updateSlide(i, 'imageUrl', val)
-                          if (urlDebounceTimerRef.current) clearTimeout(urlDebounceTimerRef.current)
-                          urlDebounceTimerRef.current = setTimeout(async () => {
-                            await persistSlides((config.heroSlides || []).map((x: any, idx: number) => idx === i ? { ...x, imageUrl: val } : x))
-                            toast.success('Image URL saved')
-                          }, 500)
-                        }} 
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Or Image URL</label>
+                      <input
+                        type="url"
+                        value={slide.imageUrl || ''}
+                        onChange={(e) => updateSlide(slide.id, { imageUrl: e.target.value })}
                         placeholder="https://example.com/image.jpg"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
-            </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Content Section */}
               <div className="space-y-4">
-            <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                  <input 
-                    value={s.title || ''} 
-                    onChange={(e) => updateSlide(i, 'title', e.target.value)} 
-                    placeholder="Enter slide title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-            </div>
-                
                 <div>
-                  <label className="text-sm text-gray-700 mb-2 block">Subtitle</label>
-                  <textarea 
-                    value={s.subtitle || ''} 
-                    onChange={(e) => updateSlide(i, 'subtitle', e.target.value)} 
-                    placeholder="Enter slide description"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    value={slide.title || ''}
+                    onChange={(e) => updateSlide(slide.id, { title: e.target.value })}
+                    placeholder="Enter slide title"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
                 
-                {/* CTA fields only for first slide */}
-                {i === 0 && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                    <label className="block text-sm text-gray-700 mb-2">CTA Label</label>
-                    <input 
-                      value={s.ctaLabel || ''} 
-                      onChange={(e) => updateSlide(i, 'ctaLabel', e.target.value)} 
-                      placeholder="e.g., Get Started"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                  <textarea
+                    value={slide.subtitle || ''}
+                    onChange={(e) => updateSlide(slide.id, { subtitle: e.target.value })}
+                    placeholder="Enter slide subtitle"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Label</label>
+                    <input
+                      type="text"
+                      value={slide.ctaLabel || ''}
+                      onChange={(e) => updateSlide(slide.id, { ctaLabel: e.target.value })}
+                      placeholder="Get Started"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
-              </div>
-              <div>
-                    <label className="block text-sm text-gray-700 mb-2">CTA Link</label>
-                    <input 
-                      value={s.ctaHref || ''} 
-                      onChange={(e) => updateSlide(i, 'ctaHref', e.target.value)} 
-                      placeholder="e.g., #services"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Link</label>
+                    <input
+                      type="text"
+                      value={slide.ctaHref || ''}
+                      onChange={(e) => updateSlide(slide.id, { ctaHref: e.target.value })}
+                      placeholder="#contact"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                        <button
+                    onClick={() => deleteSlide(slide.id)}
+                    className="px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete Slide</span>
+                  </button>
+                </div>
               </div>
-            </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Remove Button */}
-            <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
-              <button 
-                onClick={() => removeSlide(i)} 
-                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
-                disabled={uploadingSlides[i]}
-              >
-                Remove Slide
-              </button>
             </div>
           </div>
         ))}
         
-        <div className="flex justify-center">
-          <button 
-            onClick={addSlide} 
-            className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all duration-300 border-2 border-dashed border-primary-300 hover:border-primary-400 hover:shadow-lg hover:scale-[1.02] group"
+        {/* Add New Slide / Migrate Buttons */}
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="group bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-center space-x-3">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
@@ -2465,211 +2352,81 @@ const HeroConfig = ({ config, onChange }: any) => {
               <span className="text-lg">Add New Slide</span>
             </div>
           </button>
-        </div>
-        
-        {/* Save Button */}
-        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-          <button 
-            onClick={async () => {
-              if (saving) return // Prevent double-clicking
-              
-              setSaving(true)
-              const startTime = Date.now()
-              
-              try {
-                console.log('Starting hero settings save...')
-                const nextSlides = [...slides]
-                
-                // Upload pending images with timeout and progress
-                for (let i = 0; i < nextSlides.length; i++) {
-                  const pending = pendingFiles[i]
-                  if (pending) {
-                    setUploadingSlides(prev => ({ ...prev, [i]: true }))
-                    try {
-                      // Add timeout to prevent hanging
-                      const { uploadImage } = await import('@/lib/storage')
-                      const uploadPromise = uploadImage(pending, `hero-slides/slide-${Date.now()}-${i}`)
-                      const timeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('Upload timeout')), 45000)
-                      )
-                      
-                      const url = await Promise.race([uploadPromise, timeoutPromise])
-                      nextSlides[i] = { ...nextSlides[i], imageUrl: url }
-                      console.log(`Slide ${i + 1} uploaded successfully`)
-                    } catch (uploadErr: unknown) {
-                      console.error('Upload failed for slide', i, uploadErr)
-                      const errorMessage = uploadErr instanceof Error ? uploadErr.message : 'Unknown error'
-                      toast.error(`Failed to upload slide ${i + 1}: ${errorMessage}`)
-                      // Continue with other slides instead of failing completely
-                    } finally {
-                      setUploadingSlides(prev => ({ ...prev, [i]: false }))
-                    }
-                  }
-                }
-
-                // Ensure default CTA values for all slides
-                for (let i = 0; i < nextSlides.length; i++) {
-                  const s = nextSlides[i] || {}
-                  nextSlides[i] = {
-                    ...s,
-                    ctaLabel: s.ctaLabel || 'Get Started Today',
-                    ctaHref: s.ctaHref || '#contact'
-                  }
-                }
-
-                console.log('Saving to server...')
-                // Sanitize slides: trim strings, drop empty imageUrls
-                const version = Date.now().toString()
-                const appendCacheBust = (url: string) => {
-                  try {
-                    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url
-                    const u = new URL(url)
-                    // Only add if not already present
-                    if (!u.searchParams.has('v')) {
-                      u.searchParams.set('v', version)
-                    }
-                    return u.toString()
-                  } catch {
-                    // If invalid URL, return as-is
-                    return url
-                  }
-                }
-
-                const sanitizedSlides = nextSlides
-                  .map((s) => {
-                    const imageUrl = (s.imageUrl || '').trim()
-                    return {
-                      imageUrl: imageUrl ? appendCacheBust(imageUrl) : '',
-                      title: (s.title || '').trim(),
-                      subtitle: (s.subtitle || '').trim(),
-                      ctaLabel: (s.ctaLabel || '').trim(),
-                      ctaHref: (s.ctaHref || '').trim()
-                    }
-                  })
-                  .filter((s) => s.imageUrl !== '')
-
-                // Persist via server route to avoid client networking issues
-                const saveRes = await fetch('/api/config/save', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ heroSlides: sanitizedSlides })
-                })
-                if (!saveRes.ok) {
-                  const errText = await saveRes.text().catch(() => '')
-                  throw new Error(`Save failed: ${saveRes.status} ${errText}`)
-                }
-
-                const totalTime = Date.now() - startTime
-                console.log(`Save completed in ${totalTime}ms`)
-
-                // Clear pending state and update local config
-                setPendingFiles({})
-                setPendingPreviews({})
-                onChange({ ...config, heroSlides: sanitizedSlides })
-              toast.success('Hero carousel settings saved successfully!')
-              } catch (err: unknown) {
-                console.error('Failed to save hero settings:', err)
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-                toast.error(`Failed to save hero settings: ${errorMessage}`)
-              } finally {
-                setSaving(false)
-              }
-            }}
-            disabled={saving}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors duration-200 hover:shadow-lg ${
-              saving 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
+          <button
+            onClick={migrateConfigSlides}
+            disabled={migrating}
+            className="px-6 py-4 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-semibold disabled:opacity-60"
           >
-            {saving ? (
-              <span className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Saving...</span>
-              </span>
-            ) : (
-              '💾 Save Hero Settings'
-            )}
+            {migrating ? 'Migrating...' : 'Migrate Config Slides → Firestore'}
           </button>
         </div>
-
-        {/* Add Slide Modal */}
-        {isAddModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/40" onClick={closeAddModal}></div>
-            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Add New Slide</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <input
-                    value={newSlideTitle}
-                    onChange={(e) => setNewSlideTitle(e.target.value)}
-                    placeholder="Enter slide title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                  <textarea
-                    value={newSlideSubtitle}
-                    onChange={(e) => setNewSlideSubtitle(e.target.value)}
-                    placeholder="Enter slide subtitle"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Image</label>
-                  <div className="flex items-center gap-3">
-                    <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                      <span className="text-sm font-medium">Choose File</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] || null
-                          setNewSlideFile(file)
-                        }}
-                        disabled={creatingSlide}
-                      />
-                    </label>
-                    <span className="text-sm text-gray-600 truncate max-w-[50%]">{newSlideFile?.name || 'No file selected'}</span>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-1">Or image URL</label>
-                    <input
-                      value={newSlideUrl}
-                      onChange={(e) => setNewSlideUrl(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      disabled={creatingSlide}
-                    />
-                  </div>
-                </div>
-                <div className="text-xs text-gray-500">CTA Label and CTA Link will default to "Get Started" and "#contact".</div>
+      </div>
+      
+      {/* Add Slide Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsAddModalOpen(false)}></div>
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Add New Slide</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  value={newSlideTitle}
+                  onChange={(e) => setNewSlideTitle(e.target.value)}
+                  placeholder="Enter slide title"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
               </div>
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  onClick={closeAddModal}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300"
-                  disabled={creatingSlide}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={createNewSlide}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-60"
-                  disabled={creatingSlide}
-                >
-                  {creatingSlide ? 'Creating...' : 'Create Slide'}
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                <textarea
+                  value={newSlideSubtitle}
+                  onChange={(e) => setNewSlideSubtitle(e.target.value)}
+                  placeholder="Enter slide subtitle"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <input
+                  type="url"
+                  value={newSlideUrl}
+                  onChange={(e) => setNewSlideUrl(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Or Upload Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewSlideFile(e.target.files?.[0] || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
               </div>
             </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                disabled={creatingSlide}
+                className="px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createNewSlide}
+                disabled={creatingSlide}
+                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50"
+              >
+                {creatingSlide ? 'Creating...' : 'Create Slide'}
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -2679,7 +2436,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
   const [uploadingServices, setUploadingServices] = useState<{ [key: number]: boolean }>({})
   
   const updateService = (index: number, key: string, value: string) => {
-    const next = { ...config }
+                            const next = { ...config }
     next.services = [...services]
     next.services[index] = { ...next.services[index], [key]: value }
     onChange(next)
@@ -2715,7 +2472,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Content Section */}
               <div className="space-y-4">
-            <div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Service Title</label>
                   <input 
                     value={s.title} 
@@ -2723,30 +2480,30 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     placeholder="Enter service title"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
-            </div>
-                
-            <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <input 
-                    value={s.category || ''} 
-                    onChange={(e) => updateService(i, 'category', e.target.value)} 
-                    placeholder="e.g., Cleaning Services"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-            </div>
+                </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea 
-                    value={s.description || ''} 
+                    value={s.description} 
                     onChange={(e) => updateService(i, 'description', e.target.value)} 
                     placeholder="Enter service description"
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
-            </div>
-            </div>
-              
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <input 
+                    value={s.category} 
+                    onChange={(e) => updateService(i, 'category', e.target.value)} 
+                    placeholder="e.g., Cleaning, Maintenance"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+              </div>
+
               {/* Image Section */}
               <div className="space-y-4">
                 <div>
@@ -2756,11 +2513,11 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   {s.imageUrl && (
                     <div className="mb-3">
                       <img 
-                        src={s.imageUrl} 
-                        alt={`Service ${i + 1}`}
+                        src={s.imageUrl}
+                        alt={s.title || 'Service'}
                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
                         }}
                       />
                     </div>
@@ -2770,9 +2527,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">
-                          {uploadingServices[i] ? 'Uploading...' : 'Upload Image'}
-                        </span>
+                        <span className="text-sm font-medium">Upload Image</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -2784,31 +2539,77 @@ const ServicesConfig = ({ config, onChange }: any) => {
                           disabled={uploadingServices[i]}
                         />
                       </label>
-                      
                       {s.imageUrl && (
                         <button
-                          type="button"
                           onClick={() => updateService(i, 'imageUrl', '')}
-                          className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
-                          disabled={uploadingServices[i]}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
                         >
-                          Remove
+                          Clear Image
                         </button>
                       )}
+                      
                     </div>
                     
-                    {/* URL Input as fallback */}
-                    <div>
+                    {/* URL Input as fallback with debounce auto-save */}
+            <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
                       <input 
-                        value={s.imageUrl || ''} 
+                        value={s.imageUrl} 
                         onChange={(e) => updateService(i, 'imageUrl', e.target.value)} 
                         placeholder="https://example.com/image.jpg"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                       />
-                    </div>
+            </div>
                   </div>
                 </div>
+              </div>
+              
+              {/* Content Section */}
+              <div className="space-y-4">
+            <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                  <input 
+                    value={s.title || ''} 
+                    onChange={(e) => updateService(i, 'title', e.target.value)} 
+                    placeholder="Enter slide title"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+            </div>
+                
+                <div>
+                  <label className="text-sm text-gray-700 mb-2 block">Subtitle</label>
+                  <textarea 
+                    value={s.subtitle || ''} 
+                    onChange={(e) => updateService(i, 'description', e.target.value)} 
+                    placeholder="Enter slide description"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                {/* CTA fields only for first slide */}
+                {i === 0 && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                    <label className="block text-sm text-gray-700 mb-2">CTA Label</label>
+                    <input 
+                      value={s.ctaLabel || ''} 
+                      onChange={(e) => updateService(i, 'category', e.target.value)} 
+                      placeholder="e.g., Get Started"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    />
+              </div>
+              <div>
+                    <label className="block text-sm text-gray-700 mb-2">CTA Link</label>
+                    <input 
+                      value={s.ctaHref || ''} 
+                      onChange={(e) => updateService(i, 'imageUrl', e.target.value)} 
+                      placeholder="e.g., #services"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    />
+              </div>
+            </div>
+                )}
               </div>
             </div>
             
@@ -2819,7 +2620,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
                 disabled={uploadingServices[i]}
               >
-                Remove Service
+                Remove Slide
               </button>
             </div>
           </div>
@@ -2834,7 +2635,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
                 <Plus className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg">Add New Service</span>
+              <span className="text-lg">Add New Slide</span>
             </div>
           </button>
         </div>
@@ -2843,7 +2644,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
         <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
           <button 
             onClick={() => {
-              onChange(config)
               toast.success('Services settings saved successfully!')
             }}
             className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 hover:shadow-lg"
@@ -2855,6 +2655,19 @@ const ServicesConfig = ({ config, onChange }: any) => {
     </motion.div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const AboutConfig = ({ config, onChange }: any) => {
   const about = config.about || { title: '', content: '', imageUrl: '' }
