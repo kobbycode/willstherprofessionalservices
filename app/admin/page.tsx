@@ -645,6 +645,18 @@ const BlogManagement = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+  const [showPostModal, setShowPostModal] = useState(false)
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
+  const [savingPost, setSavingPost] = useState(false)
+  const [form, setForm] = useState({
+    title: '',
+    excerpt: '',
+    content: '',
+    category: '',
+    image: '',
+    tags: '' as string,
+    status: 'draft' as 'draft' | 'published' | 'scheduled'
+  })
 
   const load = async () => {
     setLoading(true)
@@ -662,6 +674,73 @@ const BlogManagement = () => {
   }
 
   useEffect(() => { load() }, [])
+
+  const openCreate = () => {
+    setEditingPost(null)
+    setForm({ title: '', excerpt: '', content: '', category: '', image: '', tags: '', status: 'draft' })
+    setShowPostModal(true)
+  }
+
+  const openEdit = (post: BlogPost) => {
+    setEditingPost(post)
+    setForm({
+      title: post.title || '',
+      excerpt: post.excerpt || '',
+      content: post.content || '',
+      category: post.category || '',
+      image: post.image || '',
+      tags: (post.tags || []).join(', '),
+      status: post.status
+    })
+    setShowPostModal(true)
+  }
+
+  const savePost = async () => {
+    if (!form.title.trim() || !form.content.trim()) {
+      toast.error('Title and content are required')
+      return
+    }
+    setSavingPost(true)
+    try {
+      const { createPost, updatePost } = await import('@/lib/blog')
+      const payload = {
+        title: form.title.trim(),
+        excerpt: form.excerpt.trim(),
+        content: form.content,
+        category: form.category.trim() || 'General',
+        image: form.image.trim(),
+        tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+        status: form.status
+      }
+      if (editingPost) {
+        await updatePost(editingPost.id, payload)
+        setPosts(prev => prev.map(p => p.id === editingPost.id ? { ...p, ...payload } as any : p))
+        toast.success('Post updated')
+      } else {
+        const { createPost: create } = await import('@/lib/blog')
+        const id = await create(payload)
+        setPosts(prev => [{ id, author: 'Willsther Team', date: new Date().toISOString(), readTime: '1 min read', views: 0, ...payload } as any, ...prev])
+        toast.success('Post created')
+      }
+      setShowPostModal(false)
+    } catch (e) {
+      console.error(e)
+      toast.error('Failed to save post')
+    } finally {
+      setSavingPost(false)
+    }
+  }
+
+  const handleImagePick = async (file?: File | null) => {
+    if (!file) return
+    try {
+      const url = await uploadImage(file, `posts/cover-${Date.now()}`)
+      setForm(prev => ({ ...prev, image: url }))
+      toast.success('Image uploaded')
+    } catch (e) {
+      toast.error('Image upload failed')
+    }
+  }
 
   const handleDeletePost = async (postId: string) => {
     setDeletingPostId(postId)
@@ -704,13 +783,13 @@ const BlogManagement = () => {
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Blog Management</h2>
             <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your blog posts and categories</p>
           </div>
-        <Link
-          href="/admin/blog/new"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center sm:justify-start space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
+        <button
+          onClick={openCreate}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center sm:justify-start space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
         >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>New Post</span>
-        </Link>
+        </button>
         </div>
         
         {/* Stats Cards */}
@@ -868,13 +947,13 @@ const BlogManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateHuman(post.date, 'en-GB')}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <Link 
-                        href={`/admin/blog/edit/${post.id}`}
+                      <button 
+                        onClick={() => openEdit(post)}
                         className="text-blue-600 hover:text-blue-900"
                         title="Edit post"
                       >
                         <Edit className="w-4 h-4" />
-                      </Link>
+                      </button>
                       
                       {post.status === 'published' ? (
                         <button 
@@ -968,6 +1047,69 @@ const BlogManagement = () => {
                   <Trash2 className="w-4 h-4" />
                 )}
                 <span>{deletingPostId === showDeleteDialog ? 'Deleting...' : 'Delete'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create/Edit Post Modal */}
+      {showPostModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">{editingPost ? 'Edit Post' : 'New Post'}</h3>
+              <button onClick={() => setShowPostModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+                <textarea value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className="w-full px-3 py-2 border rounded-lg" rows={2} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full px-3 py-2 border rounded-lg" rows={6} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as any })} className="w-full px-3 py-2 border rounded-lg">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="scheduled">Scheduled</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+                <input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                <div className="mt-2 flex items-center gap-3">
+                  <label className="px-3 py-2 bg-blue-600 text-white rounded-lg cursor-pointer">
+                    Upload Image
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e.target.files?.[0])} />
+                  </label>
+                  {form.image && <img src={form.image} alt="cover" className="h-12 w-20 object-cover rounded border" />}
+                </div>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+                <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowPostModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
+              <button onClick={savePost} disabled={savingPost} className="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-60">
+                {savingPost ? 'Saving...' : editingPost ? 'Save Changes' : 'Create Post'}
               </button>
             </div>
           </div>
