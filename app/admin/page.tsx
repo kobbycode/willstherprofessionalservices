@@ -2323,6 +2323,34 @@ const HeroConfig = ({ config, onChange }: any) => {
                     />
                   </div>
                 </div>
+
+                {/* Order */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
+                    <input
+                      type="number"
+                      value={typeof slide.order === 'number' ? slide.order : ''}
+                      onChange={(e) => updateSlide(slide.id, { order: parseInt(e.target.value || '0', 10) })}
+                      placeholder="1"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex items-end space-x-2">
+                    <button
+                      onClick={() => updateSlide(slide.id, { order: (slide.order || 1) - 1 })}
+                      className="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200"
+                    >
+                      Move Up
+                    </button>
+                    <button
+                      onClick={() => updateSlide(slide.id, { order: (slide.order || 1) + 1 })}
+                      className="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200"
+                    >
+                      Move Down
+                    </button>
+                  </div>
+                </div>
                 
                 {/* Actions */}
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
