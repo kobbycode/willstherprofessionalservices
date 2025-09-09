@@ -66,11 +66,20 @@ const POSTS_COLLECTION = 'posts'
 
 export async function fetchPosts(publishedOnly = true, take = 50): Promise<BlogPost[]> {
   const db = getDb()
-  const col = collection(db, POSTS_COLLECTION)
-  const q = publishedOnly
-    ? query(col, where('status', '==', 'published'), orderBy('createdAt', 'desc'), fsLimit(take))
-    : query(col, orderBy('createdAt', 'desc'), fsLimit(take))
-  const snap = await getDocs(q)
+  const colRef = collection(db, POSTS_COLLECTION)
+  let snap
+  try {
+    const q = publishedOnly
+      ? query(colRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), fsLimit(take))
+      : query(colRef, orderBy('createdAt', 'desc'), fsLimit(take))
+    snap = await getDocs(q)
+  } catch (e) {
+    // Fallback if orderBy createdAt fails (missing field/index); fetch without order
+    const q = publishedOnly
+      ? query(colRef, where('status', '==', 'published'), fsLimit(take))
+      : query(colRef, fsLimit(take))
+    snap = await getDocs(q)
+  }
   return snap.docs.map((d) => {
     const data = d.data() as any
     return {
@@ -79,7 +88,7 @@ export async function fetchPosts(publishedOnly = true, take = 50): Promise<BlogP
       excerpt: data.excerpt || '',
       content: data.content || '',
       author: data.author || 'Willsther Team',
-      date: (data.date as string) || new Date().toISOString(),
+      date: (data.date as string) || data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
       readTime: data.readTime || estimateReadTime(data.content || ''),
       category: data.category || 'General',
       image: data.image || '',
