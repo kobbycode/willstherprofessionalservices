@@ -662,7 +662,7 @@ const BlogManagement = () => {
     setLoading(true)
     try {
       const { fetchPosts } = await import('@/lib/blog')
-      const list = await fetchPosts()
+      const list = await fetchPosts(false)
       setPosts(list)
     } catch (e) {
       console.error('Failed to load posts:', e)
@@ -725,7 +725,8 @@ const BlogManagement = () => {
         toast.success('Post updated')
       } else {
         const id = await withTimeout(createPost(payload))
-        setPosts(prev => [{ id, author: 'Willsther Team', date: new Date().toISOString(), readTime: '1 min read', views: 0, ...payload } as any, ...prev])
+        // Reload to ensure we get server timestamps and correct mapping
+        await load()
         toast.success('Post created')
       }
       setShowPostModal(false)
