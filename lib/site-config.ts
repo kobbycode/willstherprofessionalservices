@@ -236,16 +236,13 @@ export function useSiteConfig() {
 			unsubscribe = onSnapshot(slidesQuery, (snapshot) => {
 				const slides = snapshot.docs.map(doc => ({
 					id: doc.id,
-					...doc.data()
-				}))
+					...(doc.data() as any)
+				})) as HeroSlide[]
 				
-				setConfig(prev => ({
-					...prev,
-					heroSlides: slides
-				}))
-				saveSiteConfigToLocal({
-					...config,
-					heroSlides: slides
+				setConfig((prev) => {
+					const next = { ...prev, heroSlides: slides }
+					saveSiteConfigToLocal(next)
+					return next
 				})
 				setLastFetch(Date.now())
 			}, (error) => {
