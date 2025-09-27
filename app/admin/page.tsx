@@ -2312,8 +2312,9 @@ const HeroConfig = ({ config, onChange }: any) => {
       
       // Upload image if file is provided
       if (!imageUrl && newSlideFile) {
-        toast.info('Uploading image...')
+        const uploadToast = toast.loading('Uploading image...')
         imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
+        toast.dismiss(uploadToast)
         toast.success('Image uploaded successfully!')
       }
       
@@ -2325,7 +2326,7 @@ const HeroConfig = ({ config, onChange }: any) => {
         ctaHref: '#contact'
       }
       
-      toast.info('Creating slide...')
+      const createToast = toast.loading('Creating slide...')
       const res = await fetch('/api/slides', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2338,6 +2339,9 @@ const HeroConfig = ({ config, onChange }: any) => {
       }
       
       const newSlide = await res.json()
+      
+      // Dismiss the loading toast
+      toast.dismiss(createToast)
       
       // Add the new slide to local state immediately
       setLocalSlides(prev => [...prev, newSlide])
@@ -2360,6 +2364,8 @@ const HeroConfig = ({ config, onChange }: any) => {
     } catch (e) {
       console.error('Failed to create slide:', e)
       const errorMessage = e instanceof Error ? e.message : 'Failed to create slide'
+      // Dismiss any loading toasts
+      toast.dismiss()
       toast.error(errorMessage)
     } finally {
       setCreatingSlide(false)
