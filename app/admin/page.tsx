@@ -2275,11 +2275,21 @@ const HeroConfig = ({ config, onChange }: any) => {
   const [newSlideFile, setNewSlideFile] = useState<File | null>(null)
   const [newSlideUrl, setNewSlideUrl] = useState('')
   const [creatingSlide, setCreatingSlide] = useState(false)
+  const [creationTimeout, setCreationTimeout] = useState<NodeJS.Timeout | null>(null)
   const [localSlides, setLocalSlides] = useState<any[]>(slides)
 
   useEffect(() => {
     setLocalSlides(slides)
   }, [slides])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (creationTimeout) {
+        clearTimeout(creationTimeout)
+      }
+    }
+  }, [creationTimeout])
 
   const getLocal = (id: string, key: string) => {
     const s = localSlides.find((x) => x.id === id)
@@ -2308,14 +2318,32 @@ const HeroConfig = ({ config, onChange }: any) => {
     
     try {
       setCreatingSlide(true)
+      console.log('Starting slide creation...')
+      
+      // Set a timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        console.error('Slide creation timed out after 30 seconds')
+        toast.error('Creation timed out. Please try again.')
+        setCreatingSlide(false)
+      }, 30000)
+      setCreationTimeout(timeout)
+      
       let imageUrl = newSlideUrl.trim()
       
       // Upload image if file is provided
       if (!imageUrl && newSlideFile) {
+        console.log('Uploading image file:', newSlideFile.name)
         const uploadToast = toast.loading('Uploading image...')
-        imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
-        toast.dismiss(uploadToast)
-        toast.success('Image uploaded successfully!')
+        try {
+          imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
+          console.log('Image uploaded successfully:', imageUrl)
+          toast.dismiss(uploadToast)
+          toast.success('Image uploaded successfully!')
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError)
+          toast.dismiss(uploadToast)
+          throw new Error(`Image upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`)
+        }
       }
       
       const slideData = {
@@ -2326,19 +2354,25 @@ const HeroConfig = ({ config, onChange }: any) => {
         ctaHref: '#contact'
       }
       
+      console.log('Creating slide with data:', slideData)
       const createToast = toast.loading('Creating slide...')
+      
       const res = await fetch('/api/slides', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(slideData)
       })
       
+      console.log('API response status:', res.status)
+      
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
+        console.error('API error response:', errorData)
         throw new Error(errorData.error || `Failed to create slide: ${res.status}`)
       }
       
       const newSlide = await res.json()
+      console.log('Slide created successfully:', newSlide)
       
       // Dismiss the loading toast
       toast.dismiss(createToast)
@@ -2368,6 +2402,12 @@ const HeroConfig = ({ config, onChange }: any) => {
       toast.dismiss()
       toast.error(errorMessage)
     } finally {
+      console.log('Setting creatingSlide to false')
+      // Clear timeout
+      if (creationTimeout) {
+        clearTimeout(creationTimeout)
+        setCreationTimeout(null)
+      }
       setCreatingSlide(false)
     }
   }
@@ -2711,6 +2751,23 @@ const HeroConfig = ({ config, onChange }: any) => {
                 )}
                 <span>{creatingSlide ? 'Creating...' : 'Create Slide'}</span>
               </button>
+              {creatingSlide && (
+                <button
+                  onClick={() => {
+                    console.log('Manual reset triggered')
+                    if (creationTimeout) {
+                      clearTimeout(creationTimeout)
+                      setCreationTimeout(null)
+                    }
+                    setCreatingSlide(false)
+                    toast.dismiss()
+                    toast.success('Creation cancelled')
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
         </div>
