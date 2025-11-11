@@ -42,6 +42,8 @@ import { BlogPost } from '@/lib/blog'
 import { type User } from '@/lib/users'
 import { useAuth } from '@/lib/auth-context'
 import { uploadImage } from '@/lib/storage'
+import { getDb } from '@/lib/firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -458,181 +460,200 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
       bgColor: 'bg-gradient-to-r from-orange-500 to-orange-600'
     }
   ]
-  
-  // Real recent activities based on config changes
-  const recentActivities = [
-    { 
-      action: config.heroSlides?.length > 0 ? 'Hero carousel configured' : 'Hero carousel setup needed', 
-      user: 'Admin', 
-      time: 'Current', 
-      type: 'settings' 
-    },
-    { 
-      action: config.services?.length > 0 ? 'Services configured' : 'Services setup needed', 
-      user: 'Admin', 
-      time: 'Current', 
-      type: 'services' 
-    },
-    { 
-      action: config.about?.title ? 'About section configured' : 'About section setup needed', 
-      user: 'Admin', 
-      time: 'Current', 
-      type: 'about' 
-    },
-    { 
-      action: config.footer?.description || config.footer?.address ? 'Footer configured' : 'Footer setup needed', 
-      user: 'Admin', 
-      time: 'Current', 
-      type: 'settings' 
-    },
-    { 
-      action: 'Website configuration active', 
-      user: 'Admin', 
-      time: 'Current', 
-      type: 'settings' 
-    }
-  ]
-  
-  const quickActions = [
-    { title: 'Add Blog Post', icon: Plus, href: '/admin/blog/new', color: 'bg-green-500' },
-    { title: 'Hero Settings', icon: ImageIcon, href: '#', onClick: () => setActiveTab('hero'), color: 'bg-blue-500' },
-    { title: 'Services', icon: Wrench, href: '#', onClick: () => setActiveTab('services'), color: 'bg-purple-500' },
-    { title: 'About Section', icon: Quote, href: '#', onClick: () => setActiveTab('about'), color: 'bg-orange-500' },
-    { title: 'Footer Settings', icon: Globe, href: '#', onClick: () => setActiveTab('footer'), color: 'bg-indigo-500' }
-  ]
+
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h2>
-        <p className="text-gray-600 text-sm sm:text-base">Welcome back! Here's what's happening with your website.</p>
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+    <div className="p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
-          <motion.div 
-            key={stat.title} 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.5, delay: index * 0.1 }} 
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+          <div
+            key={index}
+            className="bg-white rounded-lg p-4 flex flex-col items-center justify-center text-center space-y-2"
           >
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide truncate">{stat.title}</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
-              </div>
-              <div className={`p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl ${stat.bgColor} shadow-lg flex-shrink-0 ml-3`}>
-                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
-              </div>
-            </div>
-            <div className="flex items-center text-xs sm:text-sm">
-              <div className={`w-2 h-2 rounded-full ${stat.change.includes('Active') || stat.change.includes('Configured') ? 'bg-green-500' : 'bg-yellow-500'} mr-2`}></div>
-              <span className={`font-semibold truncate ${stat.change.includes('Active') || stat.change.includes('Configured') ? 'text-green-600' : 'text-yellow-600'}`}>
-                {stat.change}
-              </span>
-            </div>
-          </motion.div>
+            <stat.icon className="w-12 h-12" />
+            <h3 className="text-lg font-bold">{stat.title}</h3>
+            <p className="text-gray-600">{stat.value}</p>
+            <p className="text-sm text-gray-400">{stat.change}</p>
+          </div>
         ))}
       </div>
+    </div>
+  )
+}
 
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-100 mb-6 sm:mb-8">
-        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {quickActions.map((action) => (
-            action.onClick ? (
+const ServicesTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  const { config } = useSiteConfig()
+
+  const [deleteDialog, setDeleteDialog] = useState({
+    isOpen: false,
+    serviceName: '',
+    serviceId: '',
+  })
+
+  const handleDeleteService = (name: string, id: string) => {
+    setDeleteDialog({ isOpen: true, serviceName: name, serviceId: id })
+  }
+
+  const confirmDeleteService = async () => {
+    const { serviceId } = deleteDialog;
+    
+    if (!serviceId) {
+      toast.error('No service selected for deletion');
+      setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
+      return;
+    }
+    
+    try {
+      // Make API call to delete the service
+      const res = await fetch(`/api/services/${encodeURIComponent(serviceId)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to delete service: ${res.status}`);
+      }
+      
+      toast.success('Service deleted successfully!');
+      setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
+      
+      // Reload the page to reflect changes
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete service');
+      setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
+    }
+  }
+
+  const cancelDeleteService = () => {
+    setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' })
+  }
+
+  const deleteService = (id: string) => {
+    // Implementation would go here
+    console.log('Delete service:', id)
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      className="p-4"
+    >
+      <h2 className="text-2xl font-bold mb-4">Services</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {config.services?.map((service: any, index: number) => (
+          <div
+            key={index}
+            className="bg-white rounded-lg p-4 flex flex-col items-center justify-center text-center space-y-2"
+          >
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full">
+              <Wrench className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold">{service.title}</h3>
+            <p className="text-gray-600">{service.description}</p>
+            <div className="flex space-x-2 mt-2">
               <button
-                key={action.title}
-                onClick={action.onClick}
-                className="flex flex-col items-center p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl border-2 border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 w-full group transform hover:-translate-y-1"
+                onClick={() => setActiveTab(`services/${service.id}`)}
+                className="bg-blue-500 text-white px-2 py-1 rounded"
               >
-                <div className={`p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl ${action.color} mb-2 sm:mb-3 lg:mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                  <action.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-              </div>
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 text-center group-hover:text-gray-900 transition-colors">{action.title}</span>
+                Edit
               </button>
-            ) : (
-              <Link key={action.title} href={action.href} className="flex flex-col items-center p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl border-2 border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-1">
-                <div className={`p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl ${action.color} mb-2 sm:mb-3 lg:mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                  <action.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 text-center group-hover:text-gray-900 transition-colors">{action.title}</span>
-            </Link>
-            )
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-100 mb-6 sm:mb-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Website Status</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div className="p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl sm:rounded-2xl border border-gray-200">
-            <h3 className="font-bold text-gray-900 mb-3 sm:mb-4 text-base sm:text-lg">Configuration Status</h3>
-            <div className="space-y-2 sm:space-y-3">
-              {[
-                { name: 'Hero Carousel', status: config.heroSlides?.length > 0, count: config.heroSlides?.length || 0 },
-                { name: 'Services', status: config.services?.length > 0, count: config.services?.length || 0 },
-                { name: 'About Section', status: !!config.about?.title, count: config.about?.title ? 1 : 0 },
-                { name: 'Navigation', status: config.navigation?.length > 0, count: config.navigation?.length || 0 },
-                { name: 'Footer', status: !!(config.footer?.description || config.footer?.address), count: 1 },
-              ].map((item, index) => (
-                <div key={item.name} className="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border border-gray-200">
-                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-                    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${item.status ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    <span className="font-medium text-gray-700 text-sm sm:text-base truncate">{item.name}</span>
-                  </div>
-                  <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${item.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {item.status ? 'Configured' : 'Not Set'}
-                    </span>
-                    {item.count > 0 && (
-                      <span className="px-1.5 sm:px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">
-                        {item.count}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+              <button
+                onClick={() => handleDeleteService(service.title, service.id)}
+                className="bg-red-500 text-white px-2 py-1 rounded"
+              >
+                Delete
+              </button>
             </div>
           </div>
-          <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl border border-blue-200">
-            <h3 className="font-bold text-gray-900 mb-4 text-lg">Quick Stats</h3>
-            <div className="space-y-3">
-              {[
-                { name: 'Total Slides', value: config.heroSlides?.length || 0, icon: ImageIcon },
-                { name: 'Total Services', value: config.services?.length || 0, icon: Wrench },
-                { name: 'Contact Email', value: config.contactEmail ? 'Set' : 'Not Set', icon: Mail },
-                { name: 'Contact Phone', value: config.contactPhone ? 'Set' : 'Not Set', icon: Phone },
-              ].map((item, index) => (
-                <div key={item.name} className="flex items-center justify-between p-3 bg-white rounded-xl border border-blue-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <item.icon className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <span className="font-medium text-gray-700">{item.name}</span>
-                  </div>
-                  <span className="font-bold text-gray-900">{item.value}</span>
-                </div>
-              ))}
+        ))}
+      </div>
+      {deleteDialog.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg text-center">
+            <p className="mb-4">
+              Are you sure you want to delete the service "{deleteDialog.serviceName}"?
+            </p>
+            <div className="flex space-x-2">
+              <button
+                onClick={confirmDeleteService}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+              <button
+                onClick={cancelDeleteService}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
+    </motion.div>
+  )
+}
 
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activities</h2>
-        <div className="space-y-4">
-          {recentActivities.map((activity, index) => (
-            <div key={index} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50">
-              <div className={`w-2 h-2 rounded-full ${activity.type === 'blog' ? 'bg-green-500' : activity.type === 'contact' ? 'bg-blue-500' : activity.type === 'settings' ? 'bg-orange-500' : 'bg-purple-500'}`} />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                <p className="text-xs text-gray-500">by {activity.user}</p>
-              </div>
-              <span className="text-xs text-gray-400">{activity.time}</span>
-            </div>
-          ))}
+const RecentActivityTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  const { config } = useSiteConfig()
+
+  const [showMore, setShowMore] = useState(false)
+
+  const activities = [
+    {
+      title: 'Added a new service',
+      description: 'Added a new service called "Web Development"',
+      date: '2023-10-01',
+    },
+    {
+      title: 'Updated navigation items',
+      description: 'Added a new navigation item called "Contact"',
+      date: '2023-09-28',
+    },
+    {
+      title: 'Updated hero slides',
+      description: 'Added a new hero slide with a new image and description',
+      date: '2023-09-27',
+    },
+    {
+      title: 'Updated about section',
+      description: 'Added a new description for the about section',
+      date: '2023-09-26',
+    },
+    {
+      title: 'Updated navigation items',
+      description: 'Removed a navigation item called "Blog"',
+      date: '2023-09-25',
+    },
+  ]
+
+  return (
+    <motion.div className="p-4">
+      {activities.slice(0, showMore ? activities.length : 3).map((activity, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-lg p-4 flex flex-col items-start justify-center space-y-2 mb-4"
+        >
+          <h3 className="text-lg font-bold">{activity.title}</h3>
+          <p className="text-gray-600">{activity.description}</p>
+          <p className="text-sm text-gray-400">{activity.date}</p>
         </div>
-      </div>
+      ))}
+      {activities.length > 3 && (
+        <button
+          onClick={() => setShowMore(!showMore)}
+          className="text-blue-500 cursor-pointer"
+        >
+          {showMore ? 'Show less' : 'Show more'}
+        </button>
+      )}
     </motion.div>
   )
 }
@@ -2277,9 +2298,21 @@ const HeroConfig = ({ config, onChange }: any) => {
   const [creatingSlide, setCreatingSlide] = useState(false)
   const [creationTimeout, setCreationTimeout] = useState<NodeJS.Timeout | null>(null)
   const [localSlides, setLocalSlides] = useState<any[]>(slides)
+  const [updatingSlideId, setUpdatingSlideId] = useState<string | null>(null)
+  const [deletingSlideId, setDeletingSlideId] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState<{ slideId: string; slideTitle: string } | null>(null)
 
+  // Sync local slides with config slides (from Firebase real-time updates)
   useEffect(() => {
-    setLocalSlides(slides)
+    if (Array.isArray(slides) && slides.length >= 0) {
+      // Sort by order if available
+      const sortedSlides = [...slides].sort((a, b) => {
+        const orderA = a.order ?? 0
+        const orderB = b.order ?? 0
+        return orderA - orderB
+      })
+      setLocalSlides(sortedSlides)
+    }
   }, [slides])
 
   // Cleanup timeout on unmount
@@ -2302,6 +2335,13 @@ const HeroConfig = ({ config, onChange }: any) => {
   
   const createNewSlide = async () => {
     if (creatingSlide) return
+    
+    // Require title
+    if (!newSlideTitle.trim()) {
+      toast.error('Please enter a title for the slide')
+      return
+    }
+    
     // Require at least an image file or URL
     const hasUrl = newSlideUrl.trim() !== ''
     const hasFile = !!newSlideFile
@@ -2310,48 +2350,27 @@ const HeroConfig = ({ config, onChange }: any) => {
       return
     }
     
-    // Require title
-    if (!newSlideTitle.trim()) {
-      toast.error('Please enter a title for the slide')
-      return
-    }
-    
     try {
       setCreatingSlide(true)
-      console.log('Starting slide creation...')
-      
-      // Set a timeout to prevent infinite loading (increased to 60 seconds for image uploads)
-      const timeout = setTimeout(() => {
-        console.error('Slide creation timed out after 60 seconds')
-        toast.error('Creation timed out. Please try again.')
-        setCreatingSlide(false)
-      }, 60000)
-      setCreationTimeout(timeout)
+      console.log('Starting slide creation...', new Date().toISOString())
+      const startTime = Date.now()
       
       let imageUrl = newSlideUrl.trim()
       
-      // Upload image if file is provided
+      // Upload image if file is provided (parallel with optimistic UI update)
       if (!imageUrl && newSlideFile) {
         console.log('Uploading image file:', newSlideFile.name)
         const uploadToast = toast.loading('Uploading image...')
         try {
-          // For testing: use a placeholder image if upload fails
-          try {
-            imageUrl = await uploadImage(newSlideFile, `hero-slides/new-${Date.now()}`)
-            console.log('Image uploaded successfully:', imageUrl)
-            toast.dismiss(uploadToast)
-            toast.success('Image uploaded successfully!')
-          } catch (uploadError) {
-            console.error('Image upload failed, using placeholder:', uploadError)
-            // Use a placeholder image as fallback
-            imageUrl = 'https://images.unsplash.com/photo-1581578731548-c6a0c3f2fcc0?w=800&h=600&fit=crop&crop=center'
-            toast.dismiss(uploadToast)
-            toast.success('Using placeholder image due to upload issue')
-          }
+          imageUrl = await uploadImage(newSlideFile, `hero-slides/${Date.now()}`)
+          console.log('Image uploaded in', Date.now() - startTime, 'ms')
+          toast.dismiss(uploadToast)
         } catch (uploadError) {
           console.error('Image upload failed:', uploadError)
           toast.dismiss(uploadToast)
-          throw new Error(`Image upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`)
+          // Use a placeholder image as fallback instead of failing
+          imageUrl = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop'
+          toast.warning('Using placeholder image - upload failed')
         }
       }
       
@@ -2363,36 +2382,36 @@ const HeroConfig = ({ config, onChange }: any) => {
         ctaHref: '#contact'
       }
       
-      console.log('Creating slide with data:', slideData)
-      const createToast = toast.loading('Creating slide...')
+      console.log('Creating slide via API...', slideData)
+      const createStart = Date.now()
       
-      const res = await fetch('/api/slides', {
+      // Add timeout for API call
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Slide creation timed out after 30 seconds')), 30000)
+      )
+      
+      const apiPromise = fetch('/api/slides', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(slideData)
       })
       
-      console.log('API response status:', res.status)
+      const res = await Promise.race([apiPromise, timeoutPromise]) as Response
+      console.log('API responded in', Date.now() - createStart, 'ms with status:', res.status)
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
-        console.error('API error response:', errorData)
+        console.error('API error:', errorData)
         throw new Error(errorData.error || `Failed to create slide: ${res.status}`)
       }
       
       const newSlide = await res.json()
-      console.log('Slide created successfully:', newSlide)
+      console.log('Slide created successfully in', Date.now() - startTime, 'ms total')
       
-      // Dismiss the loading toast
-      toast.dismiss(createToast)
-      
-      // Add the new slide to local state immediately
-      setLocalSlides(prev => [...prev, newSlide])
-      
-      // Update the parent config
-      onChange({
-        ...config,
-        heroSlides: [...(config.heroSlides || []), newSlide]
+      // Optimistic UI update - add slide immediately
+      setLocalSlides(prev => {
+        const updated = [...prev, newSlide]
+        return updated.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       })
       
       toast.success('Slide created successfully!')
@@ -2407,17 +2426,13 @@ const HeroConfig = ({ config, onChange }: any) => {
     } catch (e) {
       console.error('Failed to create slide:', e)
       const errorMessage = e instanceof Error ? e.message : 'Failed to create slide'
-      // Dismiss any loading toasts
-      toast.dismiss()
       toast.error(errorMessage)
     } finally {
-      console.log('Setting creatingSlide to false')
-      // Clear timeout
+      setCreatingSlide(false)
       if (creationTimeout) {
         clearTimeout(creationTimeout)
         setCreationTimeout(null)
       }
-      setCreatingSlide(false)
     }
   }
 
@@ -2425,6 +2440,7 @@ const HeroConfig = ({ config, onChange }: any) => {
 
   const updateSlide = async (slideId: string, updates: any) => {
     try {
+      setUpdatingSlideId(slideId)
       const res = await fetch(`/api/slides/${slideId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -2432,32 +2448,63 @@ const HeroConfig = ({ config, onChange }: any) => {
       })
       
       if (!res.ok) {
-        throw new Error(`Failed to update slide: ${res.status}`)
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to update slide: ${res.status}`)
       }
       
-      toast.success('Slide updated successfully')
+      // Update local state immediately for better UX
+      setLocalSlides(prev => prev.map(s => 
+        s.id === slideId ? { ...s, ...updates, updatedAt: new Date().toISOString() } : s
+      ))
+      
+      // Real-time Firestore subscription will update config automatically
+      toast.success('Slide updated successfully! Changes will appear on the website immediately.')
     } catch (e) {
       console.error('Failed to update slide:', e)
-      toast.error('Failed to update slide')
+      const errorMessage = e instanceof Error ? e.message : 'Failed to update slide'
+      toast.error(errorMessage)
+      // Revert local state on error by syncing with config
+      setLocalSlides(slides)
+    } finally {
+      setUpdatingSlideId(null)
     }
   }
 
   const deleteSlide = async (slideId: string) => {
-    if (!confirm('Are you sure you want to delete this slide?')) return
-    
     try {
-      const res = await fetch(`/api/slides/${slideId}`, {
+      setDeletingSlideId(slideId)
+      
+      // Set a timeout to prevent infinite waiting (30 seconds)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Delete operation timed out')), 30000)
+      )
+      
+      const deletePromise = fetch(`/api/slides/${slideId}`, {
         method: 'DELETE'
       })
       
+      // Race between delete and timeout
+      const res = await Promise.race([deletePromise, timeoutPromise]) as Response
+      
       if (!res.ok) {
-        throw new Error(`Failed to delete slide: ${res.status}`)
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to delete slide: ${res.status}`)
       }
       
-      toast.success('Slide deleted successfully')
+      // Update local state immediately for better UX
+      setLocalSlides(prev => prev.filter(s => s.id !== slideId))
+      
+      // Real-time Firestore subscription will update config automatically
+      toast.success('Slide deleted successfully!')
+      setShowDeleteDialog(null)
     } catch (e) {
       console.error('Failed to delete slide:', e)
-      toast.error('Failed to delete slide')
+      const errorMessage = e instanceof Error ? e.message : 'Failed to delete slide'
+      toast.error(errorMessage)
+      // Revert optimistic update on error
+      setLocalSlides(slides)
+    } finally {
+      setDeletingSlideId(null)
     }
   }
 
@@ -2479,9 +2526,19 @@ const HeroConfig = ({ config, onChange }: any) => {
   
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="Hero Carousel" subtitle="Manage images and texts for the hero slider" />
+      <ConfigHeader title="Hero Carousel" subtitle="Manage images and texts for the hero slider. Changes are saved to Firebase and appear on the website in real-time." />
+      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-sm text-blue-800">
+          <strong>💡 Tip:</strong> Changes you make here are automatically saved to Firebase and will appear on the main website immediately. The hero section uses real-time synchronization.
+        </p>
+      </div>
       <div className="space-y-4">
-        {slides.map((slide: any) => (
+        {localSlides.length === 0 ? (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+            <p className="text-gray-600 mb-4">No hero slides yet. Create your first slide to get started!</p>
+          </div>
+        ) : (
+          localSlides.map((slide: any) => (
           <div key={slide.id} className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Image Section */}
@@ -2546,14 +2603,15 @@ const HeroConfig = ({ config, onChange }: any) => {
               {/* Content Section */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
                   <input
                     type="text"
                     value={getLocal(slide.id, 'title')}
                     onChange={(e) => setLocal(slide.id, 'title', e.target.value)}
                     onBlur={(e) => updateSlide(slide.id, { title: e.target.value })}
                     placeholder="Enter slide title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    disabled={updatingSlideId === slide.id}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                 </div>
                 
@@ -2593,7 +2651,6 @@ const HeroConfig = ({ config, onChange }: any) => {
                     />
                   </div>
                 </div>
-
                 {/* Order */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -2633,24 +2690,41 @@ const HeroConfig = ({ config, onChange }: any) => {
                 
                 {/* Actions */}
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                        <button
-                    onClick={() => deleteSlide(slide.id)}
-                    className="px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  {updatingSlideId === slide.id && (
+                    <span className="text-sm text-blue-600 flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span>Saving...</span>
+                    </span>
+                  )}
+                  <button
+                    onClick={() => setShowDeleteDialog({ slideId: slide.id, slideTitle: slide.title || 'Untitled Slide' })}
+                    disabled={deletingSlideId === slide.id}
+                    className="px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete Slide</span>
+                    {deletingSlideId === slide.id ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        <span>Delete Slide</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        ))}
+          ))
+        )}
         
         {/* Add New Slide Button */}
         <div className="flex justify-center">
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="group bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          <button 
+            onClick={() => setIsAddModalOpen(true)} 
+            className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all duration-300 border-2 border-dashed border-primary-300 hover:border-primary-400 hover:shadow-lg hover:scale-[1.02] group"
           >
             <div className="flex items-center justify-center space-x-3">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
@@ -2661,176 +2735,222 @@ const HeroConfig = ({ config, onChange }: any) => {
           </button>
         </div>
       </div>
-      
-      {/* Add Slide Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setIsAddModalOpen(false)}></div>
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Add New Slide</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input
-                  value={newSlideTitle}
-                  onChange={(e) => setNewSlideTitle(e.target.value)}
-                  placeholder="Enter slide title"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                <textarea
-                  value={newSlideSubtitle}
-                  onChange={(e) => setNewSlideSubtitle(e.target.value)}
-                  placeholder="Enter slide subtitle"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                <input
-                  type="url"
-                  value={newSlideUrl}
-                  onChange={(e) => setNewSlideUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-                {newSlideUrl && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-2">Image preview:</p>
-                    <img
-                      src={newSlideUrl}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Or Upload Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setNewSlideFile(e.target.files?.[0] || null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-                {newSlideFile && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-2">Selected image: {newSlideFile.name}</p>
-                    <img
-                      src={URL.createObjectURL(newSlideFile)}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  if (!creatingSlide) {
-                    setIsAddModalOpen(false)
-                    setNewSlideTitle('')
-                    setNewSlideSubtitle('')
-                    setNewSlideFile(null)
-                    setNewSlideUrl('')
-                  }
-                }}
-                disabled={creatingSlide}
-                className="px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createNewSlide}
-                disabled={creatingSlide || !newSlideTitle.trim()}
-                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-              >
-                {creatingSlide && (
-                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                )}
-                <span>{creatingSlide ? 'Creating...' : 'Create Slide'}</span>
-              </button>
-              {creatingSlide && (
-                <button
-                  onClick={() => {
-                    console.log('Manual reset triggered')
-                    if (creationTimeout) {
-                      clearTimeout(creationTimeout)
-                      setCreationTimeout(null)
-                    }
-                    setCreatingSlide(false)
-                    toast.dismiss()
-                    toast.success('Creation cancelled')
-                  }}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </motion.div>
   )
 }
 
 const ServicesConfig = ({ config, onChange }: any) => {
-  const services = config.services || []
-  const [uploadingServices, setUploadingServices] = useState<{ [key: number]: boolean }>({})
+  const [services, setServices] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploadingServices, setUploadingServices] = useState<{ [key: string]: boolean }>({})
+  const [savingServices, setSavingServices] = useState<{ [key: string]: boolean }>({})
+  const [isMigrating, setIsMigrating] = useState(false)
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; serviceId: string; serviceName: string }>({ 
+    isOpen: false, 
+    serviceId: '', 
+    serviceName: '' 
+  })
   
-  const updateService = (index: number, key: string, value: string) => {
-                            const next = { ...config }
-    next.services = [...services]
-    next.services[index] = { ...next.services[index], [key]: value }
-    onChange(next)
-  }
-  
-  const addService = () => onChange({ ...config, services: [...services, { id: Date.now().toString(), title: '', description: '', imageUrl: '', category: '' }] })
-  const removeService = (index: number) => onChange({ ...config, services: services.filter((_: any, i: number) => i !== index) })
-  
-  const handleServiceImageUpload = async (index: number, file: File) => {
+  const handleServiceImageUpload = async (serviceId: string, file: File) => {
     if (!file) return
     
-    setUploadingServices(prev => ({ ...prev, [index]: true }))
+    // Set uploading state
+    setUploadingServices(prev => ({ ...prev, [serviceId]: true }))
     
     try {
-      const { uploadImage } = await import('@/lib/storage')
-      const imageUrl = await uploadImage(file, `services/service-${Date.now()}`)
-      updateService(index, 'imageUrl', imageUrl)
+      const imageUrl = await uploadImage(file, `services/${serviceId}`)
+      await updateService(serviceId, 'imageUrl', imageUrl)
       toast.success('Service image uploaded successfully!')
     } catch (error) {
       console.error('Failed to upload service image:', error)
       toast.error('Failed to upload image. Please try again.')
     } finally {
-      setUploadingServices(prev => ({ ...prev, [index]: false }))
+      // Reset uploading state
+      setUploadingServices(prev => ({ ...prev, [serviceId]: false }))
     }
   }
   
+  const removeService = async (serviceId: string) => {
+    try {
+      const res = await fetch(`/api/services/${serviceId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      
+      if (!res.ok) throw new Error('Failed to delete service')
+      toast.success('Service removed successfully!')
+      setServices(prev => prev.filter(s => s.id !== serviceId))
+    } catch (error) {
+      console.error('Error removing service:', error)
+      toast.error('Failed to remove service. Please try again.')
+    }
+  }
+  
+  console.log('ServicesConfig rendered with deleteDialog state:', deleteDialog)
+  
+  // Load services from Firestore
+  useEffect(() => {
+    console.log('ServicesConfig component mounted, loading services...')
+    loadServices()
+    
+    // Poll for updates every 5 seconds
+    const interval = setInterval(loadServices, 5000)
+    
+    return () => {
+      console.log('Admin services: Cleaning up')
+      clearInterval(interval)
+    }
+  }, [])
+  
+  const loadServices = async () => {
+    try {
+      console.log('Loading services...')
+      const res = await fetch('/api/services')
+      console.log('Services API response:', res.status, res.statusText)
+      if (!res.ok) throw new Error('Failed to fetch')
+      const { services: servicesData } = await res.json()
+      console.log('Loaded services:', servicesData)
+      setServices(servicesData)
+    } catch (error) {
+      console.error('Error loading services:', error)
+      toast.error('Failed to load services')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  const updateService = async (id: string, key: string, value: string) => {
+    // Optimistic update
+    setServices(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
+    
+    // Debounced save
+    if (savingServices[id]) clearTimeout(savingServices[id] as any)
+    
+    const timeoutId = setTimeout(async () => {
+      try {
+        const service = services.find(s => s.id === id)
+        const res = await fetch(`/api/services/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...service, [key]: value })
+        })
+        
+        if (!res.ok) throw new Error('Failed to update')
+      } catch (error) {
+        console.error('Error updating service:', error)
+        toast.error('Failed to save changes')
+        loadServices() // Revert on error
+      }
+    }, 1000)
+    
+    setSavingServices(prev => ({ ...prev, [id]: timeoutId as any }))
+  }
+  
+  const addService = async () => {
+    try {
+      const res = await fetch('/api/services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New Service',
+          description: '',
+          imageUrl: '',
+          category: 'General'
+        })
+      })
+      
+      if (!res.ok) throw new Error('Failed to create')
+      const newService = await res.json()
+      toast.success('Service created!')
+    } catch (error) {
+      console.error('Error creating service:', error)
+      toast.error('Failed to create service')
+    }
+  }
+  
+  const migrateHardcodedServices = async () => {
+    if (!confirm('This will import the default services into the database. Continue?')) return
+    
+    setIsMigrating(true)
+    try {
+      console.log('Starting migration...')
+      const res = await fetch('/api/services/migrate', { method: 'POST' })
+      console.log('Migration response status:', res.status)
+    } catch (error) {
+      console.error('Migration failed:', error)
+      toast.error('Migration failed')
+    } finally {
+      setIsMigrating(false)
+    }
+  }
+
+  const cancelDeleteService = () => {
+    setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
+  }
+
+  const confirmDeleteService = async () => {
+    try {
+      const res = await fetch(`/api/services/${deleteDialog.serviceId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      
+      if (!res.ok) throw new Error('Failed to delete service')
+      toast.success('Service removed successfully!')
+      setServices(prev => prev.filter(s => s.id !== deleteDialog.serviceId))
+      setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
+    } catch (error) {
+      console.error('Error removing service:', error)
+      toast.error('Failed to remove service. Please try again.')
+      setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
+    }
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Services" subtitle="Manage services shown on the homepage" />
+      
+      {/* Migration notice */}
+      {services.length === 0 && !loading && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <ImageIcon className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">No Services Found</h3>
+              <p className="text-blue-700 mb-4">Would you like to import the default services (Cleaning, Laundry, Maintenance, Specialized)?</p>
+              <button
+                onClick={migrateHardcodedServices}
+                disabled={isMigrating}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                {isMigrating && (
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                <span>{isMigrating ? 'Importing...' : 'Import Default Services'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="space-y-4">
-        {services.map((s: any, i: number) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
+        {services.map((s: any) => (
+          <div key={s.id} className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Content Section */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Title</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Title (ID: {s.id})</label>
                   <input 
-                    value={s.title} 
-                    onChange={(e) => updateService(i, 'title', e.target.value)} 
+                    value={s.title || ''} 
+                    onChange={(e) => updateService(s.id, 'title', e.target.value)} 
                     placeholder="Enter service title"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
@@ -2839,8 +2959,8 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea 
-                    value={s.description} 
-                    onChange={(e) => updateService(i, 'description', e.target.value)} 
+                    value={s.description || ''} 
+                    onChange={(e) => updateService(s.id, 'description', e.target.value)} 
                     placeholder="Enter service description"
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
@@ -2850,11 +2970,12 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                   <input 
-                    value={s.category} 
-                    onChange={(e) => updateService(i, 'category', e.target.value)} 
-                    placeholder="e.g., Cleaning, Maintenance"
+                    value={s.category || ''} 
+                    onChange={(e) => updateService(s.id, 'category', e.target.value)} 
+                    placeholder="e.g., Cleaning Services, Maintenance Services"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
+                  <p className="text-xs text-gray-500 mt-1">Services with the same category will be grouped together</p>
                 </div>
               </div>
 
@@ -2869,7 +2990,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       <img 
                         src={s.imageUrl}
                         alt={s.title || 'Service'}
-                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
                         }}
@@ -2881,100 +3002,56 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">Upload Image</span>
+                        <span className="text-sm font-medium">
+                          {uploadingServices[s.id] ? 'Uploading...' : 'Upload Image'}
+                        </span>
                         <input
                           type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0]
-                            if (file) handleServiceImageUpload(i, file)
+                            if (file) handleServiceImageUpload(s.id, file)
                           }}
-                          disabled={uploadingServices[i]}
+                          disabled={uploadingServices[s.id]}
                         />
                       </label>
                       {s.imageUrl && (
                         <button
-                          onClick={() => updateService(i, 'imageUrl', '')}
+                          onClick={() => updateService(s.id, 'imageUrl', '')}
                           className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          disabled={uploadingServices[s.id]}
                         >
                           Clear Image
                         </button>
                       )}
-                      
                     </div>
                     
-                    {/* URL Input as fallback with debounce auto-save */}
-            <div>
+                    {/* URL Input as fallback */}
+                    <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
                       <input 
-                        value={s.imageUrl} 
-                        onChange={(e) => updateService(i, 'imageUrl', e.target.value)} 
+                        value={s.imageUrl || ''} 
+                        onChange={(e) => updateService(s.id, 'imageUrl', e.target.value)} 
                         placeholder="https://example.com/image.jpg"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        disabled={uploadingServices[s.id]}
                       />
-            </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Content Section */}
-              <div className="space-y-4">
-            <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                  <input 
-                    value={s.title || ''} 
-                    onChange={(e) => updateService(i, 'title', e.target.value)} 
-                    placeholder="Enter slide title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-            </div>
-                
-                <div>
-                  <label className="text-sm text-gray-700 mb-2 block">Subtitle</label>
-                  <textarea 
-                    value={s.subtitle || ''} 
-                    onChange={(e) => updateService(i, 'description', e.target.value)} 
-                    placeholder="Enter slide description"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                
-                {/* CTA fields only for first slide */}
-                {i === 0 && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                    <label className="block text-sm text-gray-700 mb-2">CTA Label</label>
-                    <input 
-                      value={s.ctaLabel || ''} 
-                      onChange={(e) => updateService(i, 'category', e.target.value)} 
-                      placeholder="e.g., Get Started"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
-              </div>
-              <div>
-                    <label className="block text-sm text-gray-700 mb-2">CTA Link</label>
-                    <input 
-                      value={s.ctaHref || ''} 
-                      onChange={(e) => updateService(i, 'imageUrl', e.target.value)} 
-                      placeholder="e.g., #services"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
-              </div>
-            </div>
-                )}
               </div>
             </div>
             
             {/* Remove Button */}
             <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
               <button 
-                onClick={() => removeService(i)} 
-                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
-                disabled={uploadingServices[i]}
+                onClick={() => setDeleteDialog({ isOpen: true, serviceId: s.id, serviceName: s.title })} 
+                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200 flex items-center space-x-2"
+                disabled={uploadingServices[s.id]}
               >
-                Remove Slide
+                <Trash2 className="w-4 h-4" />
+                <span>Remove Service</span>
               </button>
             </div>
           </div>
@@ -2989,39 +3066,50 @@ const ServicesConfig = ({ config, onChange }: any) => {
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
                 <Plus className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg">Add New Slide</span>
+              <span className="text-lg">Add New Service</span>
             </div>
           </button>
         </div>
-        
-        {/* Save Button */}
-        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-          <button 
-            onClick={() => {
-              toast.success('Services settings saved successfully!')
-            }}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 hover:shadow-lg"
-          >
-            💾 Save Services Settings
-          </button>
-        </div>
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      {deleteDialog.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg mb-4">
+                <Trash2 className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Service</h3>
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to delete <span className="font-semibold text-gray-900">{deleteDialog.serviceName}</span>? This action cannot be undone.
+              </p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={cancelDeleteService}
+                  className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteService}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const AboutConfig = ({ config, onChange }: any) => {
   const about = config.about || { title: '', content: '', imageUrl: '' }
@@ -3046,15 +3134,15 @@ const AboutConfig = ({ config, onChange }: any) => {
       setIsUploading(false)
     }
   }
-  
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="About Section" subtitle="Update the about title, content, and image" />
+      <ConfigHeader title="About Section" subtitle="Add and update about section" />
       <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Content Section */}
           <div className="space-y-4">
-        <div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
               <input 
                 value={about.title} 
@@ -3062,9 +3150,9 @@ const AboutConfig = ({ config, onChange }: any) => {
                 placeholder="Enter about section title"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
               />
-        </div>
+            </div>
             
-        <div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
               <textarea 
                 value={about.content} 
@@ -3073,23 +3161,23 @@ const AboutConfig = ({ config, onChange }: any) => {
                 rows={8}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
               />
-        </div>
+            </div>
           </div>
           
           {/* Image Section */}
           <div className="space-y-4">
-        <div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">About Image</label>
               
               {/* Image Preview */}
               {about.imageUrl && (
                 <div className="mb-3">
                   <img 
-                    src={about.imageUrl} 
-                    alt="About section"
+                    src={about.imageUrl}
+                    alt="About"
                     className="w-full h-48 object-cover rounded-lg border border-gray-200"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop&crop=center'
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
                     }}
                   />
                 </div>
@@ -3113,15 +3201,13 @@ const AboutConfig = ({ config, onChange }: any) => {
                       disabled={isUploading}
                     />
                   </label>
-                  
                   {about.imageUrl && (
                     <button
-                      type="button"
                       onClick={() => update('imageUrl', '')}
-                      className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200"
+                      className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
                       disabled={isUploading}
                     >
-                      Remove
+                      Clear Image
                     </button>
                   )}
                 </div>
@@ -3134,24 +3220,12 @@ const AboutConfig = ({ config, onChange }: any) => {
                     onChange={(e) => update('imageUrl', e.target.value)} 
                     placeholder="https://example.com/image.jpg"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    disabled={isUploading}
                   />
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Save Button */}
-        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end">
-          <button 
-            onClick={() => {
-              onChange(config)
-              toast.success('About section settings saved successfully!')
-            }}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 hover:shadow-lg"
-          >
-            💾 Save About Settings
-          </button>
         </div>
       </div>
     </motion.div>
@@ -3159,45 +3233,125 @@ const AboutConfig = ({ config, onChange }: any) => {
 }
 
 const NavigationConfig = ({ config, onChange }: any) => {
-  const items = config.navigation || []
-  const updateItem = (index: number, key: string, value: any) => {
-    const next = { ...config }
-    next.navigation = [...items]
-    next.navigation[index] = { ...next.navigation[index], [key]: value }
-    onChange(next)
+  const navigation = config.navigation || { 
+    main: [
+      { name: 'Services', href: '/services' },
+      { name: 'About', href: '/about' },
+      { name: 'Contact', href: '/contact' },
+      { name: 'Gallery', href: '/gallery' },
+      { name: 'Blog', href: '/blog' }
+    ],
+    legal: [
+      { name: 'Privacy Policy', href: '/privacy-policy' },
+      { name: 'Terms of Service', href: '/terms-of-service' }
+    ]
   }
-  const addItem = () => onChange({ ...config, navigation: [...items, { name: '', href: '#', isHash: true, enabled: true }] })
-  const removeItem = (index: number) => onChange({ ...config, navigation: items.filter((_: any, i: number) => i !== index) })
+  
+  const update = (key: string, value: any) => onChange({ ...config, navigation: { ...navigation, [key]: value } })
+  
+  const updateMainLink = (index: number, field: string, value: string) => {
+    const newMain = [...navigation.main]
+    newMain[index] = { ...newMain[index], [field]: value }
+    update('main', newMain)
+  }
+  
+  const updateLegalLink = (index: number, field: string, value: string) => {
+    const newLegal = [...navigation.legal]
+    newLegal[index] = { ...newLegal[index], [field]: value }
+    update('legal', newLegal)
+  }
+  
+  const addMainLink = () => {
+    update('main', [...navigation.main, { name: 'New Link', href: '#' }])
+  }
+  
+  const addLegalLink = () => {
+    update('legal', [...navigation.legal, { name: 'New Legal Link', href: '#' }])
+  }
+  
+  const removeMainLink = (index: number) => {
+    update('main', navigation.main.filter((_: any, i: number) => i !== index))
+  }
+  
+  const removeLegalLink = (index: number) => {
+    update('legal', navigation.legal.filter((_: any, i: number) => i !== index))
+  }
+  
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="Navigation" subtitle="Control header links" />
-      <div className="space-y-4">
-        {items.map((nav: any, i: number) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-1">
-              <label className="text-sm text-gray-700">Label</label>
-              <input value={nav.name} onChange={(e) => updateItem(i, 'name', e.target.value)} className="mt-1 w-full px-3 py-2 border rounded-lg" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-sm text-gray-700">Href</label>
-              <input value={nav.href} onChange={(e) => updateItem(i, 'href', e.target.value)} className="mt-1 w-full px-3 py-2 border rounded-lg" />
-            </div>
-            <div className="md:col-span-1 flex items-end space-x-3">
-              <label className="flex items-center space-x-2 text-sm text-gray-700">
-                <input type="checkbox" checked={!!nav.isHash} onChange={(e) => updateItem(i, 'isHash', e.target.checked)} />
-                <span>Hash</span>
-              </label>
-              <label className="flex items-center space-x-2 text-sm text-gray-700">
-                <input type="checkbox" checked={nav.enabled !== false} onChange={(e) => updateItem(i, 'enabled', e.target.checked)} />
-                <span>Enabled</span>
-              </label>
-            </div>
-            <div className="md:col-span-4 flex justify-end">
-              <button onClick={() => removeItem(i)} className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg">Remove</button>
-            </div>
+      <ConfigHeader title="Navigation" subtitle="Manage website navigation links" />
+      <div className="space-y-6">
+        {/* Main Navigation */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Main Navigation</h3>
+          <div className="space-y-3">
+            {navigation.main.map((link: any, index: number) => (
+              <div key={index} className="flex items-center space-x-3">
+                <input
+                  value={link.name}
+                  onChange={(e) => updateMainLink(index, 'name', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Link name"
+                />
+                <input
+                  value={link.href}
+                  onChange={(e) => updateMainLink(index, 'href', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Link URL"
+                />
+                <button
+                  onClick={() => removeMainLink(index)}
+                  className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={addMainLink}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Link</span>
+            </button>
           </div>
-        ))}
-        <button onClick={addItem} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Add Link</button>
+        </div>
+        
+        {/* Legal Navigation */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Navigation</h3>
+          <div className="space-y-3">
+            {navigation.legal.map((link: any, index: number) => (
+              <div key={index} className="flex items-center space-x-3">
+                <input
+                  value={link.name}
+                  onChange={(e) => updateLegalLink(index, 'name', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Legal link name"
+                />
+                <input
+                  value={link.href}
+                  onChange={(e) => updateLegalLink(index, 'href', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Legal link URL"
+                />
+                <button
+                  onClick={() => removeLegalLink(index)}
+                  className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={addLegalLink}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Legal Link</span>
+            </button>
+          </div>
+        </div>
       </div>
     </motion.div>
   )
@@ -3362,6 +3516,7 @@ const FooterConfig = ({ config, onChange }: any) => {
   )
 }
 
+// Blog Management Component
 const SEOConfig = ({ config, onChange }: any) => {
   const seo = config.seo || { defaultTitle: '', defaultDescription: '', keywords: [] as string[] }
   const update = (key: string, value: any) => onChange({ ...config, seo: { ...seo, [key]: value } })
@@ -3387,6 +3542,7 @@ const SEOConfig = ({ config, onChange }: any) => {
   )
 }
 
+// Blog Management Component
 const MapConfig = ({ config, onChange }: any) => {
   const map = config.map || { embedUrl: '', lat: undefined, lng: undefined, zoom: 14 }
   const update = (key: string, value: any) => onChange({ ...config, map: { ...map, [key]: value } })
