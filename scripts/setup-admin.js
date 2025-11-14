@@ -8,9 +8,9 @@ const { getFirestore, doc, setDoc } = require('firebase/firestore');
 // Your Firebase config - replace with your actual config
 const firebaseConfig = {
   apiKey: 'AIzaSyB4XxvcqkCGS6IgwkDQSKEr8XFKJgodCIU',
-  authDomain: 'wilsther-profesional-services.firebaseapp.com',
-  projectId: 'wilsther-profesional-services',
-  storageBucket: 'wilsther-profesional-services.firebasestorage.app',
+  authDomain: 'wilsther-professional-services.firebaseapp.com',
+  projectId: 'wilsther-professional-services',
+  storageBucket: 'wilsther-professional-services.appspot.com',
   messagingSenderId: '484189314031',
   appId: '1:484189314031:web:cc4f556f31e37757eab41a',
   measurementId: 'G-BGVH0BFR5Y'

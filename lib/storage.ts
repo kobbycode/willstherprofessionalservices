@@ -1,8 +1,8 @@
 'use client'
 
 // Robust image upload system with multiple hosting strategies for cross-device accessibility
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { getApp } from 'firebase/app'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getStorageClient } from '@/lib/firebase'
 
 export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<string> {
   console.log('=== UPLOAD START ===')
@@ -58,8 +58,7 @@ async function uploadToFirebaseWithTimeout(file: File, pathPrefix: string): Prom
 // Firebase Storage upload with public access
 async function uploadToFirebase(file: File, pathPrefix: string): Promise<string> {
   try {
-    const app = getApp()
-    const storage = getStorage(app)
+    const storage = getStorageClient()
     const timestamp = Date.now()
     const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
     const storageRef = ref(storage, `${pathPrefix}/${fileName}`)

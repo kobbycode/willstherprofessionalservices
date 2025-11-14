@@ -13,7 +13,7 @@ import Footer from '@/components/Footer'
 import MaintenanceMode from '@/components/MaintenanceMode'
 import { useSiteConfig } from '@/lib/site-config'
 
-export default function Home() {
+export default function HomePageClient() {
   const { config } = useSiteConfig()
   
   if (config.maintenanceMode) {

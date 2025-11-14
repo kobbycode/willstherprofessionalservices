@@ -255,7 +255,7 @@ export function useSiteConfig() {
 		// Lightweight periodic refresh as a fallback safety net
 		const intervalId = setInterval(() => {
 			loadFromServer()
-		}, 60000) // 60 seconds
+		}, 300000) // Increased from 60 seconds to 300 seconds (5 minutes)
 
 		return () => {
 			clearInterval(intervalId)

@@ -3,13 +3,13 @@ import { initializeApp, getApps } from 'firebase/app'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyB4XxvcqkCGS6IgwkDQSKEr8XFKJgodCIU',
-  authDomain: 'wilsther-profesional-services.firebaseapp.com',
-  projectId: 'wilsther-profesional-services',
-  storageBucket: 'wilsther-profesional-services.appspot.com',
-  messagingSenderId: '484189314031',
-  appId: '1:484189314031:web:cc4f556f31e37757eab41a',
-  measurementId: 'G-BGVH0BFR5Y'
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 }
 
 // Initialize Firebase for server-side

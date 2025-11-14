@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { uploadImage } from '@/lib/storage'
 
-export default function TestStoragePage() {
+export default function TestApiUploadPage() {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [result, setResult] = useState<string | null>(null)
+  const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,10 +26,23 @@ export default function TestStoragePage() {
     setResult(null)
 
     try {
-      const url = await uploadImage(file, 'test-uploads')
-      setResult(url)
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/test-upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed')
+      }
+
+      setResult(data)
     } catch (err) {
-      console.error('Upload failed:', err)
+      console.error('API upload failed:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setUploading(false)
@@ -39,7 +51,7 @@ export default function TestStoragePage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Test Image Upload</h1>
+      <h1 className="text-2xl font-bold mb-6">Test API Image Upload</h1>
       
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">Select Image</label>
@@ -61,7 +73,7 @@ export default function TestStoragePage() {
         disabled={uploading || !file}
         className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
       >
-        {uploading ? 'Uploading...' : 'Upload Image'}
+        {uploading ? 'Uploading...' : 'Upload Image via API'}
       </button>
 
       {error && (
@@ -74,11 +86,16 @@ export default function TestStoragePage() {
         <div className="mt-4">
           <p className="mb-2">Upload successful!</p>
           <div className="border rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-2">Image URL:</p>
-            <p className="font-mono text-sm break-all">{result}</p>
-            <div className="mt-4">
-              <img src={result} alt="Uploaded" className="max-w-full h-auto rounded" />
-            </div>
+            <p className="text-sm text-gray-600 mb-2">Response:</p>
+            <pre className="font-mono text-sm bg-gray-50 p-2 rounded">
+              {JSON.stringify(result, null, 2)}
+            </pre>
+            {result.url && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-2">Uploaded Image:</p>
+                <img src={result.url} alt="Uploaded" className="max-w-full h-auto rounded" />
+              </div>
+            )}
           </div>
         </div>
       )}

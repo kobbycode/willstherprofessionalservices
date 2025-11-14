@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:image-upload": "node scripts/test-image-upload.js"
   },
   "dependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
     "critters": "^0.0.23",
     "firebase": "^12.1.0",
     "firebase-admin": "^13.4.0",

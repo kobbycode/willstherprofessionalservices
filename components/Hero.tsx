@@ -17,8 +17,15 @@ const Hero = memo(() => {
     const configured = Array.isArray(config.heroSlides) ? config.heroSlides : []
     
     if (configured.length > 0) {
-      return configured.map((s, idx) => ({
-      id: idx + 1,
+      // Sort slides by order (if available) to maintain admin-defined order
+      const sortedSlides = [...configured].sort((a, b) => {
+        const orderA = a.order ?? 0
+        const orderB = b.order ?? 0
+        return orderA - orderB
+      })
+      
+      return sortedSlides.map((s) => ({
+        id: s.id || `slide-${Date.now()}-${Math.random()}`, // Use Firebase document ID
         image: (s.imageUrl || '').trim() || getFallbackImageUrl(),
         title: s.title || 'Professional Maintenance Services',
         description: s.subtitle || 'Trusted, reliable and affordable services',
@@ -33,9 +40,10 @@ const Hero = memo(() => {
       }))
     }
     
+    // Default fallback slide if no slides are configured
     return [
       {
-        id: 1,
+        id: 'default-slide',
         image: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop',
         title: 'Professional Cleaning',
         description: 'Trusted, reliable and affordable services',

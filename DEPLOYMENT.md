@@ -141,3 +141,59 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-BGVH0BFR5Y
 
 **Deployment URL**: https://willstherprofessionalservices.vercel.app
 **GitHub Repository**: https://github.com/kobbycode/willstherprofessionalservices.git
+
+## 📷 Image Upload Configuration
+
+### ImgBB Setup (Recommended)
+For the best image hosting experience, configure ImgBB:
+
+1. **Sign up for ImgBB** at https://imgbb.com/
+2. **Get your API key** from your profile settings
+3. **Add to Vercel environment variables**:
+   ```
+   NEXT_PUBLIC_IMGBB_API_KEY=your_imgbb_api_key_here
+   ```
+
+### Firebase Storage Setup
+If not using ImgBB, Firebase Storage will be used as fallback:
+
+1. **Enable Storage** in Firebase Console:
+   - Go to Storage > Get started
+   - Follow the setup wizard
+   - Note your storage bucket URL
+
+2. **Update Environment Variables** if needed:
+   ```
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket_url
+   ```
+
+### Storage Bucket Configuration
+Ensure your Firebase Storage rules allow uploads:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Public read access for uploaded images
+    match /uploads/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /hero-slides/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /services/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
+

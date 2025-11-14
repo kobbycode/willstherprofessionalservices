@@ -6,131 +6,79 @@ import {
   Sparkles, Shield, Clock, Star,
   Car, Truck, Zap, Target
 } from 'lucide-react'
-import { useSiteConfig } from '@/lib/site-config'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 
 const Services = () => {
-  const { config } = useSiteConfig()
+  const [services, setServices] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Load services from API once
+  useEffect(() => {
+    console.log('Services component: Loading services...')
+    
+    const loadServices = async () => {
+      try {
+        const res = await fetch('/api/services', { cache: 'no-store' })
+        if (!res.ok) throw new Error('Failed to fetch services')
+        const data = await res.json()
+        console.log('Services loaded:', data.services?.length || 0, 'services')
+        setServices(data.services || [])
+        setLoading(false)
+      } catch (error) {
+        console.error('Error loading services:', error)
+        setLoading(false)
+      }
+    }
+    
+    // Initial load only
+    loadServices()
+    
+    // Removed polling - no need to poll every 5 seconds
+  }, [])
 
   const serviceCategories = useMemo(() => {
-    if (config.services && config.services.length > 0) {
-      const grouped: Record<string, { title: string; services: { name: string; icon: any; image: string }[] }> = {}
+    if (services && services.length > 0) {
+      const grouped: Record<string, { title: string; services: { name: string; description?: string; icon: any; image: string }[] }> = {}
       const iconPool = [Home, Building, Users, Wrench, Sparkles, Shield, Clock, Star, Car, Truck, Zap, Target]
-      config.services.forEach((svc, idx) => {
+      services.forEach((svc, idx) => {
         const cat = svc.category || 'General'
         if (!grouped[cat]) grouped[cat] = { title: cat, services: [] }
         grouped[cat].services.push({
           name: svc.title,
+          description: svc.description, // Add description to the service object
           icon: iconPool[idx % iconPool.length],
           image: svc.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
         })
       })
       return Object.values(grouped)
     }
-    return [
-   
-     {
-      title: 'Cleaning Services',
-      services: [
-        {
-          name: 'Residential Cleaning',
-          icon: Home,
-          image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Commercial Office Cleaning',
-          icon: Building,
-          image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Industrial Facility Cleaning',
-          icon: Users,
-          image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'High-Pressure Cleaning',
-          icon: Zap,
-          image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center'
-        }
-      ]
-    },
-    {
-      title: 'Laundry Services',
-      services: [
-        {
-          name: 'Residential Cleaning',
-          icon: Home,
-          image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Commercial Office Cleaning',
-          icon: Building,
-          image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Industrial Facility Cleaning',
-          icon: Users,
-          image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'High-Pressure Cleaning',
-          icon: Zap,
-          image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center'
-        }
-      ]
-    },
-    {
-      title: 'Maintenance Services',
-      services: [
-        {
-          name: 'Post-Construction Cleaning',
-          icon: Wrench,
-          image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Carpet & Upholstery Cleaning',
-          icon: Sparkles,
-          image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Window & Glass Cleaning',
-          icon: Shield,
-          image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Kitchen & Bathroom Deep Clean',
-          icon: Star,
-          image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center'
-        }
-      ]
-    },
-    {
-      title: 'Specialized Services',
-      services: [
-        {
-          name: 'Event & Venue Cleaning',
-          icon: Clock,
-          image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Vehicle Cleaning',
-          icon: Car,
-          image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Equipment Maintenance',
-          icon: Truck,
-          image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=300&fit=crop&crop=center'
-        },
-        {
-          name: 'Quality Assurance',
-          icon: Target,
-          image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
-        }
-      ]
-    }
-    ]
-  }, [config])
+    return []
+  }, [services])
+
+  if (loading) {
+    return (
+      <section id="services" className="section-padding bg-secondary-50">
+        <div className="container-custom px-4">
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600"></div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (serviceCategories.length === 0) {
+    return (
+      <section id="services" className="section-padding bg-secondary-50">
+        <div className="container-custom px-4">
+          <div className="text-center py-20">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">No Services Available</h2>
+            <p className="text-gray-600">Services will be added soon. Please check back later.</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section id="services" className="section-padding bg-secondary-50">
@@ -205,6 +153,12 @@ const Services = () => {
                       <h4 className="text-sm sm:text-base md:text-lg font-semibold text-secondary-900 text-center mb-1 sm:mb-2">
                         {service.name}
                       </h4>
+                      {/* Display service description if available */}
+                      {service.description && (
+                        <p className="text-xs sm:text-sm text-secondary-600 text-center line-clamp-2">
+                          {service.description}
+                        </p>
+                      )}
                     </div>
                   </motion.div>
                 ))}

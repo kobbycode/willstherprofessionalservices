@@ -10,6 +10,7 @@ A modern, responsive website for Willsther Professional Services with an integra
 - **User Management**: Admin and editor role management
 - **Contact Form**: Manage contact submissions
 - **Website Settings**: Dynamic configuration management
+- **Image Upload**: Multi-strategy image hosting (ImgBB, Firebase Storage, Data URLs)
 - **Firebase Integration**: Real-time database and authentication
 - **SEO Optimized**: Meta tags, sitemap, and structured data
 
@@ -153,6 +154,25 @@ Use the admin dashboard to manage:
 
 ### Firebase Configuration
 Update Firebase settings in `lib/firebase.ts`
+
+## 📷 Image Upload Setup
+
+The system supports multiple image hosting strategies:
+
+1. **ImgBB** (Primary) - Requires API key
+2. **Firebase Storage** (Fallback) - Uses Firebase credentials
+3. **Data URLs** (Last Resort) - Converts images to base64
+
+### ImgBB Setup
+1. Sign up at [imgbb.com](https://imgbb.com/)
+2. Get your API key from profile settings
+3. Add to `.env.local`:
+   ```
+   NEXT_PUBLIC_IMGBB_API_KEY=your_api_key_here
+   ```
+
+### Firebase Storage
+Already configured with your Firebase project.
 
 ## 📱 Responsive Design
 
