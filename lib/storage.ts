@@ -159,20 +159,16 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
     const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
     const storageRef = ref(storage, `${pathPrefix}/${fileName}`)
     
-    console.log('Uploading to Firebase Storage...')
+    console.log('Uploading to Firebase Storage with bucket:', storageRef.bucket);
+    console.log('File path:', `${pathPrefix}/${fileName}`);
+    
     const snapshot = await uploadBytes(storageRef, file)
     console.log('Upload completed, getting download URL...')
     
     // Get the download URL
     const downloadURL = await getDownloadURL(snapshot.ref)
     
-    // Make the file publicly accessible by setting metadata
-    try {
-      // Note: Firebase Storage files are public by default, but we ensure it
-      console.log('Firebase Storage file uploaded successfully with public access')
-    } catch (metadataError) {
-      console.warn('Could not set public metadata, but file should be accessible:', metadataError)
-    }
+    console.log('Firebase Storage file uploaded successfully with public access')
     
     return downloadURL
   } catch (error) {
@@ -186,6 +182,8 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
         throw new Error('Firebase Storage bucket not found. Please check your Firebase configuration.');
       } else if (error.message.includes('Firebase: Error (auth/')) {
         throw new Error('Firebase authentication error. Please check your Firebase configuration.');
+      } else if (error.message.includes('CORS') || error.message.includes('preflight')) {
+        throw new Error('CORS error: Please ensure your Firebase Storage CORS configuration is deployed correctly.');
       }
     }
     

@@ -146,6 +146,7 @@ const HeroConfig = ({ config, onChange }: any) => {
     setIsUploadingNewSlideImage(true)
     
     try {
+      console.log('Starting image upload process...');
       const imageUrl = await uploadImage(file, `hero/slides/slide-${Date.now()}`)
       setNewSlideData(prev => ({ ...prev, imageUrl }))
       toast.success('Slide image uploaded successfully!')
@@ -157,7 +158,7 @@ const HeroConfig = ({ config, onChange }: any) => {
       if (errorMessage.includes('Firebase')) {
         toast.error('Firebase Storage configuration issue. Please check your environment variables and Firebase setup.');
       } else if (errorMessage.includes('CORS') || errorMessage.includes('preflight')) {
-        toast.error('CORS error: Please ensure your Firebase Storage CORS configuration is set up correctly and you\'ve deployed the cors.json file.');
+        toast.error('CORS error: Please ensure your Firebase Storage CORS configuration is set up correctly and you\'ve deployed the cors.json file. Run: gsutil cors set cors.json gs://wilsther-professional-services.appspot.com');
       } else if (errorMessage.includes('base64') || errorMessage.includes('data URL')) {
         toast.error('Image is too large. Please use a smaller image or check your Firebase configuration.')
       } else if (errorMessage.includes('compress')) {

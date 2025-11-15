@@ -67,7 +67,7 @@ export default function RichTextEditor({ value, onChange, placeholder, className
       [{ header: [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }],
-      ['blockquote', 'link'], // Removed 'image' from toolbar to prevent base64 conversion
+      ['blockquote', 'link'], 
       ['clean']
     ],
     // Custom clipboard handler to prevent image pasting
