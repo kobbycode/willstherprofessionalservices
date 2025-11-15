@@ -1,30 +1,98 @@
-'use client'
-
 // Robust image upload system with multiple hosting strategies for cross-device accessibility
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { getStorageClient } from '@/lib/firebase'
+
+// Function to compress image before upload
+async function compressImage(file: File): Promise<File> {
+  // If file is small enough, return as is
+  if (file.size <= 2 * 1024 * 1024) { // 2MB
+    return file;
+  }
+
+  // For larger images, try to compress
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      try {
+        // Calculate new dimensions maintaining aspect ratio
+        let { width, height } = img;
+        const maxSize = 1920; // Max dimension
+        
+        if (width > height && width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw image on canvas
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to blob with compression
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              reject(new Error('Failed to compress image'));
+            }
+          },
+          'image/jpeg',
+          0.8 // 80% quality
+        );
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    img.onerror = () => reject(new Error('Failed to load image for compression'));
+    
+    // Handle both data URLs and regular files
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    } else {
+      reject(new Error('File is not an image'));
+    }
+  });
+}
 
 export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<string> {
   console.log('=== UPLOAD START ===')
   console.log('File details:', { name: file.name, size: file.size, type: file.type })
 
-  // Strategy 1: Try ImgBB FIRST (most reliable for public access)
+  // Compress large images to prevent upload issues
+  let processedFile = file;
   try {
-    console.log('Attempting ImgBB upload for guaranteed public access...')
-    const result = await uploadToImgBB(file)
-    console.log('ImgBB upload successful:', result)
-    return result
-  } catch (imgbbError) {
-    console.error('ImgBB upload failed:', imgbbError)
-    if (imgbbError instanceof Error && imgbbError.message.includes('Missing NEXT_PUBLIC_IMGBB_API_KEY')) {
-      console.warn('ImgBB API key not configured. Please add NEXT_PUBLIC_IMGBB_API_KEY to your environment variables.')
+    if (file.size > 1024 * 1024) { // If larger than 1MB
+      console.log('Compressing large image...')
+      processedFile = await compressImage(file);
+      console.log('Compressed file size:', processedFile.size)
     }
+  } catch (compressError) {
+    console.warn('Failed to compress image, using original:', compressError)
+    processedFile = file;
   }
 
-  // Strategy 2: Try Firebase Storage as fallback
+  // SKIP ImgBB and go directly to Firebase Storage
   try {
-    console.log('Attempting Firebase Storage upload as fallback...')
-    const result = await uploadToFirebaseWithTimeout(file, pathPrefix)
+    console.log('Attempting Firebase Storage upload...')
+    const result = await uploadToFirebaseWithTimeout(processedFile, pathPrefix)
     console.log('Firebase Storage upload successful:', result)
     return result
   } catch (error) {
@@ -32,16 +100,36 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
   }
 
   // Strategy 3: Convert to data URL as last resort (always accessible)
-  console.log('All hosting methods failed, converting to data URL for guaranteed access...')
-  return convertToDataURL(file)
+  console.log('Firebase Storage failed, converting to data URL for guaranteed access...')
+  return convertToDataURL(processedFile)
+}
+
+// Add a timeout wrapper for the entire upload process
+export async function uploadImageWithTimeout(file: File, pathPrefix = 'uploads', timeoutMs = 30000): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Image upload timed out'))
+    }, timeoutMs)
+    
+    uploadImage(file, pathPrefix)
+      .then((result) => {
+        clearTimeout(timeout)
+        resolve(result)
+      })
+      .catch((error) => {
+        clearTimeout(timeout)
+        reject(error)
+      })
+  })
 }
 
 // Firebase Storage upload with timeout and public access
 async function uploadToFirebaseWithTimeout(file: File, pathPrefix: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    // Reduced timeout to 20 seconds to prevent long hangs
     const timeout = setTimeout(() => {
-      reject(new Error('Upload timeout after 45 seconds'))
-    }, 45000)
+      reject(new Error('Upload timeout after 20 seconds'))
+    }, 20000)
 
     uploadToFirebase(file, pathPrefix)
       .then((result) => {
@@ -144,5 +232,3 @@ export function getFallbackImageUrl(): string {
   ]
   return fallbackImages[Math.floor(Math.random() * fallbackImages.length)]
 }
-
-

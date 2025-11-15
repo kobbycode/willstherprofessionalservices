@@ -42,16 +42,15 @@ import { BlogPost } from '@/lib/blog'
 import { type User } from '@/lib/users'
 import { useAuth } from '@/lib/auth-context'
 import { uploadImage } from '@/lib/storage'
-import { getDb } from '@/lib/firebase'
-import { collection, onSnapshot } from 'firebase/firestore'
 import ServicesConfigComponent from './ServicesConfig'
+import HeroConfig from './HeroConfig'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
     <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
     {subtitle && <p className="text-gray-600 mt-1">{subtitle}</p>}
   </div>
-)
+);
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -320,11 +319,11 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'hero' && (
-              <HeroConfig config={config} onChange={saveConfig} />
+              <HeroConfigLocal config={config} onChange={saveConfig} />
             )}
 
             {activeTab === 'services' && (
-              <ServicesConfig config={config} onChange={saveConfig} />
+              <ServicesConfigLocal config={config} onChange={saveConfig} />
             )}
 
             {activeTab === 'about' && (
@@ -396,11 +395,9 @@ const AdminDashboard = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to log out?</p>
               </div>
             </div>
-            
             <p className="text-gray-700 mb-6">
               You will be signed out of your account and redirected to the login page. You will need to log in again to access the admin dashboard.
             </p>
-            
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowLogoutDialog(false)}
@@ -425,7 +422,6 @@ const AdminDashboard = () => {
 
 const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
   const { config } = useSiteConfig()
-  
   // Real statistics based on actual data
   const stats = [
     { 
@@ -496,13 +492,11 @@ const ServicesTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
 
   const confirmDeleteService = async () => {
     const { serviceId } = deleteDialog;
-    
     if (!serviceId) {
       toast.error('No service selected for deletion');
       setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
       return;
     }
-    
     try {
       // Make API call to delete the service
       const res = await fetch(`/api/services/${encodeURIComponent(serviceId)}`, {
@@ -511,15 +505,12 @@ const ServicesTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
           'Content-Type': 'application/json',
         }
       });
-      
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || `Failed to delete service: ${res.status}`);
       }
-      
       toast.success('Service deleted successfully!');
       setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
-      
       // Reload the page to reflect changes
       window.location.reload();
     } catch (error) {
@@ -684,7 +675,7 @@ const BlogManagement = () => {
     setLoading(true)
     try {
       // Prefer API to avoid client-side Firestore issues in some environments
-      const res = await fetch('/api/posts', { cache: 'no-store' })
+      const res = await fetch('/api/posts?publishedOnly=true', { cache: 'no-store' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { posts: list } = await res.json()
       setPosts(list)
@@ -763,21 +754,25 @@ const BlogManagement = () => {
     setShowPostModal(true)
   }
 
-  const withTimeout = async <T,>(promise: Promise<T>, ms = 10000): Promise<T> => {
+  const withTimeout = async <T,>(promise: Promise<T>, ms = 15000): Promise<T> => {
     return new Promise<T>((resolve, reject) => {
-      const t = setTimeout(() => reject(new Error('Request timed out')), ms)
+      const t = setTimeout(() => reject(new Error('Request timed out after 15 seconds')), ms)
       promise.then((v) => { clearTimeout(t); resolve(v) }).catch((e) => { clearTimeout(t); reject(e) })
     })
   }
 
   const savePost = async () => {
+    console.log('=== SAVE POST START ===')
     if (!form.title.trim() || !form.content.trim()) {
       toast.error('Title and content are required')
       return
     }
     setSavingPost(true)
     try {
+      console.log('Importing blog functions...')
       const { createPost, updatePost } = await import('@/lib/blog')
+      console.log('Blog functions imported successfully')
+      
       const payload = {
         title: form.title.trim(),
         excerpt: form.excerpt.trim(),
@@ -787,18 +782,25 @@ const BlogManagement = () => {
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
         status: form.status
       }
+      
+      console.log('Payload prepared:', payload)
+      
       if (editingPost) {
+        console.log('Updating existing post:', editingPost.id)
         await withTimeout(updatePost(editingPost.id, payload))
         setPosts(prev => prev.map(p => p.id === editingPost.id ? { ...p, ...payload } as any : p))
         toast.success('Post updated')
       } else {
+        console.log('Creating new post...')
         const id = await withTimeout(createPost(payload))
+        console.log('Post created with ID:', id)
         // Reload to ensure we get server timestamps and correct mapping
         await load()
         toast.success('Post created')
       }
       setShowPostModal(false)
     } catch (e) {
+      console.error('=== SAVE POST ERROR ===')
       console.error('Save post failed:', e)
       const msg = (e as any)?.message || 'Failed to save post'
       toast.error(msg)
@@ -867,7 +869,6 @@ const BlogManagement = () => {
           <span>New Post</span>
         </button>
         </div>
-        
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
@@ -1030,7 +1031,6 @@ const BlogManagement = () => {
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      
                       {post.status === 'published' ? (
                         <button 
                           className="text-yellow-600 hover:text-yellow-900"
@@ -1070,7 +1070,6 @@ const BlogManagement = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                       )}
-                      
                       <button 
                         className="text-red-600 hover:text-red-900"
                         title="Delete post"
@@ -1100,11 +1099,9 @@ const BlogManagement = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to delete this post?</p>
               </div>
             </div>
-            
             <p className="text-gray-700 mb-6">
               This action cannot be undone. The post will be permanently removed from the system.
             </p>
-            
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteDialog(null)}
@@ -1196,20 +1193,25 @@ const BlogManagement = () => {
 }
 
 const CategoriesManagement = () => {
-  const [items, setItems] = useState<{ id: string; name: string }[]>([])
+  const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [newName, setNewName] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+  const [newSubtitle, setNewSubtitle] = useState('')
+  const [newImageUrl, setNewImageUrl] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState('')
+  const [editingTitle, setEditingTitle] = useState('')
+  const [editingSubtitle, setEditingSubtitle] = useState('')
+  const [editingImageUrl, setEditingImageUrl] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const load = async () => {
     setLoading(true)
     try {
-      const { fetchCategoriesWithIds } = await import('@/lib/categories')
-      const list = await fetchCategoriesWithIds()
+      const { fetchServiceCategories } = await import('@/lib/categories')
+      const list = await fetchServiceCategories()
       setItems(list)
     } catch (e) {
       console.error('Failed to load categories:', e)
@@ -1222,77 +1224,244 @@ const CategoriesManagement = () => {
 
   useEffect(() => { load() }, [])
 
+  const handleImageUpload = async (file: File, isEditing = false) => {
+    try {
+      setIsUploading(true)
+      const { uploadImage } = await import('@/lib/storage')
+      const imageUrl = await uploadImage(file, `categories/${Date.now()}`)
+      if (isEditing) {
+        setEditingImageUrl(imageUrl)
+      } else {
+        setNewImageUrl(imageUrl)
+      }
+      toast.success('Image uploaded successfully!')
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      toast.error('Failed to upload image. Please try again.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Categories</h2>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="New category name"
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
-          />
-          <button
-            type="button"
-            onClick={async () => {
-              const name = newName.trim()
-              if (!name) return
-              setIsAdding(true)
-              try {
-                const { addCategory } = await import('@/lib/categories')
-                await addCategory(name)
-                setNewName('')
-                toast.success('Category added')
-                load()
-              } catch (e) {
-                toast.error((e as any)?.message || 'Failed to add')
-              } finally {
-                setIsAdding(false)
-              }
-            }}
-            disabled={isAdding}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
-          >
-            {isAdding ? 'Adding...' : 'Add'}
-          </button>
+      <ConfigHeader title="Service Categories" subtitle="Manage service categories with images, titles, and subtitles" />
+      {/* Add New Category Form */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Category</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Enter category title"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+              <textarea
+                value={newSubtitle}
+                onChange={(e) => setNewSubtitle(e.target.value)}
+                placeholder="Enter category subtitle"
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+              <input
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="Enter image URL or upload below"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+          <div className="space-y-4">
+            {/* Image Preview */}
+            {newImageUrl && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
+                <div className="border border-gray-200 rounded-lg p-2">
+                  <img 
+                    src={newImageUrl} 
+                    alt="Preview" 
+                    className="w-full h-48 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {/* Upload Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
+              <div className="flex items-center space-x-3">
+                <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                  <span className="text-sm font-medium">
+                    {isUploading ? 'Uploading...' : 'Upload Image'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleImageUpload(file)
+                    }}
+                    disabled={isUploading}
+                  />
+                </label>
+                {newImageUrl && (
+                  <button
+                    onClick={() => setNewImageUrl('')}
+                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                    disabled={isUploading}
+                  >
+                    Clear Image
+                  </button>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                const title = newTitle.trim()
+                if (!title) {
+                  toast.error('Title is required')
+                  return
+                }
+                setIsAdding(true)
+                try {
+                  const { addServiceCategory } = await import('@/lib/categories')
+                  await addServiceCategory({
+                    title,
+                    subtitle: newSubtitle.trim(),
+                    imageUrl: newImageUrl.trim()
+                  })
+                  setNewTitle('')
+                  setNewSubtitle('')
+                  setNewImageUrl('')
+                  toast.success('Category added')
+                  load()
+                } catch (e) {
+                  toast.error((e as any)?.message || 'Failed to add')
+                } finally {
+                  setIsAdding(false)
+                }
+              }}
+              disabled={isAdding || !newTitle.trim()}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+            >
+              {isAdding ? 'Adding...' : 'Add Category'}
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* Categories List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtitle</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
-                <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">Loading...</td></tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500 text-sm">Loading...</td></tr>
               ) : items.length === 0 ? (
-                <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">No categories</td></tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500 text-sm">No categories</td></tr>
               ) : items.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     {editingId === c.id ? (
-                      <input value={editingName} onChange={(e) => setEditingName(e.target.value)} className="px-2 py-1 text-sm border rounded w-full sm:w-auto" />
+                      <div className="flex items-center space-x-3">
+                        <input 
+                          value={editingImageUrl} 
+                          onChange={(e) => setEditingImageUrl(e.target.value)} 
+                          placeholder="Image URL" 
+                          className="px-2 py-1 text-sm border rounded w-full" 
+                        />
+                        <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+                          <span>Upload</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleImageUpload(file, true)
+                            }}
+                            disabled={isUploading}
+                          />
+                        </label>
+                      </div>
                     ) : (
-                      <span className="text-sm text-gray-900">{c.name}</span>
+                      <div className="w-16 h-16 rounded-lg overflow-hidden">
+                        <img 
+                          src={c.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=100&h=100&fit=crop&crop=center'} 
+                          alt={c.title} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=100&h=100&fit=crop&crop=center'
+                          }}
+                        />
+                      </div>
                     )}
                   </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium flex gap-2">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {editingId === c.id ? (
+                      <input 
+                        value={editingTitle} 
+                        onChange={(e) => setEditingTitle(e.target.value)} 
+                        className="px-2 py-1 text-sm border rounded w-full" 
+                      />
+                    ) : (
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{c.title}</div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {editingId === c.id ? (
+                      <textarea 
+                        value={editingSubtitle} 
+                        onChange={(e) => setEditingSubtitle(e.target.value)} 
+                        rows={2}
+                        className="px-2 py-1 text-sm border rounded w-full" 
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-500 max-w-xs line-clamp-2">{c.subtitle}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                     {editingId === c.id ? (
                       <>
                         <button 
                           className="text-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm" 
-                          disabled={isUpdating}
+                          disabled={isUpdating || !editingTitle.trim()}
                           onClick={async () => {
+                            if (!editingTitle.trim()) {
+                              toast.error('Title is required')
+                              return
+                            }
                             setIsUpdating(true)
                             try {
-                              const { updateCategory } = await import('@/lib/categories')
-                              await updateCategory(c.id, editingName.trim())
+                              const { updateServiceCategory } = await import('@/lib/categories')
+                              await updateServiceCategory(c.id, {
+                                title: editingTitle.trim(),
+                                subtitle: editingSubtitle.trim(),
+                                imageUrl: editingImageUrl.trim()
+                              })
                               toast.success('Updated')
                               setEditingId(null)
                               load()
@@ -1309,15 +1478,20 @@ const CategoriesManagement = () => {
                       </>
                     ) : (
                       <>
-                        <button className="text-blue-600 text-sm" onClick={() => { setEditingId(c.id); setEditingName(c.name) }}>Edit</button>
+                        <button className="text-blue-600 text-sm" onClick={() => { 
+                          setEditingId(c.id)
+                          setEditingTitle(c.title)
+                          setEditingSubtitle(c.subtitle)
+                          setEditingImageUrl(c.imageUrl)
+                        }}>Edit</button>
                         <button 
                           className="text-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm" 
                           disabled={isDeleting === c.id}
                           onClick={async () => {
                             setIsDeleting(c.id)
                             try {
-                              const { deleteCategory } = await import('@/lib/categories')
-                              await deleteCategory(c.id)
+                              const { deleteServiceCategory } = await import('@/lib/categories')
+                              await deleteServiceCategory(c.id)
                               toast.success('Deleted')
                               load()
                             } catch (e) {
@@ -1374,7 +1548,6 @@ const UserManagement = () => {
     try {
       const { deleteUser } = await import('@/lib/users')
       const success = await deleteUser(userId)
-      
       if (success) {
         setUsers(prev => prev.filter(user => user.id !== userId))
         toast.success('User deleted successfully')
@@ -1423,7 +1596,6 @@ const UserManagement = () => {
                          user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter
     const matchesRole = roleFilter === 'all' || user.role === roleFilter
-    
     return matchesSearch && matchesStatus && matchesRole
   })
 
@@ -1492,7 +1664,6 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1504,7 +1675,6 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1516,7 +1686,6 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-        
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1546,7 +1715,6 @@ const UserManagement = () => {
               />
             </div>
           </div>
-          
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Filter by Status</label>
             <select
@@ -1560,7 +1728,6 @@ const UserManagement = () => {
               <option value="pending">Pending</option>
             </select>
           </div>
-          
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Filter by Role</label>
             <select
@@ -1706,11 +1873,9 @@ const UserManagement = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to delete this user?</p>
               </div>
             </div>
-            
             <p className="text-gray-700 mb-6">
               Are you sure you want to delete <strong>{showDeleteDialog.userName}</strong>? This action cannot be undone.
             </p>
-            
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteDialog(null)}
@@ -1771,7 +1936,6 @@ const Analytics = () => {
         const { fetchCategories } = await import('@/lib/categories')
         const { getUserStats } = await import('@/lib/users')
         const { useSiteConfig } = await import('@/lib/site-config')
-        
         const [posts, categories, userStats] = await Promise.all([
           fetchPosts(false), // Get all posts including drafts
           fetchCategories(),
@@ -1784,7 +1948,6 @@ const Analytics = () => {
         // Calculate blog statistics
         const publishedPosts = posts.filter(p => p.status === 'published')
         const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0)
-        
         // Get popular posts (top 5 by views)
         const popularPosts = posts
           .filter(p => p.status === 'published')
@@ -1820,7 +1983,6 @@ const Analytics = () => {
         }
       }
     }
-    
     loadAnalytics()
     return () => { active = false }
   }, [])
@@ -1913,7 +2075,6 @@ const Analytics = () => {
               </div>
             </div>
           </div>
-      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Blog Statistics */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
@@ -2288,20 +2449,26 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
 }
 
 // Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
-const HeroConfig = ({ config, onChange }: any) => {
+// Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
+const HeroConfigLocal = ({ config, onChange }: any) => {
   const slides = config.heroSlides || []
   const [saving, setSaving] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [newSlideTitle, setNewSlideTitle] = useState('')
-  const [newSlideSubtitle, setNewSlideSubtitle] = useState('')
-  const [newSlideFile, setNewSlideFile] = useState<File | null>(null)
-  const [newSlideUrl, setNewSlideUrl] = useState('')
   const [creatingSlide, setCreatingSlide] = useState(false)
   const [creationTimeout, setCreationTimeout] = useState<NodeJS.Timeout | null>(null)
   const [localSlides, setLocalSlides] = useState<any[]>(slides)
   const [updatingSlideId, setUpdatingSlideId] = useState<string | null>(null)
   const [deletingSlideId, setDeletingSlideId] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState<{ slideId: string; slideTitle: string } | null>(null)
+  // Add missing state variables for the modal
+  const [newSlideData, setNewSlideData] = useState({
+    imageUrl: '',
+    title: '',
+    subtitle: '',
+    ctaLabel: 'Get Started Today',
+    ctaHref: '#contact'
+  })
+  const [isUploadingNewSlideImage, setIsUploadingNewSlideImage] = useState(false)
 
   // Sync local slides with config slides (from Firebase real-time updates)
   useEffect(() => {
@@ -2312,7 +2479,15 @@ const HeroConfig = ({ config, onChange }: any) => {
         const orderB = b.order ?? 0
         return orderA - orderB
       })
-      setLocalSlides(sortedSlides)
+      // Only update if the slides are actually different to prevent infinite loops
+      setLocalSlides(prevSlides => {
+        // Check if the slides are the same by comparing length and IDs
+        if (prevSlides.length === sortedSlides.length) {
+          const sameIds = prevSlides.every((slide, index) => slide.id === sortedSlides[index].id)
+          if (sameIds) return prevSlides
+        }
+        return sortedSlides
+      })
     }
   }, [slides])
 
@@ -2333,20 +2508,18 @@ const HeroConfig = ({ config, onChange }: any) => {
   const setLocal = (id: string, key: string, value: any) => {
     setLocalSlides((prev) => prev.map((s) => (s.id === id ? { ...s, [key]: value } : s)))
   }
-  
   const createNewSlide = async () => {
     if (creatingSlide) return
     
     // Require title
-    if (!newSlideTitle.trim()) {
+    if (!newSlideData.title.trim()) {
       toast.error('Please enter a title for the slide')
       return
     }
     
     // Require at least an image file or URL
-    const hasUrl = newSlideUrl.trim() !== ''
-    const hasFile = !!newSlideFile
-    if (!hasUrl && !hasFile) {
+    const hasUrl = newSlideData.imageUrl.trim() !== ''
+    if (!hasUrl) {
       toast.error('Please select an image or provide an image URL')
       return
     }
@@ -2356,31 +2529,12 @@ const HeroConfig = ({ config, onChange }: any) => {
       console.log('Starting slide creation...', new Date().toISOString())
       const startTime = Date.now()
       
-      let imageUrl = newSlideUrl.trim()
-      
-      // Upload image if file is provided (parallel with optimistic UI update)
-      if (!imageUrl && newSlideFile) {
-        console.log('Uploading image file:', newSlideFile.name)
-        const uploadToast = toast.loading('Uploading image...')
-        try {
-          imageUrl = await uploadImage(newSlideFile, `hero-slides/${Date.now()}`)
-          console.log('Image uploaded in', Date.now() - startTime, 'ms')
-          toast.dismiss(uploadToast)
-        } catch (uploadError) {
-          console.error('Image upload failed:', uploadError)
-          toast.dismiss(uploadToast)
-          // Use a placeholder image as fallback instead of failing
-          imageUrl = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop'
-          toast.warning('Using placeholder image - upload failed')
-        }
-      }
-      
       const slideData = {
-        imageUrl,
-        title: newSlideTitle.trim(),
-        subtitle: newSlideSubtitle.trim(),
-        ctaLabel: 'Get Started Today',
-        ctaHref: '#contact'
+        imageUrl: newSlideData.imageUrl,
+        title: newSlideData.title.trim(),
+        subtitle: newSlideData.subtitle.trim(),
+        ctaLabel: newSlideData.ctaLabel,
+        ctaHref: newSlideData.ctaHref
       }
       
       console.log('Creating slide via API...', slideData)
@@ -2409,20 +2563,20 @@ const HeroConfig = ({ config, onChange }: any) => {
       const newSlide = await res.json()
       console.log('Slide created successfully in', Date.now() - startTime, 'ms total')
       
-      // Optimistic UI update - add slide immediately
-      setLocalSlides(prev => {
-        const updated = [...prev, newSlide]
-        return updated.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      })
+      // Don't do optimistic UI update - let the real-time subscription handle it
+      // The real-time subscription will automatically update the UI when the data changes in Firebase
       
       toast.success('Slide created successfully!')
       
       // Close modal and reset form
       setIsAddModalOpen(false)
-      setNewSlideTitle('')
-      setNewSlideSubtitle('')
-      setNewSlideFile(null)
-      setNewSlideUrl('')
+      setNewSlideData({
+        imageUrl: '',
+        title: '',
+        subtitle: '',
+        ctaLabel: 'Get Started Today',
+        ctaHref: '#contact'
+      })
       
     } catch (e) {
       console.error('Failed to create slide:', e)
@@ -2437,8 +2591,6 @@ const HeroConfig = ({ config, onChange }: any) => {
     }
   }
 
-  
-
   const updateSlide = async (slideId: string, updates: any) => {
     try {
       setUpdatingSlideId(slideId)
@@ -2447,18 +2599,12 @@ const HeroConfig = ({ config, onChange }: any) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
       })
-      
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
         throw new Error(errorData.error || `Failed to update slide: ${res.status}`)
       }
-      
-      // Update local state immediately for better UX
-      setLocalSlides(prev => prev.map(s => 
-        s.id === slideId ? { ...s, ...updates, updatedAt: new Date().toISOString() } : s
-      ))
-      
-      // Real-time Firestore subscription will update config automatically
+      // Don't do optimistic UI update - let the real-time subscription handle it
+      // The real-time subscription will automatically update the UI when the data changes in Firebase
       toast.success('Slide updated successfully! Changes will appear on the website immediately.')
     } catch (e) {
       console.error('Failed to update slide:', e)
@@ -2474,36 +2620,27 @@ const HeroConfig = ({ config, onChange }: any) => {
   const deleteSlide = async (slideId: string) => {
     try {
       setDeletingSlideId(slideId)
-      
       // Set a timeout to prevent infinite waiting (30 seconds)
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Delete operation timed out')), 30000)
       )
-      
       const deletePromise = fetch(`/api/slides/${slideId}`, {
         method: 'DELETE'
       })
-      
       // Race between delete and timeout
       const res = await Promise.race([deletePromise, timeoutPromise]) as Response
-      
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
         throw new Error(errorData.error || `Failed to delete slide: ${res.status}`)
       }
-      
-      // Update local state immediately for better UX
-      setLocalSlides(prev => prev.filter(s => s.id !== slideId))
-      
-      // Real-time Firestore subscription will update config automatically
+      // Don't do optimistic UI update - let the real-time subscription handle it
+      // The real-time subscription will automatically update the UI when the data changes in Firebase
       toast.success('Slide deleted successfully!')
       setShowDeleteDialog(null)
     } catch (e) {
       console.error('Failed to delete slide:', e)
       const errorMessage = e instanceof Error ? e.message : 'Failed to delete slide'
       toast.error(errorMessage)
-      // Revert optimistic update on error
-      setLocalSlides(slides)
     } finally {
       setDeletingSlideId(null)
     }
@@ -2513,10 +2650,28 @@ const HeroConfig = ({ config, onChange }: any) => {
     try {
       const imageUrl = await uploadImage(file, `hero-slides/${slideId}`)
       await updateSlide(slideId, { imageUrl })
-      setLocal(slideId, 'imageUrl', imageUrl)
-      } catch (e) {
+      // Don't update local state directly - let the real-time subscription handle it
+    } catch (e) {
       console.error('Failed to upload image:', e)
-        toast.error('Failed to upload image')
+      toast.error('Failed to upload image')
+    }
+  }
+
+  // Add the missing handleSlideImageUpload function
+  const handleSlideImageUpload = async (file: File) => {
+    if (!file) return
+    
+    setIsUploadingNewSlideImage(true)
+    
+    try {
+      const imageUrl = await uploadImage(file, `hero/slides/slide-${Date.now()}`)
+      setNewSlideData(prev => ({ ...prev, imageUrl }))
+      toast.success('Slide image uploaded successfully!')
+    } catch (error) {
+      console.error('Failed to upload slide image:', error)
+      toast.error('Failed to upload image. Please try again.')
+    } finally {
+      setIsUploadingNewSlideImage(false)
     }
   }
 
@@ -2524,7 +2679,6 @@ const HeroConfig = ({ config, onChange }: any) => {
     setLocal(slideId, 'imageUrl', '')
     await updateSlide(slideId, { imageUrl: '' })
   }
-  
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Hero Carousel" subtitle="Manage images and texts for the hero slider. Changes are saved to Firebase and appear on the website in real-time." />
@@ -2546,7 +2700,6 @@ const HeroConfig = ({ config, onChange }: any) => {
               <div className="space-y-4">
             <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
-                  
                   {/* Image Preview */}
                   {slide.imageUrl && (
                     <div className="mb-3">
@@ -2560,7 +2713,6 @@ const HeroConfig = ({ config, onChange }: any) => {
                       />
             </div>
                   )}
-                  
                   {/* Upload Section */}
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -2585,7 +2737,6 @@ const HeroConfig = ({ config, onChange }: any) => {
                         </button>
                       )}
                     </div>
-                    
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Or Image URL</label>
                       <input
@@ -2615,7 +2766,6 @@ const HeroConfig = ({ config, onChange }: any) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
                   <textarea
@@ -2627,7 +2777,6 @@ const HeroConfig = ({ config, onChange }: any) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
-                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">CTA Label</label>
@@ -2688,7 +2837,6 @@ const HeroConfig = ({ config, onChange }: any) => {
                     </button>
                   </div>
                 </div>
-                
                 {/* Actions */}
                 <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                   {updatingSlideId === slide.id && (
@@ -2720,7 +2868,6 @@ const HeroConfig = ({ config, onChange }: any) => {
           </div>
           ))
         )}
-        
         {/* Add New Slide Button */}
         <div className="flex justify-center">
           <button 
@@ -2735,12 +2882,152 @@ const HeroConfig = ({ config, onChange }: any) => {
             </div>
           </button>
         </div>
+
+        {/* Add New Slide Modal */}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Add New Hero Slide</h3>
+                  <button 
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Image Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image *</label>
+                    {newSlideData.imageUrl ? (
+                      <div className="mb-3">
+                        <img 
+                          src={newSlideData.imageUrl}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                        />
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-3">
+                        <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                        <p className="mt-2 text-sm text-gray-600">No image selected</p>
+                      </div>
+                    )}
+                    
+                    <div className="flex space-x-3">
+                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                        <span className="text-sm font-medium">
+                          {isUploadingNewSlideImage ? 'Uploading...' : 'Upload Image'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleSlideImageUpload(file)
+                          }}
+                          disabled={isUploadingNewSlideImage}
+                        />
+                      </label>
+                      
+                      {newSlideData.imageUrl && (
+                        <button
+                          onClick={() => setNewSlideData(prev => ({ ...prev, imageUrl: '' }))}
+                          className="px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          disabled={isUploadingNewSlideImage}
+                        >
+                          Clear Image
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                    <input
+                      type="text"
+                      value={newSlideData.title}
+                      onChange={(e) => setNewSlideData(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Enter slide title"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  {/* Subtitle */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
+                    <textarea
+                      value={newSlideData.subtitle}
+                      onChange={(e) => setNewSlideData(prev => ({ ...prev, subtitle: e.target.value }))}
+                      placeholder="Enter slide subtitle"
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  {/* CTA Label */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Label</label>
+                    <input
+                      type="text"
+                      value={newSlideData.ctaLabel}
+                      onChange={(e) => setNewSlideData(prev => ({ ...prev, ctaLabel: e.target.value }))}
+                      placeholder="Get Started Today"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  {/* CTA Link */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Link</label>
+                    <input
+                      type="text"
+                      value={newSlideData.ctaHref}
+                      onChange={(e) => setNewSlideData(prev => ({ ...prev, ctaHref: e.target.value }))}
+                      placeholder="#contact"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => setIsAddModalOpen(false)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={createNewSlide}
+                      disabled={creatingSlide || !newSlideData.title.trim() || (!newSlideData.imageUrl.trim())}
+                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {creatingSlide ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Creating...</span>
+                        </>
+                      ) : (
+                        <span>Create Slide</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   )
 }
 
-const ServicesConfig = ({ config, onChange }: any) => {
+const ServicesConfigLocal = ({ config, onChange }: any) => {
   const [services, setServices] = useState<any[]>([])
   const [originalServices, setOriginalServices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -2764,53 +3051,65 @@ const ServicesConfig = ({ config, onChange }: any) => {
   const [isUploadingNewServiceImage, setIsUploadingNewServiceImage] = useState(false)
   // Reference for scrolling to new services
   const serviceRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
-  
   const handleServiceImageUpload = async (serviceId: string, file: File) => {
     if (!file) return
-    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file (JPEG, PNG, GIF, etc.)')
+      return
+    }
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image file is too large. Please select an image smaller than 10MB.')
+      return
+    }
     // Set uploading state
     setUploadingServices(prev => ({ ...prev, [serviceId]: true }))
-    
     try {
       const imageUrl = await uploadImage(file, `services/${serviceId}`)
       await updateService(serviceId, 'imageUrl', imageUrl)
       toast.success('Service image uploaded successfully!')
     } catch (error) {
       console.error('Failed to upload service image:', error)
-      toast.error('Failed to upload image. Please try again.')
+      toast.error(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       // Reset uploading state
       setUploadingServices(prev => ({ ...prev, [serviceId]: false }))
     }
   }
-  
   // Add the missing function for handling new service image uploads
   const handleNewServiceImageUpload = async (file: File) => {
     if (!file) return
-    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file (JPEG, PNG, GIF, etc.)')
+      return
+    }
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image file is too large. Please select an image smaller than 10MB.')
+      return
+    }
     // Set uploading state
     setIsUploadingNewServiceImage(true)
-    
     try {
       const imageUrl = await uploadImage(file, `services/new-${Date.now()}`)
       setNewServiceData(prev => ({ ...prev, imageUrl }))
       toast.success('Service image uploaded successfully!')
     } catch (error) {
       console.error('Failed to upload service image:', error)
-      toast.error('Failed to upload image. Please try again.')
+      toast.error(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       // Reset uploading state
       setIsUploadingNewServiceImage(false)
     }
   }
-  
   const removeService = async (serviceId: string) => {
     try {
       const res = await fetch(`/api/services/${serviceId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       })
-      
       if (!res.ok) throw new Error('Failed to delete service')
       toast.success('Service removed successfully!')
       setServices(prev => prev.filter(s => s.id !== serviceId))
@@ -2819,20 +3118,16 @@ const ServicesConfig = ({ config, onChange }: any) => {
       toast.error('Failed to remove service. Please try again.')
     }
   }
-  
   console.log('ServicesConfig rendered with deleteDialog state:', deleteDialog)
-  
   // Load services from Firestore
   useEffect(() => {
     console.log('ServicesConfig component mounted, loading services...')
     loadServices()
-    
     // Return cleanup function
     return () => {
       console.log('Admin services: Cleaning up')
     }
   }, [])
-  
   const loadServices = async () => {
     try {
       console.log('Loading services...')
@@ -2850,7 +3145,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
       setLoading(false)
     }
   }
-  
   // Scroll to a specific service
   const scrollToService = (serviceId: string) => {
     setTimeout(() => {
@@ -2865,12 +3159,10 @@ const ServicesConfig = ({ config, onChange }: any) => {
       }
     }, 100)
   }
-  
   // Update service in local state only (no auto-save)
   const updateService = (id: string, key: string, value: string) => {
     setServices(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
   }
-  
   const addService = async () => {
     // Open the modal form instead of creating a service immediately
     setNewServiceData({
@@ -2881,7 +3173,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
     })
     setIsAddServiceModalOpen(true)
   }
-  
   // Create a new function to actually save the new service
   const createNewService = async (shouldCloseModal = true) => {
     try {
@@ -2890,32 +3181,29 @@ const ServicesConfig = ({ config, onChange }: any) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newServiceData)
       })
-      
-      if (!res.ok) throw new Error('Failed to create')
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to create service: ${res.status} ${res.statusText}`)
+      }
       const newService = await res.json()
       toast.success('Service created!')
-      
       // Only close modal if requested
       if (shouldCloseModal) {
         setIsAddServiceModalOpen(false)
       }
-      
       // Reload services to show the new one
       await loadServices()
-      
       // After loading, scroll to the new service
       setTimeout(() => {
         scrollToService(newService.id)
       }, 500)
     } catch (error) {
       console.error('Error creating service:', error)
-      toast.error('Failed to create service')
+      toast.error(`Failed to create service: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
-  
   const migrateHardcodedServices = async () => {
     if (!confirm('This will import the default services into the database. Continue?')) return
-    
     setIsMigrating(true)
     try {
       console.log('Starting migration...')
@@ -2939,7 +3227,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       })
-      
       if (!res.ok) throw new Error('Failed to delete service')
       toast.success('Service removed successfully!')
       setServices(prev => prev.filter(s => s.id !== deleteDialog.serviceId))
@@ -2950,7 +3237,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
       setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
     }
   }
-  
   // Save all modified services
   const saveAllServices = async () => {
     setIsSaving(true)
@@ -2959,23 +3245,19 @@ const ServicesConfig = ({ config, onChange }: any) => {
       const promises = services.map(async (service) => {
         const originalService = originalServices.find(s => s.id === service.id)
         if (!originalService) return // New service, will be handled separately
-        
         // Check if service has changed
         const hasChanged = Object.keys(service).some(key => 
           service[key] !== originalService[key]
         )
-        
         if (hasChanged) {
           const res = await fetch(`/api/services/${service.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(service)
           })
-          
           if (!res.ok) throw new Error(`Failed to update service ${service.id}`)
         }
       })
-      
       await Promise.all(promises)
       setOriginalServices(JSON.parse(JSON.stringify(services))) // Update original services
       toast.success('All changes saved successfully!')
@@ -2986,12 +3268,10 @@ const ServicesConfig = ({ config, onChange }: any) => {
       setIsSaving(false)
     }
   }
-  
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Services" subtitle="Manage services shown on the homepage" />
-      
       {/* Save Button */}
       <div className="mb-6 flex justify-end">
         <button
@@ -3017,7 +3297,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
           )}
         </button>
       </div>
-      
       {/* Migration notice */}
       {services.length === 0 && !loading && (
         <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -3047,7 +3326,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
           </div>
         </div>
       )}
-      
       {/* Add Service Button */}
       <div className="flex justify-center mb-6">
         <button 
@@ -3062,7 +3340,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
           </div>
         </button>
       </div>
-      
       <div className="space-y-4">
         {services.map((s: any) => (
           <div 
@@ -3082,7 +3359,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea 
@@ -3093,7 +3369,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                   <input 
@@ -3110,7 +3385,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
-                  
                   {/* Image Preview */}
                   {s.imageUrl && (
                     <div className="mb-3">
@@ -3124,7 +3398,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       />
                     </div>
                   )}
-                  
                   {/* Upload Section */}
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -3153,7 +3426,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                         </button>
                       )}
                     </div>
-                    
                     {/* URL Input as fallback */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
@@ -3169,7 +3441,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 </div>
               </div>
             </div>
-            
             {/* Remove Button */}
             <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
               <button 
@@ -3184,7 +3455,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
           </div>
         ))}
       </div>
-      
       {/* Notification for new service added */}
       {services.length > 0 && (
         <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
@@ -3220,7 +3490,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
           </button>
         </div>
       )}
-      
       {/* Add Service Modal */}
       {isAddServiceModalOpen && (
         <div 
@@ -3247,7 +3516,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Service Title *</label>
@@ -3258,7 +3526,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea 
@@ -3269,7 +3536,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                   <input 
@@ -3279,10 +3545,8 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
-                  
                   {/* Image Preview */}
                   {newServiceData.imageUrl && (
                     <div className="mb-3">
@@ -3296,7 +3560,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       />
                     </div>
                   )}
-                  
                   {/* Upload Section */}
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -3325,7 +3588,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                         </button>
                       )}
                     </div>
-                    
                     {/* URL Input as fallback */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
@@ -3341,7 +3603,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 </div>
               </div>
             </div>
-            
             <div className="p-6 border-t border-gray-200">
               <div className="flex space-x-3">
                 <button
@@ -3387,7 +3648,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
           </motion.div>
         </div>
       )}
-      
       {/* Delete Confirmation Dialog */}
       {deleteDialog.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -3430,14 +3690,10 @@ const ServicesConfig = ({ config, onChange }: any) => {
 const AboutConfig = ({ config, onChange }: any) => {
   const about = config.about || { title: '', content: '', imageUrl: '' }
   const [isUploading, setIsUploading] = useState(false)
-  
   const update = (key: string, value: string) => onChange({ ...config, about: { ...about, [key]: value } })
-  
   const handleAboutImageUpload = async (file: File) => {
     if (!file) return
-    
     setIsUploading(true)
-    
     try {
       const { uploadImage } = await import('@/lib/storage')
       const imageUrl = await uploadImage(file, `about/about-${Date.now()}`)
@@ -3467,7 +3723,6 @@ const AboutConfig = ({ config, onChange }: any) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
               />
             </div>
-            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
               <textarea 
@@ -3479,12 +3734,10 @@ const AboutConfig = ({ config, onChange }: any) => {
               />
             </div>
           </div>
-          
           {/* Image Section */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">About Image</label>
-              
               {/* Image Preview */}
               {about.imageUrl && (
                 <div className="mb-3">
@@ -3498,7 +3751,6 @@ const AboutConfig = ({ config, onChange }: any) => {
                   />
                 </div>
               )}
-              
               {/* Upload Section */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
@@ -3527,7 +3779,6 @@ const AboutConfig = ({ config, onChange }: any) => {
                     </button>
                   )}
                 </div>
-                
                 {/* URL Input as fallback */}
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
@@ -3562,37 +3813,29 @@ const NavigationConfig = ({ config, onChange }: any) => {
       { name: 'Terms of Service', href: '/terms-of-service' }
     ]
   }
-  
   const update = (key: string, value: any) => onChange({ ...config, navigation: { ...navigation, [key]: value } })
-  
   const updateMainLink = (index: number, field: string, value: string) => {
     const newMain = [...navigation.main]
     newMain[index] = { ...newMain[index], [field]: value }
     update('main', newMain)
   }
-  
   const updateLegalLink = (index: number, field: string, value: string) => {
     const newLegal = [...navigation.legal]
     newLegal[index] = { ...newLegal[index], [field]: value }
     update('legal', newLegal)
   }
-  
   const addMainLink = () => {
     update('main', [...navigation.main, { name: 'New Link', href: '#' }])
   }
-  
   const addLegalLink = () => {
     update('legal', [...navigation.legal, { name: 'New Legal Link', href: '#' }])
   }
-  
   const removeMainLink = (index: number) => {
     update('main', navigation.main.filter((_: any, i: number) => i !== index))
   }
-  
   const removeLegalLink = (index: number) => {
     update('legal', navigation.legal.filter((_: any, i: number) => i !== index))
   }
-  
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Navigation" subtitle="Manage website navigation links" />
@@ -3632,7 +3875,6 @@ const NavigationConfig = ({ config, onChange }: any) => {
             </button>
           </div>
         </div>
-        
         {/* Legal Navigation */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Navigation</h3>
@@ -3701,7 +3943,6 @@ const FooterConfig = ({ config, onChange }: any) => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Footer Configuration" subtitle="Manage footer content, links, and social media" />
-      
       <div className="space-y-6">
         {/* Basic Information */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -3972,3 +4213,5 @@ const GalleryConfig = ({ config, onChange }: any) => {
 }
 
 export default AdminDashboard
+
+

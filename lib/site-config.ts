@@ -200,14 +200,20 @@ export function useSiteConfig() {
 			
 			// Load slides separately
 			const slidesRes = await fetch('/api/slides', { cache: 'no-store' })
-			if (!slidesRes.ok) throw new Error(`HTTP ${slidesRes.status}`)
-			const { slides } = await slidesRes.json()
+			// Even if slides fail to load, continue with the config
+			let slides = []
+			if (slidesRes.ok) {
+				const slidesData = await slidesRes.json()
+				slides = slidesData.slides || []
+			} else {
+				console.warn('Failed to load slides, using empty array')
+			}
 			
 			if (remoteConfig && typeof remoteConfig === 'object') {
 				const merged = { 
 					...defaultSiteConfig, 
 					...remoteConfig,
-					heroSlides: slides || []
+					heroSlides: slides
 				}
 				setConfig(merged)
 				saveSiteConfigToLocal(merged)
@@ -215,7 +221,14 @@ export function useSiteConfig() {
 				console.log('Site config loaded from server:', merged)
 			}
 		} catch (error) {
-			console.warn('Failed to load site config from server:', error)
+			console.warn('Failed to load site config from server, using local cache or defaults:', error)
+			// Try to load from local storage as fallback
+			const cached = loadSiteConfigFromLocal()
+			if (cached && cached !== defaultSiteConfig) {
+				setConfig(cached)
+			}
+		} finally {
+			setIsLoaded(true)
 		}
 	}, [])
 
@@ -228,28 +241,30 @@ export function useSiteConfig() {
 		// Always fetch fresh config from server immediately
 		setTimeout(loadFromServer, 0)
 
-		// Real-time updates from Firestore for slides
+		// Real-time updates from Firestore for slides (only if Firebase is available)
 		let unsubscribe: (() => void) | undefined
 		try {
 			const db = getDb()
-			const slidesQuery = query(collection(db, 'heroSlides'), orderBy('order', 'asc'))
-			unsubscribe = onSnapshot(slidesQuery, (snapshot) => {
-				const slides = snapshot.docs.map(doc => ({
-					id: doc.id,
-					...(doc.data() as any)
-				})) as HeroSlide[]
-				
-				setConfig((prev) => {
-					const next = { ...prev, heroSlides: slides }
-					saveSiteConfigToLocal(next)
-					return next
+			if (db) {
+				const slidesQuery = query(collection(db, 'heroSlides'), orderBy('order', 'asc'))
+				unsubscribe = onSnapshot(slidesQuery, (snapshot) => {
+					const slides = snapshot.docs.map(doc => ({
+						id: doc.id,
+						...(doc.data() as any)
+					})) as HeroSlide[]
+					
+					setConfig((prev) => {
+						const next = { ...prev, heroSlides: slides }
+						saveSiteConfigToLocal(next)
+						return next
+					})
+					setLastFetch(Date.now())
+				}, (error) => {
+					console.warn('Realtime slides subscription error, falling back to polling:', error)
 				})
-				setLastFetch(Date.now())
-			}, (error) => {
-				console.warn('Realtime slides subscription error, falling back to polling:', error)
-			})
-		} catch {
-			// ignore subscription errors (e.g., server-side)
+			}
+		} catch (error) {
+			console.warn('Firestore subscription not available, using polling only:', error)
 		}
 
 		// Lightweight periodic refresh as a fallback safety net
@@ -272,10 +287,13 @@ export function useSiteConfig() {
 				if (typeof window === 'undefined') return
 				
 				const db = getDb()
-				const ref = doc(db, 'config', 'hero')
-				await setDoc(ref, next, { merge: true })
-			} catch {
-				// no-op
+				if (db) {
+					const ref = doc(db, 'config', 'hero')
+					await setDoc(ref, next, { merge: true })
+				}
+			} catch (error) {
+				console.warn('Failed to save config to Firestore:', error)
+				// Continue without saving to Firestore
 			}
 		})()
 	}, [])

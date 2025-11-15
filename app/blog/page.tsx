@@ -50,13 +50,15 @@ const BlogPage = () => {
     try {
       // Fetch posts and categories in parallel
       const [posts, categoriesData] = await Promise.all([
-        fetchPosts(true, 100),
+        fetchPosts(true, 100), // This should fetch only published posts
         import('@/lib/categories').then(m => m.fetchCategories())
       ])
       
-      // Filter to only show published posts
-      const publishedPosts = posts.filter(post => post.status === 'published')
-      setBlogPosts(publishedPosts)
+      // Log for debugging
+      console.log('Fetched published posts:', posts.length)
+      console.log('Published posts data:', posts)
+      
+      setBlogPosts(posts)
       
       // Set categories with 'All' as first option
       setCategories(['All', ...categoriesData])
@@ -216,7 +218,7 @@ const BlogPage = () => {
                       src={sortedPosts[0].image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop&crop=center'}
                       alt={sortedPosts[0].title}
                       className="w-full h-full object-cover"
-                      loading="lazy"
+                      loading="eager"
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop&crop=center'
                       }}
@@ -245,7 +247,7 @@ const BlogPage = () => {
                       {sortedPosts[0].title}
                     </h2>
                     <p className="text-secondary-600 mb-6 leading-relaxed">
-                      {sortedPosts[0].excerpt}
+                      {sortedPosts[0].excerpt || 'No excerpt available'}
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 text-sm text-secondary-500">
@@ -264,13 +266,14 @@ const BlogPage = () => {
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                <h3 className="text-xl font-semibold text-secondary-600 mb-2">No articles found</h3>
-                <p className="text-secondary-500">Try adjusting your search or category filter.</p>
+                <h3 className="text-xl font-semibold text-secondary-600 mb-2">No published articles yet</h3>
+                <p className="text-secondary-500 mb-4">Check back later for our latest cleaning tips and industry insights.</p>
+                <p className="text-sm text-secondary-400">Admins: Make sure to publish posts in the admin panel for them to appear here.</p>
               </div>
             )}
           </div>
 
-          {/* Blog Grid */}
+          {/* Blog Grid - Exclude featured post */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {[...Array(6)].map((_, index) => (
@@ -285,19 +288,27 @@ const BlogPage = () => {
                 </div>
               ))}
             </div>
+          ) : sortedPosts.length <= 1 ? (
+            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+              <h3 className="text-xl font-semibold text-secondary-600 mb-2">No more articles</h3>
+              <p className="text-secondary-500">This is all we have for now. Check back later for more content!</p>
+            </div>
           ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {sortedPosts.map((post, index) => (
+            {sortedPosts.slice(1).map((post, index) => (
                 <article
                 key={post.id}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="relative h-48">
                   <img
-                    src={post.image}
+                    src={post.image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'}
                     alt={post.title}
                     className="w-full h-full object-cover"
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'
+                      }}
                   />
                   <div className="absolute top-3 left-3">
                       <span className="bg-secondary-100 text-secondary-700 px-3 py-1 rounded text-xs font-medium">
@@ -320,7 +331,7 @@ const BlogPage = () => {
                     {post.title}
                   </h3>
                   <p className="text-secondary-600 text-sm mb-4 line-clamp-3">
-                    {post.excerpt}
+                    {post.excerpt || 'No excerpt available'}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-xs text-secondary-500">

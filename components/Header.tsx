@@ -32,10 +32,9 @@ const Header = () => {
           element.scrollIntoView({ behavior: 'smooth' })
         }
       }
-    } else {
-      // For page links, navigate directly
-      router.push(item.href)
     }
+    // For page links, we're using Link components which handle navigation directly
+    // Just close the mobile menu if it's open
     setIsMenuOpen(false)
   }
 
@@ -81,14 +80,26 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-1">
               {navigation.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => handleNavigation(item)}
-                  className="px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group"
-                >
-                  {item.name}
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
-                </button>
+                item.isHash ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleNavigation(item)}
+                    className="px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group"
+                  >
+                    {item.name}
+                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+                  </button>
+                ) : (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+                  </Link>
+                )
               ))}
             </nav>
 
@@ -120,13 +131,24 @@ const Header = () => {
           <div className="container-custom">
             <nav className="py-3 sm:py-4 space-y-1 sm:space-y-2">
               {navigation.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => handleNavigation(item)}
-                  className="block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200"
-                >
-                  {item.name}
-                </button>
+                item.isHash ? (
+                  <button
+                    key={item.name}
+                    onClick={() => handleNavigation(item)}
+                    className="block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )
               ))}
               <div className="pt-3 sm:pt-4 border-t border-primary-500">
                 <button

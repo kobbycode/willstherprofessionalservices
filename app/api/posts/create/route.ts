@@ -16,42 +16,6 @@ function estimateReadTime(text: string): string {
   return `${minutes} min read`
 }
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const publishedOnly = searchParams.get('publishedOnly') === 'true'
-    
-    const db = await getAdminDb()
-    let snap
-    
-    try {
-      let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('posts')
-      if (publishedOnly) {
-        query = query.where('status', '==', 'published')
-      }
-      query = query.orderBy('createdAt', 'desc').limit(50)
-      
-      snap = await query.get()
-    } catch (orderError) {
-      console.warn('Failed to order posts, trying without orderBy:', orderError)
-      let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('posts')
-      if (publishedOnly) {
-        query = query.where('status', '==', 'published')
-      }
-      query = query.limit(50)
-      
-      snap = await query.get()
-    }
-    
-    const posts = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-    console.log('API: Fetched', posts.length, 'posts', publishedOnly ? '(published only)' : '(all)')
-    return NextResponse.json({ posts })
-  } catch (e) {
-    console.error('Failed to load posts (admin):', e)
-    return NextResponse.json({ error: 'Failed to load posts' }, { status: 500 })
-  }
-}
-
 export async function POST(request: Request) {
   try {
     const db = await getAdminDb()

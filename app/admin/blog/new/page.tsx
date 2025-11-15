@@ -14,12 +14,15 @@ import {
   ListOrdered,
   Quote,
   Link as LinkIcon,
-  Edit
+  Edit,
+  EyeOff
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import RichTextEditor from '@/components/RichTextEditor'
 import { createPost } from '@/lib/blog'
+import { uploadImageWithTimeout } from '@/lib/storage'
 import { formatDateHuman } from '@/lib/date'
 import toast from 'react-hot-toast'
 
@@ -37,6 +40,7 @@ const calculateReadingTime = (content: string): number => {
 }
 
 const NewBlogPost = () => {
+  const router = useRouter()
   const [post, setPost] = useState({
     title: '',
     excerpt: '',
@@ -56,6 +60,7 @@ const NewBlogPost = () => {
   const [isAddingCategory, setIsAddingCategory] = useState(false)
   const [showUrlModal, setShowUrlModal] = useState(false)
   const [urlInput, setUrlInput] = useState('')
+  const [imagePreview, setImagePreview] = useState('')
 
   const [categories, setCategories] = useState<string[]>([])
   const [newCategory, setNewCategory] = useState('')
@@ -78,13 +83,31 @@ const NewBlogPost = () => {
     return () => { active = false }
   }, [])
 
+  // Add useEffect to sync imagePreview with post.image
+  useEffect(() => {
+    if (post.image && post.image !== imagePreview) {
+      setImagePreview(post.image)
+    }
+  }, [post.image, imagePreview])
+
   const handleSave = async () => {
+    console.log('=== HANDLE SAVE START ===')
     if (!post.title || !post.content || !post.category) {
       toast.error('Please fill in Title, Content, and Category')
       return
     }
     setIsSaving(true)
     try {
+      console.log('Creating post with data:', {
+        title: post.title,
+        category: post.category,
+        contentLength: post.content.length,
+        hasImage: !!post.image,
+        tagsCount: tags.length,
+        status: post.status
+      })
+      
+      // Create post without waiting for image upload to complete
       const id = await createPost({
         title: post.title,
         excerpt: post.excerpt,
@@ -95,23 +118,36 @@ const NewBlogPost = () => {
         status: post.status as any,
         author: 'Willsther Team'
       })
-      toast.success('Post saved')
+      console.log('Post created successfully with ID:', id)
+      toast.success('Post saved successfully')
+      // Close the form and redirect to admin
+      router.push('/admin')
     } catch (error) {
-      toast.error('Failed to save post')
+      console.error('=== HANDLE SAVE ERROR ===')
+      console.error('Failed to save post:', error)
+      toast.error('Failed to save post: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setIsSaving(false)
     }
   }
 
   const handlePublish = async () => {
+    console.log('=== HANDLE PUBLISH START ===')
     if (!post.title || !post.content || !post.category) {
       toast.error('Please fill in Title, Content, and Category')
       return
     }
     setIsPublishing(true)
     try {
-      const next = { ...post, status: 'published' }
-      setPost(next)
+      console.log('Publishing post with data:', {
+        title: post.title,
+        category: post.category,
+        contentLength: post.content.length,
+        hasImage: !!post.image,
+        tagsCount: tags.length
+      })
+      
+      // Create post without waiting for image upload to complete
       await createPost({
         title: post.title,
         excerpt: post.excerpt,
@@ -122,9 +158,14 @@ const NewBlogPost = () => {
         status: 'published' as any,
         author: 'Willsther Team'
       })
-      toast.success('Post published')
+      console.log('Post published successfully')
+      toast.success('Post published successfully')
+      // Close the form and redirect to admin
+      router.push('/admin')
     } catch (error) {
-      toast.error('Failed to publish post')
+      console.error('=== HANDLE PUBLISH ERROR ===')
+      console.error('Failed to publish post:', error)
+      toast.error('Failed to publish post: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setIsPublishing(false)
     }
@@ -185,6 +226,31 @@ const NewBlogPost = () => {
     setTags(tags.filter((_, i) => i !== index))
   }
 
+  // Image upload handling with timeout
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      // Reduced timeout to 20 seconds to match Firebase Storage
+      const url = await uploadImageWithTimeout(file, `blog-images/${Date.now()}-${file.name}`, 20000)
+      setPost({ ...post, image: url })
+      setImagePreview(url)
+      toast.success('Image uploaded successfully')
+    } catch (error) {
+      console.error('Upload failed:', error)
+      toast.error('Image upload timed out or failed. You can still save your post.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeImage = () => {
+    setPost({ ...post, image: '' })
+    setImagePreview('')
+  }
+
   const TextEditor = () => (
     <div className="border border-gray-300 rounded-lg">
       <RichTextEditor
@@ -201,10 +267,10 @@ const NewBlogPost = () => {
       {post.excerpt && (
         <p className="text-gray-600 mb-4 italic">"{post.excerpt}"</p>
       )}
-      {post.image && (
+      {imagePreview && (
         <div className="mb-4">
           <img 
-            src={post.image} 
+            src={imagePreview} 
             alt={post.title} 
             className="w-full h-48 object-cover rounded-lg"
           />
@@ -252,7 +318,7 @@ const NewBlogPost = () => {
               <div className="hidden sm:block h-6 w-px bg-white/30"></div>
               <div>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Create New Blog Post</h1>
-                <p className="text-white/80 mt-1 text-sm sm:text-base">Write and publish a new blog post</p>
+                <p className="text-white/880 mt-1 text-sm sm:text-base">Write and publish a new blog post</p>
               </div>
             </div>
             
@@ -435,23 +501,58 @@ const NewBlogPost = () => {
 
                 {/* Image URL */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image</label>
                 <div className="space-y-3">
+                    <div className="flex space-x-2">
+                      <label className="flex items-center space-x-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">
+                        <Upload className="w-4 h-4" />
+                        <span>{isUploading ? 'Uploading...' : 'Upload Image'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          disabled={isUploading}
+                        />
+                      </label>
+                      <button
+                        onClick={() => setShowUrlModal(true)}
+                        className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium transition-colors"
+                      >
+                        Or enter URL
+                      </button>
+                    </div>
+                    
+                    {imagePreview && (
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* URL input (fallback) */}
                     <input
                       type="text"
                       value={post.image}
-                      onChange={(e) => setPost({ ...post, image: e.target.value })}
-                      placeholder="Enter image URL..."
+                      onChange={(e) => {
+                        setPost({ ...post, image: e.target.value })
+                        setImagePreview(e.target.value)
+                      }}
+                      placeholder="Or enter image URL..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
-                    <button
-                      onClick={() => setShowUrlModal(true)}
-                      className="w-full px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium transition-colors"
-                    >
-                      Upload Image
-                  </button>
+                  </div>
                 </div>
-              </div>
 
                 {/* Post Stats */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
@@ -530,6 +631,7 @@ const NewBlogPost = () => {
                    onClick={() => {
                      if (urlInput.trim()) {
                        setPost({ ...post, image: urlInput.trim() })
+                       setImagePreview(urlInput.trim())
                        setShowUrlModal(false)
                        setUrlInput('')
                        toast.success('Image URL added')

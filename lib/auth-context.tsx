@@ -92,9 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userRef = doc(db, 'users', firebaseUser.uid)
       console.log('User document reference:', userRef.path)
       
-      // Add timeout for Firestore operations
+      // Add timeout for Firestore operations (reduced to 3 seconds to prevent conflicts)
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore operation timeout')), 10000)
+        setTimeout(() => reject(new Error('Firestore operation timeout after 3 seconds')), 3000)
       })
       
       const userDocPromise = getDoc(userRef)

@@ -2751,7 +2751,17 @@ const ServicesConfig = ({ config, onChange }: any) => {
     serviceId: '', 
     serviceName: '' 
   })
-  
+  // Add state for the new service modal
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
+  const [newServiceData, setNewServiceData] = useState({
+    title: '',
+    description: '',
+    category: 'General',
+    imageUrl: ''
+  })
+  // Add state for uploading in the new service form
+  const [isUploadingNewServiceImage, setIsUploadingNewServiceImage] = useState(false)
+
   const handleServiceImageUpload = async (serviceId: string, file: File) => {
     if (!file) return
     
@@ -2768,6 +2778,26 @@ const ServicesConfig = ({ config, onChange }: any) => {
     } finally {
       // Reset uploading state
       setUploadingServices(prev => ({ ...prev, [serviceId]: false }))
+    }
+  }
+  
+  // Add the missing function for handling new service image uploads
+  const handleNewServiceImageUpload = async (file: File) => {
+    if (!file) return
+    
+    // Set uploading state
+    setIsUploadingNewServiceImage(true)
+    
+    try {
+      const imageUrl = await uploadImage(file, `services/new-${Date.now()}`)
+      setNewServiceData(prev => ({ ...prev, imageUrl }))
+      toast.success('Service image uploaded successfully!')
+    } catch (error) {
+      console.error('Failed to upload service image:', error)
+      toast.error('Failed to upload image. Please try again.')
+    } finally {
+      // Reset uploading state
+      setIsUploadingNewServiceImage(false)
     }
   }
   
@@ -2794,12 +2824,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
     console.log('ServicesConfig component mounted, loading services...')
     loadServices()
     
-    // Poll for updates every 5 seconds
-    const interval = setInterval(loadServices, 5000)
-    
+    // Return cleanup function
     return () => {
       console.log('Admin services: Cleaning up')
-      clearInterval(interval)
     }
   }, [])
   
@@ -2826,49 +2853,32 @@ const ServicesConfig = ({ config, onChange }: any) => {
     setServices(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
   }
   
-  const updateServiceDebounced = async (id: string, key: string, value: string) => {
-    // Optimistic update
-    setServices(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
-    
-    // Debounced save
-    if (savingServices[id]) clearTimeout(savingServices[id] as any)
-    
-    const timeoutId = setTimeout(async () => {
-      try {
-        const service = services.find(s => s.id === id)
-        const res = await fetch(`/api/services/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...service, [key]: value })
-        })
-        
-        if (!res.ok) throw new Error('Failed to update')
-      } catch (error) {
-        console.error('Error updating service:', error)
-        toast.error('Failed to save changes')
-        loadServices() // Revert on error
-      }
-    }, 1000)
-    
-    setSavingServices(prev => ({ ...prev, [id]: timeoutId as any }))
+  const addService = async () => {
+    // Open the modal form instead of creating a service immediately
+    setNewServiceData({
+      title: '',
+      description: '',
+      category: 'General',
+      imageUrl: ''
+    })
+    setIsAddServiceModalOpen(true)
   }
   
-  const addService = async () => {
+  // Create a new function to actually save the new service
+  const createNewService = async () => {
     try {
       const res = await fetch('/api/services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: 'New Service',
-          description: '',
-          imageUrl: '',
-          category: 'General'
-        })
+        body: JSON.stringify(newServiceData)
       })
       
       if (!res.ok) throw new Error('Failed to create')
       const newService = await res.json()
       toast.success('Service created!')
+      setIsAddServiceModalOpen(false)
+      // Reload services to show the new one
+      loadServices()
     } catch (error) {
       console.error('Error creating service:', error)
       toast.error('Failed to create service')
@@ -2954,6 +2964,32 @@ const ServicesConfig = ({ config, onChange }: any) => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Services" subtitle="Manage services shown on the homepage" />
       
+      {/* Save Button */}
+      <div className="mb-6 flex justify-end">
+        <button
+          onClick={saveAllServices}
+          disabled={isSaving}
+          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+        >
+          {isSaving ? (
+            <>
+              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              <span>Save All Changes</span>
+            </>
+          )}
+        </button>
+      </div>
+      
       {/* Migration notice */}
       {services.length === 0 && !loading && (
         <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -2983,6 +3019,21 @@ const ServicesConfig = ({ config, onChange }: any) => {
           </div>
         </div>
       )}
+      
+      {/* Add Service Button */}
+      <div className="flex justify-center mb-6">
+        <button 
+          onClick={addService} 
+          className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all duration-300 border-2 border-dashed border-primary-300 hover:border-primary-400 hover:shadow-lg hover:scale-[1.02] group"
+        >
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
+              <Plus className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg">Add New Service</span>
+          </div>
+        </button>
+      </div>
       
       <div className="space-y-4">
         {services.map((s: any) => (
@@ -3100,21 +3151,380 @@ const ServicesConfig = ({ config, onChange }: any) => {
             </div>
           </div>
         ))}
-        
-        <div className="flex justify-center">
-          <button 
-            onClick={addService} 
-            className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all duration-300 border-2 border-dashed border-primary-300 hover:border-primary-400 hover:shadow-lg hover:scale-[1.02] group"
-          >
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
-                <Plus className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg">Add New Service</span>
-            </div>
-          </button>
-        </div>
       </div>
+      
+      {/* Add Service Modal */}
+      {isAddServiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Add New Service</h3>
+                <button 
+                  onClick={() => setIsAddServiceModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Title *</label>
+                  <input 
+                    value={newServiceData.title} 
+                    onChange={(e) => setNewServiceData({...newServiceData, title: e.target.value})} 
+                    placeholder="Enter service title"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea 
+                    value={newServiceData.description} 
+                    onChange={(e) => setNewServiceData({...newServiceData, description: e.target.value})} 
+                    placeholder="Enter service description"
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <input 
+                    value={newServiceData.category} 
+                    onChange={(e) => setNewServiceData({...newServiceData, category: e.target.value})} 
+                    placeholder="e.g., Cleaning Services, Maintenance Services"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
+                  
+                  {/* Image Preview */}
+                  {newServiceData.imageUrl && (
+                    <div className="mb-3">
+                      <img 
+                        src={newServiceData.imageUrl}
+                        alt="Service preview"
+                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Upload Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                        <span className="text-sm font-medium">
+                          {isUploadingNewServiceImage ? 'Uploading...' : 'Upload Image'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleNewServiceImageUpload(file)
+                          }}
+                          disabled={isUploadingNewServiceImage}
+                        />
+                      </label>
+                      {newServiceData.imageUrl && (
+                        <button
+                          onClick={() => setNewServiceData({...newServiceData, imageUrl: ''})}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          disabled={isUploadingNewServiceImage}
+                        >
+                          Clear Image
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* URL Input as fallback */}
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
+                      <input 
+                        value={newServiceData.imageUrl || ''} 
+                        onChange={(e) => setNewServiceData({...newServiceData, imageUrl: e.target.value})} 
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        disabled={isUploadingNewServiceImage}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 mt-8">
+                <button
+                  onClick={() => setIsAddServiceModalOpen(false)}
+                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createNewService}
+                  disabled={!newServiceData.title.trim()}
+                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
+                    !newServiceData.title.trim() 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Add Service</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+</original_code>
+
+```
+                    value={s.description || ''} 
+                    onChange={(e) => updateService(s.id, 'description', e.target.value)} 
+                    placeholder="Enter service description"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <input 
+                    value={s.category || ''} 
+                    onChange={(e) => updateService(s.id, 'category', e.target.value)} 
+                    placeholder="e.g., Cleaning Services, Maintenance Services"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Services with the same category will be grouped together</p>
+                </div>
+              </div>
+
+              {/* Image Section */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
+                  
+                  {/* Image Preview */}
+                  {s.imageUrl && (
+                    <div className="mb-3">
+                      <img 
+                        src={s.imageUrl}
+                        alt={s.title || 'Service'}
+                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Upload Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                        <span className="text-sm font-medium">
+                          {uploadingServices[s.id] ? 'Uploading...' : 'Upload Image'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleServiceImageUpload(s.id, file)
+                          }}
+                          disabled={uploadingServices[s.id]}
+                        />
+                      </label>
+                      {s.imageUrl && (
+                        <button
+                          onClick={() => updateService(s.id, 'imageUrl', '')}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          disabled={uploadingServices[s.id]}
+                        >
+                          Clear Image
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* URL Input as fallback */}
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
+                      <input 
+                        value={s.imageUrl || ''} 
+                        onChange={(e) => updateService(s.id, 'imageUrl', e.target.value)} 
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        disabled={uploadingServices[s.id]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Remove Button */}
+            <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
+              <button 
+                onClick={() => setDeleteDialog({ isOpen: true, serviceId: s.id, serviceName: s.title })} 
+                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200 flex items-center space-x-2"
+                disabled={uploadingServices[s.id]}
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Remove Service</span>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Add Service Modal */}
+      {isAddServiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Add New Service</h3>
+                <button 
+                  onClick={() => setIsAddServiceModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Title *</label>
+                  <input 
+                    value={newServiceData.title} 
+                    onChange={(e) => setNewServiceData({...newServiceData, title: e.target.value})} 
+                    placeholder="Enter service title"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea 
+                    value={newServiceData.description} 
+                    onChange={(e) => setNewServiceData({...newServiceData, description: e.target.value})} 
+                    placeholder="Enter service description"
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <input 
+                    value={newServiceData.category} 
+                    onChange={(e) => setNewServiceData({...newServiceData, category: e.target.value})} 
+                    placeholder="e.g., Cleaning Services, Maintenance Services"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
+                  
+                  {/* Image Preview */}
+                  {newServiceData.imageUrl && (
+                    <div className="mb-3">
+                      <img 
+                        src={newServiceData.imageUrl}
+                        alt="Service preview"
+                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Upload Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                        <span className="text-sm font-medium">
+                          {isUploadingNewServiceImage ? 'Uploading...' : 'Upload Image'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleNewServiceImageUpload(file)
+                          }}
+                          disabled={isUploadingNewServiceImage}
+                        />
+                      </label>
+                      {newServiceData.imageUrl && (
+                        <button
+                          onClick={() => setNewServiceData({...newServiceData, imageUrl: ''})}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          disabled={isUploadingNewServiceImage}
+                        >
+                          Clear Image
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* URL Input as fallback */}
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
+                      <input 
+                        value={newServiceData.imageUrl || ''} 
+                        onChange={(e) => setNewServiceData({...newServiceData, imageUrl: e.target.value})} 
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        disabled={isUploadingNewServiceImage}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 mt-8">
+                <button
+                  onClick={() => setIsAddServiceModalOpen(false)}
+                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createNewService}
+                  disabled={!newServiceData.title.trim()}
+                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
+                    !newServiceData.title.trim() 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Add Service</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
       
       {/* Delete Confirmation Dialog */}
       {deleteDialog.isOpen && (

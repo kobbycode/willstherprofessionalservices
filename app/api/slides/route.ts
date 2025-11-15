@@ -18,11 +18,31 @@ export async function GET() {
     return response
   } catch (error) {
     console.error('Error fetching slides:', error)
-    // If Firebase Admin is not initialized, return empty array instead of error
+    // If Firebase Admin is not initialized or authentication fails, return default slides
     // This allows the site to work even without admin credentials
-    if (error instanceof Error && error.message.includes('Firebase Admin not initialized')) {
-      console.warn('Firebase Admin not initialized, returning empty slides array')
-      const response = NextResponse.json({ slides: [] })
+    if (error instanceof Error && (error.message.includes('Firebase Admin not initialized') || error.message.includes('UNAUTHENTICATED'))) {
+      console.warn('Firebase Admin not initialized or authentication failed, returning default slides')
+      const defaultSlides = [
+        {
+          id: 'default-1',
+          imageUrl: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop',
+          title: 'Professional Cleaning',
+          subtitle: 'Trusted, reliable and affordable services',
+          ctaLabel: 'Get Started Today',
+          ctaHref: '#contact',
+          order: 1
+        },
+        {
+          id: 'default-2',
+          imageUrl: 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center',
+          title: 'Maintenance Services',
+          subtitle: 'Comprehensive maintenance solutions for all your needs',
+          ctaLabel: 'Learn More',
+          ctaHref: '#services',
+          order: 2
+        }
+      ]
+      const response = NextResponse.json({ slides: defaultSlides })
       response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
       response.headers.set('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
       return response
@@ -110,9 +130,9 @@ export async function POST(request: NextRequest) {
     })
     
     // Provide more helpful error messages
-    if (errorMessage.includes('Firebase Admin not initialized')) {
+    if (errorMessage.includes('Firebase Admin not initialized') || errorMessage.includes('UNAUTHENTICATED')) {
       return NextResponse.json({ 
-        error: 'Firebase Admin is not configured. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.' 
+        error: 'Firebase Admin is not configured or authentication failed. Please check FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.' 
       }, { status: 503 })
     }
     

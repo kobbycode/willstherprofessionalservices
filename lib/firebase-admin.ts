@@ -51,5 +51,3 @@ export async function verifyIdToken(idToken: string) {
   }
   return getAuth().verifyIdToken(idToken)
 }
-
-
