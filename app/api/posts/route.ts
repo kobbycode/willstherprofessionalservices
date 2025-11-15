@@ -64,6 +64,13 @@ export async function POST(request: Request) {
       status: input.status
     })
     
+    // Validate image URL - reject base64/data URLs
+    if (input.image && input.image.startsWith('data:')) {
+      return NextResponse.json({ 
+        error: 'Base64/Data URLs are not allowed. Please upload images to Firebase Storage.' 
+      }, { status: 400 })
+    }
+    
     // Prepare post data
     const postData = {
       title: input.title,

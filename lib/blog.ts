@@ -212,6 +212,11 @@ export async function createPost(input: NewPostInput): Promise<string> {
     author: input.author
   })
   
+  // Validate image URL - reject base64/data URLs
+  if (input.image && input.image.startsWith('data:')) {
+    throw new Error('Base64/Data URLs are not allowed. Please upload images to Firebase Storage.');
+  }
+  
   // Strategy 1: Try direct Firestore access with reduced timeout
   try {
     console.log('Attempting createPost with direct Firestore access...')
@@ -309,6 +314,11 @@ export async function createPost(input: NewPostInput): Promise<string> {
 }
 
 export async function updatePost(id: string, input: Partial<NewPostInput>): Promise<void> {
+  // Validate image URL - reject base64/data URLs
+  if (input.image && input.image.startsWith('data:')) {
+    throw new Error('Base64/Data URLs are not allowed. Please upload images to Firebase Storage.');
+  }
+  
   const db = getDb()
   const ref = doc(db, POSTS_COLLECTION, id)
   const updateData: any = {

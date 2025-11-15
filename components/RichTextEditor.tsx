@@ -67,13 +67,17 @@ export default function RichTextEditor({ value, onChange, placeholder, className
       [{ header: [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }],
-      ['blockquote', 'link', 'image'],
+      ['blockquote', 'link'], // Removed 'image' from toolbar to prevent base64 conversion
       ['clean']
-    ]
+    ],
+    // Custom clipboard handler to prevent image pasting
+    clipboard: {
+      matchVisual: false
+    }
   }), [])
 
   const formats = useMemo(() => [
-    'header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'blockquote', 'link', 'image'
+    'header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'blockquote', 'link'
   ], [])
 
   const handleChange = (html: string) => {
