@@ -151,7 +151,26 @@ const HeroConfig = ({ config, onChange }: any) => {
       toast.success('Slide image uploaded successfully!')
     } catch (error) {
       console.error('Failed to upload slide image:', error)
-      toast.error('Failed to upload image. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      // Provide specific guidance based on error type
+      if (errorMessage.includes('Firebase')) {
+        toast.error('Firebase Storage configuration issue. Please check your environment variables and Firebase setup.');
+      } else if (errorMessage.includes('base64') || errorMessage.includes('data URL')) {
+        toast.error('Image is too large. Please use a smaller image or check your Firebase configuration.')
+      } else if (errorMessage.includes('compress')) {
+        // Try uploading without compression
+        try {
+          const imageUrl = await uploadImage(file, `hero/slides/slide-${Date.now()}`)
+          setNewSlideData(prev => ({ ...prev, imageUrl }))
+          toast.success('Slide image uploaded successfully!')
+        } catch (retryError) {
+          console.error('Retry upload failed:', retryError)
+          toast.error('Failed to upload image. Please try a smaller image or check your Firebase configuration.')
+        }
+      } else {
+        toast.error('Failed to upload image. Please try again or check your Firebase configuration.')
+      }
     } finally {
       setIsUploadingNewSlideImage(false)
     }

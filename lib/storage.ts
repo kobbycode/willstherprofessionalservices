@@ -5,7 +5,7 @@ import { getStorageClient } from '@/lib/firebase'
 // Function to compress image before upload
 async function compressImage(file: File): Promise<File> {
   // If file is small enough, return as is
-  if (file.size <= 2 * 1024 * 1024) { // 2MB
+  if (file.size <= 500 * 1024) { // 500KB
     return file;
   }
 
@@ -19,7 +19,8 @@ async function compressImage(file: File): Promise<File> {
       try {
         // Calculate new dimensions maintaining aspect ratio
         let { width, height } = img;
-        const maxSize = 1920; // Max dimension
+        // More aggressive size reduction for very large images
+        const maxSize = file.size > 2 * 1024 * 1024 ? 800 : 1200; // 800px for >2MB, 1200px for 1-2MB
         
         if (width > height && width > maxSize) {
           height = (height * maxSize) / width;
@@ -35,7 +36,9 @@ async function compressImage(file: File): Promise<File> {
         // Draw image on canvas
         ctx?.drawImage(img, 0, 0, width, height);
         
-        // Convert to blob with compression
+        // Convert to blob with adaptive compression based on file size
+        const quality = file.size > 2 * 1024 * 1024 ? 0.6 : 0.7; // Lower quality for larger files
+        
         canvas.toBlob(
           (blob) => {
             if (blob) {
@@ -49,7 +52,7 @@ async function compressImage(file: File): Promise<File> {
             }
           },
           'image/jpeg',
-          0.8 // 80% quality
+          quality
         );
       } catch (error) {
         reject(error);
@@ -79,7 +82,7 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
   // Compress large images to prevent upload issues
   let processedFile = file;
   try {
-    if (file.size > 1024 * 1024) { // If larger than 1MB
+    if (file.size > 2 * 1024 * 1024) { // If larger than 2MB
       console.log('Compressing large image...')
       processedFile = await compressImage(file);
       console.log('Compressed file size:', processedFile.size)
@@ -89,7 +92,7 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
     processedFile = file;
   }
 
-  // SKIP ImgBB and go directly to Firebase Storage
+  // Try Firebase Storage first (preferred method)
   try {
     console.log('Attempting Firebase Storage upload...')
     const result = await uploadToFirebaseWithTimeout(processedFile, pathPrefix)
@@ -97,11 +100,16 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
     return result
   } catch (error) {
     console.error('Firebase Storage upload failed:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // If it's a configuration issue, provide a more helpful error
+    if (errorMessage.includes('Firebase') || errorMessage.includes('configuration')) {
+      throw new Error('Failed to upload image to Firebase Storage. Please ensure your Firebase configuration is correct and you have set up the required environment variables (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY).');
+    }
+    
+    // For other errors, still prevent base64 conversion
+    throw new Error('Failed to upload image. Please try a smaller image or check your Firebase configuration.');
   }
-
-  // Strategy 3: Convert to data URL as last resort (always accessible)
-  console.log('Firebase Storage failed, converting to data URL for guaranteed access...')
-  return convertToDataURL(processedFile)
 }
 
 // Add a timeout wrapper for the entire upload process
@@ -169,7 +177,19 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
     return downloadURL
   } catch (error) {
     console.error('Firebase Storage upload error:', error)
-    throw new Error('Firebase Storage upload failed')
+    
+    // Provide more specific error messages based on the type of error
+    if (error instanceof Error) {
+      if (error.message.includes('Firebase Storage: User does not have permission')) {
+        throw new Error('Firebase Storage permission denied. Please check your Firebase Storage rules and authentication.');
+      } else if (error.message.includes('Firebase Storage: Bucket does not exist')) {
+        throw new Error('Firebase Storage bucket not found. Please check your Firebase configuration.');
+      } else if (error.message.includes('Firebase: Error (auth/')) {
+        throw new Error('Firebase authentication error. Please check your Firebase configuration.');
+      }
+    }
+    
+    throw new Error(`Firebase Storage upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

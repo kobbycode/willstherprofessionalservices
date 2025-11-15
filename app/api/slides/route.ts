@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         // Check if it's a base64/data URL
         if (imageUrl.startsWith('data:')) {
           return NextResponse.json({ 
-            error: 'Base64/Data URLs are too large for Firestore. Please upload the image file instead or use a public image URL.' 
+            error: 'Base64/Data URLs are too large for Firestore. Please upload the image file instead or use a public image URL from a service like Imgur or Firebase Storage.' 
           }, { status: 400 })
         }
         return NextResponse.json({ 
@@ -141,6 +141,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Image URL is too large. Please upload an image file or use a public image URL instead of base64/data URLs.' 
       }, { status: 400 })
+    }
+    
+    // Handle Firebase Storage configuration errors
+    if (errorMessage.includes('Firebase Storage')) {
+      return NextResponse.json({ 
+        error: 'Firebase Storage configuration error. Please check your Firebase configuration and ensure Firebase Storage is properly set up.' 
+      }, { status: 503 })
     }
     
     return NextResponse.json({ 
