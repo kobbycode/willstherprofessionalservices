@@ -156,6 +156,8 @@ const HeroConfig = ({ config, onChange }: any) => {
       // Provide specific guidance based on error type
       if (errorMessage.includes('Firebase')) {
         toast.error('Firebase Storage configuration issue. Please check your environment variables and Firebase setup.');
+      } else if (errorMessage.includes('CORS') || errorMessage.includes('preflight')) {
+        toast.error('CORS error: Please ensure your Firebase Storage CORS configuration is set up correctly and you\'ve deployed the cors.json file.');
       } else if (errorMessage.includes('base64') || errorMessage.includes('data URL')) {
         toast.error('Image is too large. Please use a smaller image or check your Firebase configuration.')
       } else if (errorMessage.includes('compress')) {
@@ -168,6 +170,8 @@ const HeroConfig = ({ config, onChange }: any) => {
           console.error('Retry upload failed:', retryError)
           toast.error('Failed to upload image. Please try a smaller image or check your Firebase configuration.')
         }
+      } else if (errorMessage.includes('timeout')) {
+        toast.error('Upload timed out. Please check your internet connection or try a smaller image.');
       } else {
         toast.error('Failed to upload image. Please try again or check your Firebase configuration.')
       }

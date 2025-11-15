@@ -113,7 +113,7 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
 }
 
 // Add a timeout wrapper for the entire upload process
-export async function uploadImageWithTimeout(file: File, pathPrefix = 'uploads', timeoutMs = 30000): Promise<string> {
+export async function uploadImageWithTimeout(file: File, pathPrefix = 'uploads', timeoutMs = 45000): Promise<string> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       reject(new Error('Image upload timed out'))
@@ -134,10 +134,10 @@ export async function uploadImageWithTimeout(file: File, pathPrefix = 'uploads',
 // Firebase Storage upload with timeout and public access
 async function uploadToFirebaseWithTimeout(file: File, pathPrefix: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    // Reduced timeout to 20 seconds to prevent long hangs
+    // Increased timeout to 45 seconds to accommodate slower connections
     const timeout = setTimeout(() => {
-      reject(new Error('Upload timeout after 20 seconds'))
-    }, 20000)
+      reject(new Error('Upload timeout after 45 seconds'))
+    }, 45000)
 
     uploadToFirebase(file, pathPrefix)
       .then((result) => {
