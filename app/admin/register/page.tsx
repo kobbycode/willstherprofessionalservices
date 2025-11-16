@@ -15,9 +15,10 @@ import {
   CheckCircle
 } from 'lucide-react'
 import Link from 'next/link'
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { getAuth, updateProfile } from 'firebase/auth'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/lib/auth-context'
+import { createUserWithAuth } from '@/lib/users'
 
 export default function AdminRegister() {
   const [formData, setFormData] = useState({
@@ -88,29 +89,35 @@ export default function AdminRegister() {
     setError('')
 
     try {
-      // Create user in Firebase Auth
-      const auth = getAuth()
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        formData.email, 
-        formData.password
-      )
-      
-      const firebaseUser = userCredential.user
-      console.log('Firebase Auth user created:', firebaseUser.uid)
+      // Create user using our createUserWithAuth function which properly handles roles
+      const result = await createUserWithAuth({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        role: formData.role as 'admin' | 'editor' | 'user'
+      })
+
+      if (!result) {
+        throw new Error('Failed to create user account')
+      }
 
       // Set display name in Auth
-      try {
-        await updateProfile(firebaseUser, { displayName: formData.name })
-      } catch (profileErr) {
-        console.warn('Failed to set display name:', profileErr)
+      const auth = getAuth()
+      const firebaseUser = auth.currentUser
+      if (firebaseUser) {
+        try {
+          await updateProfile(firebaseUser, { displayName: formData.name })
+        } catch (profileErr) {
+          console.warn('Failed to set display name:', profileErr)
+        }
       }
       
-      // AuthContext will automatically handle user document creation and state management
+      // Refresh user data to ensure the role is properly loaded
       await refreshUser()
         
-        toast.success('Admin account created successfully!')
-          router.push('/admin')
+      toast.success('Admin account created successfully!')
+      router.push('/admin')
       
     } catch (err: any) {
       console.error('Registration error:', err)
@@ -120,6 +127,8 @@ export default function AdminRegister() {
         setError('Password is too weak. Please choose a stronger password')
       } else if (err.code === 'auth/invalid-email') {
         setError('Invalid email address')
+      } else if (err.message) {
+        setError(err.message)
       } else {
         setError('Registration failed. Please try again.')
       }
@@ -254,7 +263,7 @@ export default function AdminRegister() {
                 >
                   <option value="admin">Administrator</option>
                   <option value="editor">Editor</option>
-                  <option value="manager">Manager</option>
+                  <option value="user">User</option>
                 </select>
               </div>
 
