@@ -1,6 +1,6 @@
-﻿[
+[
   {
-    "origin": ["http://localhost:3000", "https://your-production-domain.com"],
+    "origin": ["http://localhost:3000", "https://www.willstherprofessionalservices.com"],
     "method": ["GET", "POST", "PUT", "HEAD", "DELETE"],
     "responseHeader": ["Content-Type", "x-goog-meta-*"],
     "maxAgeSeconds": 3600
