@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "origin": ["http://localhost:3000", "https://www.willstherprofessionalservices.com"],
     "method": ["GET", "POST", "PUT", "HEAD", "DELETE"],
