@@ -17,7 +17,7 @@ firebase storage:set-cors cors.json
 
 If the above command doesn't work, try:
 ```bash
-firebase storage:bucket:wilsther-professional-services.appspot.com:set-cors cors.json
+firebase storage:bucket:wilsther-profesional-services.firebasestorage.app:set-cors cors.json
 ```
 
 ## Alternative Method: Using gsutil (Google Cloud SDK)
@@ -31,7 +31,7 @@ gcloud auth login
 
 2. Deploy CORS configuration:
 ```bash
-gsutil cors set cors.json gs://wilsther-professional-services.appspot.com
+gsutil cors set cors.json gs://wilsther-profesional-services.firebasestorage.app
 ```
 
 ## After Deployment

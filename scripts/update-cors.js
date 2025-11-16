@@ -40,7 +40,7 @@ exec('firebase --version', (error, stdout, stderr) => {
       // Try alternative command
       console.log('\n🔄 Trying alternative Firebase command...\n');
       
-      const altDeployCommand = `firebase storage:bucket:wilsther-professional-services.appspot.com:set-cors cors.json`;
+      const altDeployCommand = `firebase storage:bucket:wilsther-profesional-services.firebasestorage.app:set-cors cors.json`;
       
       exec(altDeployCommand, { cwd: projectDir }, (altError, altStdout, altStderr) => {
         if (altError) {
@@ -50,7 +50,7 @@ exec('firebase --version', (error, stdout, stderr) => {
           // Try gsutil as final fallback
           console.log('\n🔄 Trying final fallback method with gsutil...\n');
           
-          const gsutilCommand = `gsutil cors set cors.json gs://wilsther-professional-services.appspot.com`;
+          const gsutilCommand = `gsutil cors set cors.json gs://wilsther-profesional-services.firebasestorage.app`;
           
           exec(gsutilCommand, { cwd: projectDir }, (gsutilError, gsutilStdout, gsutilStderr) => {
             if (gsutilError) {

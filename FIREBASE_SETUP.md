@@ -22,7 +22,7 @@
 To fix the CORS issues with Firebase Storage, run this command:
 
 ```bash
-gsutil cors set cors.json gs://wilsther-professional-services.appspot.com
+gsutil cors set cors.json gs://wilsther-profesional-services.firebasestorage.app
 ```
 
 **Note:** You need `gsutil` installed and authenticated with your Firebase project.

@@ -26,7 +26,7 @@ The system uses a multi-strategy approach for image hosting:
 
 Firebase Storage is already configured in the application. No additional setup is required if you have Firebase Admin credentials properly configured.
 
-The storage bucket is set to: `wilsther-professional-services.appspot.com`
+The storage bucket is set to: `wilsther-profesional-services.firebasestorage.app`
 
 ### Option 3: Direct Image URLs
 
