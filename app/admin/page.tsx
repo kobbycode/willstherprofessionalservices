@@ -42,15 +42,17 @@ import { BlogPost } from '@/lib/blog'
 import { type User } from '@/lib/users'
 import { useAuth } from '@/lib/auth-context'
 import { uploadImage } from '@/lib/storage'
-import ServicesConfigComponent from './ServicesConfig'
+import { getDb } from '@/lib/firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 import HeroConfig from './HeroConfig'
+import ServicesConfig from './ServicesConfig'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
     <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
     {subtitle && <p className="text-gray-600 mt-1">{subtitle}</p>}
   </div>
-);
+)
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -195,8 +197,8 @@ const AdminDashboard = () => {
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
                       className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${
-                      activeTab === item.id
-                          ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg transform scale-105'
+                        activeTab === item.id
+                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
                           : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
                       }`}
                     >
@@ -227,7 +229,7 @@ const AdminDashboard = () => {
                       }}
                       className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${
                         activeTab === item.id
-                          ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg transform scale-105'
+                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
                           : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
                       }`}
                     >
@@ -258,7 +260,7 @@ const AdminDashboard = () => {
                       }}
                       className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${
                         activeTab === item.id
-                          ? 'bg-gradient-to-r ' + item.color + ' text-white shadow-lg transform scale-105'
+                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
                           : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
                       }`}
                     >
@@ -307,7 +309,7 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'analytics' && (
-              <Analytics />
+              <OverviewTab setActiveTab={setActiveTab} />
             )}
 
             {activeTab === 'contact' && (
@@ -319,11 +321,11 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'hero' && (
-              <HeroConfigLocal config={config} onChange={saveConfig} />
+              <HeroConfig config={config} onChange={saveConfig} />
             )}
 
             {activeTab === 'services' && (
-              <ServicesConfigLocal config={config} onChange={saveConfig} />
+              <ServicesConfig config={config} onChange={saveConfig} />
             )}
 
             {activeTab === 'about' && (
@@ -395,9 +397,11 @@ const AdminDashboard = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to log out?</p>
               </div>
             </div>
+            
             <p className="text-gray-700 mb-6">
               You will be signed out of your account and redirected to the login page. You will need to log in again to access the admin dashboard.
             </p>
+            
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowLogoutDialog(false)}
@@ -420,235 +424,7 @@ const AdminDashboard = () => {
   )
 }
 
-const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
-  const { config } = useSiteConfig()
-  // Real statistics based on actual data
-  const stats = [
-    { 
-      title: 'Hero Slides', 
-      value: (config.heroSlides?.length || 0).toString(), 
-      change: config.heroSlides?.length > 0 ? 'Active' : 'No slides', 
-      icon: ImageIcon, 
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-gradient-to-r from-blue-500 to-blue-600'
-    },
-    { 
-      title: 'Services', 
-      value: (config.services?.length || 0).toString(), 
-      change: config.services?.length > 0 ? 'Configured' : 'No services', 
-      icon: Wrench, 
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-gradient-to-r from-green-500 to-green-600'
-    },
-    { 
-      title: 'Navigation Items', 
-      value: (config.navigation?.length || 0).toString(), 
-      change: config.navigation?.length > 0 ? 'Active' : 'Not set', 
-      icon: MenuIcon, 
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-gradient-to-r from-purple-500 to-purple-600'
-    },
-    { 
-      title: 'About Section', 
-      value: config.about?.title ? 'Configured' : 'Not set', 
-      change: config.about?.title ? 'Active' : 'Setup needed', 
-      icon: Quote, 
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'bg-gradient-to-r from-orange-500 to-orange-600'
-    }
-  ]
-
-  return (
-    <div className="p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg p-4 flex flex-col items-center justify-center text-center space-y-2"
-          >
-            <stat.icon className="w-12 h-12" />
-            <h3 className="text-lg font-bold">{stat.title}</h3>
-            <p className="text-gray-600">{stat.value}</p>
-            <p className="text-sm text-gray-400">{stat.change}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const ServicesTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
-  const { config } = useSiteConfig()
-
-  const [deleteDialog, setDeleteDialog] = useState({
-    isOpen: false,
-    serviceName: '',
-    serviceId: '',
-  })
-
-  const handleDeleteService = (name: string, id: string) => {
-    setDeleteDialog({ isOpen: true, serviceName: name, serviceId: id })
-  }
-
-  const confirmDeleteService = async () => {
-    const { serviceId } = deleteDialog;
-    if (!serviceId) {
-      toast.error('No service selected for deletion');
-      setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
-      return;
-    }
-    try {
-      // Make API call to delete the service
-      const res = await fetch(`/api/services/${encodeURIComponent(serviceId)}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to delete service: ${res.status}`);
-      }
-      toast.success('Service deleted successfully!');
-      setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
-      // Reload the page to reflect changes
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting service:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete service');
-      setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' });
-    }
-  }
-
-  const cancelDeleteService = () => {
-    setDeleteDialog({ isOpen: false, serviceName: '', serviceId: '' })
-  }
-
-  const deleteService = (id: string) => {
-    // Implementation would go here
-    console.log('Delete service:', id)
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-4"
-    >
-      <h2 className="text-2xl font-bold mb-4">Services</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {config.services?.map((service: any, index: number) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg p-4 flex flex-col items-center justify-center text-center space-y-2"
-          >
-            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full">
-              <Wrench className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold">{service.title}</h3>
-            <p className="text-gray-600">{service.description}</p>
-            <div className="flex space-x-2 mt-2">
-              <button
-                onClick={() => setActiveTab(`services/${service.id}`)}
-                className="bg-blue-500 text-white px-2 py-1 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDeleteService(service.title, service.id)}
-                className="bg-red-500 text-white px-2 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {deleteDialog.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg text-center">
-            <p className="mb-4">
-              Are you sure you want to delete the service "{deleteDialog.serviceName}"?
-            </p>
-            <div className="flex space-x-2">
-              <button
-                onClick={confirmDeleteService}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
-                Delete
-              </button>
-              <button
-                onClick={cancelDeleteService}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </motion.div>
-  )
-}
-
-const RecentActivityTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
-  const { config } = useSiteConfig()
-
-  const [showMore, setShowMore] = useState(false)
-
-  const activities = [
-    {
-      title: 'Added a new service',
-      description: 'Added a new service called "Web Development"',
-      date: '2023-10-01',
-    },
-    {
-      title: 'Updated navigation items',
-      description: 'Added a new navigation item called "Contact"',
-      date: '2023-09-28',
-    },
-    {
-      title: 'Updated hero slides',
-      description: 'Added a new hero slide with a new image and description',
-      date: '2023-09-27',
-    },
-    {
-      title: 'Updated about section',
-      description: 'Added a new description for the about section',
-      date: '2023-09-26',
-    },
-    {
-      title: 'Updated navigation items',
-      description: 'Removed a navigation item called "Blog"',
-      date: '2023-09-25',
-    },
-  ]
-
-  return (
-    <motion.div className="p-4">
-      {activities.slice(0, showMore ? activities.length : 3).map((activity, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-lg p-4 flex flex-col items-start justify-center space-y-2 mb-4"
-        >
-          <h3 className="text-lg font-bold">{activity.title}</h3>
-          <p className="text-gray-600">{activity.description}</p>
-          <p className="text-sm text-gray-400">{activity.date}</p>
-        </div>
-      ))}
-      {activities.length > 3 && (
-        <button
-          onClick={() => setShowMore(!showMore)}
-          className="text-blue-500 cursor-pointer"
-        >
-          {showMore ? 'Show less' : 'Show more'}
-        </button>
-      )}
-    </motion.div>
-  )
-}
+// Fix the incomplete component declarations
 
 // Blog Management Component
 const BlogManagement = () => {
@@ -675,7 +451,7 @@ const BlogManagement = () => {
     setLoading(true)
     try {
       // Prefer API to avoid client-side Firestore issues in some environments
-      const res = await fetch('/api/posts?publishedOnly=true', { cache: 'no-store' })
+      const res = await fetch('/api/posts', { cache: 'no-store' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { posts: list } = await res.json()
       setPosts(list)
@@ -754,25 +530,21 @@ const BlogManagement = () => {
     setShowPostModal(true)
   }
 
-  const withTimeout = async <T,>(promise: Promise<T>, ms = 15000): Promise<T> => {
+  const withTimeout = async <T,>(promise: Promise<T>, ms = 10000): Promise<T> => {
     return new Promise<T>((resolve, reject) => {
-      const t = setTimeout(() => reject(new Error('Request timed out after 15 seconds')), ms)
+      const t = setTimeout(() => reject(new Error('Request timed out')), ms)
       promise.then((v) => { clearTimeout(t); resolve(v) }).catch((e) => { clearTimeout(t); reject(e) })
     })
   }
 
   const savePost = async () => {
-    console.log('=== SAVE POST START ===')
     if (!form.title.trim() || !form.content.trim()) {
       toast.error('Title and content are required')
       return
     }
     setSavingPost(true)
     try {
-      console.log('Importing blog functions...')
       const { createPost, updatePost } = await import('@/lib/blog')
-      console.log('Blog functions imported successfully')
-      
       const payload = {
         title: form.title.trim(),
         excerpt: form.excerpt.trim(),
@@ -782,25 +554,18 @@ const BlogManagement = () => {
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
         status: form.status
       }
-      
-      console.log('Payload prepared:', payload)
-      
       if (editingPost) {
-        console.log('Updating existing post:', editingPost.id)
         await withTimeout(updatePost(editingPost.id, payload))
         setPosts(prev => prev.map(p => p.id === editingPost.id ? { ...p, ...payload } as any : p))
         toast.success('Post updated')
       } else {
-        console.log('Creating new post...')
         const id = await withTimeout(createPost(payload))
-        console.log('Post created with ID:', id)
         // Reload to ensure we get server timestamps and correct mapping
         await load()
         toast.success('Post created')
       }
       setShowPostModal(false)
     } catch (e) {
-      console.error('=== SAVE POST ERROR ===')
       console.error('Save post failed:', e)
       const msg = (e as any)?.message || 'Failed to save post'
       toast.error(msg)
@@ -860,6 +625,35 @@ const BlogManagement = () => {
           <div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Blog Management</h2>
             <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your blog posts and categories</p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <Link 
+                href="/admin/test-status-fix" 
+                className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+              >
+                Fix Post Status
+              </Link>
+              <button 
+                onClick={async () => {
+                  if (confirm('Publish all draft posts? This will make all posts visible on the website.')) {
+                    try {
+                      const res = await fetch('/api/posts/publish-all', { method: 'POST' })
+                      const data = await res.json()
+                      if (data.success) {
+                        toast.success(data.message)
+                        load() // Reload posts
+                      } else {
+                        toast.error(data.error || 'Failed to publish posts')
+                      }
+                    } catch (error) {
+                      toast.error('Failed to publish posts')
+                    }
+                  }
+                }}
+                className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded hover:bg-purple-200 transition-colors"
+              >
+                Publish All Posts
+              </button>
+            </div>
           </div>
         <button
           onClick={openCreate}
@@ -869,6 +663,7 @@ const BlogManagement = () => {
           <span>New Post</span>
         </button>
         </div>
+        
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
@@ -1031,6 +826,7 @@ const BlogManagement = () => {
                       >
                         <Edit className="w-4 h-4" />
                       </button>
+                      
                       {post.status === 'published' ? (
                         <button 
                           className="text-yellow-600 hover:text-yellow-900"
@@ -1070,6 +866,7 @@ const BlogManagement = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                       )}
+                      
                       <button 
                         className="text-red-600 hover:text-red-900"
                         title="Delete post"
@@ -1099,9 +896,11 @@ const BlogManagement = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to delete this post?</p>
               </div>
             </div>
+            
             <p className="text-gray-700 mb-6">
               This action cannot be undone. The post will be permanently removed from the system.
             </p>
+            
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteDialog(null)}
@@ -1193,25 +992,20 @@ const BlogManagement = () => {
 }
 
 const CategoriesManagement = () => {
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newSubtitle, setNewSubtitle] = useState('')
-  const [newImageUrl, setNewImageUrl] = useState('')
+  const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingTitle, setEditingTitle] = useState('')
-  const [editingSubtitle, setEditingSubtitle] = useState('')
-  const [editingImageUrl, setEditingImageUrl] = useState('')
+  const [editingName, setEditingName] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
 
   const load = async () => {
     setLoading(true)
     try {
-      const { fetchServiceCategories } = await import('@/lib/categories')
-      const list = await fetchServiceCategories()
+      const { fetchCategoriesWithIds } = await import('@/lib/categories')
+      const list = await fetchCategoriesWithIds()
       setItems(list)
     } catch (e) {
       console.error('Failed to load categories:', e)
@@ -1224,244 +1018,77 @@ const CategoriesManagement = () => {
 
   useEffect(() => { load() }, [])
 
-  const handleImageUpload = async (file: File, isEditing = false) => {
-    try {
-      setIsUploading(true)
-      const { uploadImage } = await import('@/lib/storage')
-      const imageUrl = await uploadImage(file, `categories/${Date.now()}`)
-      if (isEditing) {
-        setEditingImageUrl(imageUrl)
-      } else {
-        setNewImageUrl(imageUrl)
-      }
-      toast.success('Image uploaded successfully!')
-    } catch (error) {
-      console.error('Failed to upload image:', error)
-      toast.error('Failed to upload image. Please try again.')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="Service Categories" subtitle="Manage service categories with images, titles, and subtitles" />
-      {/* Add New Category Form */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Category</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-              <input
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Enter category title"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-              <textarea
-                value={newSubtitle}
-                onChange={(e) => setNewSubtitle(e.target.value)}
-                placeholder="Enter category subtitle"
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
-              <input
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="Enter image URL or upload below"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-          <div className="space-y-4">
-            {/* Image Preview */}
-            {newImageUrl && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
-                <div className="border border-gray-200 rounded-lg p-2">
-                  <img 
-                    src={newImageUrl} 
-                    alt="Preview" 
-                    className="w-full h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-            {/* Upload Section */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
-              <div className="flex items-center space-x-3">
-                <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                  <span className="text-sm font-medium">
-                    {isUploading ? 'Uploading...' : 'Upload Image'}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleImageUpload(file)
-                    }}
-                    disabled={isUploading}
-                  />
-                </label>
-                {newImageUrl && (
-                  <button
-                    onClick={() => setNewImageUrl('')}
-                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                    disabled={isUploading}
-                  >
-                    Clear Image
-                  </button>
-                )}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={async () => {
-                const title = newTitle.trim()
-                if (!title) {
-                  toast.error('Title is required')
-                  return
-                }
-                setIsAdding(true)
-                try {
-                  const { addServiceCategory } = await import('@/lib/categories')
-                  await addServiceCategory({
-                    title,
-                    subtitle: newSubtitle.trim(),
-                    imageUrl: newImageUrl.trim()
-                  })
-                  setNewTitle('')
-                  setNewSubtitle('')
-                  setNewImageUrl('')
-                  toast.success('Category added')
-                  load()
-                } catch (e) {
-                  toast.error((e as any)?.message || 'Failed to add')
-                } finally {
-                  setIsAdding(false)
-                }
-              }}
-              disabled={isAdding || !newTitle.trim()}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
-            >
-              {isAdding ? 'Adding...' : 'Add Category'}
-            </button>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Categories</h2>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="New category name"
+            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              const name = newName.trim()
+              if (!name) return
+              setIsAdding(true)
+              try {
+                const { addCategory } = await import('@/lib/categories')
+                await addCategory(name)
+                setNewName('')
+                toast.success('Category added')
+                load()
+              } catch (e) {
+                toast.error((e as any)?.message || 'Failed to add')
+              } finally {
+                setIsAdding(false)
+              }
+            }}
+            disabled={isAdding}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+          >
+            {isAdding ? 'Adding...' : 'Add'}
+          </button>
         </div>
       </div>
 
-      {/* Categories List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtitle</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500 text-sm">Loading...</td></tr>
+                <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">Loading...</td></tr>
               ) : items.length === 0 ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500 text-sm">No categories</td></tr>
+                <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">No categories</td></tr>
               ) : items.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     {editingId === c.id ? (
-                      <div className="flex items-center space-x-3">
-                        <input 
-                          value={editingImageUrl} 
-                          onChange={(e) => setEditingImageUrl(e.target.value)} 
-                          placeholder="Image URL" 
-                          className="px-2 py-1 text-sm border rounded w-full" 
-                        />
-                        <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
-                          <span>Upload</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0]
-                              if (file) handleImageUpload(file, true)
-                            }}
-                            disabled={isUploading}
-                          />
-                        </label>
-                      </div>
+                      <input value={editingName} onChange={(e) => setEditingName(e.target.value)} className="px-2 py-1 text-sm border rounded w-full sm:w-auto" />
                     ) : (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden">
-                        <img 
-                          src={c.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=100&h=100&fit=crop&crop=center'} 
-                          alt={c.title} 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=100&h=100&fit=crop&crop=center'
-                          }}
-                        />
-                      </div>
+                      <span className="text-sm text-gray-900">{c.name}</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {editingId === c.id ? (
-                      <input 
-                        value={editingTitle} 
-                        onChange={(e) => setEditingTitle(e.target.value)} 
-                        className="px-2 py-1 text-sm border rounded w-full" 
-                      />
-                    ) : (
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{c.title}</div>
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    {editingId === c.id ? (
-                      <textarea 
-                        value={editingSubtitle} 
-                        onChange={(e) => setEditingSubtitle(e.target.value)} 
-                        rows={2}
-                        className="px-2 py-1 text-sm border rounded w-full" 
-                      />
-                    ) : (
-                      <div className="text-sm text-gray-500 max-w-xs line-clamp-2">{c.subtitle}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                     {editingId === c.id ? (
                       <>
                         <button 
                           className="text-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm" 
-                          disabled={isUpdating || !editingTitle.trim()}
+                          disabled={isUpdating}
                           onClick={async () => {
-                            if (!editingTitle.trim()) {
-                              toast.error('Title is required')
-                              return
-                            }
                             setIsUpdating(true)
                             try {
-                              const { updateServiceCategory } = await import('@/lib/categories')
-                              await updateServiceCategory(c.id, {
-                                title: editingTitle.trim(),
-                                subtitle: editingSubtitle.trim(),
-                                imageUrl: editingImageUrl.trim()
-                              })
+                              const { updateCategory } = await import('@/lib/categories')
+                              await updateCategory(c.id, editingName.trim())
                               toast.success('Updated')
                               setEditingId(null)
                               load()
@@ -1478,20 +1105,15 @@ const CategoriesManagement = () => {
                       </>
                     ) : (
                       <>
-                        <button className="text-blue-600 text-sm" onClick={() => { 
-                          setEditingId(c.id)
-                          setEditingTitle(c.title)
-                          setEditingSubtitle(c.subtitle)
-                          setEditingImageUrl(c.imageUrl)
-                        }}>Edit</button>
+                        <button className="text-blue-600 text-sm" onClick={() => { setEditingId(c.id); setEditingName(c.name) }}>Edit</button>
                         <button 
                           className="text-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm" 
                           disabled={isDeleting === c.id}
                           onClick={async () => {
                             setIsDeleting(c.id)
                             try {
-                              const { deleteServiceCategory } = await import('@/lib/categories')
-                              await deleteServiceCategory(c.id)
+                              const { deleteCategory } = await import('@/lib/categories')
+                              await deleteCategory(c.id)
                               toast.success('Deleted')
                               load()
                             } catch (e) {
@@ -1548,6 +1170,7 @@ const UserManagement = () => {
     try {
       const { deleteUser } = await import('@/lib/users')
       const success = await deleteUser(userId)
+      
       if (success) {
         setUsers(prev => prev.filter(user => user.id !== userId))
         toast.success('User deleted successfully')
@@ -1596,6 +1219,7 @@ const UserManagement = () => {
                          user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter
     const matchesRole = roleFilter === 'all' || user.role === roleFilter
+    
     return matchesSearch && matchesStatus && matchesRole
   })
 
@@ -1664,6 +1288,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
+        
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1675,6 +1300,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
+        
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1686,6 +1312,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
+        
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1715,6 +1342,7 @@ const UserManagement = () => {
               />
             </div>
           </div>
+          
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Filter by Status</label>
             <select
@@ -1728,6 +1356,7 @@ const UserManagement = () => {
               <option value="pending">Pending</option>
             </select>
           </div>
+          
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Filter by Role</label>
             <select
@@ -1873,9 +1502,11 @@ const UserManagement = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to delete this user?</p>
               </div>
             </div>
+            
             <p className="text-gray-700 mb-6">
               Are you sure you want to delete <strong>{showDeleteDialog.userName}</strong>? This action cannot be undone.
             </p>
+            
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteDialog(null)}
@@ -1903,8 +1534,27 @@ const UserManagement = () => {
   )
 }
 
-// Analytics Component
-const Analytics = () => {
+// Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
+
+const RecentActivityTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h3 className="font-bold">Recent Activity</h3>
+        <p className="text-sm text-gray-500">View recent activity on your site</p>
+      </div>
+      <div className="flex flex-col gap-1">
+        <h3 className="font-bold">Recent Activity</h3>
+        <p className="text-sm text-gray-500">View recent activity on your site</p>
+      </div>
+    </div>
+  )
+}
+
+// Fix the incorrectly defined Analytics component
+
+// OverviewTab component
+const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
   const [analytics, setAnalytics] = useState({
     blogStats: {
       totalPosts: 0,
@@ -1912,7 +1562,7 @@ const Analytics = () => {
       publishedPosts: 0,
       draftPosts: 0
     },
-    popularPosts: [] as any[],
+    popularPosts: [] as BlogPost[],
     userStats: {
       total: 0,
       active: 0,
@@ -1936,6 +1586,7 @@ const Analytics = () => {
         const { fetchCategories } = await import('@/lib/categories')
         const { getUserStats } = await import('@/lib/users')
         const { useSiteConfig } = await import('@/lib/site-config')
+        
         const [posts, categories, userStats] = await Promise.all([
           fetchPosts(false), // Get all posts including drafts
           fetchCategories(),
@@ -1948,6 +1599,7 @@ const Analytics = () => {
         // Calculate blog statistics
         const publishedPosts = posts.filter(p => p.status === 'published')
         const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0)
+        
         // Get popular posts (top 5 by views)
         const popularPosts = posts
           .filter(p => p.status === 'published')
@@ -1983,6 +1635,7 @@ const Analytics = () => {
         }
       }
     }
+    
     loadAnalytics()
     return () => { active = false }
   }, [])
@@ -2075,6 +1728,7 @@ const Analytics = () => {
               </div>
             </div>
           </div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Blog Statistics */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
@@ -2449,1355 +2103,6 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
 }
 
 // Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
-// Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
-const HeroConfigLocal = ({ config, onChange }: any) => {
-  const slides = config.heroSlides || []
-  const [saving, setSaving] = useState(false)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [creatingSlide, setCreatingSlide] = useState(false)
-  const [creationTimeout, setCreationTimeout] = useState<NodeJS.Timeout | null>(null)
-  const [localSlides, setLocalSlides] = useState<any[]>(slides)
-  const [updatingSlideId, setUpdatingSlideId] = useState<string | null>(null)
-  const [deletingSlideId, setDeletingSlideId] = useState<string | null>(null)
-  const [showDeleteDialog, setShowDeleteDialog] = useState<{ slideId: string; slideTitle: string } | null>(null)
-  // Add missing state variables for the modal
-  const [newSlideData, setNewSlideData] = useState({
-    imageUrl: '',
-    title: '',
-    subtitle: '',
-    ctaLabel: 'Get Started Today',
-    ctaHref: '#contact'
-  })
-  const [isUploadingNewSlideImage, setIsUploadingNewSlideImage] = useState(false)
-
-  // Sync local slides with config slides (from Firebase real-time updates)
-  useEffect(() => {
-    if (Array.isArray(slides) && slides.length >= 0) {
-      // Sort by order if available
-      const sortedSlides = [...slides].sort((a, b) => {
-        const orderA = a.order ?? 0
-        const orderB = b.order ?? 0
-        return orderA - orderB
-      })
-      // Only update if the slides are actually different to prevent infinite loops
-      setLocalSlides(prevSlides => {
-        // Check if the slides are the same by comparing length and IDs
-        if (prevSlides.length === sortedSlides.length) {
-          const sameIds = prevSlides.every((slide, index) => slide.id === sortedSlides[index].id)
-          if (sameIds) return prevSlides
-        }
-        return sortedSlides
-      })
-    }
-  }, [slides])
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (creationTimeout) {
-        clearTimeout(creationTimeout)
-      }
-    }
-  }, [creationTimeout])
-
-  const getLocal = (id: string, key: string) => {
-    const s = localSlides.find((x) => x.id === id)
-    return (s && (s as any)[key]) ?? ''
-  }
-
-  const setLocal = (id: string, key: string, value: any) => {
-    setLocalSlides((prev) => prev.map((s) => (s.id === id ? { ...s, [key]: value } : s)))
-  }
-  const createNewSlide = async () => {
-    if (creatingSlide) return
-    
-    // Require title
-    if (!newSlideData.title.trim()) {
-      toast.error('Please enter a title for the slide')
-      return
-    }
-    
-    // Require at least an image file or URL
-    const hasUrl = newSlideData.imageUrl.trim() !== ''
-    if (!hasUrl) {
-      toast.error('Please select an image or provide an image URL')
-      return
-    }
-    
-    try {
-      setCreatingSlide(true)
-      console.log('Starting slide creation...', new Date().toISOString())
-      const startTime = Date.now()
-      
-      const slideData = {
-        imageUrl: newSlideData.imageUrl,
-        title: newSlideData.title.trim(),
-        subtitle: newSlideData.subtitle.trim(),
-        ctaLabel: newSlideData.ctaLabel,
-        ctaHref: newSlideData.ctaHref
-      }
-      
-      console.log('Creating slide via API...', slideData)
-      const createStart = Date.now()
-      
-      // Add timeout for API call
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Slide creation timed out after 30 seconds')), 30000)
-      )
-      
-      const apiPromise = fetch('/api/slides', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(slideData)
-      })
-      
-      const res = await Promise.race([apiPromise, timeoutPromise]) as Response
-      console.log('API responded in', Date.now() - createStart, 'ms with status:', res.status)
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        console.error('API error:', errorData)
-        throw new Error(errorData.error || `Failed to create slide: ${res.status}`)
-      }
-      
-      const newSlide = await res.json()
-      console.log('Slide created successfully in', Date.now() - startTime, 'ms total')
-      
-      // Don't do optimistic UI update - let the real-time subscription handle it
-      // The real-time subscription will automatically update the UI when the data changes in Firebase
-      
-      toast.success('Slide created successfully!')
-      
-      // Close modal and reset form
-      setIsAddModalOpen(false)
-      setNewSlideData({
-        imageUrl: '',
-        title: '',
-        subtitle: '',
-        ctaLabel: 'Get Started Today',
-        ctaHref: '#contact'
-      })
-      
-    } catch (e) {
-      console.error('Failed to create slide:', e)
-      const errorMessage = e instanceof Error ? e.message : 'Failed to create slide'
-      toast.error(errorMessage)
-    } finally {
-      setCreatingSlide(false)
-      if (creationTimeout) {
-        clearTimeout(creationTimeout)
-        setCreationTimeout(null)
-      }
-    }
-  }
-
-  const updateSlide = async (slideId: string, updates: any) => {
-    try {
-      setUpdatingSlideId(slideId)
-      const res = await fetch(`/api/slides/${slideId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      })
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to update slide: ${res.status}`)
-      }
-      // Don't do optimistic UI update - let the real-time subscription handle it
-      // The real-time subscription will automatically update the UI when the data changes in Firebase
-      toast.success('Slide updated successfully! Changes will appear on the website immediately.')
-    } catch (e) {
-      console.error('Failed to update slide:', e)
-      const errorMessage = e instanceof Error ? e.message : 'Failed to update slide'
-      toast.error(errorMessage)
-      // Revert local state on error by syncing with config
-      setLocalSlides(slides)
-    } finally {
-      setUpdatingSlideId(null)
-    }
-  }
-
-  const deleteSlide = async (slideId: string) => {
-    try {
-      setDeletingSlideId(slideId)
-      // Set a timeout to prevent infinite waiting (30 seconds)
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Delete operation timed out')), 30000)
-      )
-      const deletePromise = fetch(`/api/slides/${slideId}`, {
-        method: 'DELETE'
-      })
-      // Race between delete and timeout
-      const res = await Promise.race([deletePromise, timeoutPromise]) as Response
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to delete slide: ${res.status}`)
-      }
-      // Don't do optimistic UI update - let the real-time subscription handle it
-      // The real-time subscription will automatically update the UI when the data changes in Firebase
-      toast.success('Slide deleted successfully!')
-      setShowDeleteDialog(null)
-    } catch (e) {
-      console.error('Failed to delete slide:', e)
-      const errorMessage = e instanceof Error ? e.message : 'Failed to delete slide'
-      toast.error(errorMessage)
-    } finally {
-      setDeletingSlideId(null)
-    }
-  }
-
-  const handleImageUpload = async (slideId: string, file: File) => {
-    try {
-      const imageUrl = await uploadImage(file, `hero-slides/${slideId}`)
-      await updateSlide(slideId, { imageUrl })
-      // Don't update local state directly - let the real-time subscription handle it
-    } catch (e) {
-      console.error('Failed to upload image:', e)
-      toast.error('Failed to upload image')
-    }
-  }
-
-  // Add the missing handleSlideImageUpload function
-  const handleSlideImageUpload = async (file: File) => {
-    if (!file) return
-    
-    setIsUploadingNewSlideImage(true)
-    
-    try {
-      const imageUrl = await uploadImage(file, `hero/slides/slide-${Date.now()}`)
-      setNewSlideData(prev => ({ ...prev, imageUrl }))
-      toast.success('Slide image uploaded successfully!')
-    } catch (error) {
-      console.error('Failed to upload slide image:', error)
-      toast.error('Failed to upload image. Please try again.')
-    } finally {
-      setIsUploadingNewSlideImage(false)
-    }
-  }
-
-  const clearImage = async (slideId: string) => {
-    setLocal(slideId, 'imageUrl', '')
-    await updateSlide(slideId, { imageUrl: '' })
-  }
-  return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="Hero Carousel" subtitle="Manage images and texts for the hero slider. Changes are saved to Firebase and appear on the website in real-time." />
-      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-800">
-          <strong>💡 Tip:</strong> Changes you make here are automatically saved to Firebase and will appear on the main website immediately. The hero section uses real-time synchronization.
-        </p>
-      </div>
-      <div className="space-y-4">
-        {localSlides.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <p className="text-gray-600 mb-4">No hero slides yet. Create your first slide to get started!</p>
-          </div>
-        ) : (
-          localSlides.map((slide: any) => (
-          <div key={slide.id} className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Image Section */}
-              <div className="space-y-4">
-            <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
-                  {/* Image Preview */}
-                  {slide.imageUrl && (
-                    <div className="mb-3">
-                      <img 
-                        src={slide.imageUrl}
-                        alt={`Slide ${slide.title || 'Untitled'}`}
-                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop'
-                        }}
-                      />
-            </div>
-                  )}
-                  {/* Upload Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">Upload Image</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleImageUpload(slide.id, file)
-                          }}
-                        />
-                      </label>
-                      {slide.imageUrl && (
-                        <button
-                          onClick={() => clearImage(slide.id)}
-                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                        >
-                          Clear Image
-                        </button>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Or Image URL</label>
-                      <input
-                        type="url"
-                        value={getLocal(slide.id, 'imageUrl')}
-                        onChange={(e) => setLocal(slide.id, 'imageUrl', e.target.value)}
-                        onBlur={(e) => updateSlide(slide.id, { imageUrl: e.target.value })}
-                        placeholder="https://example.com/image.jpg"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Content Section */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                  <input
-                    type="text"
-                    value={getLocal(slide.id, 'title')}
-                    onChange={(e) => setLocal(slide.id, 'title', e.target.value)}
-                    onBlur={(e) => updateSlide(slide.id, { title: e.target.value })}
-                    placeholder="Enter slide title"
-                    disabled={updatingSlideId === slide.id}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                  <textarea
-                    value={getLocal(slide.id, 'subtitle')}
-                    onChange={(e) => setLocal(slide.id, 'subtitle', e.target.value)}
-                    onBlur={(e) => updateSlide(slide.id, { subtitle: e.target.value })}
-                    placeholder="Enter slide subtitle"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Label</label>
-                    <input
-                      type="text"
-                      value={getLocal(slide.id, 'ctaLabel')}
-                      onChange={(e) => setLocal(slide.id, 'ctaLabel', e.target.value)}
-                      onBlur={(e) => updateSlide(slide.id, { ctaLabel: e.target.value })}
-                      placeholder="Get Started"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Link</label>
-                    <input
-                      type="text"
-                      value={getLocal(slide.id, 'ctaHref')}
-                      onChange={(e) => setLocal(slide.id, 'ctaHref', e.target.value)}
-                      onBlur={(e) => updateSlide(slide.id, { ctaHref: e.target.value })}
-                      placeholder="#contact"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                {/* Order */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                    <input
-                      type="number"
-                      value={typeof getLocal(slide.id, 'order') === 'number' ? getLocal(slide.id, 'order') : ''}
-                      onChange={(e) => setLocal(slide.id, 'order', parseInt(e.target.value || '0', 10))}
-                      onBlur={(e) => updateSlide(slide.id, { order: parseInt(e.target.value || '0', 10) })}
-                      placeholder="1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div className="flex items-end space-x-2">
-                    <button
-                      onClick={() => {
-                        const next = (getLocal(slide.id, 'order') || 1) - 1
-                        setLocal(slide.id, 'order', next)
-                        updateSlide(slide.id, { order: next })
-                      }}
-                      className="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200"
-                    >
-                      Move Up
-                    </button>
-                    <button
-                      onClick={() => {
-                        const next = (getLocal(slide.id, 'order') || 1) + 1
-                        setLocal(slide.id, 'order', next)
-                        updateSlide(slide.id, { order: next })
-                      }}
-                      className="px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200"
-                    >
-                      Move Down
-                    </button>
-                  </div>
-                </div>
-                {/* Actions */}
-                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                  {updatingSlideId === slide.id && (
-                    <span className="text-sm text-blue-600 flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
-                    </span>
-                  )}
-                  <button
-                    onClick={() => setShowDeleteDialog({ slideId: slide.id, slideTitle: slide.title || 'Untitled Slide' })}
-                    disabled={deletingSlideId === slide.id}
-                    className="px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {deletingSlideId === slide.id ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span>Deleting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="w-4 h-4" />
-                        <span>Delete Slide</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          ))
-        )}
-        {/* Add New Slide Button */}
-        <div className="flex justify-center">
-          <button 
-            onClick={() => setIsAddModalOpen(true)} 
-            className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all duration-300 border-2 border-dashed border-primary-300 hover:border-primary-400 hover:shadow-lg hover:scale-[1.02] group"
-          >
-            <div className="flex items-center justify-center space-x-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
-                <Plus className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg">Add New Slide</span>
-            </div>
-          </button>
-        </div>
-
-        {/* Add New Slide Modal */}
-        {isAddModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">Add New Hero Slide</h3>
-                  <button 
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                
-                <div className="space-y-6">
-                  {/* Image Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image *</label>
-                    {newSlideData.imageUrl ? (
-                      <div className="mb-3">
-                        <img 
-                          src={newSlideData.imageUrl}
-                          alt="Preview"
-                          className="w-full h-48 object-cover rounded-lg border border-gray-200"
-                        />
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-3">
-                        <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-2 text-sm text-gray-600">No image selected</p>
-                      </div>
-                    )}
-                    
-                    <div className="flex space-x-3">
-                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">
-                          {isUploadingNewSlideImage ? 'Uploading...' : 'Upload Image'}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleSlideImageUpload(file)
-                          }}
-                          disabled={isUploadingNewSlideImage}
-                        />
-                      </label>
-                      
-                      {newSlideData.imageUrl && (
-                        <button
-                          onClick={() => setNewSlideData(prev => ({ ...prev, imageUrl: '' }))}
-                          className="px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                          disabled={isUploadingNewSlideImage}
-                        >
-                          Clear Image
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Title */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                    <input
-                      type="text"
-                      value={newSlideData.title}
-                      onChange={(e) => setNewSlideData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Enter slide title"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  {/* Subtitle */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Subtitle</label>
-                    <textarea
-                      value={newSlideData.subtitle}
-                      onChange={(e) => setNewSlideData(prev => ({ ...prev, subtitle: e.target.value }))}
-                      placeholder="Enter slide subtitle"
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  {/* CTA Label */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Label</label>
-                    <input
-                      type="text"
-                      value={newSlideData.ctaLabel}
-                      onChange={(e) => setNewSlideData(prev => ({ ...prev, ctaLabel: e.target.value }))}
-                      placeholder="Get Started Today"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  {/* CTA Link */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CTA Link</label>
-                    <input
-                      type="text"
-                      value={newSlideData.ctaHref}
-                      onChange={(e) => setNewSlideData(prev => ({ ...prev, ctaHref: e.target.value }))}
-                      placeholder="#contact"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  {/* Actions */}
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => setIsAddModalOpen(false)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={createNewSlide}
-                      disabled={creatingSlide || !newSlideData.title.trim() || (!newSlideData.imageUrl.trim())}
-                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                    >
-                      {creatingSlide ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Creating...</span>
-                        </>
-                      ) : (
-                        <span>Create Slide</span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  )
-}
-
-const ServicesConfigLocal = ({ config, onChange }: any) => {
-  const [services, setServices] = useState<any[]>([])
-  const [originalServices, setOriginalServices] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [uploadingServices, setUploadingServices] = useState<{ [key: string]: boolean }>({})
-  const [isSaving, setIsSaving] = useState(false)
-  const [isMigrating, setIsMigrating] = useState(false)
-  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; serviceId: string; serviceName: string }>({ 
-    isOpen: false, 
-    serviceId: '', 
-    serviceName: '' 
-  })
-  // Add state for the new service modal
-  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
-  const [newServiceData, setNewServiceData] = useState({
-    title: '',
-    description: '',
-    category: 'General',
-    imageUrl: ''
-  })
-  // Add state for uploading in the new service form
-  const [isUploadingNewServiceImage, setIsUploadingNewServiceImage] = useState(false)
-  // Reference for scrolling to new services
-  const serviceRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
-  const handleServiceImageUpload = async (serviceId: string, file: File) => {
-    if (!file) return
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file (JPEG, PNG, GIF, etc.)')
-      return
-    }
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image file is too large. Please select an image smaller than 10MB.')
-      return
-    }
-    // Set uploading state
-    setUploadingServices(prev => ({ ...prev, [serviceId]: true }))
-    try {
-      const imageUrl = await uploadImage(file, `services/${serviceId}`)
-      await updateService(serviceId, 'imageUrl', imageUrl)
-      toast.success('Service image uploaded successfully!')
-    } catch (error) {
-      console.error('Failed to upload service image:', error)
-      toast.error(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
-    } finally {
-      // Reset uploading state
-      setUploadingServices(prev => ({ ...prev, [serviceId]: false }))
-    }
-  }
-  // Add the missing function for handling new service image uploads
-  const handleNewServiceImageUpload = async (file: File) => {
-    if (!file) return
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file (JPEG, PNG, GIF, etc.)')
-      return
-    }
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image file is too large. Please select an image smaller than 10MB.')
-      return
-    }
-    // Set uploading state
-    setIsUploadingNewServiceImage(true)
-    try {
-      const imageUrl = await uploadImage(file, `services/new-${Date.now()}`)
-      setNewServiceData(prev => ({ ...prev, imageUrl }))
-      toast.success('Service image uploaded successfully!')
-    } catch (error) {
-      console.error('Failed to upload service image:', error)
-      toast.error(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
-    } finally {
-      // Reset uploading state
-      setIsUploadingNewServiceImage(false)
-    }
-  }
-  const removeService = async (serviceId: string) => {
-    try {
-      const res = await fetch(`/api/services/${serviceId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      if (!res.ok) throw new Error('Failed to delete service')
-      toast.success('Service removed successfully!')
-      setServices(prev => prev.filter(s => s.id !== serviceId))
-    } catch (error) {
-      console.error('Error removing service:', error)
-      toast.error('Failed to remove service. Please try again.')
-    }
-  }
-  console.log('ServicesConfig rendered with deleteDialog state:', deleteDialog)
-  // Load services from Firestore
-  useEffect(() => {
-    console.log('ServicesConfig component mounted, loading services...')
-    loadServices()
-    // Return cleanup function
-    return () => {
-      console.log('Admin services: Cleaning up')
-    }
-  }, [])
-  const loadServices = async () => {
-    try {
-      console.log('Loading services...')
-      const res = await fetch('/api/services')
-      console.log('Services API response:', res.status, res.statusText)
-      if (!res.ok) throw new Error('Failed to fetch')
-      const { services: servicesData } = await res.json()
-      console.log('Loaded services:', servicesData)
-      setServices(servicesData)
-      setOriginalServices(JSON.parse(JSON.stringify(servicesData))) // Deep copy
-    } catch (error) {
-      console.error('Error loading services:', error)
-      toast.error('Failed to load services')
-    } finally {
-      setLoading(false)
-    }
-  }
-  // Scroll to a specific service
-  const scrollToService = (serviceId: string) => {
-    setTimeout(() => {
-      const element = serviceRefs.current[serviceId]
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        // Add a temporary highlight effect
-        element.classList.add('ring-4', 'ring-green-500')
-        setTimeout(() => {
-          element.classList.remove('ring-4', 'ring-green-500')
-        }, 2000)
-      }
-    }, 100)
-  }
-  // Update service in local state only (no auto-save)
-  const updateService = (id: string, key: string, value: string) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, [key]: value } : s))
-  }
-  const addService = async () => {
-    // Open the modal form instead of creating a service immediately
-    setNewServiceData({
-      title: '',
-      description: '',
-      category: 'General',
-      imageUrl: ''
-    })
-    setIsAddServiceModalOpen(true)
-  }
-  // Create a new function to actually save the new service
-  const createNewService = async (shouldCloseModal = true) => {
-    try {
-      const res = await fetch('/api/services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newServiceData)
-      })
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.error || `Failed to create service: ${res.status} ${res.statusText}`)
-      }
-      const newService = await res.json()
-      toast.success('Service created!')
-      // Only close modal if requested
-      if (shouldCloseModal) {
-        setIsAddServiceModalOpen(false)
-      }
-      // Reload services to show the new one
-      await loadServices()
-      // After loading, scroll to the new service
-      setTimeout(() => {
-        scrollToService(newService.id)
-      }, 500)
-    } catch (error) {
-      console.error('Error creating service:', error)
-      toast.error(`Failed to create service: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
-  const migrateHardcodedServices = async () => {
-    if (!confirm('This will import the default services into the database. Continue?')) return
-    setIsMigrating(true)
-    try {
-      console.log('Starting migration...')
-      const res = await fetch('/api/services/migrate', { method: 'POST' })
-      console.log('Migration response status:', res.status)
-    } catch (error) {
-      console.error('Migration failed:', error)
-      toast.error('Migration failed')
-    } finally {
-      setIsMigrating(false)
-    }
-  }
-
-  const cancelDeleteService = () => {
-    setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
-  }
-
-  const confirmDeleteService = async () => {
-    try {
-      const res = await fetch(`/api/services/${deleteDialog.serviceId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      if (!res.ok) throw new Error('Failed to delete service')
-      toast.success('Service removed successfully!')
-      setServices(prev => prev.filter(s => s.id !== deleteDialog.serviceId))
-      setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
-    } catch (error) {
-      console.error('Error removing service:', error)
-      toast.error('Failed to remove service. Please try again.')
-      setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
-    }
-  }
-  // Save all modified services
-  const saveAllServices = async () => {
-    setIsSaving(true)
-    try {
-      // Compare current services with original services and update only changed ones
-      const promises = services.map(async (service) => {
-        const originalService = originalServices.find(s => s.id === service.id)
-        if (!originalService) return // New service, will be handled separately
-        // Check if service has changed
-        const hasChanged = Object.keys(service).some(key => 
-          service[key] !== originalService[key]
-        )
-        if (hasChanged) {
-          const res = await fetch(`/api/services/${service.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(service)
-          })
-          if (!res.ok) throw new Error(`Failed to update service ${service.id}`)
-        }
-      })
-      await Promise.all(promises)
-      setOriginalServices(JSON.parse(JSON.stringify(services))) // Update original services
-      toast.success('All changes saved successfully!')
-    } catch (error) {
-      console.error('Error saving services:', error)
-      toast.error('Failed to save changes. Please try again.')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="Services" subtitle="Manage services shown on the homepage" />
-      {/* Save Button */}
-      <div className="mb-6 flex justify-end">
-        <button
-          onClick={saveAllServices}
-          disabled={isSaving}
-          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-        >
-          {isSaving ? (
-            <>
-              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Saving...</span>
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Save All Changes</span>
-            </>
-          )}
-        </button>
-      </div>
-      {/* Migration notice */}
-      {services.length === 0 && !loading && (
-        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                <ImageIcon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">No Services Found</h3>
-              <p className="text-blue-700 mb-4">Would you like to import the default services (Cleaning, Laundry, Maintenance, Specialized)?</p>
-              <button
-                onClick={migrateHardcodedServices}
-                disabled={isMigrating}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-              >
-                {isMigrating && (
-                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                )}
-                <span>{isMigrating ? 'Importing...' : 'Import Default Services'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Add Service Button */}
-      <div className="flex justify-center mb-6">
-        <button 
-          onClick={addService} 
-          className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all duration-300 border-2 border-dashed border-primary-300 hover:border-primary-400 hover:shadow-lg hover:scale-[1.02] group"
-        >
-          <div className="flex items-center justify-center space-x-3">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
-              <Plus className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg">Add New Service</span>
-          </div>
-        </button>
-      </div>
-      <div className="space-y-4">
-        {services.map((s: any) => (
-          <div 
-            key={s.id} 
-            className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300"
-            ref={(el) => { serviceRefs.current[s.id] = el }}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Content Section */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Title (ID: {s.id})</label>
-                  <input 
-                    value={s.title || ''} 
-                    onChange={(e) => updateService(s.id, 'title', e.target.value)} 
-                    placeholder="Enter service title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea 
-                    value={s.description || ''} 
-                    onChange={(e) => updateService(s.id, 'description', e.target.value)} 
-                    placeholder="Enter service description"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <input 
-                    value={s.category || ''} 
-                    onChange={(e) => updateService(s.id, 'category', e.target.value)} 
-                    placeholder="e.g., Cleaning Services, Maintenance Services"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Services with the same category will be grouped together</p>
-                </div>
-              </div>
-
-              {/* Image Section */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
-                  {/* Image Preview */}
-                  {s.imageUrl && (
-                    <div className="mb-3">
-                      <img 
-                        src={s.imageUrl}
-                        alt={s.title || 'Service'}
-                        className="w-full max-h-48 object-contain rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
-                        }}
-                      />
-                    </div>
-                  )}
-                  {/* Upload Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">
-                          {uploadingServices[s.id] ? 'Uploading...' : 'Upload Image'}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) handleServiceImageUpload(s.id, file)
-                          }}
-                          disabled={uploadingServices[s.id]}
-                        />
-                      </label>
-                      {s.imageUrl && (
-                        <button
-                          onClick={() => updateService(s.id, 'imageUrl', '')}
-                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                          disabled={uploadingServices[s.id]}
-                        >
-                          Clear Image
-                        </button>
-                      )}
-                    </div>
-                    {/* URL Input as fallback */}
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                      <input 
-                        value={s.imageUrl || ''} 
-                        onChange={(e) => updateService(s.id, 'imageUrl', e.target.value)} 
-                        placeholder="https://example.com/image.jpg"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                        disabled={uploadingServices[s.id]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Remove Button */}
-            <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
-              <button 
-                onClick={() => setDeleteDialog({ isOpen: true, serviceId: s.id, serviceName: s.title })} 
-                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors duration-200 flex items-center space-x-2"
-                disabled={uploadingServices[s.id]}
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Remove Service</span>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Notification for new service added */}
-      {services.length > 0 && (
-        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-5 h-5 text-green-600">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-green-800 font-medium">New service added successfully!</p>
-              <p className="text-green-700 text-sm">Don't forget to save your changes below.</p>
-            </div>
-          </div>
-          <button 
-            onClick={saveAllServices}
-            disabled={isSaving}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-          >
-            {isSaving ? (
-              <>
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <span>Save Changes</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-      {/* Add Service Modal */}
-      {isAddServiceModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          onClick={(e) => {
-            // Close modal when clicking on backdrop
-            if (e.target === e.currentTarget) {
-              setIsAddServiceModalOpen(false);
-            }
-          }}
-        >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200 max-h-[90vh] flex flex-col"
-          >
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">Add New Service</h3>
-                <button 
-                  onClick={() => setIsAddServiceModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-500"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Title *</label>
-                  <input 
-                    value={newServiceData.title} 
-                    onChange={(e) => setNewServiceData({...newServiceData, title: e.target.value})} 
-                    placeholder="Enter service title"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea 
-                    value={newServiceData.description} 
-                    onChange={(e) => setNewServiceData({...newServiceData, description: e.target.value})} 
-                    placeholder="Enter service description"
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <input 
-                    value={newServiceData.category} 
-                    onChange={(e) => setNewServiceData({...newServiceData, category: e.target.value})} 
-                    placeholder="e.g., Cleaning Services, Maintenance Services"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
-                  {/* Image Preview */}
-                  {newServiceData.imageUrl && (
-                    <div className="mb-3">
-                      <img 
-                        src={newServiceData.imageUrl}
-                        alt="Service preview"
-                        className="w-full max-h-64 object-contain rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop';
-                        }}
-                      />
-                    </div>
-                  )}
-                  {/* Upload Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">
-                          {isUploadingNewServiceImage ? 'Uploading...' : 'Upload Image'}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleNewServiceImageUpload(file);
-                          }}
-                          disabled={isUploadingNewServiceImage}
-                        />
-                      </label>
-                      {newServiceData.imageUrl && (
-                        <button
-                          onClick={() => setNewServiceData({...newServiceData, imageUrl: ''})}
-                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                          disabled={isUploadingNewServiceImage}
-                        >
-                          Clear Image
-                        </button>
-                      )}
-                    </div>
-                    {/* URL Input as fallback */}
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                      <input 
-                        value={newServiceData.imageUrl || ''} 
-                        onChange={(e) => setNewServiceData({...newServiceData, imageUrl: e.target.value})} 
-                        placeholder="https://example.com/image.jpg"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                        disabled={isUploadingNewServiceImage}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-gray-200">
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setIsAddServiceModalOpen(false)}
-                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    createNewService(true);
-                  }}
-                  disabled={!newServiceData.title.trim() || isUploadingNewServiceImage}
-                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
-                    !newServiceData.title.trim() || isUploadingNewServiceImage
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl'
-                  }`}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Save & Close</span>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    createNewService(false);
-                  }}
-                  disabled={!newServiceData.title.trim() || isUploadingNewServiceImage}
-                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
-                    !newServiceData.title.trim() || isUploadingNewServiceImage
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
-                  }`}
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Add Service</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
-      {/* Delete Confirmation Dialog */}
-      {deleteDialog.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200"
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg mb-4">
-                <Trash2 className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Service</h3>
-              <p className="text-gray-600 text-center mb-6">
-                Are you sure you want to delete <span className="font-semibold text-gray-900">{deleteDialog.serviceName}</span>? This action cannot be undone.
-              </p>
-              <div className="flex space-x-3">
-                <button
-                  onClick={cancelDeleteService}
-                  className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeleteService}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Delete</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </motion.div>
-  )
-}
-
-const AboutConfig = ({ config, onChange }: any) => {
-  const about = config.about || { title: '', content: '', imageUrl: '' }
-  const [isUploading, setIsUploading] = useState(false)
-  const update = (key: string, value: string) => onChange({ ...config, about: { ...about, [key]: value } })
-  const handleAboutImageUpload = async (file: File) => {
-    if (!file) return
-    setIsUploading(true)
-    try {
-      const { uploadImage } = await import('@/lib/storage')
-      const imageUrl = await uploadImage(file, `about/about-${Date.now()}`)
-      update('imageUrl', imageUrl)
-      toast.success('About image uploaded successfully!')
-    } catch (error) {
-      console.error('Failed to upload about image:', error)
-      toast.error('Failed to upload image. Please try again.')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="About Section" subtitle="Add and update about section" />
-      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Content Section */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-              <input 
-                value={about.title} 
-                onChange={(e) => update('title', e.target.value)} 
-                placeholder="Enter about section title"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-              <textarea 
-                value={about.content} 
-                onChange={(e) => update('content', e.target.value)} 
-                placeholder="Enter about section content"
-                rows={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-              />
-            </div>
-          </div>
-          {/* Image Section */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">About Image</label>
-              {/* Image Preview */}
-              {about.imageUrl && (
-                <div className="mb-3">
-                  <img 
-                    src={about.imageUrl}
-                    alt="About"
-                    className="w-full h-48 object-cover rounded-lg border border-gray-200"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
-                    }}
-                  />
-                </div>
-              )}
-              {/* Upload Section */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                    <span className="text-sm font-medium">
-                      {isUploading ? 'Uploading...' : 'Upload Image'}
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) handleAboutImageUpload(file)
-                      }}
-                      disabled={isUploading}
-                    />
-                  </label>
-                  {about.imageUrl && (
-                    <button
-                      onClick={() => update('imageUrl', '')}
-                      className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                      disabled={isUploading}
-                    >
-                      Clear Image
-                    </button>
-                  )}
-                </div>
-                {/* URL Input as fallback */}
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                  <input 
-                    value={about.imageUrl || ''} 
-                    onChange={(e) => update('imageUrl', e.target.value)} 
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    disabled={isUploading}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
 
 const NavigationConfig = ({ config, onChange }: any) => {
   const navigation = config.navigation || { 
@@ -3813,29 +2118,37 @@ const NavigationConfig = ({ config, onChange }: any) => {
       { name: 'Terms of Service', href: '/terms-of-service' }
     ]
   }
+  
   const update = (key: string, value: any) => onChange({ ...config, navigation: { ...navigation, [key]: value } })
+  
   const updateMainLink = (index: number, field: string, value: string) => {
     const newMain = [...navigation.main]
     newMain[index] = { ...newMain[index], [field]: value }
     update('main', newMain)
   }
+  
   const updateLegalLink = (index: number, field: string, value: string) => {
     const newLegal = [...navigation.legal]
     newLegal[index] = { ...newLegal[index], [field]: value }
     update('legal', newLegal)
   }
+  
   const addMainLink = () => {
     update('main', [...navigation.main, { name: 'New Link', href: '#' }])
   }
+  
   const addLegalLink = () => {
     update('legal', [...navigation.legal, { name: 'New Legal Link', href: '#' }])
   }
+  
   const removeMainLink = (index: number) => {
     update('main', navigation.main.filter((_: any, i: number) => i !== index))
   }
+  
   const removeLegalLink = (index: number) => {
     update('legal', navigation.legal.filter((_: any, i: number) => i !== index))
   }
+  
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Navigation" subtitle="Manage website navigation links" />
@@ -3875,6 +2188,7 @@ const NavigationConfig = ({ config, onChange }: any) => {
             </button>
           </div>
         </div>
+        
         {/* Legal Navigation */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Navigation</h3>
@@ -3916,155 +2230,378 @@ const NavigationConfig = ({ config, onChange }: any) => {
 }
 
 const FooterConfig = ({ config, onChange }: any) => {
-  const footer = config.footer || {}
+  const footer = config.footer || { copyright: '', socialLinks: [] }
+  const [isUploading, setIsUploading] = useState(false)
+  const [newSocialLink, setNewSocialLink] = useState({ name: '', url: '', icon: '' })
+  const [isAddSocialLinkModalOpen, setIsAddSocialLinkModalOpen] = useState(false)
+  const [socialLinkToDelete, setSocialLinkToDelete] = useState<number | null>(null)
+
   const update = (key: string, value: any) => onChange({ ...config, footer: { ...footer, [key]: value } })
-  const updateSocial = (key: string, value: string) => onChange({ ...config, footer: { ...footer, social: { ...(footer.social || {}), [key]: value } } })
-  const updateLinks = (section: string, index: number, field: string, value: string) => {
-    const links = { ...(footer.links || {}) }
-    if (!links[section]) links[section] = []
-    links[section] = [...(links[section] || [])]
-    links[section][index] = { ...(links[section][index] || {}), [field]: value }
-    onChange({ ...config, footer: { ...footer, links } })
+  const updateSocialLink = (index: number, field: string, value: string) => {
+    const newSocialLinks = [...footer.socialLinks]
+    newSocialLinks[index] = { ...newSocialLinks[index], [field]: value }
+    update('socialLinks', newSocialLinks)
   }
-  const addLink = (section: string) => {
-    const links = { ...(footer.links || {}) }
-    if (!links[section]) links[section] = []
-    links[section] = [...(links[section] || []), { name: '', href: '' }]
-    onChange({ ...config, footer: { ...footer, links } })
+  const addSocialLink = () => {
+    update('socialLinks', [...footer.socialLinks, newSocialLink])
+    setIsAddSocialLinkModalOpen(false)
   }
-  const removeLink = (section: string, index: number) => {
-    const links = { ...(footer.links || {}) }
-    if (links[section]) {
-      links[section] = links[section].filter((_: any, i: number) => i !== index)
-      onChange({ ...config, footer: { ...footer, links } })
+  const removeSocialLink = (index: number) => {
+    update('socialLinks', footer.socialLinks.filter((_: any, i: number) => i !== index))
+  }
+  const handleNewSocialLinkImageUpload = async (file: File) => {
+    if (!file) return
+    
+    setIsUploading(true)
+    
+    try {
+      const { uploadImage } = await import('@/lib/storage')
+      const imageUrl = await uploadImage(file, `social-links/${Date.now()}`)
+      setNewSocialLink({...newSocialLink, icon: imageUrl})
+      toast.success('Social link icon uploaded successfully!')
+    } catch (error) {
+      console.error('Failed to upload social link icon:', error)
+      toast.error('Failed to upload image. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
   }
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <ConfigHeader title="Footer Configuration" subtitle="Manage footer content, links, and social media" />
-      <div className="space-y-6">
-        {/* Basic Information */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+      <ConfigHeader title="Footer" subtitle="Manage footer settings" />
+      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Copyright Section */}
           <div className="space-y-4">
-        <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Company Description</label>
-              <textarea 
-                value={footer.description || ''} 
-                onChange={(e) => update('description', e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                rows={3}
-                placeholder="Brief description about your company..."
-              />
-        </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Copyright</label>
               <input 
-                value={footer.address || ''} 
-                onChange={(e) => update('address', e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="Company address..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Copyright Text</label>
-              <input 
-                value={footer.copyright || ''} 
+                value={footer.copyright} 
                 onChange={(e) => update('copyright', e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="© 2024 Company Name. All rights reserved."
+                placeholder="Enter copyright text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
               />
             </div>
           </div>
-        </div>
-
-        {/* Social Media Links */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media Links</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {['facebook','twitter','instagram','linkedin'].map((key) => (
-            <div key={key}>
-                <label className="block text-sm font-medium text-gray-700 mb-2 capitalize">{key}</label>
-                <input 
-                  value={(footer.social?.[key] as string) || ''} 
-                  onChange={(e) => updateSocial(key, e.target.value)} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  placeholder={`https://${key}.com/yourprofile`}
-                />
-            </div>
-          ))}
-        </div>
-        </div>
-
-        {/* Footer Links */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Footer Links</h3>
-          <div className="space-y-6">
-            {['services', 'company', 'support'].map((section) => (
-              <div key={section} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-md font-medium text-gray-900 capitalize">{section} Links</h4>
+          
+          {/* Social Links Section */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Social Links</label>
+              {footer.socialLinks.map((link: any, index: number) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <img 
+                    src={link.icon}
+                    alt={link.name}
+                    className="w-8 h-8 object-cover rounded-full border border-gray-200"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
+                    }}
+                  />
+                  <span className="font-medium text-gray-700">{link.name}</span>
+                  <span className="text-gray-500">{link.url}</span>
                   <button
-                    onClick={() => addLink(section)}
-                    className="px-3 py-1 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors"
+                    onClick={() => setSocialLinkToDelete(index)}
+                    className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    Add Link
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="space-y-3">
-                  {(footer.links?.[section] || []).map((link: any, index: number) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <input
-                        value={link.name || ''}
-                        onChange={(e) => updateLinks(section, index, 'name', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="Link name"
-                      />
-                      <input
-                        value={link.href || ''}
-                        onChange={(e) => updateLinks(section, index, 'href', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="Link URL"
-                      />
-                      <button
-                        onClick={() => removeLink(section, index)}
-                        className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  {(footer.links?.[section] || []).length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No links added yet. Click "Add Link" to get started.</p>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
+              <button
+                onClick={() => setIsAddSocialLinkModalOpen(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Social Link</span>
+              </button>
+            </div>
           </div>
         </div>
+      </div>
+      
+      {/* Add Social Link Modal */}
+      {isAddSocialLinkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Add New Social Link</h3>
+                <button 
+                  onClick={() => setIsAddSocialLinkModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Social Link Name *</label>
+                  <input 
+                    value={newSocialLink.name} 
+                    onChange={(e) => setNewSocialLink({...newSocialLink, name: e.target.value})} 
+                    placeholder="Enter social link name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Social Link URL</label>
+                  <input 
+                    value={newSocialLink.url} 
+                    onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})} 
+                    placeholder="Enter social link URL"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Social Link Icon</label>
+                  
+                  {/* Image Preview */}
+                  {newSocialLink.icon && (
+                    <div className="mb-3">
+                      <img 
+                        src={newSocialLink.icon}
+                        alt="Social link preview"
+                        className="w-full h-12 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Upload Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                        <span className="text-sm font-medium">
+                          {isUploading ? 'Uploading...' : 'Upload Image'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleNewSocialLinkImageUpload(file)
+                          }}
+                          disabled={isUploading}
+                        />
+                      </label>
+                      {newSocialLink.icon && (
+                        <button
+                          onClick={() => setNewSocialLink({...newSocialLink, icon: ''})}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          disabled={isUploading}
+                        >
+                          Clear Image
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* URL Input as fallback */}
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
+                      <input 
+                        value={newSocialLink.icon || ''} 
+                        onChange={(e) => setNewSocialLink({...newSocialLink, icon: e.target.value})} 
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        disabled={isUploading}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 mt-8">
+                <button
+                  onClick={() => setIsAddSocialLinkModalOpen(false)}
+                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addSocialLink}
+                  disabled={!newSocialLink.name.trim()}
+                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
+                    !newSocialLink.name.trim() 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Add Social Link</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Dialog */}
+      {socialLinkToDelete !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg mb-4">
+                <Trash2 className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Social Link</h3>
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to delete this social link? This action cannot be undone.
+              </p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setSocialLinkToDelete(null)}
+                  className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    removeSocialLink(socialLinkToDelete)
+                    setSocialLinkToDelete(null)
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </motion.div>
+  )
+}
 
-        {/* Legal Links */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Pages</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Privacy Policy URL</label>
+const AboutConfig = ({ config, onChange }: any) => {
+  const about = config.about || { title: '', content: '', imageUrl: '' }
+  const [isUploading, setIsUploading] = useState(false)
+  
+  const update = (key: string, value: string) => onChange({ ...config, about: { ...about, [key]: value } })
+  
+  const handleAboutImageUpload = async (file: File) => {
+    if (!file) return
+    
+    setIsUploading(true)
+    
+    try {
+      const { uploadImage } = await import('@/lib/storage')
+      const imageUrl = await uploadImage(file, `about/about-${Date.now()}`)
+      update('imageUrl', imageUrl)
+      toast.success('About image uploaded successfully!')
+    } catch (error) {
+      console.error('Failed to upload about image:', error)
+      toast.error('Failed to upload image. Please try again.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <ConfigHeader title="About Section" subtitle="Add and update about section" />
+      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Content Section */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
               <input 
-                value={footer.privacyPolicy || ''} 
-                onChange={(e) => update('privacyPolicy', e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="/privacy-policy"
+                value={about.title} 
+                onChange={(e) => update('title', e.target.value)} 
+                placeholder="Enter about section title"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
               />
             </div>
+            
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Terms of Service URL</label>
-              <input 
-                value={footer.termsOfService || ''} 
-                onChange={(e) => update('termsOfService', e.target.value)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="/terms-of-service"
+              <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+              <textarea 
+                value={about.content} 
+                onChange={(e) => update('content', e.target.value)} 
+                placeholder="Enter about section content"
+                rows={8}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
               />
+            </div>
+          </div>
+          
+          {/* Image Section */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">About Image</label>
+              
+              {/* Image Preview */}
+              {about.imageUrl && (
+                <div className="mb-3">
+                  <img 
+                    src={about.imageUrl}
+                    alt="About"
+                    className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?q=80&w=1974&auto=format&fit=crop'
+                    }}
+                  />
+                </div>
+              )}
+              
+              {/* Upload Section */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                    <span className="text-sm font-medium">
+                      {isUploading ? 'Uploading...' : 'Upload Image'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleAboutImageUpload(file)
+                      }}
+                      disabled={isUploading}
+                    />
+                  </label>
+                  {about.imageUrl && (
+                    <button
+                      onClick={() => update('imageUrl', '')}
+                      className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                      disabled={isUploading}
+                    >
+                      Clear Image
+                    </button>
+                  )}
+                </div>
+                
+                {/* URL Input as fallback */}
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
+                  <input 
+                    value={about.imageUrl || ''} 
+                    onChange={(e) => update('imageUrl', e.target.value)} 
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    disabled={isUploading}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -4213,5 +2750,3 @@ const GalleryConfig = ({ config, onChange }: any) => {
 }
 
 export default AdminDashboard
-
-
