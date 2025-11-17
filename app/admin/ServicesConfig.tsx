@@ -6,7 +6,8 @@ import {
   Wrench,
   Plus,
   Trash2,
-  X
+  X,
+  AlertCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
@@ -14,6 +15,7 @@ import { uploadImage } from '@/lib/storage'
 const ServicesConfig = ({ config, onChange }: any) => {
   const [services, setServices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
   const [newServiceData, setNewServiceData] = useState({
     title: '',
@@ -32,38 +34,85 @@ const ServicesConfig = ({ config, onChange }: any) => {
   // Load services from API
   useEffect(() => {
     const loadServices = async () => {
-      console.log('Starting to load services...')
+      console.log('=== SERVICES CONFIG: Starting to load services ===')
       let timeoutId: NodeJS.Timeout | null = null;
+      setError(null)
       
       // Set a timeout to prevent infinite loading
       const timeout = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
-          reject(new Error('Request timeout after 10 seconds'));
-        }, 10000);
-      });
+          console.error('=== SERVICES CONFIG: Request timeout after 10 seconds ===')
+          reject(new Error('Request timeout after 10 seconds'))
+        }, 10000)
+      })
       
       try {
-        const response = await Promise.race([
-          fetch('/api/services', { cache: 'no-store' }),
-          timeout
-        ]) as Response;
+        console.log('=== SERVICES CONFIG: Making fetch request to /api/services ===')
+        const fetchPromise = fetch('/api/services', { cache: 'no-store' })
         
-        console.log('Services API response status:', response.status)
+        const response = await Promise.race([
+          fetchPromise,
+          timeout
+        ]) as Response
+        
+        console.log('=== SERVICES CONFIG: API response status:', response.status)
         
         if (!response.ok) {
           const errorText = await response.text()
-          console.error('Failed to fetch services:', response.status, errorText)
-          throw new Error(`Failed to fetch services: ${response.status} ${errorText}`)
+          console.error('=== SERVICES CONFIG: Failed to fetch services:', response.status, errorText)
+          
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText)
+          } catch (parseError) {
+            throw new Error(`Failed to fetch services: ${response.status} ${errorText}`)
+          }
+          
+          if (errorData.error === 'Firebase Permission Denied') {
+            setError('Firebase Permission Error: Please check your Firebase Admin credentials in .env.local')
+            toast.error('Firebase Permission Error! Check your credentials.', {
+              duration: 10000,
+              icon: '🔐'
+            })
+          } else {
+            setError(`Failed to fetch services: ${errorData.error || response.status}`)
+            toast.error(`Failed to fetch services: ${errorData.error || response.status}`)
+          }
+          
+          throw new Error(`Failed to fetch services: ${errorData.error || response.status}`)
         }
         
-        const data = await response.json()
-        console.log('Services data received:', data)
+        const text = await response.text()
+        console.log('=== SERVICES CONFIG: Raw response text:', text.substring(0, 200) + '...')
+        
+        let data;
+        try {
+          data = JSON.parse(text)
+        } catch (parseError) {
+          console.error('=== SERVICES CONFIG: Failed to parse JSON response ===', parseError)
+          throw new Error('Invalid JSON response from server')
+        }
+        
+        console.log('=== SERVICES CONFIG: Services data received:', data)
+        
+        // Check if services array exists
+        if (!data.hasOwnProperty('services')) {
+          console.error('=== SERVICES CONFIG: Services property missing from response ===')
+          console.log('=== SERVICES CONFIG: Full response data:', data)
+          throw new Error('Invalid response format: services property missing')
+        }
+        
+        console.log('=== SERVICES CONFIG: Services array length:', data.services.length)
         setServices(data.services || [])
       } catch (error) {
-        console.error('Error loading services:', error)
-        toast.error('Failed to load services: ' + (error as Error).message)
+        console.error('=== SERVICES CONFIG: Error loading services:', error)
+        const errorMessage = (error as Error).message
+        if (!error) {
+          setError(errorMessage)
+          toast.error('Failed to load services: ' + errorMessage)
+        }
       } finally {
-        console.log('Finished loading services, setting loading to false')
+        console.log('=== SERVICES CONFIG: Finished loading services, setting loading to false ===')
         setLoading(false)
         if (timeoutId) clearTimeout(timeoutId)
       }
@@ -222,6 +271,56 @@ const ServicesConfig = ({ config, onChange }: any) => {
               <div className="h-32 bg-gray-200 rounded"></div>
             </div>
           ))}
+        </div>
+      </motion.div>
+    )
+  }
+
+  if (error) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Services Configuration</h2>
+            <p className="text-gray-600 mt-1">Manage your professional services</p>
+          </div>
+          <button 
+            onClick={addService} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Service</span>
+          </button>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Services</h3>
+              <p className="text-red-700 mb-4">{error}</p>
+              <div className="bg-red-100 p-4 rounded-lg mb-4">
+                <h4 className="font-semibold text-red-800 mb-2">How to Fix:</h4>
+                <ul className="list-disc list-inside text-red-700 space-y-1">
+                  <li>Check your Firebase Admin credentials in <code className="bg-red-200 px-1 rounded">.env.local</code></li>
+                  <li>Ensure <code className="bg-red-200 px-1 rounded">FIREBASE_PROJECT_ID</code>, <code className="bg-red-200 px-1 rounded">FIREBASE_CLIENT_EMAIL</code>, and <code className="bg-red-200 px-1 rounded">FIREBASE_PRIVATE_KEY</code> are set</li>
+                  <li>Verify the service account has proper permissions</li>
+                  <li>Restart the development server after updating credentials</li>
+                </ul>
+              </div>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Retry Loading Services
+              </button>
+            </div>
+          </div>
         </div>
       </motion.div>
     )

@@ -208,82 +208,94 @@ const Services = () => {
         )}
 
         {/* Services by Category Section */}
-        <div className="space-y-16 sm:space-y-20 md:space-y-24">
-          {Object.entries(categorizedServices).map(([categoryName, categoryServices], categoryIndex) => {
-            // Find the category object to get subtitle and image
-            const categoryObj = categories.find(cat => cat.title === categoryName) || {};
-            
-            return (
-              <motion.div
-                key={categoryName}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${
-                  categoryIndex === 0 ? 'bg-blue-100' : 
-                  categoryIndex === 1 ? 'bg-green-100' : 
-                  categoryIndex === 2 ? 'bg-purple-100' : 
-                  'bg-orange-100'
-                }`}>
-                  <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${
-                    categoryIndex === 0 ? 'text-blue-700' : 
-                    categoryIndex === 1 ? 'text-green-700' : 
-                    categoryIndex === 2 ? 'text-purple-700' : 
-                    'text-orange-700'
+        {Object.keys(categorizedServices).length > 0 ? (
+          <div className="space-y-16 sm:space-y-20 md:space-y-24">
+            {Object.entries(categorizedServices).map(([categoryName, categoryServices], categoryIndex) => {
+              // Find the category object to get subtitle and image
+              const categoryObj = categories.find(cat => cat.title === categoryName) || {};
+              
+              return (
+                <motion.div
+                  key={categoryName}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                  className="text-center"
+                >
+                  <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${
+                    categoryIndex === 0 ? 'bg-blue-100' : 
+                    categoryIndex === 1 ? 'bg-green-100' : 
+                    categoryIndex === 2 ? 'bg-purple-100' : 
+                    'bg-orange-100'
                   }`}>
-                    {categoryName}
-                  </h3>
-                </div>
-                
-                {categoryObj.subtitle && (
-                  <p className="text-secondary-600 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base max-w-2xl mx-auto">
-                    {categoryObj.subtitle}
-                  </p>
-                )}
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                  {categoryServices.map((service, serviceIndex) => (
-                    <motion.div
-                      key={service.id || serviceIndex}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
-                      viewport={{ once: true }}
-                      className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full"
-                    >
-                      <div className="relative flex-1">
-                        <img
-                          src={service.image}
-                          alt={service.title}
-                          className="w-full h-full min-h-[180px] sm:min-h-[200px] md:min-h-[240px] lg:min-h-[280px] object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
-                          }}
-                        />
-                        <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg">
-                          <service.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
+                    <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${
+                      categoryIndex === 0 ? 'text-blue-700' : 
+                      categoryIndex === 1 ? 'text-green-700' : 
+                      categoryIndex === 2 ? 'text-purple-700' : 
+                      'text-orange-700'
+                    }`}>
+                      {categoryName}
+                    </h3>
+                  </div>
+                  
+                  {categoryObj.subtitle && (
+                    <p className="text-secondary-600 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base max-w-2xl mx-auto">
+                      {categoryObj.subtitle}
+                    </p>
+                  )}
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    {categoryServices.map((service, serviceIndex) => (
+                      <motion.div
+                        key={service.id || serviceIndex}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
+                        viewport={{ once: true }}
+                        className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full"
+                      >
+                        <div className="relative flex-1">
+                          <img
+                            src={service.image}
+                            alt={service.title}
+                            className="w-full h-full min-h-[180px] sm:min-h-[200px] md:min-h-[240px] lg:min-h-[280px] object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
+                            }}
+                          />
+                          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg">
+                            <service.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
+                          </div>
                         </div>
-                      </div>
-                      <div className="p-3 sm:p-4 md:p-6 flex-1 flex flex-col justify-center">
-                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-secondary-900 text-center mb-1 sm:mb-2">
-                          {service.title}
-                        </h4>
-                        {service.description && (
-                          <p className="text-xs sm:text-sm text-secondary-600 text-center line-clamp-2">
-                            {service.description}
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )
-          })}
-        </div>
+                        <div className="p-3 sm:p-4 md:p-6 flex-1 flex flex-col justify-center">
+                          <h4 className="text-sm sm:text-base md:text-lg font-semibold text-secondary-900 text-center mb-1 sm:mb-2">
+                            {service.title}
+                          </h4>
+                          {service.description && (
+                            <p className="text-xs sm:text-sm text-secondary-600 text-center line-clamp-2">
+                              {service.description}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="inline-block p-4 bg-blue-50 rounded-full mb-4">
+              <Wrench className="w-12 h-12 text-blue-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Services Available</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              We're working on adding new services. Please check back later.
+            </p>
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
