@@ -9,29 +9,43 @@ export async function GET() {
     const db = await getAdminDb()
     console.log('=== SERVICES API: Firebase Admin DB initialized ===')
     
-    // Test if we can access the services collection
-    const testDoc = await db.collection('services').limit(1).get()
-    console.log('=== SERVICES API: Test query completed, docs found:', testDoc.size)
-    
     // Try to fetch services with orderBy, but fallback to without if it fails
     let snapshot;
     try {
-      snapshot = await db.collection('services').orderBy('createdAt', 'desc').get()
+      console.log('=== SERVICES API: Attempting to fetch services with orderBy ===')
+      // Add a limit to prevent loading too much data
+      snapshot = await db.collection('services').orderBy('createdAt', 'desc').limit(50).get()
       console.log('=== SERVICES API: Firestore query with orderBy completed, docs count:', snapshot.size)
     } catch (orderByError) {
       console.warn('=== SERVICES API: orderBy failed, fetching without orderBy ===', orderByError)
-      snapshot = await db.collection('services').get()
+      // Add a limit to prevent loading too much data
+      snapshot = await db.collection('services').limit(50).get()
       console.log('=== SERVICES API: Firestore query without orderBy completed, docs count:', snapshot.size)
     }
     
-    const services = snapshot.docs.map(doc => {
-      const data = doc.data()
-      console.log('=== SERVICES API: Processing doc:', doc.id, 'data keys:', Object.keys(data))
-      return {
-        id: doc.id,
-        ...data
+    console.log('=== SERVICES API: Processing documents ===')
+    const services = []
+    
+    // Process documents one by one with error handling
+    // Only process the fields we need to reduce payload size
+    for (let i = 0; i < snapshot.docs.length; i++) {
+      const doc = snapshot.docs[i];
+      try {
+        const data = doc.data()
+        // Only include the fields we actually need
+        services.push({
+          id: doc.id,
+          title: data.title || '',
+          description: data.description || '',
+          category: data.category || 'General',
+          imageUrl: data.imageUrl || '',
+          createdAt: data.createdAt || null
+        })
+      } catch (docError) {
+        console.error(`=== SERVICES API: Error processing document ${doc.id} ===`, docError)
+        // Continue with other documents even if one fails
       }
-    })
+    }
     
     console.log('=== SERVICES API: Services processed, count:', services.length)
     

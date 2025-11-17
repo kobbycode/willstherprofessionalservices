@@ -38,12 +38,12 @@ const ServicesConfig = ({ config, onChange }: any) => {
       let timeoutId: NodeJS.Timeout | null = null;
       setError(null)
       
-      // Set a timeout to prevent infinite loading
+      // Set a timeout to prevent infinite loading (increased to 30 seconds)
       const timeout = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
-          console.error('=== SERVICES CONFIG: Request timeout after 10 seconds ===')
-          reject(new Error('Request timeout after 10 seconds'))
-        }, 10000)
+          console.error('=== SERVICES CONFIG: Request timeout after 30 seconds ===')
+          reject(new Error('Request timeout after 30 seconds'))
+        }, 30000)
       })
       
       try {
@@ -82,14 +82,18 @@ const ServicesConfig = ({ config, onChange }: any) => {
           throw new Error(`Failed to fetch services: ${errorData.error || response.status}`)
         }
         
+        console.log('=== SERVICES CONFIG: Reading response text ===')
         const text = await response.text()
-        console.log('=== SERVICES CONFIG: Raw response text:', text.substring(0, 200) + '...')
+        console.log('=== SERVICES CONFIG: Raw response text length:', text.length)
+        console.log('=== SERVICES CONFIG: Raw response text (first 500 chars):', text.substring(0, 500) + '...')
         
+        console.log('=== SERVICES CONFIG: Parsing JSON response ===')
         let data;
         try {
           data = JSON.parse(text)
         } catch (parseError) {
           console.error('=== SERVICES CONFIG: Failed to parse JSON response ===', parseError)
+          console.error('=== SERVICES CONFIG: Response text that failed to parse ===', text)
           throw new Error('Invalid JSON response from server')
         }
         
@@ -489,9 +493,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200 max-h-[90vh] flex flex-col"
           >
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto flex-1">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">Add New Service</h3>
                 <button 
@@ -594,7 +598,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   </div>
                 </div>
               </div>
-              
+            </div>
+            
+            <div className="p-6 pt-0">
               <div className="flex space-x-3 mt-8">
                 <button
                   onClick={() => setIsAddServiceModalOpen(false)}
