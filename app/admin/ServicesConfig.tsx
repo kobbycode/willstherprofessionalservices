@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Wrench,
@@ -12,7 +12,8 @@ import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
 
 const ServicesConfig = ({ config, onChange }: any) => {
-  const services = config.services || []
+  const [services, setServices] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
   const [newServiceData, setNewServiceData] = useState({
     title: '',
@@ -28,13 +29,71 @@ const ServicesConfig = ({ config, onChange }: any) => {
     serviceName: ''
   })
 
-  const updateService = (id: string, key: string, value: string) => {
-    const next = { ...config }
-    next.services = [...services]
-    const index = next.services.findIndex((s: any) => s.id === id)
-    if (index >= 0) {
-      next.services[index] = { ...next.services[index], [key]: value }
-      onChange(next)
+  // Load services from API
+  useEffect(() => {
+    const loadServices = async () => {
+      console.log('Starting to load services...')
+      let timeoutId: NodeJS.Timeout | null = null;
+      
+      // Set a timeout to prevent infinite loading
+      const timeout = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('Request timeout after 10 seconds'));
+        }, 10000);
+      });
+      
+      try {
+        const response = await Promise.race([
+          fetch('/api/services', { cache: 'no-store' }),
+          timeout
+        ]) as Response;
+        
+        console.log('Services API response status:', response.status)
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Failed to fetch services:', response.status, errorText)
+          throw new Error(`Failed to fetch services: ${response.status} ${errorText}`)
+        }
+        
+        const data = await response.json()
+        console.log('Services data received:', data)
+        setServices(data.services || [])
+      } catch (error) {
+        console.error('Error loading services:', error)
+        toast.error('Failed to load services: ' + (error as Error).message)
+      } finally {
+        console.log('Finished loading services, setting loading to false')
+        setLoading(false)
+        if (timeoutId) clearTimeout(timeoutId)
+      }
+    }
+
+    loadServices()
+  }, [])
+
+  const updateService = async (id: string, key: string, value: string) => {
+    try {
+      const serviceToUpdate = services.find(s => s.id === id)
+      if (!serviceToUpdate) return
+
+      const updatedService = { ...serviceToUpdate, [key]: value }
+      
+      const response = await fetch(`/api/services/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedService),
+      })
+
+      if (!response.ok) throw new Error('Failed to update service')
+
+      setServices(prev => prev.map(s => s.id === id ? updatedService : s))
+      toast.success('Service updated successfully!')
+    } catch (error) {
+      console.error('Failed to update service:', error)
+      toast.error('Failed to update service. Please try again.')
     }
   }
 
@@ -48,24 +107,34 @@ const ServicesConfig = ({ config, onChange }: any) => {
     })
   }
 
-  const createNewService = () => {
+  const createNewService = async () => {
     if (!newServiceData.title.trim()) return
     
-    const next = { ...config }
-    next.services = [...services]
-    next.services.push({
-      id: `service_${Date.now()}`,
-      ...newServiceData
-    })
-    onChange(next)
-    setIsAddServiceModalOpen(false)
-    setNewServiceData({
-      title: '',
-      description: '',
-      category: '',
-      imageUrl: ''
-    })
-    toast.success('Service added successfully!')
+    try {
+      const response = await fetch('/api/services', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newServiceData),
+      })
+
+      if (!response.ok) throw new Error('Failed to create service')
+      
+      const createdService = await response.json()
+      setServices(prev => [...prev, createdService])
+      setIsAddServiceModalOpen(false)
+      setNewServiceData({
+        title: '',
+        description: '',
+        category: '',
+        imageUrl: ''
+      })
+      toast.success('Service added successfully!')
+    } catch (error) {
+      console.error('Failed to create service:', error)
+      toast.error('Failed to create service. Please try again.')
+    }
   }
 
   const handleServiceImageUpload = async (serviceId: string, file: File) => {
@@ -75,7 +144,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
     
     try {
       const imageUrl = await uploadImage(file, `services/service-${serviceId}-${Date.now()}`)
-      updateService(serviceId, 'imageUrl', imageUrl)
+      await updateService(serviceId, 'imageUrl', imageUrl)
       toast.success('Service image uploaded successfully!')
     } catch (error) {
       console.error('Failed to upload service image:', error)
@@ -102,19 +171,60 @@ const ServicesConfig = ({ config, onChange }: any) => {
     }
   }
 
-  const confirmDeleteService = () => {
+  const confirmDeleteService = async () => {
     const { serviceId } = deleteDialog
     if (!serviceId) return
     
-    const next = { ...config }
-    next.services = services.filter((s: any) => s.id !== serviceId)
-    onChange(next)
-    setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
-    toast.success('Service deleted successfully!')
+    try {
+      const response = await fetch(`/api/services/${serviceId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete service')
+
+      setServices(prev => prev.filter(s => s.id !== serviceId))
+      setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
+      toast.success('Service deleted successfully!')
+    } catch (error) {
+      console.error('Failed to delete service:', error)
+      toast.error('Failed to delete service. Please try again.')
+    }
   }
 
   const cancelDeleteService = () => {
     setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
+  }
+
+  if (loading) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Services Configuration</h2>
+            <p className="text-gray-600 mt-1">Manage your professional services</p>
+          </div>
+          <div className="px-4 py-2 bg-gray-200 rounded-lg animate-pulse">
+            <span className="text-transparent">Add Service</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-6 animate-pulse">
+              <div className="h-6 bg-gray-200 rounded mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded mb-4 w-3/4"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    )
   }
 
   return (
