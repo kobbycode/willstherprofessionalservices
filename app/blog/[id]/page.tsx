@@ -23,7 +23,12 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   const loadPost = useCallback(async () => {
     setIsLoading(true)
     try {
-      const p = await fetchPostById(params.id)
+      // Load post and related posts in parallel for better performance
+      const [p, all] = await Promise.all([
+        fetchPostById(params.id),
+        fetchPosts(true, 6) // Fetch only 6 related posts instead of 12
+      ])
+      
       if (!p || p.status !== 'published') {
     notFound()
         return
@@ -38,8 +43,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
         console.error('Failed to increment views:', e)
       }
       
-      // Load related posts in parallel
-      const all = await fetchPosts(true, 12)
       // Filter related posts to only show published ones
       setRelated(all.filter((x) => x.id !== p.id && x.category === p.category && x.status === 'published').slice(0, 3))
     } catch (error) {
@@ -237,5 +240,3 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
     </div>
   )
 }
-
-

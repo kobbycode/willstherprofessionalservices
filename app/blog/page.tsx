@@ -14,6 +14,8 @@ const BlogPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [sortBy, setSortBy] = useState('date') // date, readTime, title
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
 
   const [categories, setCategories] = useState<string[]>([])
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
@@ -21,7 +23,7 @@ const BlogPage = () => {
   // Memoize filtered and sorted posts for better performance
   const { filteredPosts, sortedPosts } = useMemo(() => {
     const filtered = blogPosts.filter(post => {
-    const matchesCategory = activeCategory === 'All' || post.category === activeCategory
+    const matchesCategory = activeCategory === 'All' || activeCategory === '' || post.category === activeCategory
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            (post.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -44,13 +46,37 @@ const BlogPage = () => {
     return { filteredPosts: filtered, sortedPosts: sorted }
   }, [blogPosts, activeCategory, searchQuery, sortBy])
 
+  // Load more posts
+  const loadMorePosts = useCallback(async () => {
+    if (isLoading || !hasMore) return
+    
+    setIsLoading(true)
+    try {
+      const newPosts = await fetchPosts(true, 12) // Fetch only 12 posts at a time
+      if (newPosts.length < 12) {
+        setHasMore(false)
+      }
+      
+      // Avoid duplicates
+      const existingIds = new Set(blogPosts.map(p => p.id))
+      const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id))
+      
+      setBlogPosts(prev => [...prev, ...uniqueNewPosts])
+    } catch (error) {
+      console.error('Failed to load more blog posts:', error)
+      setHasMore(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [blogPosts, isLoading, hasMore])
+
   // Memoize the load function to prevent unnecessary re-renders
   const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
       // Fetch posts and categories in parallel
       const [posts, categoriesData] = await Promise.all([
-        fetchPosts(true, 100), // This should fetch only published posts
+        fetchPosts(true, 12), // Fetch only 12 posts initially instead of 100
         import('@/lib/categories').then(m => m.fetchCategories())
       ])
       
@@ -59,6 +85,7 @@ const BlogPage = () => {
       console.log('Published posts data:', posts)
       
       setBlogPosts(posts)
+      setHasMore(posts.length === 12) // If we got 12 posts, there might be more
       
       // Set categories with 'All' as first option
       setCategories(['All', ...categoriesData])
@@ -90,6 +117,13 @@ const BlogPage = () => {
       isMounted = false
     }
   }, [loadData])
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1)
+    setHasMore(true)
+    setBlogPosts([])
+  }, [activeCategory, searchQuery, sortBy])
 
   // Memoize search handler
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,7 +203,7 @@ const BlogPage = () => {
 
                 {/* Category Filter */}
                 <div className="flex flex-wrap gap-2">
-                  {isLoading ? (
+                  {isLoading && blogPosts.length === 0 ? (
                     // Loading skeleton for categories
                     [...Array(4)].map((_, index) => (
                       <div key={index} className="h-10 w-20 bg-gray-200 rounded-lg animate-pulse"></div>
@@ -194,18 +228,18 @@ const BlogPage = () => {
             </div>
 
             {/* Results Summary */}
-            {!isLoading && (
+            {!isLoading && blogPosts.length > 0 && (
             <div className="mt-4 text-sm text-secondary-500">
               Showing {sortedPosts.length} of {blogPosts.length} articles
               {searchQuery && ` for "${searchQuery}"`}
-              {activeCategory !== 'All' && ` in ${activeCategory}`}
+              {activeCategory !== 'All' && activeCategory !== '' && ` in ${activeCategory}`}
             </div>
             )}
           </div>
 
           {/* Featured Post */}
           <div className="mb-12 md:mb-16">
-            {isLoading ? (
+            {isLoading && blogPosts.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
                 <p className="text-secondary-500">Loading featured article...</p>
@@ -274,7 +308,7 @@ const BlogPage = () => {
           </div>
 
           {/* Blog Grid - Exclude featured post */}
-          {isLoading ? (
+          {isLoading && blogPosts.length === 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
@@ -349,6 +383,19 @@ const BlogPage = () => {
                 </article>
             ))}
           </div>
+          )}
+
+          {/* Load More Button */}
+          {hasMore && sortedPosts.length > 1 && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={loadMorePosts}
+                disabled={isLoading}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
+              >
+                {isLoading ? 'Loading...' : 'Load More Articles'}
+              </button>
+            </div>
           )}
 
           {/* Newsletter Signup */}

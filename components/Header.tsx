@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Phone, Mail, Menu, X } from 'lucide-react'
@@ -8,8 +8,7 @@ import { useSiteConfig } from '@/lib/site-config'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [logoLoaded, setLogoLoaded] = useState(false)
-  const [logoError, setLogoError] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
   const router = useRouter()
   const pathname = usePathname()
 
@@ -19,6 +18,58 @@ const Header = () => {
     const base = (config?.navigation || []).filter((item) => item.enabled !== false)
     return base
   }, [config])
+
+  // Function to check if a navigation item is active
+  const isActive = (item: any) => {
+    if (item.isHash) {
+      // For hash links on the homepage, check if the section is active
+      if (pathname === '/') {
+        return activeSection === item.href.substring(1) // Remove the # prefix
+      }
+      return false
+    }
+    // For page links, check if the current path matches
+    return pathname === item.href
+  }
+
+  // Detect which section is currently in view
+  useEffect(() => {
+    if (pathname !== '/') return
+
+    const sections = ['home', 'about', 'services', 'contact']
+    let currentSection = 'home'
+
+    const checkSection = () => {
+      const scrollPosition = window.scrollY + 100
+
+      for (const section of sections) {
+        const element = document.getElementById(section)
+        if (element) {
+          const offsetTop = element.offsetTop
+          const offsetHeight = element.offsetHeight
+          
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            currentSection = section
+            break
+          }
+        }
+      }
+      
+      setActiveSection(currentSection)
+    }
+
+    // Check on scroll and resize
+    window.addEventListener('scroll', checkSection)
+    window.addEventListener('resize', checkSection)
+    
+    // Initial check
+    checkSection()
+
+    return () => {
+      window.removeEventListener('scroll', checkSection)
+      window.removeEventListener('resize', checkSection)
+    }
+  }, [pathname])
 
   const handleNavigation = (item: any) => {
     if (item.isHash) {
@@ -73,7 +124,6 @@ const Header = () => {
                   alt="Willsther Logo" 
                   className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
                 />
-                {/* Removed loading placeholder to ensure logo is always visible */}
               </Link>
             </div>
 
@@ -84,7 +134,9 @@ const Header = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item)}
-                    className="px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group"
+                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${
+                      isActive(item) ? 'underline underline-offset-4' : ''
+                    }`}
                   >
                     {item.name}
                     <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
@@ -93,7 +145,9 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group"
+                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${
+                      isActive(item) ? 'underline underline-offset-4' : ''
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -135,7 +189,9 @@ const Header = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item)}
-                    className="block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${
+                      isActive(item) ? 'underline underline-offset-4' : ''
+                    }`}
                   >
                     {item.name}
                   </button>
@@ -143,7 +199,9 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${
+                      isActive(item) ? 'underline underline-offset-4' : ''
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
