@@ -1,11 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { 
-  Home, Building, Users, Wrench, 
+import {
+  Home, Building, Users, Wrench,
   Sparkles, Shield, Clock, Star,
   Car, Truck, Zap, Target
 } from 'lucide-react'
+import Link from 'next/link'
 import { useMemo, useState, useEffect } from 'react'
 
 const Services = () => {
@@ -16,7 +17,7 @@ const Services = () => {
   // Load services and categories from API
   useEffect(() => {
     console.log('Services component: Loading services and categories...')
-    
+
     const loadData = async () => {
       try {
         // Load categories
@@ -25,7 +26,7 @@ const Services = () => {
           const categoriesData = await categoriesRes.json()
           setCategories(categoriesData.categories || [])
         }
-        
+
         // Load services
         const servicesRes = await fetch('/api/services', { cache: 'no-store' })
         if (!servicesRes.ok) throw new Error('Failed to fetch services')
@@ -38,7 +39,7 @@ const Services = () => {
         setLoading(false)
       }
     }
-    
+
     loadData()
   }, [])
 
@@ -46,13 +47,13 @@ const Services = () => {
   const categorizedServices = useMemo(() => {
     if (services && services.length > 0) {
       const grouped: Record<string, any[]> = {}
-      
+
       // Initialize with empty arrays for all categories
       const categoryNames = categories.map(cat => cat.title);
       categoryNames.forEach(catName => {
         grouped[catName] = [];
       });
-      
+
       // Add services to their respective categories
       const iconPool = [Home, Building, Users, Wrench, Sparkles, Shield, Clock, Star, Car, Truck, Zap, Target]
       services.forEach((svc, idx) => {
@@ -64,7 +65,7 @@ const Services = () => {
           image: svc.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
         })
       })
-      
+
       return grouped
     }
     return {}
@@ -91,12 +92,12 @@ const Services = () => {
       'Electrical': Zap,
       'General': Target,
     }
-    
+
     // Default to Wrench if no match
-    const categoryKey = Object.keys(iconMap).find(key => 
+    const categoryKey = Object.keys(iconMap).find(key =>
       category.toLowerCase().includes(key.toLowerCase())
     )
-    
+
     return categoryKey ? iconMap[categoryKey] : Wrench
   }
 
@@ -122,7 +123,7 @@ const Services = () => {
           </h2>
           <div className="w-16 sm:w-20 md:w-24 h-1 bg-primary-500 mx-auto"></div>
         </div>
-        
+
         {/* Service Categories from Services - Display under What We Offer */}
         {serviceCategoriesFromServices.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12 md:mb-16">
@@ -154,7 +155,7 @@ const Services = () => {
             })}
           </div>
         )}
-        
+
         {/* Categories Section - Appears first */}
         {categories.length > 0 && (
           <motion.div
@@ -175,7 +176,7 @@ const Services = () => {
                 Explore our comprehensive range of professional services organized by category
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {categories.map((category: any, index: number) => (
                 <motion.div
@@ -213,7 +214,7 @@ const Services = () => {
             {Object.entries(categorizedServices).map(([categoryName, categoryServices], categoryIndex) => {
               // Find the category object to get subtitle and image
               const categoryObj = categories.find(cat => cat.title === categoryName) || {};
-              
+
               return (
                 <motion.div
                   key={categoryName}
@@ -223,62 +224,60 @@ const Services = () => {
                   viewport={{ once: true }}
                   className="text-center"
                 >
-                  <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${
-                    categoryIndex === 0 ? 'bg-blue-100' : 
-                    categoryIndex === 1 ? 'bg-green-100' : 
-                    categoryIndex === 2 ? 'bg-purple-100' : 
-                    'bg-orange-100'
-                  }`}>
-                    <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${
-                      categoryIndex === 0 ? 'text-blue-700' : 
-                      categoryIndex === 1 ? 'text-green-700' : 
-                      categoryIndex === 2 ? 'text-purple-700' : 
-                      'text-orange-700'
+                  <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${categoryIndex === 0 ? 'bg-blue-100' :
+                    categoryIndex === 1 ? 'bg-green-100' :
+                      categoryIndex === 2 ? 'bg-purple-100' :
+                        'bg-orange-100'
                     }`}>
+                    <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${categoryIndex === 0 ? 'text-blue-700' :
+                      categoryIndex === 1 ? 'text-green-700' :
+                        categoryIndex === 2 ? 'text-purple-700' :
+                          'text-orange-700'
+                      }`}>
                       {categoryName}
                     </h3>
                   </div>
-                  
+
                   {categoryObj.subtitle && (
                     <p className="text-secondary-600 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base max-w-2xl mx-auto">
                       {categoryObj.subtitle}
                     </p>
                   )}
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                     {categoryServices.map((service, serviceIndex) => (
-                      <motion.div
+                      <Link
                         key={service.id || serviceIndex}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
-                        viewport={{ once: true }}
-                        className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full"
+                        href={`/services/${service.id}`}
+                        className="block h-full"
                       >
-                        <div className="relative flex-1">
-                          <img
-                            src={service.image}
-                            alt={service.title}
-                            className="w-full h-full min-h-[180px] sm:min-h-[200px] md:min-h-[240px] lg:min-h-[280px] object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
-                            }}
-                          />
-                          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg">
-                            <service.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
+                          viewport={{ once: true }}
+                          className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
+                        >
+                          <div className="relative flex-1">
+                            <img
+                              src={service.image}
+                              alt={service.title}
+                              className="w-full h-full min-h-[180px] sm:min-h-[200px] md:min-h-[240px] lg:min-h-[280px] object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
+                              }}
+                            />
+                            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg">
+                              <service.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
+                            </div>
                           </div>
-                        </div>
-                        <div className="p-3 sm:p-4 md:p-6 flex-1 flex flex-col justify-center">
-                          <h4 className="text-sm sm:text-base md:text-lg font-semibold text-secondary-900 text-center mb-1 sm:mb-2">
-                            {service.title}
-                          </h4>
-                          {service.description && (
-                            <p className="text-xs sm:text-sm text-secondary-600 text-center line-clamp-2">
-                              {service.description}
-                            </p>
-                          )}
-                        </div>
-                      </motion.div>
+                          <div className="p-3 sm:p-4 md:p-6 flex-1 flex flex-col justify-center">
+                            <h4 className="text-sm sm:text-base md:text-lg font-semibold text-secondary-900 text-center mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors">
+                              {service.title}
+                            </h4>
+                          </div>
+                        </motion.div>
+                      </Link>
                     ))}
                   </div>
                 </motion.div>

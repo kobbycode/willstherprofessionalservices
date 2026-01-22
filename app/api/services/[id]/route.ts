@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
+// GET - Fetch single service
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const db = await getAdminDb()
+    const { id } = params
+
+    const doc = await db.collection('services').doc(id).get()
+
+    if (!doc.exists) {
+      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      service: {
+        id: doc.id,
+        ...doc.data()
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching service:', error)
+    return NextResponse.json({
+      error: `Failed to fetch service: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }, { status: 500 })
+  }
+}
+
 // PUT - Update service
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -22,16 +48,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     await db.collection('services').doc(id).update(serviceData)
-    
-    return NextResponse.json({ 
-      id, 
+
+    return NextResponse.json({
+      id,
       ...serviceData,
-      success: true 
+      success: true
     })
   } catch (error) {
     console.error('Error updating service:', error)
-    return NextResponse.json({ 
-      error: `Failed to update service: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    return NextResponse.json({
+      error: `Failed to update service: ${error instanceof Error ? error.message : 'Unknown error'}`
     }, { status: 500 })
   }
 }
@@ -43,26 +69,26 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const db = await getAdminDb()
     const { id } = params
     console.log('Attempting to delete service with ID:', id)
-    
+
     // Check if the document exists before trying to delete
     const docRef = db.collection('services').doc(id)
     const doc = await docRef.get()
-    
+
     if (!doc.exists) {
       console.log('Service not found with ID:', id)
-      return NextResponse.json({ 
-        error: 'Service not found' 
+      return NextResponse.json({
+        error: 'Service not found'
       }, { status: 404 })
     }
-    
+
     await docRef.delete()
     console.log('Service deleted successfully with ID:', id)
-    
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting service:', error)
-    return NextResponse.json({ 
-      error: `Failed to delete service: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    return NextResponse.json({
+      error: `Failed to delete service: ${error instanceof Error ? error.message : 'Unknown error'}`
     }, { status: 500 })
   }
 }
