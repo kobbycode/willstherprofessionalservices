@@ -115,8 +115,8 @@ export default function ShopManagement() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">Shop Products</h2>
-                    <p className="text-gray-400">Manage your products and inventory</p>
+                    <h2 className="text-2xl font-bold text-gray-900">Shop Products</h2>
+                    <p className="text-gray-500">Manage your products and inventory</p>
                 </div>
                 <button
                     onClick={() => {
@@ -130,14 +130,14 @@ export default function ShopManagement() {
                 </button>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
+            <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                 <Search className="text-gray-400" size={20} />
                 <input
                     type="text"
                     placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 w-full"
+                    className="bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 w-full"
                 />
             </div>
 
@@ -159,9 +159,9 @@ export default function ShopManagement() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors group"
+                                className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-purple-500 hover:shadow-lg transition-all group"
                             >
-                                <div className="aspect-square relative bg-black/20">
+                                <div className="aspect-square relative bg-gray-50">
                                     {product.imageUrl ? (
                                         <img
                                             src={product.imageUrl}
@@ -169,7 +169,7 @@ export default function ShopManagement() {
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-600">
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
                                             <ImageIcon size={48} />
                                         </div>
                                     )}
@@ -179,31 +179,31 @@ export default function ShopManagement() {
                                                 setCurrentProduct(product)
                                                 setIsEditing(true)
                                             }}
-                                            className="p-2 bg-black/50 hover:bg-purple-600 text-white rounded-lg backdrop-blur-sm transition-colors"
+                                            className="p-2 bg-white/90 hover:bg-purple-600 hover:text-white text-gray-700 rounded-lg shadow-sm backdrop-blur-sm transition-colors"
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(product.id)}
-                                            className="p-2 bg-black/50 hover:bg-red-600 text-white rounded-lg backdrop-blur-sm transition-colors"
+                                            className="p-2 bg-white/90 hover:bg-red-600 hover:text-white text-gray-700 rounded-lg shadow-sm backdrop-blur-sm transition-colors"
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                     {!product.inStock && (
-                                        <div className="absolute top-2 left-2 px-2 py-1 bg-red-500/80 text-white text-xs font-bold rounded backdrop-blur-sm">
+                                        <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded shadow-sm">
                                             OUT OF STOCK
                                         </div>
                                     )}
                                 </div>
                                 <div className="p-4">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-lg font-semibold text-white line-clamp-1">{product.title}</h3>
-                                        <span className="text-purple-400 font-bold whitespace-nowrap">
-                                            ${product.price.toFixed(2)}
+                                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{product.title}</h3>
+                                        <span className="text-purple-600 font-bold whitespace-nowrap">
+                                            GH₵{product.price.toFixed(2)}
                                         </span>
                                     </div>
-                                    <p className="text-gray-400 text-sm line-clamp-2 mb-4 h-10">
+                                    <p className="text-gray-500 text-sm line-clamp-2 mb-4 h-10">
                                         {product.description}
                                     </p>
                                     <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -220,20 +220,20 @@ export default function ShopManagement() {
             {/* Edit/Create Modal */}
             <AnimatePresence>
                 {isEditing && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className="bg-[#1a1a1a] w-full max-w-2xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl"
+                            className="bg-white w-full max-w-2xl rounded-2xl border border-gray-100 overflow-hidden shadow-2xl"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-white/10">
-                                <h3 className="text-xl font-bold text-white">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                                <h3 className="text-xl font-bold text-gray-900">
                                     {currentProduct.id ? 'Edit Product' : 'Add New Product'}
                                 </h3>
                                 <button
                                     onClick={() => setIsEditing(false)}
-                                    className="text-gray-400 hover:text-white transition-colors"
+                                    className="text-gray-400 hover:text-red-500 transition-colors"
                                 >
                                     <X size={24} />
                                 </button>
@@ -243,20 +243,20 @@ export default function ShopManagement() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-400 mb-1">Product Title</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Product Title</label>
                                             <input
                                                 type="text"
                                                 required
                                                 value={currentProduct.title || ''}
                                                 onChange={e => setCurrentProduct(prev => ({ ...prev, title: e.target.value }))}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-400 mb-1">Price ($)</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Price (GH₵)</label>
                                             <div className="relative">
-                                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">GH₵</div>
                                                 <input
                                                     type="number"
                                                     required
@@ -264,19 +264,19 @@ export default function ShopManagement() {
                                                     step="0.01"
                                                     value={currentProduct.price || ''}
                                                     onChange={e => setCurrentProduct(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
                                                 />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-400 mb-1">Category</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                                             <input
                                                 type="text"
                                                 value={currentProduct.category || ''}
                                                 onChange={e => setCurrentProduct(prev => ({ ...prev, category: e.target.value }))}
                                                 placeholder="e.g. Detergents"
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
                                             />
                                         </div>
 
@@ -285,8 +285,8 @@ export default function ShopManagement() {
                                                 type="button"
                                                 onClick={() => setCurrentProduct(prev => ({ ...prev, inStock: !prev.inStock }))}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${currentProduct.inStock
-                                                        ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                                                        : 'bg-red-500/10 border-red-500/30 text-red-400'
+                                                    ? 'bg-green-50 text-green-700 border-green-200'
+                                                    : 'bg-red-50 text-red-700 border-red-200'
                                                     }`}
                                             >
                                                 {currentProduct.inStock ? <CheckCircle size={18} /> : <X size={18} />}
@@ -297,8 +297,8 @@ export default function ShopManagement() {
 
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-400 mb-1">Product Image</label>
-                                            <div className="relative aspect-video bg-black/20 rounded-lg border border-white/10 overflow-hidden group">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+                                            <div className="relative aspect-video bg-gray-50 rounded-lg border border-gray-200 overflow-hidden group">
                                                 {currentProduct.imageUrl ? (
                                                     <img
                                                         src={currentProduct.imageUrl}
@@ -306,7 +306,7 @@ export default function ShopManagement() {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-500">
+                                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
                                                         <ImageIcon size={32} />
                                                         <span className="text-xs mt-2">No image selected</span>
                                                     </div>
@@ -321,31 +321,31 @@ export default function ShopManagement() {
                                                     />
                                                 </label>
                                                 {isSaving && !currentProduct.id && (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                                                        <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                                                        <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                             <textarea
                                                 required
                                                 value={currentProduct.description || ''}
                                                 onChange={e => setCurrentProduct(prev => ({ ...prev, description: e.target.value }))}
                                                 rows={4}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none resize-none"
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none resize-none"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+                                <div className="flex justify-end gap-4 pt-4 border-t border-gray-100">
                                     <button
                                         type="button"
                                         onClick={() => setIsEditing(false)}
-                                        className="px-6 py-2 text-gray-400 hover:text-white transition-colors"
+                                        className="px-6 py-2 text-gray-500 hover:text-gray-900 transition-colors"
                                     >
                                         Cancel
                                     </button>

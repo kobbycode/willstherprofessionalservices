@@ -1,0 +1,183 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { getDb } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import { Product } from '@/types/product'
+import { useSiteConfig } from '@/lib/site-config'
+import { ShoppingBag, MessageCircle, ArrowLeft, Package, CheckCircle, X } from 'lucide-react'
+import Link from 'next/link'
+
+export default function ProductDetailPage() {
+    const { id } = useParams()
+    const router = useRouter()
+    const [product, setProduct] = useState<Product | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState('')
+    const { config } = useSiteConfig()
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            if (!id) return
+
+            try {
+                const db = getDb()
+                if (!db) throw new Error("Database not initialized")
+
+                const productDoc = await getDoc(doc(db, 'products', id as string))
+
+                if (productDoc.exists()) {
+                    setProduct({ id: productDoc.id, ...productDoc.data() } as Product)
+                } else {
+                    setError("Product not found")
+                }
+            } catch (err) {
+                console.error("Error fetching product:", err)
+                setError("Failed to load product")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchProduct()
+    }, [id])
+
+    if (isLoading) {
+        return (
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+                    <p className="text-gray-500">Loading details...</p>
+                </div>
+            </main>
+        )
+    }
+
+    if (error || !product) {
+        return (
+            <main className="min-h-screen bg-gray-50">
+                <Header />
+                <div className="container mx-auto px-4 py-20 text-center">
+                    <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+                        <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" />
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h1>
+                        <p className="text-gray-500 mb-6">The product you are looking for might have been removed or does not exist.</p>
+                        <Link
+                            href="/shop"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors font-medium"
+                        >
+                            <ArrowLeft size={18} />
+                            Back to Shop
+                        </Link>
+                    </div>
+                </div>
+                <Footer />
+            </main>
+        )
+    }
+
+    const whatsappNumber = config.contactPhone.replace(/\D/g, '')
+    const message = encodeURIComponent(`Hi, I am interested in buying *${product.title}* listed for GH₵${product.price}`)
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`
+
+    return (
+        <main className="min-h-screen bg-gray-50">
+            <Header />
+
+            <div className="container mx-auto px-4 py-12 md:py-20 lg:py-24">
+                <Link
+                    href="/shop"
+                    className="inline-flex items-center gap-2 text-gray-500 hover:text-purple-600 transition-colors mb-8 group"
+                >
+                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    Back to Shop
+                </Link>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100"
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8">
+                        {/* Image Section */}
+                        <div className="relative aspect-square md:aspect-auto bg-gray-100 overflow-hidden group">
+                            {product.imageUrl ? (
+                                <img
+                                    src={product.imageUrl}
+                                    alt={product.title}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                    <ShoppingBag size={80} className="opacity-30" />
+                                </div>
+                            )}
+                            {!product.inStock && (
+                                <div className="absolute top-6 left-6 px-4 py-2 bg-red-500 text-white font-bold rounded-lg shadow-lg">
+                                    OUT OF STOCK
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+                            <div className="flex items-center gap-2 text-purple-600 font-medium mb-4">
+                                <Package size={18} />
+                                <span>{product.category || 'Cleaning Product'}</span>
+                            </div>
+
+                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                                {product.title}
+                            </h1>
+
+                            <div className="flex items-center gap-4 mb-8">
+                                <span className="text-3xl md:text-4xl font-bold text-purple-600">
+                                    GH₵{product.price.toFixed(2)}
+                                </span>
+                                {product.inStock ? (
+                                    <span className="flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                                        <CheckCircle size={14} /> In Stock
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                                        <X size={14} /> Out of Stock
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="prose prose-lg text-gray-600 mb-10 max-w-none">
+                                <p>{product.description}</p>
+                            </div>
+
+                            <div className="mt-auto pt-8 border-t border-gray-100">
+                                <a
+                                    href={product.inStock ? whatsappUrl : '#'}
+                                    target={product.inStock ? '_blank' : undefined}
+                                    rel={product.inStock ? "noopener noreferrer" : undefined}
+                                    className={`
+                    flex items-center justify-center gap-3 w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-300 transform
+                    ${product.inStock
+                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 hover:-translate-y-1 hover:shadow-xl text-white'
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
+                  `}
+                                >
+                                    <MessageCircle size={24} />
+                                    {product.inStock ? 'Order via WhatsApp' : 'Currently Unavailable'}
+                                </a>
+                                <p className="text-center text-sm text-gray-400 mt-4">
+                                    Secure checkout via WhatsApp messaging with our sales team.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            <Footer />
+        </main>
+    )
+}
