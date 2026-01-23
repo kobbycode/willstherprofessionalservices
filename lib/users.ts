@@ -7,7 +7,7 @@ export type User = {
   id: string
   name: string
   email: string
-  role: 'admin' | 'editor' | 'user'
+  role: 'super_admin' | 'admin' | 'editor' | 'user'
   status: 'active' | 'inactive' | 'pending'
   lastLogin?: string
   createdAt?: string
@@ -22,7 +22,7 @@ export type NewUserInput = {
   name: string
   email: string
   password?: string
-  role?: 'admin' | 'editor' | 'user'
+  role?: 'super_admin' | 'admin' | 'editor' | 'user'
   status?: 'active' | 'inactive' | 'pending'
   phone?: string
   department?: string
@@ -36,7 +36,7 @@ export async function fetchUsers(): Promise<User[]> {
     const usersRef = collection(db, 'users')
     const q = query(usersRef, orderBy('createdAt', 'desc'))
     const snapshot = await getDocs(q)
-    
+
     return snapshot.docs.map(doc => {
       const data = doc.data()
       return {
@@ -66,9 +66,9 @@ export async function fetchUserById(id: string): Promise<User | null> {
     const db = getDb()
     const userRef = doc(db, 'users', id)
     const userDoc = await getDoc(userRef)
-    
+
     if (!userDoc.exists()) return null
-    
+
     const data = userDoc.data()
     return {
       id: userDoc.id,
@@ -95,11 +95,11 @@ export async function createUserWithAuth(userData: NewUserInput): Promise<string
   try {
     const { getAuth, createUserWithEmailAndPassword } = await import('firebase/auth')
     const { getFirebaseApp } = await import('./firebase')
-    
+
     const firebaseApp = getFirebaseApp()
     const auth = getAuth(firebaseApp)
     const db = getDb()
-    
+
     // Create Firebase Auth user if password is provided
     let authUid = null
     if (userData.password) {
@@ -110,7 +110,7 @@ export async function createUserWithAuth(userData: NewUserInput): Promise<string
       )
       authUid = userCredential.user.uid
     }
-    
+
     // Create user document in Firestore
     const usersRef = collection(db, 'users')
     const userDocData = {
@@ -123,13 +123,15 @@ export async function createUserWithAuth(userData: NewUserInput): Promise<string
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       lastLogin: null,
-      permissions: userData.role === 'admin' 
-        ? ['read', 'write', 'delete', 'manage_users', 'manage_content']
-        : userData.role === 'editor'
-        ? ['read', 'write', 'manage_content']
-        : ['read']
+      permissions: userData.role === 'super_admin'
+        ? ['all']
+        : userData.role === 'admin'
+          ? ['read', 'write', 'delete', 'manage_users', 'manage_content']
+          : userData.role === 'editor'
+            ? ['read', 'write', 'manage_content']
+            : ['read']
     }
-    
+
     // Use auth UID if available, otherwise create new document
     let docRef
     if (authUid) {
@@ -138,7 +140,7 @@ export async function createUserWithAuth(userData: NewUserInput): Promise<string
     } else {
       docRef = await addDoc(usersRef, userDocData)
     }
-    
+
     return docRef.id
   } catch (error) {
     console.error('Error creating user with auth:', error)
@@ -151,7 +153,7 @@ export async function createUser(userData: NewUserInput): Promise<string | null>
   try {
     const db = getDb()
     const usersRef = collection(db, 'users')
-    
+
     // Create user document
     const docRef = await addDoc(usersRef, {
       ...userData,
@@ -160,13 +162,15 @@ export async function createUser(userData: NewUserInput): Promise<string | null>
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       lastLogin: null,
-      permissions: userData.role === 'admin' 
-        ? ['read', 'write', 'delete', 'manage_users', 'manage_content']
-        : userData.role === 'editor'
-        ? ['read', 'write', 'manage_content']
-        : ['read']
+      permissions: userData.role === 'super_admin'
+        ? ['all']
+        : userData.role === 'admin'
+          ? ['read', 'write', 'delete', 'manage_users', 'manage_content']
+          : userData.role === 'editor'
+            ? ['read', 'write', 'manage_content']
+            : ['read']
     })
-    
+
     return docRef.id
   } catch (error) {
     console.error('Error creating user:', error)
@@ -220,7 +224,7 @@ export async function updateUserStatus(id: string, status: 'active' | 'inactive'
 }
 
 // Update user role
-export async function updateUserRole(id: string, role: 'admin' | 'editor' | 'user'): Promise<boolean> {
+export async function updateUserRole(id: string, role: 'super_admin' | 'admin' | 'editor' | 'user'): Promise<boolean> {
   try {
     const db = getDb()
     const userRef = doc(db, 'users', id)

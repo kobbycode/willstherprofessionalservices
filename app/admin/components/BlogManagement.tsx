@@ -20,6 +20,7 @@ import toast from 'react-hot-toast'
 import { formatDateHuman } from '@/lib/date'
 import { BlogPost } from '@/lib/blog'
 import { uploadImage } from '@/lib/storage'
+import { useAuth } from '@/lib/auth-context'
 
 export const BlogManagement = () => {
     const [posts, setPosts] = useState<BlogPost[]>([])
@@ -28,6 +29,8 @@ export const BlogManagement = () => {
     const [statusFilter, setStatusFilter] = useState('all')
     const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null)
     const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+    const { user: currentUser } = useAuth()
+    const isSuperAdmin = currentUser?.role === 'super_admin'
     const [showPostModal, setShowPostModal] = useState(false)
     const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
     const [savingPost, setSavingPost] = useState(false)
@@ -176,6 +179,10 @@ export const BlogManagement = () => {
     }
 
     const handleDeletePost = async (postId: string) => {
+        if (!isSuperAdmin) {
+            toast.error('Only super admins can delete posts')
+            return
+        }
         setDeletingPostId(postId)
         try {
             const { deletePost } = await import('@/lib/blog')
@@ -420,9 +427,11 @@ export const BlogManagement = () => {
                                                 {post.status === 'published' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
 
-                                            <button className="text-red-600 hover:text-red-900" title="Delete post" onClick={() => setShowDeleteDialog(post.id)}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            {isSuperAdmin && (
+                                                <button className="text-red-600 hover:text-red-900" title="Delete post" onClick={() => setShowDeleteDialog(post.id)}>
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

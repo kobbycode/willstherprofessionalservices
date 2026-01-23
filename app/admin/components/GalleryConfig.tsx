@@ -2,7 +2,9 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Trash2, Image as ImageIcon } from 'lucide-react'
+import { Plus, Trash2, Image as ImageIcon, Upload } from 'lucide-react'
+import { uploadImage } from '@/lib/storage'
+import toast from 'react-hot-toast'
 
 interface GalleryConfigProps {
     config: any
@@ -21,6 +23,16 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
 
     const addItem = () => onChange({ ...config, gallery: [...items, { id: Date.now().toString(), imageUrl: '', caption: '' }] })
     const removeItem = (index: number) => onChange({ ...config, gallery: items.filter((_: any, i: number) => i !== index) })
+
+    const handleUpload = async (index: number, file: File) => {
+        try {
+            const url = await uploadImage(file, 'gallery')
+            updateItem(index, 'imageUrl', url)
+            toast.success('Image uploaded')
+        } catch (error) {
+            toast.error('Failed to upload image')
+        }
+    }
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -43,7 +55,13 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                             </button>
                         </div>
                         <div className="p-4 space-y-3">
-                            <input value={g.imageUrl || ''} onChange={(e) => updateItem(i, 'imageUrl', e.target.value)} className="w-full px-3 py-2 border rounded-lg text-xs" placeholder="Image URL" />
+                            <div className="flex gap-2">
+                                <input value={g.imageUrl || ''} onChange={(e) => updateItem(i, 'imageUrl', e.target.value)} className="flex-1 px-3 py-2 border rounded-lg text-xs" placeholder="Image URL" />
+                                <label className="p-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                                    <Upload className="w-3 h-3" />
+                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(i, e.target.files[0])} />
+                                </label>
+                            </div>
                             <input value={g.caption || ''} onChange={(e) => updateItem(i, 'caption', e.target.value)} className="w-full px-3 py-2 border rounded-lg text-xs" placeholder="Caption" />
                         </div>
                     </div>

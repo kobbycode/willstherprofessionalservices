@@ -43,6 +43,28 @@ export type SiteConfig = {
 	contactEmail: string
 	contactPhone: string
 	maintenanceMode: boolean
+	systemSettings?: {
+		maintenanceMode: boolean
+		debugMode: boolean
+		autoBackup: boolean
+		backupFrequency: 'daily' | 'weekly' | 'monthly'
+		maxUploadSize: number
+		sessionTimeout: number
+		enableNotifications: boolean
+		emailNotifications: boolean
+		securityLevel: 'low' | 'medium' | 'high'
+		requireTwoFactor: boolean
+		passwordPolicy: {
+			minLength: number
+			requireUppercase: boolean
+			requireLowercase: boolean
+			requireNumbers: boolean
+			requireSpecialChars: boolean
+		}
+		theme: 'light' | 'dark' | 'auto'
+		language: string
+		timezone: string
+	}
 	heroSlides: HeroSlide[]
 	services: ServiceItem[]
 	about: {
@@ -90,6 +112,28 @@ export const defaultSiteConfig: SiteConfig = {
 	contactEmail: 'willstherprofessionalservices@gmail.com',
 	contactPhone: '(233) 594 850 005',
 	maintenanceMode: false,
+	systemSettings: {
+		maintenanceMode: false,
+		debugMode: false,
+		autoBackup: true,
+		backupFrequency: 'weekly',
+		maxUploadSize: 10,
+		sessionTimeout: 30,
+		enableNotifications: true,
+		emailNotifications: true,
+		securityLevel: 'medium',
+		requireTwoFactor: false,
+		passwordPolicy: {
+			minLength: 8,
+			requireUppercase: true,
+			requireLowercase: true,
+			requireNumbers: true,
+			requireSpecialChars: false
+		},
+		theme: 'light',
+		language: 'en',
+		timezone: 'UTC'
+	},
 	heroSlides: [
 		{
 			imageUrl: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop',
@@ -289,7 +333,7 @@ export function useSiteConfig() {
 
 					const db = getDb()
 					if (db) {
-						const ref = doc(db, 'config', 'hero')
+						const ref = doc(db, 'config', 'site')
 						await setDoc(ref, next, { merge: true })
 					}
 				} catch (error) {

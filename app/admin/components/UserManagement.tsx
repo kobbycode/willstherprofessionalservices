@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
 import { fetchUsers, deleteUser, updateUser, type User } from '@/lib/users'
+import { useAuth } from '@/lib/auth-context'
 
 export const UserManagement = () => {
     const [users, setUsers] = useState<User[]>([])
@@ -16,6 +17,9 @@ export const UserManagement = () => {
     const [roleFilter, setRoleFilter] = useState('all')
     const [showDeleteDialog, setShowDeleteDialog] = useState<{ userId: string; userName: string } | null>(null)
     const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
+
+    const { user: currentUser } = useAuth()
+    const isSuperAdmin = currentUser?.role === 'super_admin'
 
     const load = async () => {
         setLoading(true)
@@ -51,7 +55,11 @@ export const UserManagement = () => {
         }
     }
 
-    const handleRoleChange = async (userId: string, newRole: 'admin' | 'editor' | 'user') => {
+    const handleRoleChange = async (userId: string, newRole: 'super_admin' | 'admin' | 'editor' | 'user') => {
+        if (!isSuperAdmin) {
+            toast.error('Only super admins can change user roles')
+            return
+        }
         try {
             await updateUser(userId, { role: newRole })
             setUsers(prev => prev.map(user =>
@@ -121,10 +129,12 @@ export const UserManagement = () => {
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">User Management</h2>
                     <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage user accounts and permissions</p>
                 </div>
-                <Link href="/admin/users/new" className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center sm:justify-start space-x-2 w-full sm:w-auto">
-                    <Plus className="w-4 h-4" />
-                    <span>Add User</span>
-                </Link>
+                {isSuperAdmin && (
+                    <Link href="/admin/users/new" className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center sm:justify-start space-x-2 w-full sm:w-auto">
+                        <Plus className="w-4 h-4" />
+                        <span>Add User</span>
+                    </Link>
+                )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
@@ -233,7 +243,13 @@ export const UserManagement = () => {
                                         </div>
                                     </td>
                                     <td className="px-3 sm:px-6 py-4">
-                                        <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value as any)} className={`px-2 py-1 text-xs font-medium rounded-full border-0 ${getRoleColor(user.role)}`}>
+                                        <select
+                                            value={user.role}
+                                            onChange={(e) => handleRoleChange(user.id, e.target.value as any)}
+                                            className={`px-2 py-1 text-xs font-medium rounded-full border-0 ${getRoleColor(user.role)}`}
+                                            disabled={!isSuperAdmin || user.role === 'super_admin'}
+                                        >
+                                            <option value="super_admin">Super Admin</option>
                                             <option value="admin">Admin</option>
                                             <option value="editor">Editor</option>
                                             <option value="user">User</option>
@@ -249,7 +265,9 @@ export const UserManagement = () => {
                                     <td className="px-3 sm:px-6 py-4">
                                         <div className="flex items-center space-x-2">
                                             <Link href={`/admin/users/edit/${user.id}`} className="text-blue-600 hover:text-blue-900"><Edit className="w-4 h-4" /></Link>
-                                            <button onClick={() => setShowDeleteDialog({ userId: user.id, userName: user.name })} className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
+                                            {isSuperAdmin && user.role !== 'super_admin' && (
+                                                <button onClick={() => setShowDeleteDialog({ userId: user.id, userName: user.name })} className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

@@ -8,6 +8,8 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimest
 import { uploadImage } from '@/lib/storage'
 import { Product } from '@/types/product'
 import Skeleton from '@/components/Skeleton'
+import { useAuth } from '@/lib/auth-context'
+import toast from 'react-hot-toast'
 
 export default function ShopManagement() {
     const [products, setProducts] = useState<Product[]>([])
@@ -17,6 +19,8 @@ export default function ShopManagement() {
     const [searchTerm, setSearchTerm] = useState('')
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState('')
+    const { user: currentUser } = useAuth()
+    const isSuperAdmin = currentUser?.role === 'super_admin'
 
     useEffect(() => {
         const db = getDb()
@@ -79,6 +83,10 @@ export default function ShopManagement() {
     }
 
     const handleDelete = async (productId: string) => {
+        if (!isSuperAdmin) {
+            toast.error("Only super admins can delete products")
+            return
+        }
         if (!window.confirm("Are you sure you want to delete this product?")) return
 
         try {
@@ -198,12 +206,14 @@ export default function ShopManagement() {
                                         >
                                             <Edit size={16} />
                                         </button>
-                                        <button
-                                            onClick={() => handleDelete(product.id)}
-                                            className="p-2 bg-white/90 hover:bg-red-600 hover:text-white text-gray-700 rounded-lg shadow-sm backdrop-blur-sm transition-colors"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {isSuperAdmin && (
+                                            <button
+                                                onClick={() => handleDelete(product.id)}
+                                                className="p-2 bg-white/90 hover:bg-red-600 hover:text-white text-gray-700 rounded-lg shadow-sm backdrop-blur-sm transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </div>
                                     {!product.inStock && (
                                         <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded shadow-sm">

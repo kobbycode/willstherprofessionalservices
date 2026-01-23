@@ -20,7 +20,7 @@ const AdminAuth = ({ children }: AdminAuthProps) => {
     console.log('AdminAuth: useEffect triggered:', { user, loading })
     if (!loading && !user) {
       console.log('AdminAuth: Redirecting to login - no user and not loading')
-      router.push('/admin/login')
+      router.replace('/admin/login')
     }
   }, [user, loading, router])
 

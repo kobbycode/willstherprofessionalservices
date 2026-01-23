@@ -7,11 +7,16 @@ import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
 import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, type ContactSubmission } from '@/lib/contacts'
 import { formatDateHuman } from '@/lib/date'
+import { useAuth } from '@/lib/auth-context'
+import { X } from 'lucide-react'
 
 export const ContactManagement = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [submissions, setSubmissions] = useState<ContactSubmission[]>([])
     const [filter, setFilter] = useState<'all' | 'new' | 'in_progress' | 'completed'>('all')
+    const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null)
+    const { user: currentUser } = useAuth()
+    const isSuperAdmin = currentUser?.role === 'super_admin'
 
     useEffect(() => {
         let active = true
@@ -43,6 +48,10 @@ export const ContactManagement = () => {
     }
 
     const remove = async (id: string) => {
+        if (!isSuperAdmin) {
+            toast.error('Only super admins can delete submissions')
+            return
+        }
         if (!confirm('Are you sure you want to delete this submission?')) return
         try {
             await deleteContactSubmission(id)
@@ -106,8 +115,10 @@ export const ContactManagement = () => {
                                     <td className="px-6 py-4 text-sm text-gray-500 hidden lg:table-cell whitespace-nowrap">{formatDateHuman(s.createdAt || '')}</td>
                                     <td className="px-6 py-4 text-sm font-medium">
                                         <div className="flex items-center space-x-3">
-                                            <button className="text-blue-600 hover:text-blue-800"><Eye className="w-4 h-4" /></button>
-                                            <button onClick={() => remove(s.id)} className="text-red-600 hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
+                                            <button onClick={() => setSelectedSubmission(s)} className="text-blue-600 hover:text-blue-800" title="View details"><Eye className="w-4 h-4" /></button>
+                                            {isSuperAdmin && (
+                                                <button onClick={() => remove(s.id)} className="text-red-600 hover:text-red-800" title="Delete submission"><Trash2 className="w-4 h-4" /></button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -116,6 +127,72 @@ export const ContactManagement = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Detail Modal */}
+            {selectedSubmission && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden"
+                    >
+                        <div className="flex justify-between items-center p-6 border-b">
+                            <h3 className="text-xl font-bold text-gray-900">Submission Details</h3>
+                            <button onClick={() => setSelectedSubmission(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Name</label>
+                                    <p className="text-gray-900 font-medium">{selectedSubmission.firstName} {selectedSubmission.lastName}</p>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Service</label>
+                                    <p className="text-gray-900 font-medium">{selectedSubmission.service || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Email</label>
+                                    <p className="text-gray-900 font-medium">{selectedSubmission.email}</p>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Phone</label>
+                                    <p className="text-gray-900 font-medium">{selectedSubmission.phone || 'N/A'}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase">Message</label>
+                                <div className="mt-2 p-4 bg-gray-50 rounded-xl text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                    {selectedSubmission.message}
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-4 border-t">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase">Submitted On</label>
+                                    <p className="text-sm text-gray-600">{formatDateHuman(selectedSubmission.createdAt || '')}</p>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Status</label>
+                                    <select
+                                        value={selectedSubmission.status}
+                                        onChange={(e) => {
+                                            const nextStatus = e.target.value as any
+                                            changeStatus(selectedSubmission.id, nextStatus)
+                                            setSelectedSubmission({ ...selectedSubmission, status: nextStatus })
+                                        }}
+                                        className="px-3 py-1.5 text-sm font-semibold rounded-lg border focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="new">New</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </motion.div>
     )
 }

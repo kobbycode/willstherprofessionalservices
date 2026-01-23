@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { 
-  User, 
-  Lock, 
-  Mail, 
-  Eye, 
-  EyeOff, 
-  AlertCircle, 
+import {
+  User,
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  AlertCircle,
   ArrowLeft,
   Shield,
   CheckCircle
@@ -36,12 +36,10 @@ export default function AdminRegister() {
   const router = useRouter()
   const { user, refreshUser } = useAuth()
 
-  // Redirect if already authenticated
+  // Redirect to login - registration is closed
   useEffect(() => {
-    if (user) {
-      router.push('/admin')
-    }
-  }, [user, router])
+    router.replace('/admin/login')
+  }, [router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -82,7 +80,7 @@ export default function AdminRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -112,13 +110,13 @@ export default function AdminRegister() {
           console.warn('Failed to set display name:', profileErr)
         }
       }
-      
+
       // Refresh user data to ensure the role is properly loaded
       await refreshUser()
-        
+
       toast.success('Admin account created successfully!')
       router.push('/admin')
-      
+
     } catch (err: any) {
       console.error('Registration error:', err)
       if (err.code === 'auth/email-already-in-use') {
@@ -142,7 +140,7 @@ export default function AdminRegister() {
       <div className="w-full max-w-md">
         {/* Back to Login */}
         <div className="mb-6">
-          <Link 
+          <Link
             href="/admin/login"
             className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
           >

@@ -141,9 +141,9 @@ const AdminDashboard = () => {
                     { id: 'shop', label: 'Shop Management', icon: ShoppingBag },
                     { id: 'blog', label: 'Blog Management', icon: FileText },
                     { id: 'categories', label: 'Categories', icon: Filter },
-                    { id: 'users', label: 'User Management', icon: Users },
+                    { id: 'users', label: 'User Management', icon: Users, restricted: true },
                     { id: 'contact', label: 'Contact Forms', icon: MessageSquare },
-                  ].map((item) => (
+                  ].filter(item => !item.restricted || (user?.role === 'super_admin')).map((item) => (
                     <button
                       key={item.id}
                       onClick={() => {

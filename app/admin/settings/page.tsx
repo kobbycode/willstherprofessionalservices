@@ -57,34 +57,18 @@ const defaultSettings: SystemSettings = {
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { config } = useSiteConfig()
-  const [isLoading, setIsLoading] = useState(false)
+  const { config, setConfig } = useSiteConfig()
   const [isSaving, setIsSaving] = useState(false)
-  const [settings, setSettings] = useState<SystemSettings>(defaultSettings)
+  const [settings, setSettings] = useState<SystemSettings>(config.systemSettings || defaultSettings)
   const [activeTab, setActiveTab] = useState('general')
   const [showResetDialog, setShowResetDialog] = useState(false)
 
-  // Load settings from localStorage on component mount
+  // Sync settings when config loads
   useEffect(() => {
-    const savedSettings = localStorage.getItem('adminSettings')
-    if (savedSettings) {
-      try {
-        setSettings(JSON.parse(savedSettings))
-      } catch (error) {
-        console.error('Error parsing saved settings:', error)
-      }
+    if (config.systemSettings) {
+      setSettings(config.systemSettings)
     }
-
-    // Sync maintenance mode with site config
-    if (config.maintenanceMode !== undefined) {
-      setSettings(prev => ({ ...prev, maintenanceMode: config.maintenanceMode }))
-    }
-  }, [config.maintenanceMode])
-
-  // Save settings to localStorage whenever settings change
-  useEffect(() => {
-    localStorage.setItem('adminSettings', JSON.stringify(settings))
-  }, [settings])
+  }, [config.systemSettings])
 
   const handleSettingChange = (key: keyof SystemSettings, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -100,8 +84,11 @@ export default function SettingsPage() {
   const saveSettings = async () => {
     setIsSaving(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await setConfig({
+        ...config,
+        maintenanceMode: settings.maintenanceMode,
+        systemSettings: settings
+      })
       toast.success('Settings saved successfully!')
     } catch (error) {
       toast.error('Failed to save settings')

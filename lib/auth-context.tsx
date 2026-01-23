@@ -11,7 +11,7 @@ export interface AuthUser {
   email: string | null
   displayName: string | null
   photoURL: string | null
-  role: 'admin' | 'editor' | 'user'
+  role: 'super_admin' | 'admin' | 'editor' | 'user'
   status: 'active' | 'inactive' | 'pending'
   permissions: string[]
   phone?: string
@@ -38,7 +38,7 @@ interface AuthContextType {
   loading: boolean
   signOut: () => Promise<void>
   hasPermission: (permission: string) => boolean
-  hasRole: (role: 'admin' | 'editor' | 'user') => boolean
+  hasRole: (role: 'super_admin' | 'admin' | 'editor' | 'user') => boolean
   refreshUser: () => Promise<AuthUser | null>
 }
 
@@ -58,22 +58,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Import Firebase functions dynamically to ensure they're only called on client
           const { getAuth } = await import('firebase/auth')
           const { getDb } = await import('./firebase')
-          
+
           // Test Firebase initialization
           const auth = getAuth()
           const db = getDb()
-          
+
           console.log('Firebase initialized successfully in AuthContext')
           console.log('Current Firebase user on init:', auth.currentUser?.email)
           setFirebaseReady(true)
-          
+
           // Check if user is already authenticated
           if (auth.currentUser) {
             console.log('User already authenticated, loading user data...')
             const userData = await loadUserData(auth.currentUser)
             setUser(userData)
-            setLoading(false)
           }
+          setLoading(false)
         }
       } catch (error) {
         console.error('Failed to initialize Firebase in AuthContext:', error)
@@ -91,17 +91,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const db = getDb()
       const userRef = doc(db, 'users', firebaseUser.uid)
       console.log('User document reference:', userRef.path)
-      
+
       // Add timeout for Firestore operations (reduced to 3 seconds to prevent conflicts)
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Firestore operation timeout after 3 seconds')), 3000)
+        setTimeout(() => reject(new Error('Firestore operation timeout after 10 seconds')), 10000)
       })
-      
+
       const userDocPromise = getDoc(userRef)
       const userDoc = await Promise.race([userDocPromise, timeoutPromise]) as any
-      
+
       console.log('User document exists:', userDoc.exists())
-      
+
       if (userDoc.exists()) {
         const data = userDoc.data()
         console.log('User document data:', data)
@@ -163,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: defaultUser.createdAt,
           updatedAt: defaultUser.updatedAt
         })
-        
+
         await Promise.race([setDocPromise, timeoutPromise])
         console.log('User document created successfully')
 
@@ -176,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : 'No stack trace'
       })
-      
+
       // If it's a timeout or connection error, return a basic user object
       if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('400'))) {
         console.log('Firestore connection issue, creating basic user object')
@@ -199,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updatedAt: new Date().toISOString()
         }
       }
-      
+
       return null
     }
   }
@@ -246,7 +246,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user?.permissions?.includes(permission) || false
   }
 
-  const hasRole = (role: 'admin' | 'editor' | 'user'): boolean => {
+  const hasRole = (role: 'super_admin' | 'admin' | 'editor' | 'user'): boolean => {
+    // super_admin has all roles
+    if (user?.role === 'super_admin') return true
+    if (user?.role === 'admin' && role !== 'super_admin') return true
     return user?.role === role
   }
 
@@ -260,7 +263,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Refreshing user data...')
       const auth = getAuth()
       const currentUser = auth.currentUser
-      
+
       if (currentUser) {
         console.log('Current Firebase user found:', currentUser.email)
         const userData = await loadUserData(currentUser)
