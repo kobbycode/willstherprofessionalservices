@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import Skeleton from '@/components/Skeleton'
 import {
   Users,
   FileText,
@@ -199,8 +201,8 @@ const AdminDashboard = () => {
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
                       className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
-                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
-                          : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
+                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
+                        : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
                         }`}
                     >
                       <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
@@ -229,8 +231,8 @@ const AdminDashboard = () => {
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
                       className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
-                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
-                          : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
+                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
+                        : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
                         }`}
                     >
                       <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
@@ -259,8 +261,8 @@ const AdminDashboard = () => {
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
                       className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
-                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
-                          : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
+                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
+                        : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
                         }`}
                     >
                       <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
@@ -758,14 +760,17 @@ const BlogManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center space-y-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <p className="text-gray-500 font-medium">Loading posts...</p>
-                    </div>
-                  </td>
-                </tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4"><Skeleton className="h-16 w-16 rounded-lg" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-full max-w-[200px]" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-12" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-8 w-24" /></td>
+                  </tr>
+                ))
               ) : filteredPosts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
@@ -781,14 +786,14 @@ const BlogManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                       {post.image ? (
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'
-                          }}
-                        />
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={post.image}
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                           <span className="text-white text-xs font-bold">No Image</span>
@@ -809,8 +814,8 @@ const BlogManagement = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.status === 'published'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
                       }`}>
                       {post.status}
                     </span>
@@ -1068,7 +1073,12 @@ const CategoriesManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
-                <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">Loading...</td></tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-3 sm:px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-3 sm:px-6 py-4"><Skeleton className="h-8 w-24" /></td>
+                  </tr>
+                ))
               ) : items.length === 0 ? (
                 <tr><td colSpan={2} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">No categories</td></tr>
               ) : items.map((c) => (
@@ -1378,9 +1388,33 @@ const UserManagement = () => {
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-2 text-sm">Loading users...</p>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <tbody className="bg-white divide-y divide-gray-200">
+                {[...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-48" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                    <td className="px-3 sm:px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -1670,10 +1704,10 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div key={i} className="bg-white rounded-xl shadow-premium p-6 border border-gray-100">
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-8 w-1/3" />
               </div>
             </div>
           ))}
@@ -1930,7 +1964,21 @@ const ContactManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
-                <tr><td className="px-3 sm:px-6 py-6 text-sm text-gray-500" colSpan={5}>Loading submissions...</td></tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-3 w-56" />
+                        <Skeleton className="h-3 w-full" />
+                      </div>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 hidden sm:table-cell"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-3 sm:px-6 py-4"><Skeleton className="h-8 w-24" /></td>
+                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-3 sm:px-6 py-4"><Skeleton className="h-8 w-20" /></td>
+                  </tr>
+                ))
               ) : filtered.length === 0 ? (
                 <tr><td className="px-3 sm:px-6 py-6 text-sm text-gray-500" colSpan={5}>No submissions found</td></tr>
               ) : (
@@ -2435,8 +2483,8 @@ const FooterConfig = ({ config, onChange }: any) => {
                   onClick={addSocialLink}
                   disabled={!newSocialLink.name.trim()}
                   className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${!newSocialLink.name.trim()
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
                     }`}
                 >
                   <Plus className="w-5 h-5" />

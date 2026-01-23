@@ -3,10 +3,29 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useSiteConfig } from '@/lib/site-config'
+import Skeleton from '@/components/Skeleton'
 
 const Gallery = () => {
-  const { config } = useSiteConfig()
+  const { config, isLoaded } = useSiteConfig()
   const items = Array.isArray(config.gallery) ? config.gallery : []
+
+  if (!isLoaded && items.length === 0) {
+    return (
+      <section className="section-padding bg-white" id="gallery">
+        <div className="container-custom px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-4 opacity-30">Gallery</h2>
+            <div className="w-20 h-1 bg-primary-200 mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-64 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   if (items.length === 0) return null
 

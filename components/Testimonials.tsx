@@ -3,9 +3,10 @@
 import { motion } from 'framer-motion'
 import { Star, Quote } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site-config'
+import Skeleton from '@/components/Skeleton'
 
 const Testimonials = () => {
-  const { config } = useSiteConfig()
+  const { config, isLoaded } = useSiteConfig()
   const testimonials = config.testimonials && config.testimonials.length > 0 ? config.testimonials.map((t) => ({
     name: t.name,
     rating: t.rating || 5,
@@ -65,6 +66,45 @@ const Testimonials = () => {
           }`}
       />
     ))
+  }
+
+  if (!isLoaded && (!config.testimonials || config.testimonials.length === 0)) {
+    return (
+      <section className="section-padding bg-secondary-50">
+        <div className="container-custom">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 mb-6 opacity-30">
+              What Our Customers Say
+            </h2>
+            <div className="w-24 h-1 bg-primary-200 mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl p-8 shadow-premium border border-gray-100">
+                <div className="flex justify-between mb-6">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, j) => <Skeleton key={j} className="w-5 h-5 rounded-full" />)}
+                  </div>
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                </div>
+                <div className="space-y-4">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
+                <div className="mt-8 pt-6 border-t border-gray-50 flex items-center space-x-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (

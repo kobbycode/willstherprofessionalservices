@@ -12,6 +12,7 @@ import { useSiteConfig } from '@/lib/site-config'
 import { ShoppingBag, MessageCircle, ArrowLeft, Package, CheckCircle, X, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { useShop } from '@/context/ShopContext'
+import Skeleton from '@/components/Skeleton'
 
 export default function ProductDetailPage() {
     const { id } = useParams()
@@ -50,11 +51,34 @@ export default function ProductDetailPage() {
 
     if (isLoading) {
         return (
-            <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                    <p className="text-gray-500">Loading details...</p>
+            <main className="min-h-screen bg-gray-50 flex flex-col">
+                <Header />
+                <div className="container mx-auto px-4 py-12 md:py-20 lg:py-24">
+                    <Skeleton className="h-6 w-32 mb-8" />
+                    <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-0 md:gap-8">
+                            <Skeleton className="md:col-span-2 aspect-square" />
+                            <div className="md:col-span-3 p-8 md:p-10 space-y-6">
+                                <Skeleton className="h-6 w-32" />
+                                <Skeleton className="h-12 w-3/4" />
+                                <div className="flex gap-4">
+                                    <Skeleton className="h-10 w-32" />
+                                    <Skeleton className="h-10 w-24" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-2/3" />
+                                </div>
+                                <div className="pt-6 border-t border-gray-100 flex gap-3">
+                                    <Skeleton className="flex-1 h-14 rounded-xl" />
+                                    <Skeleton className="w-14 h-14 rounded-xl" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <Footer />
             </main>
         )
     }

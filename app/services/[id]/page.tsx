@@ -9,6 +9,7 @@ import MaintenanceMode from '@/components/MaintenanceMode'
 import { useSiteConfig } from '@/lib/site-config'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, CheckCircle, Clock } from 'lucide-react'
+import Skeleton from '@/components/Skeleton'
 
 // Define interface for Service
 interface Service {
@@ -63,10 +64,52 @@ export default function ServiceDetails() {
 
     if (loading) {
         return (
-            <main className="min-h-screen flex flex-col">
+            <main className="min-h-screen flex flex-col bg-gray-50">
                 <Header />
-                <div className="flex-1 flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600"></div>
+                {/* Skeleton Hero */}
+                <div className="relative py-20 bg-primary-900 border-b border-white/10">
+                    <div className="container-custom px-4 relative z-10 space-y-4">
+                        <Skeleton className="h-6 w-32 bg-white/20" />
+                        <Skeleton className="h-6 w-24 bg-white/20 rounded-full" />
+                        <Skeleton className="h-12 w-3/4 bg-white/20" />
+                    </div>
+                </div>
+
+                {/* Skeleton Content */}
+                <div className="py-16 md:py-24 flex-1">
+                    <div className="container-custom px-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                            <div className="lg:col-span-2 space-y-8">
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
+                                    <Skeleton className="h-8 w-48" />
+                                    <div className="space-y-3">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-2/3" />
+                                    </div>
+                                </div>
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-4">
+                                    <Skeleton className="h-7 w-40" />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {[...Array(4)].map((_, i) => (
+                                            <div key={i} className="flex gap-3">
+                                                <Skeleton className="w-5 h-5 rounded-full" />
+                                                <Skeleton className="h-5 flex-1" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="lg:col-span-1">
+                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden space-y-6 p-6">
+                                    <Skeleton className="h-8 w-full" />
+                                    <Skeleton className="h-12 w-full" />
+                                    <Skeleton className="h-12 w-full" />
+                                    <Skeleton className="h-12 w-full rounded-xl" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <Footer />
             </main>

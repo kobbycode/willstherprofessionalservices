@@ -4,6 +4,7 @@ import { Calendar, Clock, User, ArrowLeft, Search, Tag, Filter, TrendingUp } fro
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import Skeleton from '@/components/Skeleton'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { fetchPosts, type BlogPost } from '@/lib/blog'
 import { formatDateHuman } from '@/lib/date'
@@ -23,25 +24,25 @@ const BlogPage = () => {
   // Memoize filtered and sorted posts for better performance
   const { filteredPosts, sortedPosts } = useMemo(() => {
     const filtered = blogPosts.filter(post => {
-    const matchesCategory = activeCategory === 'All' || activeCategory === '' || post.category === activeCategory
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           (post.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+      const matchesCategory = activeCategory === 'All' || activeCategory === '' || post.category === activeCategory
+      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (post.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesCategory && matchesSearch
+    })
 
     const sorted = [...filtered].sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return new Date(b.date).getTime() - new Date(a.date).getTime()
-      case 'readTime':
-        return parseInt(a.readTime) - parseInt(b.readTime)
-      case 'title':
-        return a.title.localeCompare(b.title)
-      default:
-        return 0
-    }
-  })
+      switch (sortBy) {
+        case 'date':
+          return new Date(b.date).getTime() - new Date(a.date).getTime()
+        case 'readTime':
+          return parseInt(a.readTime) - parseInt(b.readTime)
+        case 'title':
+          return a.title.localeCompare(b.title)
+        default:
+          return 0
+      }
+    })
 
     return { filteredPosts: filtered, sortedPosts: sorted }
   }, [blogPosts, activeCategory, searchQuery, sortBy])
@@ -49,18 +50,18 @@ const BlogPage = () => {
   // Load more posts
   const loadMorePosts = useCallback(async () => {
     if (isLoading || !hasMore) return
-    
+
     setIsLoading(true)
     try {
       const newPosts = await fetchPosts(true, 12) // Fetch only 12 posts at a time
       if (newPosts.length < 12) {
         setHasMore(false)
       }
-      
+
       // Avoid duplicates
       const existingIds = new Set(blogPosts.map(p => p.id))
       const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id))
-      
+
       setBlogPosts(prev => [...prev, ...uniqueNewPosts])
     } catch (error) {
       console.error('Failed to load more blog posts:', error)
@@ -79,17 +80,17 @@ const BlogPage = () => {
         fetchPosts(true, 12), // Fetch only 12 posts initially instead of 100
         import('@/lib/categories').then(m => m.fetchCategories())
       ])
-      
+
       // Log for debugging
       console.log('Fetched published posts:', posts.length)
       console.log('Published posts data:', posts)
-      
+
       setBlogPosts(posts)
       setHasMore(posts.length === 12) // If we got 12 posts, there might be more
-      
+
       // Set categories with 'All' as first option
       setCategories(['All', ...categoriesData])
-      
+
       // Set initial active category to 'All' if not already set
       if (activeCategory === '') {
         setActiveCategory('All')
@@ -105,14 +106,14 @@ const BlogPage = () => {
 
   useEffect(() => {
     let isMounted = true
-    
+
     const load = async () => {
       await loadData()
       if (!isMounted) return
     }
-    
+
     load()
-    
+
     return () => {
       isMounted = false
     }
@@ -143,20 +144,22 @@ const BlogPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Safe Area Container */}
       <div className="pt-20">
         {/* Blog Header */}
-        <div className="bg-primary-600 shadow-sm border-b mt-8">
-          <div className="container-custom px-4 py-6">
-            <div className="flex items-center justify-between">
+        <div className="bg-primary-900 shadow-premium border-b border-white/10 mt-8">
+          <div className="container-custom px-4 py-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
-                <Link href="/" className="flex items-center space-x-2 text-white hover:text-primary-100 transition-colors duration-200">
-                  <ArrowLeft className="w-5 h-5" />
+                <Link href="/" className="flex items-center space-x-2 text-primary-100 hover:text-accent-500 transition-colors duration-200 group">
+                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                   <span className="font-medium">Back to Home</span>
                 </Link>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white">Cleaning & Maintenance Blog</h1>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center md:text-left">
+                Insightful <span className="text-accent-500">Articles</span>
+              </h1>
             </div>
           </div>
         </div>
@@ -205,22 +208,21 @@ const BlogPage = () => {
                 <div className="flex flex-wrap gap-2">
                   {isLoading && blogPosts.length === 0 ? (
                     // Loading skeleton for categories
-                    [...Array(4)].map((_, index) => (
-                      <div key={index} className="h-10 w-20 bg-gray-200 rounded-lg animate-pulse"></div>
+                    [...Array(6)].map((_, index) => (
+                      <Skeleton key={index} className="h-10 w-24 rounded-lg" />
                     ))
                   ) : (
                     categories.map((category, index) => (
-                    <button
-                      key={index}
+                      <button
+                        key={index}
                         onClick={() => handleCategoryChange(category)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        category === activeCategory
-                          ? 'bg-primary-600 text-white' 
-                          : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-600 border border-gray-200'
-                      }`}
-                    >
-                      {category}
-                    </button>
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${category === activeCategory
+                          ? 'bg-primary-900 text-accent-500 shadow-premium'
+                          : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-900 border border-gray-100'
+                          }`}
+                      >
+                        {category}
+                      </button>
                     ))
                   )}
                 </div>
@@ -229,43 +231,51 @@ const BlogPage = () => {
 
             {/* Results Summary */}
             {!isLoading && blogPosts.length > 0 && (
-            <div className="mt-4 text-sm text-secondary-500">
-              Showing {sortedPosts.length} of {blogPosts.length} articles
-              {searchQuery && ` for "${searchQuery}"`}
-              {activeCategory !== 'All' && activeCategory !== '' && ` in ${activeCategory}`}
-            </div>
+              <div className="mt-4 text-sm text-secondary-500">
+                Showing {sortedPosts.length} of {blogPosts.length} articles
+                {searchQuery && ` for "${searchQuery}"`}
+                {activeCategory !== 'All' && activeCategory !== '' && ` in ${activeCategory}`}
+              </div>
             )}
           </div>
 
           {/* Featured Post */}
           <div className="mb-12 md:mb-16">
             {isLoading && blogPosts.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                <p className="text-secondary-500">Loading featured article...</p>
+              <div className="bg-white rounded-2xl shadow-premium overflow-hidden">
+                <div className="grid lg:grid-cols-2 gap-0">
+                  <Skeleton className="h-64 lg:h-[400px] w-full" />
+                  <div className="p-6 md:p-8 flex flex-col justify-center gap-4">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <div className="flex justify-between items-center mt-4">
+                      <Skeleton className="h-6 w-24" />
+                      <Skeleton className="h-10 w-32" />
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : sortedPosts.length > 0 ? (
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-premium overflow-hidden group border border-gray-100">
                 <div className="grid lg:grid-cols-2 gap-0">
-                  <div className="relative h-64 lg:h-full">
-                    <img
+                  <div className="relative h-64 lg:h-full overflow-hidden">
+                    <Image
                       src={sortedPosts[0].image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop&crop=center'}
                       alt={sortedPosts[0].title}
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop&crop=center'
-                      }}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      priority
                     />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-primary-600 text-white px-3 py-1 rounded-none text-sm font-medium">
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs font-bold tracking-wider uppercase shadow-lg">
                         Featured
                       </span>
                     </div>
                   </div>
                   <div className="p-6 md:p-8 flex flex-col justify-center">
                     <div className="flex items-center space-x-4 text-sm text-secondary-500 mb-4">
-                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
+                      <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs font-semibold">
                         {sortedPosts[0].category}
                       </span>
                       <div className="flex items-center space-x-2">
@@ -290,7 +300,7 @@ const BlogPage = () => {
                       </div>
                       <Link
                         href={`/blog/${sortedPosts[0].id}`}
-                        className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-8 py-3 rounded-lg font-bold transition-all duration-300 shadow-premium hover:shadow-premium-hover transform hover:-translate-y-0.5"
                       >
                         Read More
                       </Link>
@@ -299,8 +309,11 @@ const BlogPage = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                <h3 className="text-xl font-semibold text-secondary-600 mb-2">No published articles yet</h3>
+              <div className="bg-white rounded-2xl shadow-premium p-12 text-center border border-gray-100">
+                <div className="bg-primary-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-10 h-10 text-primary-300" />
+                </div>
+                <h3 className="text-2xl font-bold text-secondary-900 mb-3">No published articles yet</h3>
                 <p className="text-secondary-500 mb-4">Check back later for our latest cleaning tips and industry insights.</p>
                 <p className="text-sm text-secondary-400">Admins: Make sure to publish posts in the admin panel for them to appear here.</p>
               </div>
@@ -309,80 +322,84 @@ const BlogPage = () => {
 
           {/* Blog Grid - Exclude featured post */}
           {isLoading && blogPosts.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, index) => (
-                <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
-                  <div className="h-48 bg-gray-200"></div>
-                  <div className="p-6">
-                    <div className="h-4 bg-gray-200 rounded mb-3"></div>
-                    <div className="h-6 bg-gray-200 rounded mb-3"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded"></div>
+                <div key={index} className="bg-white rounded-2xl shadow-premium overflow-hidden border border-gray-100">
+                  <Skeleton className="h-56 w-full" />
+                  <div className="p-6 flex flex-col gap-4">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : sortedPosts.length <= 1 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-              <h3 className="text-xl font-semibold text-secondary-600 mb-2">No more articles</h3>
-              <p className="text-secondary-500">This is all we have for now. Check back later for more content!</p>
+            <div className="bg-white rounded-2xl shadow-premium p-12 text-center border border-gray-100 max-w-2xl mx-auto">
+              <div className="bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-primary-300" />
+              </div>
+              <h3 className="text-xl font-bold text-secondary-900 mb-2">No more articles</h3>
+              <p className="text-secondary-500">This is all we have for now. Check back later for more premium content!</p>
             </div>
           ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {sortedPosts.slice(1).map((post, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sortedPosts.slice(1).map((post, index) => (
                 <article
-                key={post.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="relative h-48">
-                  <img
-                    src={post.image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'
-                      }}
-                  />
-                  <div className="absolute top-3 left-3">
-                      <span className="bg-secondary-100 text-secondary-700 px-3 py-1 rounded text-xs font-medium">
-                      {post.category}
-                    </span>
+                  key={post.id}
+                  className="bg-white rounded-2xl shadow-premium overflow-hidden hover:shadow-premium-hover transition-all duration-500 hover:-translate-y-2 group border border-gray-100"
+                >
+                  <div className="relative h-56 overflow-hidden">
+                    <Image
+                      src={post.image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-xs font-bold tracking-wide uppercase shadow-sm">
+                        {post.category}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center space-x-4 text-xs text-secondary-500 mb-3">
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="w-3 h-3" />
+                  <div className="p-6">
+                    <div className="flex items-center space-x-4 text-xs text-secondary-500 mb-3">
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-3 h-3" />
                         <span>{formatDateHuman(post.date, 'en-GB')}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{post.readTime}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{post.readTime}</span>
+                    <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-3 line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-secondary-600 text-sm mb-4 line-clamp-3">
+                      {post.excerpt || 'No excerpt available'}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-xs text-secondary-500">
+                        <User className="w-3 h-3" />
+                        <span>{post.author}</span>
+                      </div>
+                      <Link
+                        href={`/blog/${post.id}`}
+                        className="text-primary-900 hover:text-accent-600 font-bold text-sm transition-colors duration-200 flex items-center group/btn"
+                      >
+                        <span>Read More</span>
+                        <ArrowLeft className="w-4 h-4 ml-1 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
+                      </Link>
                     </div>
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-3 line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-secondary-600 text-sm mb-4 line-clamp-3">
-                    {post.excerpt || 'No excerpt available'}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-xs text-secondary-500">
-                      <User className="w-3 h-3" />
-                      <span>{post.author}</span>
-                    </div>
-                    <Link
-                      href={`/blog/${post.id}`}
-                      className="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors duration-200"
-                    >
-                      Read More →
-                    </Link>
-                  </div>
-                </div>
                 </article>
-            ))}
-          </div>
+              ))}
+            </div>
           )}
 
           {/* Load More Button */}
@@ -391,57 +408,60 @@ const BlogPage = () => {
               <button
                 onClick={loadMorePosts}
                 disabled={isLoading}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
+                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-10 py-4 rounded-xl font-bold transition-all duration-300 shadow-premium hover:shadow-premium-hover transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
               >
-                {isLoading ? 'Loading...' : 'Load More Articles'}
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
+                    <span>Loading...</span>
+                  </div>
+                ) : 'Load More Articles'}
               </button>
             </div>
           )}
 
           {/* Newsletter Signup */}
-          <div className="mt-16 md:mt-20 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+          <div className="mt-16 md:mt-24 bg-primary-900 rounded-3xl p-8 md:p-16 text-center text-white relative overflow-hidden shadow-premium">
             {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute inset-0 bg-primary-100"></div>
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent-500/20 via-transparent to-transparent"></div>
             </div>
-            
-            <div className="relative z-10">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Stay Updated with Cleaning Tips
+
+            <div className="relative z-10 max-w-3xl mx-auto">
+              <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+                Stay Ahead of the <span className="text-accent-500">Curse</span>
               </h3>
-              <p className="text-primary-100 mb-6 max-w-2xl mx-auto">
-                Get the latest cleaning tips, maintenance advice, and industry insights delivered to your inbox. Join 500+ professionals already subscribed.
+              <p className="text-primary-100 mb-10 text-lg md:text-xl opacity-90">
+                Subscribe for premium maintenance tips, exclusive industry insights, and seasonal guides delivered straight to your inbox.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto bg-white/5 p-2 rounded-2xl backdrop-blur-md border border-white/10">
                 <input
                   type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 rounded-lg text-secondary-900 focus:ring-2 focus:ring-white focus:outline-none"
+                  placeholder="Your professional email"
+                  className="flex-1 px-6 py-4 rounded-xl bg-white/10 text-white placeholder:text-primary-200 focus:ring-2 focus:ring-accent-500 focus:outline-none transition-all duration-300"
                 />
-                <button className="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-200 hover:scale-105">
+                <button className="bg-accent-500 text-primary-900 px-8 py-4 rounded-xl font-bold hover:bg-accent-600 transition-all duration-300 hover:scale-105 shadow-lg active:scale-95">
                   Subscribe
                 </button>
               </div>
-              <p className="text-xs text-primary-200 mt-3">
-                No spam, unsubscribe at any time. We respect your privacy.
+              <p className="text-sm text-primary-300 mt-6">
+                Luxury service, zero spam. Unsubscribe at any time.
               </p>
             </div>
           </div>
 
-          {/* Back to Top Button */}
+          {/* Back to Top */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 bg-primary-600 hover:bg-primary-700 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 z-40"
+            className="fixed bottom-8 right-8 bg-primary-900 text-accent-500 p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
             aria-label="Back to top"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
+            <ArrowLeft className="w-6 h-6 rotate-90" />
           </button>
         </div>
       </div>
       <Footer />
-    </div>
+    </div >
   )
 }
 
