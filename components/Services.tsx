@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import Skeleton from './Skeleton'
 import { useMemo, useState, useEffect } from 'react'
 
 const Services = () => {
@@ -106,8 +107,31 @@ const Services = () => {
     return (
       <section id="services" className="section-padding bg-secondary-50">
         <div className="container-custom px-4">
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600"></div>
+          <div className="text-center mb-8 sm:mb-12 md:mb-16">
+            <Skeleton className="h-10 w-48 mx-auto mb-4" />
+            <Skeleton className="w-24 h-1 mx-auto" />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12 md:mb-16">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
+
+          <div className="space-y-16">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="space-y-8">
+                <Skeleton className="h-12 w-64 mx-auto" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} className="bg-white rounded-xl p-4 space-y-4 shadow-sm">
+                      <Skeleton className="aspect-video w-full" />
+                      <Skeleton className="h-6 w-3/4 mx-auto" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -256,24 +280,26 @@ const Services = () => {
                           whileInView={{ opacity: 1, scale: 1 }}
                           transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
                           viewport={{ once: true }}
-                          className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
+                          className="bg-white rounded-lg sm:rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
                         >
-                          <div className="relative flex-1 h-[200px] sm:h-[220px] md:h-[240px]">
+                          <div className="relative aspect-video w-full overflow-hidden">
                             <Image
                               src={service.image}
                               alt={service.title}
                               fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                             />
-                            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg z-10">
-                              <service.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-accent-500 rounded-full flex items-center justify-center shadow-lg z-10 transform group-hover:scale-110 transition-transform duration-300 border border-white/20">
+                              <service.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
                           </div>
-                          <div className="p-3 sm:p-4 md:p-6 flex-1 flex flex-col justify-center">
-                            <h4 className="text-sm sm:text-base md:text-lg font-semibold text-secondary-900 text-center mb-1 sm:mb-2 group-hover:text-primary-600 transition-colors">
+                          <div className="p-4 sm:p-5 flex-grow flex flex-col items-center justify-center bg-white relative">
+                            <h4 className="text-sm sm:text-base md:text-lg font-bold text-secondary-900 text-center group-hover:text-primary-600 transition-colors leading-tight">
                               {service.title}
                             </h4>
+                            <div className="mt-2 w-0 h-0.5 bg-accent-500 group-hover:w-12 transition-all duration-300 mx-auto"></div>
                           </div>
                         </motion.div>
                       </Link>
