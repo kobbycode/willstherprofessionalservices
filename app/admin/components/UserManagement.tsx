@@ -1,13 +1,45 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, Users, Search, Edit, Trash2 } from 'lucide-react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    Plus,
+    Users,
+    Search,
+    Edit,
+    Trash2,
+    Shield,
+    UserCheck,
+    UserMinus,
+    UserPlus,
+    Filter,
+    MoreHorizontal,
+    Mail,
+    Calendar,
+    Activity,
+    PieChart as PieIcon,
+    BarChart2,
+    X as CloseIcon
+} from 'lucide-react'
 import Link from 'next/link'
 import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
 import { fetchUsers, deleteUser, updateUser, type User } from '@/lib/users'
 import { useAuth } from '@/lib/auth-context'
+import {
+    PieChart,
+    Pie,
+    Cell,
+    ResponsiveContainer,
+    Tooltip,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid
+} from 'recharts'
+
+const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444']
 
 export const UserManagement = () => {
     const [users, setUsers] = useState<User[]>([])
@@ -37,19 +69,17 @@ export const UserManagement = () => {
 
     useEffect(() => { load() }, [])
 
-    const handleDeleteUser = async (userId: string, userName: string) => {
+    const handleDeleteUser = async (userId: string) => {
         setDeletingUserId(userId)
         try {
             const success = await deleteUser(userId)
             if (success) {
                 setUsers(prev => prev.filter(user => user.id !== userId))
-                toast.success('User deleted successfully')
+                toast.success('Member removed from registry')
                 setShowDeleteDialog(null)
-            } else {
-                toast.error('Failed to delete user')
             }
         } catch (error) {
-            toast.error('Failed to delete user')
+            toast.error('Protocol failure: Could not delete user')
         } finally {
             setDeletingUserId(null)
         }
@@ -57,7 +87,7 @@ export const UserManagement = () => {
 
     const handleRoleChange = async (userId: string, newRole: 'super_admin' | 'admin' | 'editor' | 'user') => {
         if (!isSuperAdmin) {
-            toast.error('Only super admins can change user roles')
+            toast.error('Permission denied: Action requires Super Admin clearance')
             return
         }
         try {
@@ -65,9 +95,9 @@ export const UserManagement = () => {
             setUsers(prev => prev.map(user =>
                 user.id === userId ? { ...user, role: newRole } : user
             ))
-            toast.success('User role updated successfully')
+            toast.success('Privileges updated')
         } catch (error) {
-            toast.error('Failed to update user role')
+            toast.error('Failed to update credentials')
         }
     }
 
@@ -77,196 +107,254 @@ export const UserManagement = () => {
             setUsers(prev => prev.map(user =>
                 user.id === userId ? { ...user, status: newStatus } : user
             ))
-            toast.success('User status updated successfully')
+            toast.success('Access status modified')
         } catch (error) {
-            toast.error('Failed to update user status')
+            toast.error('System synchronization error')
         }
     }
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesStatus = statusFilter === 'all' || user.status === statusFilter
-        const matchesRole = roleFilter === 'all' || user.role === roleFilter
-        return matchesSearch && matchesStatus && matchesRole
-    })
+    const filteredUsers = useMemo(() => {
+        return users.filter(user => {
+            const matchesSearch = (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (user.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+            const matchesStatus = statusFilter === 'all' || user.status === statusFilter
+            const matchesRole = roleFilter === 'all' || user.role === roleFilter
+            return matchesSearch && matchesStatus && matchesRole
+        })
+    }, [users, searchTerm, statusFilter, roleFilter])
 
-    const getRoleColor = (role: string) => {
-        switch (role) {
-            case 'admin': return 'bg-red-100 text-red-800'
-            case 'editor': return 'bg-blue-100 text-blue-800'
-            case 'user': return 'bg-gray-100 text-gray-800'
-            default: return 'bg-gray-100 text-gray-800'
-        }
-    }
+    const stats = useMemo(() => {
+        const roleData: Record<string, number> = {}
+        const statusData: Record<string, number> = {}
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'active': return 'bg-green-100 text-green-800'
-            case 'inactive': return 'bg-red-100 text-red-800'
-            case 'pending': return 'bg-yellow-100 text-yellow-800'
-            default: return 'bg-gray-100 text-gray-800'
-        }
-    }
+        users.forEach(u => {
+            roleData[u.role] = (roleData[u.role] || 0) + 1
+            statusData[u.status] = (statusData[u.status] || 0) + 1
+        })
 
-    const formatDate = (dateString: string) => {
-        if (!dateString) return 'Never'
-        try {
-            return new Date(dateString).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            })
-        } catch {
-            return 'Invalid date'
+        return {
+            total: users.length,
+            active: statusData['active'] || 0,
+            pending: statusData['pending'] || 0,
+            roles: Object.entries(roleData).map(([name, value]) => ({ name, value }))
         }
-    }
+    }, [users])
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-10">
+            {/* Top Bar */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">User Management</h2>
-                    <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage user accounts and permissions</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight">Identity & Access</h2>
+                    <p className="text-secondary-600 font-medium mt-1">Regulate administrative privileges and user demographics</p>
                 </div>
-                {isSuperAdmin && (
-                    <Link href="/admin/users/new" className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center sm:justify-start space-x-2 w-full sm:w-auto">
-                        <Plus className="w-4 h-4" />
-                        <span>Add User</span>
-                    </Link>
-                )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
-                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-600">Total Users</p>
-                            <p className="text-xl sm:text-2xl font-bold text-gray-900">{users.length}</p>
-                        </div>
-                        <div className="p-2 sm:p-3 bg-blue-500 rounded-lg"><Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></div>
+                <div className="flex items-center gap-4">
+                    <div className="hidden sm:flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1">
+                        <button
+                            onClick={() => setRoleFilter('all')}
+                            className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${roleFilter === 'all' ? 'bg-primary-900 text-white shadow-lg shadow-primary-900/20' : 'text-secondary-400 hover:text-primary-900'}`}
+                        >
+                            All
+                        </button>
+                        <button
+                            onClick={() => setRoleFilter('admin')}
+                            className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${roleFilter === 'admin' ? 'bg-primary-900 text-white shadow-lg shadow-primary-900/20' : 'text-secondary-400 hover:text-primary-900'}`}
+                        >
+                            Admins
+                        </button>
                     </div>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-600">Active Users</p>
-                            <p className="text-xl sm:text-2xl font-bold text-green-600">{users.filter(user => user.status === 'active').length}</p>
-                        </div>
-                        <div className="p-2 sm:p-3 bg-green-500 rounded-lg"><Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></div>
-                    </div>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-600">Admins</p>
-                            <p className="text-xl sm:text-2xl font-bold text-red-600">{users.filter(user => user.role === 'admin').length}</p>
-                        </div>
-                        <div className="p-2 sm:p-3 bg-red-500 rounded-lg"><Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></div>
-                    </div>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-600">Editors</p>
-                            <p className="text-xl sm:text-2xl font-bold text-blue-600">{users.filter(user => user.role === 'editor').length}</p>
-                        </div>
-                        <div className="p-2 sm:p-3 bg-blue-500 rounded-lg"><Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" /></div>
-                    </div>
+                    {isSuperAdmin && (
+                        <Link href="/admin/users/new" className="flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-primary-900 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl shadow-accent-500/20 active:scale-95">
+                            <UserPlus className="w-4 h-4" />
+                            <span>Commission User</span>
+                        </Link>
+                    )}
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 mb-4 sm:mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Search Users</label>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input type="text" placeholder="Search by name or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 text-sm border rounded-lg" />
+            {/* Micro Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                    { label: 'Total Registry', value: stats.total, icon: Users, color: 'blue' },
+                    { label: 'Authorized Access', value: stats.active, icon: UserCheck, color: 'emerald' },
+                    { label: 'Credentials Pending', value: stats.pending, icon: Activity, color: 'rose' },
+                ].map((stat, idx) => (
+                    <div key={idx} className="bg-white rounded-3xl shadow-premium p-6 border border-gray-100 flex items-center gap-6">
+                        <div className={`p-4 bg-${stat.color}-500 rounded-[1.25rem] shadow-lg shadow-${stat.color}-500/20`}>
+                            <stat.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                            <h3 className="text-3xl font-black text-primary-900 leading-none">{stat.value}</h3>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Status</label>
-                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full px-3 py-2 text-sm border rounded-lg">
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="pending">Pending</option>
-                        </select>
+                ))}
+            </div>
+
+            {/* Analytics Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-[2.5rem] shadow-premium p-8 border border-gray-100 flex flex-col h-[350px]">
+                    <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Privilege distribution</h3>
+                        <Shield className="w-5 h-5 text-secondary-300" />
                     </div>
-                    <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Role</label>
-                        <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="w-full px-3 py-2 text-sm border rounded-lg">
-                            <option value="all">All Roles</option>
-                            <option value="admin">Admin</option>
-                            <option value="editor">Editor</option>
-                            <option value="user">User</option>
-                        </select>
+                    <div className="flex-1">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={stats.roles} layout="vertical">
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                <XAxis type="number" hide />
+                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} width={80} />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                                    cursor={{ fill: '#f8fafc' }}
+                                />
+                                <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={20}>
+                                    {stats.roles.map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-[2.5rem] shadow-premium p-8 border border-gray-100 flex flex-col h-[350px]">
+                    <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Access Demographics</h3>
+                        <PieIcon className="w-5 h-5 text-secondary-300" />
+                    </div>
+                    <div className="flex-1 relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={stats.roles}
+                                    innerRadius={70}
+                                    outerRadius={90}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {stats.roles.map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-3xl font-black text-primary-900 leading-none">{stats.total}</span>
+                            <span className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest mt-1">Entities</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Registry Table */}
+            <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden">
+                <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="relative flex-1 max-w-md group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400 group-focus-within:text-primary-900 transition-colors w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="QUERY REGISTRY..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none text-primary-900"
+                        />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl">
+                            <Filter className="w-4 h-4 text-secondary-400" />
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="bg-transparent border-none text-[10px] font-black uppercase tracking-widest outline-none text-secondary-600 focus:ring-0"
+                            >
+                                <option value="all">Any Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-gray-50/50">
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Identity</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Clearance Level</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">System Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Engagement</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] text-right">Operations</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-100">
                             {loading ? (
                                 [...Array(5)].map((_, i) => (
-                                    <tr key={i}>
-                                        <td className="px-3 sm:px-6 py-4"><Skeleton className="h-10 w-32 rounded" /></td>
-                                        <td className="px-3 sm:px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
-                                        <td className="px-3 sm:px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
-                                        <td className="px-3 sm:px-6 py-4"><Skeleton className="h-8 w-16" /></td>
-                                    </tr>
+                                    <tr key={i}><td colSpan={5} className="px-8 py-4"><Skeleton className="h-12 w-full rounded-2xl" /></td></tr>
                                 ))
                             ) : filteredUsers.length === 0 ? (
-                                <tr><td colSpan={4} className="px-3 sm:px-6 py-8 text-center text-gray-500">No users found</td></tr>
-                            ) : filteredUsers.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50">
-                                    <td className="px-3 sm:px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                                                <span className="text-xs font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                                <tr><td colSpan={5} className="px-8 py-20 text-center text-sm font-bold text-secondary-300 uppercase tracking-[0.3em]">No matching entities in registry</td></tr>
+                            ) : filteredUsers.map((u) => (
+                                <tr key={u.id} className="group hover:bg-gray-50/80 transition-colors">
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-900 to-primary-700 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-primary-900/10">
+                                                {u.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div>
-                                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                <div className="text-xs text-gray-500">{user.email}</div>
+                                                <h4 className="font-black text-primary-900 tracking-tight">{u.name}</h4>
+                                                <div className="flex items-center gap-2 text-secondary-400 mt-1">
+                                                    <Mail className="w-3 h-3" />
+                                                    <span className="text-[11px] font-bold lowercase tracking-normal">{u.email}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4">
+                                    <td className="px-8 py-6">
                                         <select
-                                            value={user.role}
-                                            onChange={(e) => handleRoleChange(user.id, e.target.value as any)}
-                                            className={`px-2 py-1 text-xs font-medium rounded-full border-0 ${getRoleColor(user.role)}`}
-                                            disabled={!isSuperAdmin || user.role === 'super_admin'}
+                                            value={u.role}
+                                            onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
+                                            disabled={!isSuperAdmin || u.role === 'super_admin'}
+                                            className="bg-white border-none text-[10px] font-black uppercase tracking-widest text-primary-900 focus:ring-0 cursor-pointer disabled:opacity-50"
                                         >
-                                            <option value="super_admin">Super Admin</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="editor">Editor</option>
-                                            <option value="user">User</option>
+                                            <option value="super_admin">SUPER ADMIN</option>
+                                            <option value="admin">ADMIN</option>
+                                            <option value="editor">EDITOR</option>
+                                            <option value="user">USER</option>
                                         </select>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4">
-                                        <select value={user.status} onChange={(e) => handleStatusChange(user.id, e.target.value as any)} className={`px-2 py-1 text-xs font-medium rounded-full border-0 ${getStatusColor(user.status)}`}>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                            <option value="pending">Pending</option>
-                                        </select>
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-2 h-2 rounded-full ${u.status === 'active' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : u.status === 'pending' ? 'bg-amber-500' : 'bg-rose-500'}`}></div>
+                                            <select
+                                                value={u.status}
+                                                onChange={(e) => handleStatusChange(u.id, e.target.value as any)}
+                                                className="bg-transparent border-none text-[10px] font-black uppercase tracking-widest text-primary-900 focus:ring-0 cursor-pointer"
+                                            >
+                                                <option value="active">ACTIVE</option>
+                                                <option value="inactive">INACTIVE</option>
+                                                <option value="pending">PENDING</option>
+                                            </select>
+                                        </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4">
-                                        <div className="flex items-center space-x-2">
-                                            <Link href={`/admin/users/edit/${user.id}`} className="text-blue-600 hover:text-blue-900"><Edit className="w-4 h-4" /></Link>
-                                            {isSuperAdmin && user.role !== 'super_admin' && (
-                                                <button onClick={() => setShowDeleteDialog({ userId: user.id, userName: user.name })} className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
+                                    <td className="px-8 py-6">
+                                        <div className="flex items-center gap-2 text-secondary-400">
+                                            <Calendar className="w-3 h-3" />
+                                            <span className="text-[11px] font-bold">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'LEGACY'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6 text-right">
+                                        <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                            <Link href={`/admin/users/edit/${u.id}`} className="p-2.5 bg-white text-primary-900 rounded-xl shadow-sm border border-gray-100 hover:bg-primary-900 hover:text-white transition-all">
+                                                <Edit className="w-4 h-4" />
+                                            </Link>
+                                            {isSuperAdmin && u.role !== 'super_admin' && (
+                                                <button onClick={() => setShowDeleteDialog({ userId: u.id, userName: u.name })} className="p-2.5 bg-white text-rose-500 rounded-xl shadow-sm border border-gray-100 hover:bg-rose-500 hover:text-white transition-all">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                             )}
                                         </div>
                                     </td>
@@ -277,20 +365,46 @@ export const UserManagement = () => {
                 </div>
             </div>
 
-            {showDeleteDialog && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h3>
-                        <p className="mb-6">Delete user <strong>{showDeleteDialog.userName}</strong>? This cannot be undone.</p>
-                        <div className="flex space-x-3">
-                            <button onClick={() => setShowDeleteDialog(null)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
-                            <button onClick={() => handleDeleteUser(showDeleteDialog.userId, showDeleteDialog.userName)} disabled={deletingUserId === showDeleteDialog.userId} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg">
-                                {deletingUserId ? 'Deleting...' : 'Delete'}
-                            </button>
-                        </div>
+            {/* Premium Delete Confirmation */}
+            <AnimatePresence>
+                {showDeleteDialog && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-primary-900/60 backdrop-blur-md">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full p-10 overflow-hidden relative"
+                        >
+                            <div className="absolute top-0 right-0 p-8">
+                                <button onClick={() => setShowDeleteDialog(null)}><CloseIcon className="w-6 h-6 text-secondary-300 hover:text-primary-900 transition-colors" /></button>
+                            </div>
+                            <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mb-6">
+                                <UserMinus className="w-10 h-10 text-rose-500" />
+                            </div>
+                            <h3 className="text-2xl font-black text-primary-900 tracking-tight leading-tight">Decommission member?</h3>
+                            <p className="text-secondary-500 font-medium mt-3 leading-relaxed">
+                                You are about to strip <span className="text-primary-900 font-black">@{showDeleteDialog.userName}</span> of all administrative privileges and access tokens. This action is recorded and irreversible.
+                            </p>
+                            <div className="grid grid-cols-2 gap-4 mt-10">
+                                <button
+                                    onClick={() => setShowDeleteDialog(null)}
+                                    className="px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-secondary-400 hover:text-primary-900 hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100"
+                                >
+                                    Abort
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteUser(showDeleteDialog.userId)}
+                                    disabled={!!deletingUserId}
+                                    className="px-6 py-4 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {deletingUserId ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+                                    <span>Confirm Revocation</span>
+                                </button>
+                            </div>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+            </AnimatePresence>
         </motion.div>
     )
 }

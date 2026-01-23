@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -13,14 +13,35 @@ import {
     Search,
     Edit,
     Trash2,
-    X
+    X,
+    TrendingUp,
+    BarChart2,
+    ArrowUpRight,
+    ArrowDownRight,
+    MoreVertical,
+    CheckCircle,
+    Clock
 } from 'lucide-react'
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Cell,
+    PieChart,
+    Pie
+} from 'recharts'
 import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
 import { formatDateHuman } from '@/lib/date'
 import { BlogPost } from '@/lib/blog'
 import { uploadImage } from '@/lib/storage'
 import { useAuth } from '@/lib/auth-context'
+
+const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899']
 
 export const BlogManagement = () => {
     const [posts, setPosts] = useState<BlogPost[]>([])
@@ -53,7 +74,7 @@ export const BlogManagement = () => {
             setPosts(list)
         } catch (e) {
             console.error('Failed to load posts:', e)
-            toast.error('Failed to load posts. Check console for details.')
+            toast.error('Failed to load posts.')
             setPosts([])
         } finally {
             setLoading(false)
@@ -62,6 +83,7 @@ export const BlogManagement = () => {
 
     useEffect(() => { load() }, [])
 
+    // Real-time subscription for updates
     useEffect(() => {
         let unsubscribe: undefined | (() => void)
             ; (async () => {
@@ -70,40 +92,60 @@ export const BlogManagement = () => {
                     const { collection, query, orderBy, onSnapshot, limit: fsLimit } = await import('firebase/firestore')
                     const db = getDb()
                     const colRef = collection(db, 'posts')
-                    let q: any
-                    try {
-                        q = query(colRef, orderBy('createdAt', 'desc'), fsLimit(50))
-                    } catch {
-                        q = query(colRef, fsLimit(50))
-                    }
+                    let q = query(colRef, orderBy('createdAt', 'desc'), fsLimit(100))
+
                     unsubscribe = onSnapshot(q, (snap: any) => {
                         const list = snap.docs.map((d: any) => {
                             const data = d.data() || {}
                             return {
                                 id: d.id,
-                                title: data.title || '',
-                                excerpt: data.excerpt || '',
-                                content: data.content || '',
-                                author: data.author || 'Willsther Team',
-                                date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-                                readTime: data.readTime || '1 min read',
-                                category: data.category || 'General',
-                                image: data.image || '',
-                                tags: Array.isArray(data.tags) ? data.tags : [],
-                                status: data.status || 'draft',
-                                views: data.views || 0,
-                                createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-                                updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+                                ...data,
+                                date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString()
                             } as BlogPost
                         })
                         setPosts(list)
                     })
                 } catch (e) {
-                    // ignore subscription errors
+                    console.error('Subscription error:', e)
                 }
             })()
         return () => { if (unsubscribe) unsubscribe() }
     }, [])
+
+    const filteredPosts = useMemo(() => {
+        return posts.filter(post => {
+            const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                post.category?.toLowerCase().includes(searchTerm.toLowerCase())
+            const matchesStatus = statusFilter === 'all' || post.status === statusFilter
+            return matchesSearch && matchesStatus
+        })
+    }, [posts, searchTerm, statusFilter])
+
+    const stats = useMemo(() => ({
+        total: posts.length,
+        published: posts.filter(p => p.status === 'published').length,
+        draft: posts.filter(p => p.status === 'draft').length,
+        views: posts.reduce((sum, p) => sum + (p.views || 0), 0)
+    }), [posts])
+
+    const categoryData = useMemo(() => {
+        const counts: Record<string, number> = {}
+        posts.forEach(p => {
+            const cat = p.category || 'Uncategorized'
+            counts[cat] = (counts[cat] || 0) + 1
+        })
+        return Object.entries(counts).map(([name, value]) => ({ name, value }))
+    }, [posts])
+
+    const viewData = useMemo(() => {
+        return [...posts]
+            .sort((a, b) => (b.views || 0) - (a.views || 0))
+            .slice(0, 5)
+            .map(p => ({
+                name: p.title.length > 20 ? p.title.substring(0, 20) + '...' : p.title,
+                views: p.views || 0
+            }))
+    }, [posts])
 
     const openCreate = () => {
         setEditingPost(null)
@@ -120,317 +162,240 @@ export const BlogManagement = () => {
             category: post.category || '',
             image: post.image || '',
             tags: (post.tags || []).join(', '),
-            status: post.status
+            status: post.status as any
         })
         setShowPostModal(true)
     }
 
-    const withTimeout = async <T,>(promise: Promise<T>, ms = 10000): Promise<T> => {
-        return new Promise<T>((resolve, reject) => {
-            const t = setTimeout(() => reject(new Error('Request timed out')), ms)
-            promise.then((v) => { clearTimeout(t); resolve(v) }).catch((e) => { clearTimeout(t); reject(e) })
-        })
-    }
-
     const savePost = async () => {
-        if (!form.title.trim() || !form.content.trim()) {
-            toast.error('Title and content are required')
+        if (!form.title.trim()) {
+            toast.error('Title is required')
             return
         }
         setSavingPost(true)
         try {
             const { createPost, updatePost } = await import('@/lib/blog')
             const payload = {
-                title: form.title.trim(),
-                excerpt: form.excerpt.trim(),
-                content: form.content,
-                category: form.category.trim() || 'General',
-                image: form.image.trim(),
-                tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
-                status: form.status
+                ...form,
+                tags: form.tags.split(',').map(t => t.trim()).filter(Boolean)
             }
             if (editingPost) {
-                await withTimeout(updatePost(editingPost.id, payload))
+                await updatePost(editingPost.id, payload)
                 toast.success('Post updated')
             } else {
-                await withTimeout(createPost(payload))
-                await load()
+                await createPost(payload)
                 toast.success('Post created')
             }
             setShowPostModal(false)
         } catch (e) {
-            console.error('Save post failed:', e)
-            const msg = (e as any)?.message || 'Failed to save post'
-            toast.error(msg)
+            toast.error('Failed to save post')
         } finally {
             setSavingPost(false)
         }
     }
 
-    const handleImagePick = async (file?: File | null) => {
-        if (!file) return
-        try {
-            const url = await uploadImage(file, `posts/cover-${Date.now()}`)
-            setForm(prev => ({ ...prev, image: url }))
-            toast.success('Image uploaded')
-        } catch (e) {
-            toast.error('Image upload failed')
-        }
-    }
-
-    const handleDeletePost = async (postId: string) => {
-        if (!isSuperAdmin) {
-            toast.error('Only super admins can delete posts')
-            return
-        }
-        setDeletingPostId(postId)
-        try {
-            const { deletePost } = await import('@/lib/blog')
-            await deletePost(postId)
-            setPosts((prev) => prev.filter((p) => p.id !== postId))
-            toast.success('Post deleted')
-            setShowDeleteDialog(null)
-        } catch (e) {
-            toast.error('Failed to delete post')
-        } finally {
-            setDeletingPostId(null)
-        }
-    }
-
-    const filteredPosts = posts.filter(post => {
-        const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesStatus = statusFilter === 'all' || post.status === statusFilter
-        return matchesSearch && matchesStatus
-    })
-
-    const stats = {
-        total: posts.length,
-        published: posts.filter(p => p.status === 'published').length,
-        draft: posts.filter(p => p.status === 'draft').length,
-        scheduled: posts.filter(p => p.status === 'scheduled').length
-    }
-
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-        >
-            <div className="mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-3 sm:space-y-0">
-                    <div>
-                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Blog Management</h2>
-                        <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your blog posts and categories</p>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            <Link
-                                href="/admin/test-status-fix"
-                                className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
-                            >
-                                Fix Post Status
-                            </Link>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-10">
+            {/* Header section */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight">Blog Management</h2>
+                    <p className="text-secondary-600 font-medium mt-1">Editorial control and audience engagement analytics</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex bg-white rounded-2xl shadow-premium border border-gray-100 p-1">
+                        {['all', 'published', 'draft'].map((f) => (
                             <button
-                                onClick={async () => {
-                                    if (confirm('Publish all draft posts? This will make all posts visible on the website.')) {
-                                        try {
-                                            const res = await fetch('/api/posts/publish-all', { method: 'POST' })
-                                            const data = await res.json()
-                                            if (data.success) {
-                                                toast.success(data.message)
-                                                load()
-                                            } else {
-                                                toast.error(data.error || 'Failed to publish posts')
-                                            }
-                                        } catch (error) {
-                                            toast.error('Failed to publish posts')
-                                        }
-                                    }
-                                }}
-                                className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded hover:bg-purple-200 transition-colors"
+                                key={f}
+                                onClick={() => setStatusFilter(f)}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${statusFilter === f
+                                        ? 'bg-primary-900 text-white shadow-lg'
+                                        : 'text-secondary-400 hover:text-primary-900'
+                                    }`}
                             >
-                                Publish All Posts
+                                {f}
                             </button>
-                        </div>
+                        ))}
                     </div>
                     <button
                         onClick={openCreate}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center sm:justify-start space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
+                        className="flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-primary-900 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl shadow-accent-500/20 active:scale-95"
                     >
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span>New Post</span>
+                        <Plus className="w-4 h-4" />
+                        <span>Create Post</span>
                     </button>
                 </div>
+            </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
-                        <div className="flex items-center justify-between">
+            {/* Analytics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                    { label: 'Total Posts', value: stats.total, icon: FileText, color: 'blue', trend: '+4 this month' },
+                    { label: 'Published', value: stats.published, icon: CheckCircle, color: 'emerald', trend: '92% Rate' },
+                    { label: 'Pending Drafts', value: stats.draft, icon: Clock, color: 'amber', trend: 'Needs review' },
+                    { label: 'Total Views', value: stats.views.toLocaleString(), icon: TrendingUp, color: 'purple', trend: '+18% Growth' },
+                ].map((stat, idx) => (
+                    <div key={idx} className="bg-white rounded-3xl shadow-premium p-6 border border-gray-100 relative overflow-hidden group">
+                        <div className={`absolute top-0 right-0 w-20 h-20 bg-${stat.color}-500/5 -mr-6 -mt-6 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`}></div>
+                        <div className="flex items-center justify-between relative z-10">
                             <div>
-                                <p className="text-xs sm:text-sm opacity-90">Total Posts</p>
-                                <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
+                                <p className="text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                                <h3 className="text-3xl font-black text-primary-900 leading-none">{stat.value}</h3>
+                                <p className="text-[9px] font-bold text-secondary-500 mt-2 flex items-center gap-1 uppercase tracking-wider">
+                                    <ArrowUpRight className="w-3 h-3 text-emerald-500" />
+                                    {stat.trend}
+                                </p>
                             </div>
-                            <FileText className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
+                            <div className={`p-4 bg-${stat.color}-500 rounded-2xl shadow-lg shadow-${stat.color}-500/20`}>
+                                <stat.icon className="w-5 h-5 text-white" />
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs sm:text-sm opacity-90">Published</p>
-                                <p className="text-xl sm:text-2xl font-bold">{stats.published}</p>
-                            </div>
-                            <Eye className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
+                ))}
+            </div>
+
+            {/* Visual Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-premium p-8 border border-gray-100 flex flex-col h-[400px]">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-xl font-black text-primary-900">Article Reach</h3>
+                            <p className="text-xs text-secondary-500 font-bold uppercase tracking-widest mt-1">Engagement per top post</p>
+                        </div>
+                        <BarChart2 className="w-5 h-5 text-secondary-300" />
+                    </div>
+                    <div className="flex-1 w-full relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={viewData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                                    cursor={{ fill: '#f8fafc' }}
+                                />
+                                <Bar dataKey="views" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={40} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-[2.5rem] shadow-premium p-8 border border-gray-100 flex flex-col h-[400px]">
+                    <div className="mb-6">
+                        <h3 className="text-xl font-black text-primary-900">Category Mix</h3>
+                        <p className="text-xs text-secondary-500 font-bold uppercase tracking-widest mt-1">Content Distribution</p>
+                    </div>
+                    <div className="flex-1 relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={categoryData}
+                                    innerRadius={70}
+                                    outerRadius={90}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {categoryData.map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-2xl font-black text-primary-900">{categoryData.length}</span>
+                            <span className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest">topics</span>
                         </div>
                     </div>
-                    <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs sm:text-sm opacity-90">Drafts</p>
-                                <p className="text-xl sm:text-2xl font-bold">{stats.draft}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {categoryData.slice(0, 4).map((cat, i) => (
+                            <div key={i} className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></span>
+                                <span className="text-[10px] font-black text-secondary-500 uppercase">{cat.name}</span>
                             </div>
-                            <EyeOff className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
-                        </div>
-                    </div>
-                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs sm:text-sm opacity-90">Scheduled</p>
-                                <p className="text-xl sm:text-2xl font-bold">{stats.scheduled}</p>
-                            </div>
-                            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100 mb-4 sm:mb-6">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Filters & Search</h3>
-                <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-                    <div className="flex-1">
-                        <div className="relative">
-                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                            <input
-                                type="text"
-                                placeholder="Search posts by title or content..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                            />
-                        </div>
+            {/* List Section */}
+            <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden">
+                <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="relative flex-1 max-w-md group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400 group-focus-within:text-primary-900 transition-colors w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="SEARCH ARTICLES..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-12 pr-6 py-3 bg-gray-50/50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none text-primary-900"
+                        />
                     </div>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 font-medium"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
-                        <option value="archived">Archived</option>
-                    </select>
                 </div>
-            </div>
 
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
-                    <h3 className="text-xl font-bold text-gray-900">Blog Posts</h3>
-                    <p className="text-gray-600 mt-1">Showing {filteredPosts.length} of {posts.length} posts</p>
-                </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Image</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Post</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Views</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="bg-gray-50/50 border-b border-gray-50">
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Post Info</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Category</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Status</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Reach</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Date</th>
+                                <th className="px-8 py-5 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-50">
                             {loading ? (
                                 [...Array(5)].map((_, i) => (
-                                    <tr key={i}>
-                                        <td className="px-6 py-4"><Skeleton className="h-16 w-16 rounded-lg" /></td>
-                                        <td className="px-6 py-4"><Skeleton className="h-4 w-full max-w-[200px]" /></td>
-                                        <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
-                                        <td className="px-6 py-4"><Skeleton className="h-6 w-20 rounded-full" /></td>
-                                        <td className="px-6 py-4"><Skeleton className="h-4 w-12" /></td>
-                                        <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
-                                        <td className="px-6 py-4"><Skeleton className="h-8 w-24" /></td>
-                                    </tr>
+                                    <tr key={i}><td colSpan={6} className="px-8 py-6"><Skeleton className="h-12 w-full rounded-2xl" /></td></tr>
                                 ))
                             ) : filteredPosts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center space-y-4">
-                                            <FileText className="w-12 h-12 text-gray-300" />
-                                            <p className="text-gray-500 font-medium">No posts found</p>
-                                            <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <tr><td colSpan={6} className="px-8 py-20 text-center font-black text-secondary-300 uppercase tracking-widest">No articles found</td></tr>
                             ) : filteredPosts.map((post) => (
-                                <tr key={post.id} className="hover:bg-gray-50 transition-colors duration-200">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                                            {post.image ? (
-                                                <div className="relative w-full h-full">
-                                                    <Image src={post.image} alt={post.title} fill className="object-cover" />
-                                                </div>
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                                    <span className="text-white text-xs font-bold">No Image</span>
-                                                </div>
-                                            )}
+                                <tr key={post.id} className="group hover:bg-gray-50/80 transition-all duration-300">
+                                    <td className="px-8 py-5">
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 shadow-inner">
+                                                {post.image ? (
+                                                    <Image src={post.image} alt={post.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                ) : <FileText className="w-5 h-5 m-auto text-secondary-300" />}
+                                            </div>
+                                            <div className="max-w-[180px]">
+                                                <p className="text-sm font-black text-primary-900 truncate tracking-tight">{post.title}</p>
+                                                <p className="text-[10px] font-bold text-secondary-400 uppercase mt-0.5 truncate">{post.excerpt}</p>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div>
-                                            <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                                            <div className="text-sm text-gray-500">ID: {post.id}</div>
-                                        </div>
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <span className="px-4 py-1 bg-primary-100/50 text-primary-900 text-[10px] font-black uppercase tracking-widest rounded-full">{post.category}</span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                                            {post.category}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                    <td className="px-6 py-5">
+                                        <span className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${post.status === 'published' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${post.status === 'published' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
                                             {post.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{post.views || 0}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateHuman(post.date, 'en-GB')}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex items-center space-x-2">
-                                            <button onClick={() => openEdit(post)} className="text-blue-600 hover:text-blue-900" title="Edit post">
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-
-                                            <button
-                                                className={post.status === 'published' ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}
-                                                title={post.status === 'published' ? 'Set as draft' : 'Publish post'}
-                                                onClick={async () => {
-                                                    try {
-                                                        const { updatePostStatus } = await import('@/lib/blog')
-                                                        const nextStatus = post.status === 'published' ? 'draft' : 'published'
-                                                        await updatePostStatus(post.id, nextStatus)
-                                                        setPosts((prev) => prev.map((p) => p.id === post.id ? { ...p, status: nextStatus } : p))
-                                                        toast.success(`Post ${nextStatus}`)
-                                                    } catch (e) {
-                                                        toast.error('Failed to update status')
-                                                    }
-                                                }}
-                                            >
-                                                {post.status === 'published' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                            </button>
-
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-black text-primary-900">{(post.views || 0).toLocaleString()}</span>
+                                            <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-blue-500 rounded-full"
+                                                    style={{ width: `${Math.min(100, (post.views || 0) / (stats.views / posts.length || 1) * 50)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <p className="text-[10px] font-black text-secondary-500 uppercase tracking-tighter">{formatDateHuman(post.date)}</p>
+                                    </td>
+                                    <td className="px-8 py-5 text-right">
+                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
+                                            <button onClick={() => openEdit(post)} className="p-2.5 bg-white border border-gray-100 text-blue-500 rounded-xl shadow-sm hover:bg-blue-500 hover:text-white transition-all"><Edit className="w-4 h-4" /></button>
                                             {isSuperAdmin && (
-                                                <button className="text-red-600 hover:text-red-900" title="Delete post" onClick={() => setShowDeleteDialog(post.id)}>
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                <button onClick={() => setShowDeleteDialog(post.id)} className="p-2.5 bg-white border border-gray-100 text-rose-500 rounded-xl shadow-sm hover:bg-rose-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
                                             )}
                                         </div>
                                     </td>
@@ -441,64 +406,157 @@ export const BlogManagement = () => {
                 </div>
             </div>
 
-            {showDeleteDialog && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="p-2 bg-red-100 rounded-full"><Trash2 className="w-6 h-6 text-red-600" /></div>
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900">Confirm Delete</h3>
-                                <p className="text-sm text-gray-600">Are you sure you want to delete this post?</p>
+            {/* Modal & Dialog */}
+            <AnimatePresence>
+                {showPostModal && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-primary-900/40 backdrop-blur-md">
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="p-8 border-b border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-2xl font-black text-primary-900">{editingPost ? 'Edit Article' : 'Draft New Article'}</h3>
+                                    <p className="text-secondary-500 text-xs font-bold uppercase tracking-widest mt-1">Configure your content properties</p>
+                                </div>
+                                <button onClick={() => setShowPostModal(false)} className="p-3 hover:bg-gray-100 rounded-2xl transition-colors"><X className="w-6 h-6 text-secondary-400" /></button>
                             </div>
-                        </div>
-                        <div className="flex space-x-3 mt-6">
-                            <button onClick={() => setShowDeleteDialog(null)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button>
-                            <button onClick={() => handleDeletePost(showDeleteDialog)} disabled={deletingPostId === showDeleteDialog} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg flex items-center justify-center space-x-2">
-                                {deletingPostId === showDeleteDialog ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <Trash2 className="w-4 h-4" />}
-                                <span>Delete</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {showPostModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl p-6 max-h-[85vh] overflow-y-auto">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-gray-900">{editingPost ? 'Edit Post' : 'New Post'}</h3>
-                            <button onClick={() => setShowPostModal(false)} className="text-gray-500 hover:text-gray-700"><X className="w-5 h-5" /></button>
-                        </div>
-                        <div className="grid grid-cols-1 gap-4">
-                            <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                            <textarea placeholder="Excerpt" value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className="w-full px-3 py-2 border rounded-lg" rows={2} />
-                            <textarea placeholder="Content" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full px-3 py-2 border rounded-lg h-64" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as any })} className="w-full px-3 py-2 border rounded-lg">
-                                    <option value="draft">Draft</option>
-                                    <option value="published">Published</option>
-                                    <option value="scheduled">Scheduled</option>
-                                </select>
+                            <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                                    <div className="space-y-6 text-left">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Title</label>
+                                            <input
+                                                value={form.title}
+                                                onChange={e => setForm({ ...form, title: e.target.value })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary-900 outline-none transition-all"
+                                                placeholder="ENTER HEADLINE..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Excerpt</label>
+                                            <textarea
+                                                rows={3}
+                                                value={form.excerpt}
+                                                onChange={e => setForm({ ...form, excerpt: e.target.value })}
+                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary-900 outline-none transition-all resize-none"
+                                                placeholder="BRIEF SUMMARY..."
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Category</label>
+                                                <input
+                                                    value={form.category}
+                                                    onChange={e => setForm({ ...form, category: e.target.value })}
+                                                    className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[11px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                    placeholder="TOPIC..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Status</label>
+                                                <select
+                                                    value={form.status}
+                                                    onChange={e => setForm({ ...form, status: e.target.value as any })}
+                                                    className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[11px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                >
+                                                    <option value="draft">DRAFT</option>
+                                                    <option value="published">PUBLISHED</option>
+                                                    <option value="scheduled">SCHEDULED</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Cover Asset</label>
+                                            <div className="relative aspect-video bg-gray-50 rounded-3xl overflow-hidden border-2 border-dashed border-gray-200 group">
+                                                {form.image ? (
+                                                    <Image src={form.image} alt="Preview" fill className="object-cover" />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                                                        <BarChart2 className="w-8 h-8 text-secondary-200" />
+                                                        <span className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">No preview available</span>
+                                                    </div>
+                                                )}
+                                                <label className="absolute inset-0 flex items-center justify-center bg-primary-900/80 opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
+                                                    <span className="text-white text-xs font-black uppercase tracking-widest">Replace Image</span>
+                                                    <input type="file" className="hidden" onChange={e => {
+                                                        const file = e.target.files?.[0]
+                                                        if (file) {
+                                                            uploadImage(file, 'posts').then(url => setForm({ ...form, image: url }))
+                                                        }
+                                                    }} />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Tags (Comma Separated)</label>
+                                            <input
+                                                value={form.tags}
+                                                onChange={e => setForm({ ...form, tags: e.target.value })}
+                                                className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[11px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                placeholder="NEXTJS, CLEANING, TIPS..."
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Full Article Content</label>
+                                        <textarea
+                                            rows={8}
+                                            value={form.content}
+                                            onChange={e => setForm({ ...form, content: e.target.value })}
+                                            className="w-full px-6 py-6 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-primary-900 outline-none transition-all leading-relaxed"
+                                            placeholder="WRITE SOMETHING OUTSTANDING..."
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <input placeholder="Cover Image URL" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} className="flex-1 px-3 py-2 border rounded-lg" />
-                                <label className="px-3 py-2 bg-blue-600 text-white rounded-lg cursor-pointer">
-                                    Upload
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e.target.files?.[0])} />
-                                </label>
+
+                            <div className="p-8 bg-gray-50 flex justify-end gap-4">
+                                <button onClick={() => setShowPostModal(false)} className="px-8 py-3.5 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:text-primary-900 transition-colors">Abort Changes</button>
+                                <button
+                                    onClick={savePost}
+                                    disabled={savingPost}
+                                    className="px-10 py-3.5 bg-primary-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary-900/20 active:scale-95 disabled:opacity-50 flex items-center gap-3"
+                                >
+                                    {savingPost && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                                    <span>Deploy Article</span>
+                                </button>
                             </div>
-                            <input placeholder="Tags (comma separated)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-                        </div>
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button onClick={() => setShowPostModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
-                            <button onClick={savePost} disabled={savingPost} className="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-60">
-                                {savingPost ? 'Saving...' : 'Save'}
-                            </button>
-                        </div>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+
+                {showDeleteDialog && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-primary-900/60 backdrop-blur-lg">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2rem] p-10 max-w-sm w-full text-center shadow-2xl">
+                            <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                <Trash2 className="w-8 h-8 text-rose-500" />
+                            </div>
+                            <h3 className="text-xl font-black text-primary-900 mb-2">Eliminate Content?</h3>
+                            <p className="text-secondary-500 text-sm font-medium mb-8">This action is permanent and will remove the article from all public feeds.</p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button onClick={() => setShowDeleteDialog(null)} className="py-4 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-secondary-500 rounded-2xl hover:bg-gray-100 transition-colors">Cancel</button>
+                                <button
+                                    onClick={async () => {
+                                        const { deletePost } = await import('@/lib/blog')
+                                        await deletePost(showDeleteDialog)
+                                        setShowDeleteDialog(null)
+                                        toast.success('Post eliminated')
+                                    }}
+                                    className="py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/30 active:scale-95"
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </motion.div>
     )
 }
