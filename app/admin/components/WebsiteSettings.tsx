@@ -43,7 +43,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         onChange({ ...config, ...settings })
-        toast.success('Core protocol parameters updated successfully')
+        toast.success('Core Setting parameters updated successfully')
     }
 
     const resetSettings = () => {
@@ -54,7 +54,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
             contactPhone: config.contactPhone || '+233 594 850 005',
             maintenanceMode: !!config.maintenanceMode
         })
-        toast.error('Local settings reverted to global registry')
+        toast.error('Local settings reverted to global Settings')
     }
 
     return (
@@ -66,7 +66,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight text-shadow-sm uppercase">Global Identity Registry</h2>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight text-shadow-sm uppercase">Global Identity Settings</h2>
                     <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Configure the master parameters of your digital ecosystem</p>
                 </div>
 
@@ -90,14 +90,14 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                                 <Globe className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-primary-900 uppercase">Core Brand Matrix</h3>
+                                <h3 className="text-xl font-black text-primary-900 uppercase">Core Brand List</h3>
                                 <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Public-facing identity parameters</p>
                             </div>
                         </div>
 
                         <div className="p-10 space-y-10">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Master Site Nomenclature</label>
+                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Master Site Name</label>
                                 <input
                                     type="text"
                                     value={settings.siteName}
@@ -114,7 +114,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                                     rows={4}
                                     className="w-full px-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none shadow-inner resize-none"
                                 />
-                                <p className="text-[9px] font-medium text-secondary-400 italic block px-2">Optimized for semantic search indexing. Target: 150-160 characters.</p>
+                                <p className="text-[9px] font-medium text-secondary-400 italic block px-2">Optimized for SEO search indexing. Target: 150-160 characters.</p>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                                 </div>
                             </div>
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Emergency Voice Protocol</label>
+                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Emergency Voice Setting</label>
                                 <div className="relative group">
                                     <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
                                     <input
@@ -159,7 +159,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                     </div>
                 </div>
 
-                {/* Right: Security & Deployment Protocols */}
+                {/* Right: Security & Deployment Settings */}
                 <div className="space-y-8">
                     <div className="bg-primary-900 rounded-[2.5rem] p-10 shadow-2xl shadow-primary-900/40 text-white relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-white/10 transition-all duration-700" />
@@ -167,7 +167,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                         <div className="relative z-10 space-y-8">
                             <div className="flex items-center gap-3">
                                 <ShieldCheck className="w-6 h-6 text-accent-500" />
-                                <h3 className="text-xl font-black uppercase tracking-tight">Security Matrix</h3>
+                                <h3 className="text-xl font-black uppercase tracking-tight">Security List</h3>
                             </div>
 
                             <div className="p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 space-y-6">
@@ -199,7 +199,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                                             <div className="flex items-start gap-3 p-3 bg-rose-500/20 rounded-2xl border border-rose-500/30">
                                                 <AlertTriangle className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
                                                 <p className="text-[9px] font-medium text-rose-100 leading-relaxed uppercase tracking-tighter">
-                                                    Caution: Active maintenance protocol will display an intercept page to all external visitors.
+                                                    Caution: Active maintenance Setting will display an intercept page to all external visitors.
                                                 </p>
                                             </div>
                                         </motion.div>
@@ -221,7 +221,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                                     className="w-full py-4 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-3"
                                 >
                                     <RotateCcw className="w-4 h-4" />
-                                    Reset Protocol
+                                    Reset Setting
                                 </button>
                             </div>
                         </div>

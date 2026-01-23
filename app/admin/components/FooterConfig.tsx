@@ -44,7 +44,7 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
 
     const removeSocialLink = (index: number) => {
         update('socialLinks', footer.socialLinks.filter((_: any, i: number) => i !== index))
-        toast.error('Identity segment purged')
+        toast.error('Identity segment Deleted')
     }
 
     const handleIconUpload = async (file: File) => {
@@ -53,7 +53,7 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
         try {
             const imageUrl = await uploadImage(file, `social-links/${Date.now()}`)
             setNewSocialLink({ ...newSocialLink, icon: imageUrl })
-            toast.success('Branded icon synchronized')
+            toast.success('Branded icon saved')
         } catch (error) {
             toast.error('Synchronization failed')
         } finally {
@@ -105,7 +105,7 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
                     </div>
                 </div>
 
-                {/* Social Registry Segment */}
+                {/* Social Settings Segment */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex items-center justify-between px-2">
                         <div className="flex items-center gap-4">
@@ -120,7 +120,7 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
                             className="group px-6 py-4 bg-primary-900 text-white rounded-2xl shadow-xl shadow-primary-900/10 hover:shadow-primary-900/20 active:scale-95 transition-all flex items-center gap-3"
                         >
                             <Plus className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">New Protocol</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">New Setting</span>
                         </button>
                     </div>
 
@@ -187,7 +187,7 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
                             </div>
 
                             <div className="p-10 space-y-10">
-                                {/* Visual Asset */}
+                                {/* Image */}
                                 <div className="flex flex-col md:flex-row gap-8 items-center">
                                     <div className="relative group/camera w-24 h-24 shrink-0">
                                         <label className="cursor-pointer">
@@ -213,7 +213,7 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
                                     <div className="flex-1 space-y-4">
                                         <div className="bg-primary-900 rounded-2xl p-4 text-white">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-accent-500 mb-1 leading-none">Pro Tip</p>
-                                            <p className="text-[9px] font-medium leading-relaxed opacity-80 uppercase tracking-tight">Use high-contrast branding icons (PNG/SVG) with transparent backgrounds for maximum cinematic impact.</p>
+                                            <p className="text-[9px] font-medium leading-relaxed opacity-80 uppercase tracking-tight">Use high-contrast branding icons (PNG/SVG) with transparent backgrounds for maximum Image impact.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -263,12 +263,12 @@ export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
                                 <Trash2 className="w-8 h-8" />
                             </div>
                             <div className="space-y-4">
-                                <h3 className="text-2xl font-black text-primary-900 tracking-tight uppercase">Purge Protocol</h3>
-                                <p className="text-secondary-500 font-medium">Are you certain you wish to purge this social identity endpoint? This operation is irreversible.</p>
+                                <h3 className="text-2xl font-black text-primary-900 tracking-tight uppercase">Delete Setting</h3>
+                                <p className="text-secondary-500 font-medium">Are you certain you wish to Delete this social identity endpoint? This operation is irreversible.</p>
                             </div>
                             <div className="flex gap-4">
                                 <button onClick={() => setSocialLinkToDelete(null)} className="flex-1 py-4 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:bg-gray-50 rounded-2xl transition-all">Cancel</button>
-                                <button onClick={() => { removeSocialLink(socialLinkToDelete); setSocialLinkToDelete(null); }} className="flex-1 py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/20 active:scale-95 transition-all">Execute Purge</button>
+                                <button onClick={() => { removeSocialLink(socialLinkToDelete); setSocialLinkToDelete(null); }} className="flex-1 py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/20 active:scale-95 transition-all">Execute Delete</button>
                             </div>
                         </motion.div>
                     </div>

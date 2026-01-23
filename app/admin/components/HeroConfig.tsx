@@ -75,7 +75,7 @@ const HeroConfig = ({ config, onChange }: any) => {
     })
     onChange(next)
     setIsAddSlideModalOpen(false)
-    toast.success('New cinematic slide deployed')
+    toast.success('New Image slide deployed')
   }
 
   const editSlide = (slide: any) => {
@@ -105,7 +105,7 @@ const HeroConfig = ({ config, onChange }: any) => {
       onChange(next)
       setIsAddSlideModalOpen(false)
       setEditingSlideId(null)
-      toast.success('Cinematic sequence updated')
+      toast.success('Image sequence updated')
     }
   }
 
@@ -148,7 +148,7 @@ const HeroConfig = ({ config, onChange }: any) => {
     next.heroSlides = heroSlides.filter((s: any) => s.id !== slideId)
     onChange(next)
     setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })
-    toast.success('Asset purged from sequence')
+    toast.success('Asset Deleted from sequence')
   }
 
   return (
@@ -164,7 +164,7 @@ const HeroConfig = ({ config, onChange }: any) => {
           className="group px-6 py-3.5 bg-primary-900 text-white rounded-2xl shadow-xl shadow-primary-900/20 hover:shadow-primary-900/30 active:scale-95 transition-all flex items-center gap-3"
         >
           <div className="p-1 px-2 border border-white/20 rounded-lg group-hover:border-white/40"><Plus className="w-4 h-4" /></div>
-          <span className="text-[11px] font-black uppercase tracking-widest">New Cinematic Slide</span>
+          <span className="text-[11px] font-black uppercase tracking-widest">New Image Slide</span>
         </button>
       </div>
 
@@ -176,7 +176,7 @@ const HeroConfig = ({ config, onChange }: any) => {
               <ImageIcon className="w-10 h-10" />
             </div>
             <h3 className="text-xl font-black text-primary-900 mb-2 uppercase tracking-tight">The Stage is Empty</h3>
-            <p className="text-secondary-400 font-medium text-sm max-w-xs mx-auto">Begin your brand storytelling by adding your first ultra-high-resolution cinematic slide.</p>
+            <p className="text-secondary-400 font-medium text-sm max-w-xs mx-auto">Begin your brand storytelling by adding your first ultra-high-resolution Image slide.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -230,7 +230,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
                         <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">Slide Identity Segment</p>
-                        <h3 className="text-2xl font-black text-primary-900 tracking-tight">{slide.title || 'Cinematic Header'}</h3>
+                        <h3 className="text-2xl font-black text-primary-900 tracking-tight">{slide.title || 'Image Header'}</h3>
                         <p className="text-secondary-500 font-medium text-sm line-clamp-2 italic">"{slide.subtitle || 'No subtitle established for this segment'}"</p>
                       </div>
 
@@ -259,7 +259,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                         </div>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Protocol Path</span>
+                        <span className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Setting Path</span>
                         <div className="flex items-center gap-2">
                           <ExternalLink className="w-3 h-3 text-secondary-300" />
                           <span className="text-xs font-bold text-secondary-400 lowercase">{slide.ctaHref || '#'}</span>
@@ -316,7 +316,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                 </div>
               </div>
 
-              {/* Modal Right: Intelligence Configuration */}
+              {/* Modal Right: Management Configuration */}
               <div className="flex-1 flex flex-col overflow-hidden bg-white">
                 <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-white relative z-10">
                   <h3 className="text-2xl font-black text-primary-900 tracking-tight">{editingSlideId ? 'Modify Sequence' : 'Assemble Segment'}</h3>
@@ -326,7 +326,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                 <div className="p-10 flex-1 overflow-y-auto space-y-10 custom-scrollbar">
                   {/* Asset Upload Segment */}
                   <div className="space-y-6">
-                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">01. Visual Registry</p>
+                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">01. Visual Settings</p>
                     <div className="flex flex-col md:flex-row gap-4">
                       <div className="flex-1">
                         <label className="group relative flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 rounded-[2rem] hover:border-primary-900/30 hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden">
@@ -351,7 +351,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                           className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                           placeholder="Or enter heritage asset URL..."
                         />
-                        <p className="text-[9px] font-bold text-secondary-400 mt-2 lowercase italic ml-2">Preferred resolution: 1920x1080 cinematic</p>
+                        <p className="text-[9px] font-bold text-secondary-400 mt-2 lowercase italic ml-2">Preferred resolution: 1920x1080 Image</p>
                       </div>
                     </div>
                   </div>
@@ -383,12 +383,12 @@ const HeroConfig = ({ config, onChange }: any) => {
                         <input
                           value={newSlideData.ctaLabel}
                           onChange={(e) => setNewSlideData({ ...newSlideData, ctaLabel: e.target.value })}
-                          placeholder="e.g. Inquire Intelligence"
+                          placeholder="e.g. Inquire Management"
                           className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Redirect Protocol</label>
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Redirect Setting</label>
                         <input
                           value={newSlideData.ctaHref}
                           onChange={(e) => setNewSlideData({ ...newSlideData, ctaHref: e.target.value })}
@@ -423,7 +423,7 @@ const HeroConfig = ({ config, onChange }: any) => {
         )}
       </AnimatePresence>
 
-      {/* Purge Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <AnimatePresence>
         {deleteDialog.isOpen && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-primary-900/60 backdrop-blur-md">
@@ -437,12 +437,12 @@ const HeroConfig = ({ config, onChange }: any) => {
                 <Trash2 className="w-8 h-8" />
               </div>
               <div className="space-y-4">
-                <h3 className="text-2xl font-black text-primary-900 tracking-tight uppercase">Confirm Purge Protocol</h3>
-                <p className="text-secondary-500 font-medium">Are you certain you wish to purge <span className="text-primary-900 font-black">"{deleteDialog.slideTitle}"</span> from the cinematic sequence? This operation is irreversible.</p>
+                <h3 className="text-2xl font-black text-primary-900 tracking-tight uppercase">Confirm Delete Setting</h3>
+                <p className="text-secondary-500 font-medium">Are you certain you wish to Delete <span className="text-primary-900 font-black">"{deleteDialog.slideTitle}"</span> from the Image sequence? This operation is irreversible.</p>
               </div>
               <div className="flex gap-4">
                 <button onClick={() => setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })} className="flex-1 py-4 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:bg-gray-50 rounded-2xl transition-all">Cancel</button>
-                <button onClick={confirmDeleteSlide} className="flex-1 py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/20 active:scale-95 transition-all">Execute Purge</button>
+                <button onClick={confirmDeleteSlide} className="flex-1 py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/20 active:scale-95 transition-all">Execute Delete</button>
               </div>
             </motion.div>
           </div>

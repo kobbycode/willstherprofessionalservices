@@ -44,14 +44,14 @@ export const NavigationConfig = ({ config, onChange }: NavigationConfigProps) =>
     }
 
     const addLink = (section: 'main' | 'legal') => {
-        const defaultName = section === 'main' ? 'New Navigation Link' : 'New Legal Protocol'
+        const defaultName = section === 'main' ? 'New Navigation Link' : 'New Legal Setting'
         update(section, [...navigation[section], { name: defaultName, href: '#' }])
         toast.success(`${section === 'main' ? 'Interface' : 'Legal'} endpoint established`)
     }
 
     const removeLink = (section: 'main' | 'legal', index: number) => {
         update(section, navigation[section].filter((_: any, i: number) => i !== index))
-        toast.error('Endpoint decommissioned')
+        toast.error('Endpoint deleted')
     }
 
     return (
@@ -63,8 +63,8 @@ export const NavigationConfig = ({ config, onChange }: NavigationConfigProps) =>
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-1">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Architecture Map</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global navigation hierarchies and legal protocols</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Manager Map</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global navigation hierarchies and legal Settings</p>
                 </div>
 
                 <div className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-3xl shadow-premium">
@@ -142,7 +142,7 @@ export const NavigationConfig = ({ config, onChange }: NavigationConfigProps) =>
                     <div className="flex items-center justify-between px-2">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-primary-900/5 rounded-xl text-primary-900"><Shield className="w-5 h-5" /></div>
-                            <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Compliance Protocol</h3>
+                            <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Compliance Setting</h3>
                         </div>
                         <button
                             onClick={() => addLink('legal')}

@@ -34,8 +34,8 @@ export const MapConfig = ({ config, onChange }: MapConfigProps) => {
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Geospatial Intelligence</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Registry management for global HQ coordinates & reach protocols</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Location Management</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Settings management for global HQ coordinates & reach Settings</p>
                 </div>
 
                 <div className="flex items-center gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-premium">
@@ -55,12 +55,12 @@ export const MapConfig = ({ config, onChange }: MapConfigProps) => {
                     <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden">
                         <div className="p-8 border-b border-gray-50 flex items-center gap-3 bg-gray-50/20">
                             <Compass className="w-5 h-5 text-primary-900" />
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Vector Intelligence</h3>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Vector Management</h3>
                         </div>
 
                         <div className="p-10 space-y-8">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Global Embed Protocol (URL)</label>
+                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Global Embed Setting (URL)</label>
                                 <div className="relative group/input">
                                     <Navigation2 className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                                     <input
@@ -124,8 +124,8 @@ export const MapConfig = ({ config, onChange }: MapConfigProps) => {
                                 <Zap className="w-6 h-6" />
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-sm font-black uppercase tracking-widest">Projection Protocol</h4>
-                                <p className="text-[10px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-xs">Global coordinates are automatically projected through our neural GIS interface for high-frequency location clarity.</p>
+                                <h4 className="text-sm font-black uppercase tracking-widest">Projection Setting</h4>
+                                <p className="text-[10px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-xs">Global coordinates are automatically projected through our Auto GIS interface for high-frequency location clarity.</p>
                             </div>
                         </div>
                     </div>
@@ -180,7 +180,7 @@ export const MapConfig = ({ config, onChange }: MapConfigProps) => {
                                     <ExternalLink className="w-3 h-3" />
                                 </p>
                                 <div className="text-[11px] font-mono text-secondary-300 break-all leading-relaxed bg-white p-4 rounded-xl border border-gray-100">
-                                    {map.embedUrl || 'Waiting for geospatial manifest initialization...'}
+                                    {map.embedUrl || 'Waiting for Location Details initialization...'}
                                 </div>
                             </div>
                         </div>

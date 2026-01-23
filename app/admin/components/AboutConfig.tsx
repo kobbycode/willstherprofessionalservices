@@ -33,7 +33,7 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
         try {
             const imageUrl = await uploadImage(file, `about/about-${Date.now()}`)
             update('imageUrl', imageUrl)
-            toast.success('Cinematic asset synchronized')
+            toast.success('Image asset saved')
         } catch (error) {
             toast.error('Asset upload failed')
         } finally {
@@ -83,7 +83,7 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
 
                         <div className="p-10 space-y-10">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Hero Nomenclature (Title)</label>
+                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Hero Name (Title)</label>
                                 <div className="relative group/input">
                                     <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                                     <input
@@ -121,19 +121,19 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
                                 <Zap className="w-6 h-6" />
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-sm font-black uppercase tracking-widest">Optimization Intelligence</h4>
-                                <p className="text-[10px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-md">Our neural engine automatically parses this narrative to optimize global SEO markers and brand sentiment analysis. Ensure key values are articulated clearly.</p>
+                                <h4 className="text-sm font-black uppercase tracking-widest">Automatic Management</h4>
+                                <p className="text-[10px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-md">Our Auto engine automatically parses this narrative to optimize global SEO markers and brand sentiment analysis. Ensure key values are articulated clearly.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Cinematic Asset Panel */}
+                {/* Image Asset Panel */}
                 <div className="xl:col-span-2 space-y-8">
                     <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden sticky top-8">
                         <div className="p-8 border-b border-gray-50 flex items-center gap-3 bg-gray-50/20">
                             <Camera className="w-5 h-5 text-primary-900" />
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Cinematic Identity</h3>
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Image Identity</h3>
                         </div>
 
                         <div className="p-10 space-y-8">
@@ -161,7 +161,7 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
                                         </div>
                                         <input type="file" className="hidden" onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0])} disabled={isUploading} />
                                     </label>
-                                    <p className="text-[8px] font-black text-white uppercase tracking-[0.4em] text-center px-10">Neural Asset Optimization Active</p>
+                                    <p className="text-[8px] font-black text-white uppercase tracking-[0.4em] text-center px-10">Auto Asset Automatic Active</p>
                                 </div>
 
                                 {isUploading && (
@@ -182,7 +182,7 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
                                         value={about.imageUrl || ''}
                                         onChange={(e) => update('imageUrl', e.target.value)}
                                         className="w-full bg-transparent border-none text-[11px] font-mono text-secondary-400 focus:ring-0 truncate p-0"
-                                        placeholder="https://visual-matrix.com/asset..."
+                                        placeholder="https://visual-List.com/asset..."
                                     />
                                 </div>
                                 <div className="flex items-center gap-4 px-2">

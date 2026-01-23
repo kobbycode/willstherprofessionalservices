@@ -76,7 +76,7 @@ export const ContactManagement = () => {
         try {
             await updateContactStatus(id, status)
             setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status } : s))
-            toast.success(`Protocol updated to ${status.replace('_', ' ')}`)
+            toast.success(`Setting updated to ${status.replace('_', ' ')}`)
         } catch {
             toast.error('Status synchronization failed')
         }
@@ -87,13 +87,13 @@ export const ContactManagement = () => {
             toast.error('Administrative override required for deletion')
             return
         }
-        if (!confirm('Permanent deletion will purge this record. Proceed?')) return
+        if (!confirm('Permanent deletion will Delete this record. Proceed?')) return
         try {
             await deleteContactSubmission(id)
             setSubmissions(prev => prev.filter(s => s.id !== id))
-            toast.success('Record purged from registry')
+            toast.success('Record Deleted from Settings')
         } catch {
-            toast.error('Registry deletion failed')
+            toast.error('Settings deletion failed')
         }
     }
 
@@ -129,8 +129,8 @@ export const ContactManagement = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight text-shadow-sm">Inquiry Intelligence</h2>
-                    <p className="text-secondary-600 font-medium mt-1 uppercase tracking-[0.1em] text-[10px]">Registry of client engagements and service requests</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight text-shadow-sm">Inquiry Management</h2>
+                    <p className="text-secondary-600 font-medium mt-1 uppercase tracking-[0.1em] text-[10px]">Settings of client engagements and service requests</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-1 flex">
@@ -227,14 +227,14 @@ export const ContactManagement = () => {
                 </div>
             </div>
 
-            {/* Registry List */}
+            {/* Settings List */}
             <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden">
                 <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="relative flex-1 max-w-md group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400 group-focus-within:text-primary-900 transition-colors w-4 h-4" />
                         <input
                             type="text"
-                            placeholder="SEARCH INQUIRY REGISTRY..."
+                            placeholder="SEARCH INQUIRY Settings..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none text-primary-900"
@@ -248,7 +248,7 @@ export const ContactManagement = () => {
                             <tr className="bg-gray-50/50">
                                 <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Principal</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Service Intent</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Protocol Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Setting Status</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Timestamp</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] text-right">Operations</th>
                             </tr>
@@ -329,7 +329,7 @@ export const ContactManagement = () => {
                             <div className="p-10 border-b border-gray-100 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-3xl font-black text-primary-900 tracking-tight">Luxury Detail Portal</h3>
-                                    <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.2em] mt-2">Intelligence Briefing #{selectedSubmission.id?.slice(-6)}</p>
+                                    <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.2em] mt-2">Management Briefing #{selectedSubmission.id?.slice(-6)}</p>
                                 </div>
                                 <button onClick={() => setSelectedSubmission(null)} className="p-4 hover:bg-gray-100 rounded-2xl transition-colors"><CloseIcon className="w-6 h-6 text-secondary-400" /></button>
                             </div>
@@ -383,7 +383,7 @@ export const ContactManagement = () => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">Inquiry Manifesto</p>
+                                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">Inquiry Detailso</p>
                                     <div className="p-8 bg-primary-900 text-white rounded-[2rem] shadow-2xl shadow-primary-900/10 leading-relaxed font-medium italic text-lg">
                                         "{selectedSubmission.message}"
                                     </div>

@@ -47,7 +47,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
 
     const removeItem = (index: number) => {
         onChange({ ...config, gallery: items.filter((_: any, i: number) => i !== index) })
-        toast.error('Asset decommissioned')
+        toast.error('Asset deleted')
     }
 
     const handleUpload = async (index: number, file: File) => {
@@ -56,7 +56,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
         try {
             const url = await uploadImage(file, `gallery/asset-${Date.now()}`)
             updateItem(index, 'imageUrl', url)
-            toast.success('Visual asset synchronized')
+            toast.success('Image saved')
         } catch (error) {
             toast.error('Asset upload failure')
         } finally {
@@ -73,8 +73,8 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
             {/* Header & Global Add */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Visual Asset Vault</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global media gallery & cinematic identifiers</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Visual Image Gallery</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global media gallery & Image identifiers</p>
                 </div>
 
                 <button
@@ -91,7 +91,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                 </button>
             </div>
 
-            {/* Neural Media Stats */}
+            {/* Auto Media Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
@@ -100,7 +100,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                     <div>
                         <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Vault Capacity</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Global Visual Assets</p>
+                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Global Images</p>
                     </div>
                 </div>
 
@@ -125,7 +125,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                         <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Edge Verified</p>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <p className="text-[9px] font-bold text-green-400 uppercase">Neural Distribution Active</p>
+                            <p className="text-[9px] font-bold text-green-400 uppercase">Auto Distribution Active</p>
                         </div>
                     </div>
                 </div>
@@ -185,7 +185,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                                             value={g.imageUrl || ''}
                                             onChange={(e) => updateItem(i, 'imageUrl', e.target.value)}
                                             className="flex-1 bg-transparent border-none text-[10px] font-mono text-secondary-400 focus:ring-0 truncate p-0"
-                                            placeholder="https://visual-registry.com/..."
+                                            placeholder="https://visual-Settings.com/..."
                                         />
                                         <ExternalLink className="w-3 h-3 text-secondary-200" />
                                     </div>
@@ -228,8 +228,8 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                     <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl mb-10 border border-gray-100">
                         <LayoutGrid className="w-16 h-16 text-primary-900/10" />
                     </div>
-                    <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Visual Repository Dormant</h3>
-                    <p className="max-w-md text-center text-secondary-400 font-medium mt-4 text-[11px] uppercase tracking-widest leading-relaxed">The asset vault is currently empty. Initiate visual synchronization by deploying high-integrity media files to the global registry.</p>
+                    <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Visual Storage Dormant</h3>
+                    <p className="max-w-md text-center text-secondary-400 font-medium mt-4 text-[11px] uppercase tracking-widest leading-relaxed">The Image Gallery is currently empty. Initiate visual synchronization by deploying high-integrity media files to the global Settings.</p>
                 </div>
             )}
         </motion.div>

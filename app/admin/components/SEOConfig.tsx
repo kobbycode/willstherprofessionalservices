@@ -36,8 +36,8 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Search Engine Intelligence</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global semantic markers & indexing protocols</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Search Engine Management</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global SEO markers & indexing Settings</p>
                 </div>
 
                 <div className="flex items-center gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-premium">
@@ -46,7 +46,7 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Global Index</p>
-                        <p className="text-xs font-black text-primary-900 mt-1 uppercase">Visibility Synchronized</p>
+                        <p className="text-xs font-black text-primary-900 mt-1 uppercase">Visibility saved</p>
                     </div>
                 </div>
             </div>
@@ -85,20 +85,20 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
                         <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Elite Reach</p>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <p className="text-[9px] font-bold text-green-400 uppercase">Semantic Optimization Active</p>
+                            <p className="text-[9px] font-bold text-green-400 uppercase">SEO Automatic Active</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
-                {/* Metadata Registry */}
+                {/* Metadata Settings */}
                 <div className="xl:col-span-3 space-y-8">
                     <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden">
                         <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
                             <div className="flex items-center gap-3">
                                 <FileText className="w-5 h-5 text-primary-900" />
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Metadata Registry</h3>
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Metadata Settings</h3>
                             </div>
                             <div className="flex items-center gap-2">
                                 <ShieldCheck className="w-4 h-4 text-green-500" />
@@ -108,7 +108,7 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
 
                         <div className="p-10 space-y-10">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Master Nomenclature (Default Title)</label>
+                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Master Name (Default Title)</label>
                                 <div className="relative group/input">
                                     <Globe className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                                     <input
@@ -122,7 +122,7 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between px-2">
-                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">Semantic Abstract (Meta Description)</label>
+                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">SEO Abstract (Meta Description)</label>
                                     <div className="text-[9px] font-bold text-secondary-300 uppercase italic">Maximum 160 characters</div>
                                 </div>
                                 <div className="relative group/input">
@@ -139,8 +139,8 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between px-2">
-                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">Taxonomy Matrix (Keywords)</label>
-                                    <div className="text-[9px] font-bold text-secondary-300 uppercase italic">Comma-separated registry</div>
+                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">Category List (Keywords)</label>
+                                    <div className="text-[9px] font-bold text-secondary-300 uppercase italic">Comma-separated Settings</div>
                                 </div>
                                 <div className="relative group/input">
                                     <Hash className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
@@ -156,7 +156,7 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
                     </div>
                 </div>
 
-                {/* Optimization Intelligence Section */}
+                {/* Automatic Management Section */}
                 <div className="xl:col-span-2 space-y-8">
                     <div className="bg-primary-900 rounded-[3rem] p-10 text-white relative overflow-hidden group shadow-2xl shadow-primary-900/40">
                         <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-white/10 transition-all duration-1000" />
@@ -167,8 +167,8 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
                             </div>
 
                             <div className="space-y-4">
-                                <h3 className="text-xl font-black uppercase tracking-tight">Neural Optimization</h3>
-                                <p className="text-[11px] font-medium leading-relaxed opacity-60 uppercase tracking-widest">Our semantic engine is currently analyzing your registry. High-integrity metadata reduces search friction by up to 40%.</p>
+                                <h3 className="text-xl font-black uppercase tracking-tight">Auto Automatic</h3>
+                                <p className="text-[11px] font-medium leading-relaxed opacity-60 uppercase tracking-widest">Our SEO engine is currently analyzing your Settings. High-integrity metadata reduces search friction by up to 40%.</p>
                             </div>
 
                             <div className="grid grid-cols-1 gap-4 pt-4">
@@ -187,12 +187,12 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
                     <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-premium space-y-8 relative overflow-hidden">
                         <Sparkles className="absolute top-8 right-8 w-12 h-12 text-gray-50" />
                         <div className="space-y-2">
-                            <h4 className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Registry Insights</h4>
-                            <p className="text-[9px] font-bold text-secondary-400 uppercase leading-relaxed tracking-tight">A well-structured semantic registry ensures that search nodes can accurately categorize and prioritize your entity in global results.</p>
+                            <h4 className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Settings Insights</h4>
+                            <p className="text-[9px] font-bold text-secondary-400 uppercase leading-relaxed tracking-tight">A well-structured SEO Settings ensures that search nodes can accurately categorize and prioritize your entity in global results.</p>
                         </div>
                         <div className="pt-4">
                             <button className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-[10px] font-black text-secondary-300 uppercase tracking-widest hover:border-primary-900/20 hover:text-primary-900 transition-all active:scale-95">
-                                Run Semantic Audit
+                                Run SEO Audit
                             </button>
                         </div>
                     </div>

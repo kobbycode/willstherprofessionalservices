@@ -105,7 +105,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
 
       if (!response.ok) throw new Error('Failed to update service')
       setServices(prev => prev.map(s => s.id === id ? updatedService : s))
-      toast.success('Service parameter synchronized')
+      toast.success('Service parameter saved')
     } catch (error) {
       toast.error('Sync failed')
     }
@@ -125,9 +125,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
       setServices(prev => [...prev, createdService])
       setIsAddServiceModalOpen(false)
       setNewServiceData({ title: '', description: '', category: '', imageUrl: '' })
-      toast.success('New service blueprint established')
+      toast.success('New service Service established')
     } catch (error) {
-      toast.error('Manifest injection failed')
+      toast.error('Details injection failed')
     }
   }
 
@@ -137,7 +137,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
     try {
       const imageUrl = await uploadImage(file, `services/service-${serviceId}-${Date.now()}`)
       await updateService(serviceId, 'imageUrl', imageUrl)
-      toast.success('Visual asset synchronized')
+      toast.success('Image saved')
     } catch (error) {
       toast.error('Upload intercept failure')
     } finally {
@@ -167,9 +167,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
       if (!response.ok) throw new Error('Failed to delete service')
       setServices(prev => prev.filter(s => s.id !== serviceId))
       setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
-      toast.error('Service decommissioned')
+      toast.error('Service deleted')
     } catch (error) {
-      toast.error('Decommissioning sequence failed')
+      toast.error('deleting sequence failed')
     }
   }
 
@@ -200,8 +200,8 @@ const ServicesConfig = ({ config, onChange }: any) => {
       {/* Header & Primary Action */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
         <div className="space-y-2">
-          <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Intelligence Dashboard</h2>
-          <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Service architecture & performance metrics</p>
+          <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Services Dashboard</h2>
+          <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Service Manager & performance metrics</p>
         </div>
         <button
           onClick={() => setIsAddServiceModalOpen(true)}
@@ -217,7 +217,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
         </button>
       </div>
 
-      {/* Intelligence Row (Stats) */}
+      {/* Management Row (Stats) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
           <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
@@ -274,7 +274,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                      <p className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Blueprint ID</p>
+                      <p className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Service ID</p>
                       <p className="text-xs font-black text-primary-900 uppercase">{s.id.substring(0, 8)}</p>
                     </div>
                     <div className="h-6 w-px bg-gray-100" />
@@ -296,7 +296,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Market Nomenclature</label>
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Market Name</label>
                       <input
                         value={s.title || ''}
                         onChange={(e) => updateService(s.id, 'title', e.target.value)}
@@ -305,7 +305,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       />
                     </div>
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Protocol Category</label>
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Setting Category</label>
                       <input
                         value={s.category || ''}
                         onChange={(e) => updateService(s.id, 'category', e.target.value)}
@@ -316,18 +316,18 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Operational Manifest (Description)</label>
+                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Operational Details (Description)</label>
                     <textarea
                       value={s.description || ''}
                       onChange={(e) => updateService(s.id, 'description', e.target.value)}
                       rows={3}
                       className="w-full px-8 py-5 bg-gray-50/50 border-none rounded-3xl text-[12px] font-medium text-secondary-600 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none resize-none leading-relaxed"
-                      placeholder="Detailed intelligence report..."
+                      placeholder="Detailed Management report..."
                     />
                   </div>
                 </div>
 
-                {/* Visual Asset Management */}
+                {/* Image Management */}
                 <div className="space-y-6 pt-6 border-t border-gray-50">
                   <div className="flex items-center justify-between px-2">
                     <label className="text-[10px] font-black text-secondary-300 uppercase tracking-[0.2em]">Visual Identification Asset</label>
@@ -339,7 +339,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       <label className="cursor-pointer block">
                         <div className="absolute inset-0 bg-primary-900 rounded-[2rem] flex flex-col items-center justify-center gap-3 opacity-0 group-hover/camera:opacity-100 transition-all z-20">
                           <Camera className="w-8 h-8 text-white" />
-                          <span className="text-[8px] font-black text-white uppercase tracking-widest text-center px-4">Update<br />Visual Matrix</span>
+                          <span className="text-[8px] font-black text-white uppercase tracking-widest text-center px-4">Update<br />Visual List</span>
                         </div>
                         <div className="w-40 h-40 bg-gray-100 border-2 border-dashed border-gray-200 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative shadow-inner">
                           {s.imageUrl ? (
@@ -359,7 +359,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
 
                     <div className="flex-1 space-y-4 w-full">
                       <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 shadow-inner">
-                        <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-3">Asset Registry Path</p>
+                        <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-3">Asset Settings Path</p>
                         <div className="flex items-center gap-3">
                           <input
                             value={s.imageUrl || ''}
@@ -374,7 +374,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                         onClick={() => updateService(s.id, 'imageUrl', '')}
                         className="text-[10px] font-black text-rose-500 uppercase tracking-widest px-4 py-2 hover:bg-rose-50 rounded-xl transition-all"
                       >
-                        Decommission Asset
+                        delet Asset
                       </button>
                     </div>
                   </div>
@@ -390,7 +390,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
               <Wrench className="w-10 h-10 text-primary-900" />
             </div>
             <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Service Mesh Empty</h3>
-            <p className="text-secondary-400 font-medium max-w-[320px] mt-4 mb-10 leading-relaxed uppercase text-[10px] tracking-widest">Global operations are currently dormant. Initiate service mesh by engineering a new blueprint.</p>
+            <p className="text-secondary-400 font-medium max-w-[320px] mt-4 mb-10 leading-relaxed uppercase text-[10px] tracking-widest">Global operations are currently dormant. Initiate service mesh by engineering a new Service.</p>
             <button
               onClick={() => setIsAddServiceModalOpen(true)}
               className="px-8 py-5 bg-primary-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary-900/40 active:scale-95 transition-all"
@@ -414,7 +414,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
               <div className="p-10 border-b border-gray-50 flex items-center justify-between">
                 <div>
                   <h3 className="text-3xl font-black text-primary-900 uppercase tracking-tight">Engineered Injection</h3>
-                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.3em] mt-1">Define new service architecture blueprint</p>
+                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.3em] mt-1">Define new service Manager Service</p>
                 </div>
                 <button onClick={() => setIsAddServiceModalOpen(false)} className="p-4 hover:bg-gray-100 rounded-[2rem] transition-all active:scale-95">
                   <X className="w-8 h-8 text-secondary-300" />
@@ -430,7 +430,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       <input
                         value={newServiceData.title}
                         onChange={(e) => setNewServiceData({ ...newServiceData, title: e.target.value })}
-                        placeholder="e.g. Industrial Sanitation Protocol"
+                        placeholder="e.g. Industrial Sanitation Setting"
                         className="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl text-sm font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                       />
                     </div>
@@ -460,7 +460,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     <div className="bg-primary-900 rounded-[3rem] p-8 text-white space-y-6 shadow-xl shadow-primary-900/30">
                       <div className="flex items-center gap-4">
                         <div className="p-3 bg-white/10 rounded-2xl text-accent-500"><Camera className="w-6 h-6" /></div>
-                        <h4 className="text-sm font-black uppercase tracking-widest">Visual Registry</h4>
+                        <h4 className="text-sm font-black uppercase tracking-widest">Visual Settings</h4>
                       </div>
 
                       <div className="h-64 bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative group">
@@ -501,8 +501,8 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       <div className="flex items-start gap-4">
                         <ShieldCheck className="w-6 h-6 text-green-500 shrink-0 mt-1" />
                         <div className="space-y-2">
-                          <h5 className="text-sm font-black text-primary-900 uppercase">Architecture Guard</h5>
-                          <p className="text-[10px] font-medium text-secondary-500 leading-relaxed uppercase">Blueprints are automatically encrypted and synchronized across the global edge network upon authorization.</p>
+                          <h5 className="text-sm font-black text-primary-900 uppercase">Manager Guard</h5>
+                          <p className="text-[10px] font-medium text-secondary-500 leading-relaxed uppercase">Services are automatically encrypted and saved across the global edge network upon authorization.</p>
                         </div>
                       </div>
                     </div>
@@ -511,7 +511,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
               </div>
 
               <div className="p-10 border-t border-gray-50 bg-gray-50/50 flex gap-6">
-                <button onClick={() => setIsAddServiceModalOpen(false)} className="px-10 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] hover:text-primary-900 transition-all">Discard Manifesto</button>
+                <button onClick={() => setIsAddServiceModalOpen(false)} className="px-10 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] hover:text-primary-900 transition-all">Discard Detailso</button>
                 <button
                   onClick={createNewService}
                   disabled={!newServiceData.title.trim() || isUploadingNewServiceImage}
@@ -545,9 +545,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 </div>
 
                 <div className="space-y-3">
-                  <h3 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Purge Protocol</h3>
+                  <h3 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Delete Setting</h3>
                   <p className="text-secondary-500 font-medium leading-relaxed uppercase text-[10px] tracking-widest px-4">
-                    Confirm decommissioning of <span className="text-primary-900 font-black">{deleteDialog.serviceName}</span> across the global mesh network. This operation is absolute.
+                    Confirm deleting of <span className="text-primary-900 font-black">{deleteDialog.serviceName}</span> across the global mesh network. This operation is absolute.
                   </p>
                 </div>
 
@@ -562,7 +562,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     onClick={confirmDeleteService}
                     className="flex-1 py-5 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/30 active:scale-95 transition-all"
                   >
-                    Execute Purge
+                    Execute Delete
                   </button>
                 </div>
               </div>

@@ -39,7 +39,7 @@ export const CategoriesManagement = () => {
             setItems(list)
         } catch (e) {
             console.error('Failed to load categories:', e)
-            toast.error('Registry access failure')
+            toast.error('Settings access failure')
             setItems([])
         } finally {
             setLoading(false)
@@ -55,7 +55,7 @@ export const CategoriesManagement = () => {
         try {
             await addCategory(name)
             setNewName('')
-            toast.success('Taxonomy entity synchronized')
+            toast.success('Category entity saved')
             load()
         } catch (e) {
             toast.error('Entity injection failure')
@@ -83,10 +83,10 @@ export const CategoriesManagement = () => {
         setIsDeleting(id)
         try {
             await deleteCategory(id)
-            toast.error('Taxonomy purged')
+            toast.error('Category Deleted')
             load()
         } catch (e) {
-            toast.error('Purge sequence aborted')
+            toast.error('Delete sequence aborted')
         } finally {
             setIsDeleting(null)
         }
@@ -102,11 +102,11 @@ export const CategoriesManagement = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-12 pb-20"
         >
-            {/* Header & Taxonomy Injection */}
+            {/* Header & Category Injection */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Taxonomy Architecture</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Registry management for global service categories & metadata</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Category Manager</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Settings management for global service categories & metadata</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-premium w-full lg:w-auto">
@@ -115,7 +115,7 @@ export const CategoriesManagement = () => {
                         <input
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Initialize New Taxonomy..."
+                            placeholder="Initialize New Category..."
                             className="w-full pl-14 pr-8 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                         />
                     </div>
@@ -136,14 +136,14 @@ export const CategoriesManagement = () => {
                 </div>
             </div>
 
-            {/* Metric Intelligence */}
+            {/* Metric Management */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
                         <Boxes className="w-8 h-8" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Global Registry</p>
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Global Settings</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
                         <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Taxonomies</p>
                     </div>
@@ -176,7 +176,7 @@ export const CategoriesManagement = () => {
                 </div>
             </div>
 
-            {/* Registry Explorer */}
+            {/* Settings Explorer */}
             <div className="space-y-8">
                 <div className="flex items-center justify-between">
                     <div className="relative group/search w-full max-w-md">
@@ -184,7 +184,7 @@ export const CategoriesManagement = () => {
                         <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Filter structural matrix..."
+                            placeholder="Filter structural List..."
                             className="w-full pl-14 pr-8 py-4 bg-white border border-gray-100 rounded-[2rem] text-[11px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 transition-all outline-none shadow-premium"
                         />
                     </div>
@@ -206,8 +206,8 @@ export const CategoriesManagement = () => {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50">
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Identity Matrix (ID)</th>
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Taxonomy Designation</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Identity List (ID)</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Designation</th>
                                 <th className="px-10 py-6 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">System Operations</th>
                             </tr>
                         </thead>
@@ -224,8 +224,8 @@ export const CategoriesManagement = () => {
                                 <tr>
                                     <td colSpan={3} className="px-10 py-32 text-center">
                                         <Layers className="w-16 h-16 text-gray-100 mx-auto mb-6 opacity-50" />
-                                        <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Registry Dormant</h3>
-                                        <p className="text-[10px] font-bold text-secondary-300 uppercase tracking-widest mt-2">{searchQuery ? 'Search parameter yielded zero results' : 'No taxonomies detected in master matrix'}</p>
+                                        <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Settings Dormant</h3>
+                                        <p className="text-[10px] font-bold text-secondary-300 uppercase tracking-widest mt-2">{searchQuery ? 'Search parameter yielded zero results' : 'No taxonomies detected in master List'}</p>
                                     </td>
                                 </tr>
                             ) : filteredItems.map((c) => (
@@ -297,7 +297,7 @@ export const CategoriesManagement = () => {
                                                     </button>
                                                     <button
                                                         disabled={isDeleting === c.id}
-                                                        onClick={() => (window.confirm('Execute purge sequence for this taxonomy?') && handleDelete(c.id))}
+                                                        onClick={() => (window.confirm('Execute Delete sequence for this Category?') && handleDelete(c.id))}
                                                         className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-50"
                                                     >
                                                         {isDeleting === c.id ? <div className="w-4 h-4 border-2 border-rose-500/10 border-t-rose-500 rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -314,9 +314,9 @@ export const CategoriesManagement = () => {
 
                 <div className="bg-primary-900/5 p-8 rounded-[3rem] border border-dashed border-primary-900/10 flex flex-col items-center justify-center gap-6">
                     <div className="flex items-center gap-4 text-[10px] font-black text-primary-900/30 uppercase tracking-[0.4em]">
-                        <Zap className="w-4 h-4" /> Neural Taxonomy Optimization Engine
+                        <Zap className="w-4 h-4" /> Auto Category Automatic Engine
                     </div>
-                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Structural modifications to the taxonomy architecture are propagated instantaneously across the global edge network, ensuring high-frequency consistency for all downstream service blueprints and client interactions.</p>
+                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Structural modifications to the Category Manager are propagated instantaneously across the global edge network, ensuring high-frequency consistency for all downstream service Services and client interactions.</p>
                 </div>
             </div>
         </motion.div>

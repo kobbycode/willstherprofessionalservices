@@ -75,11 +75,11 @@ export const UserManagement = () => {
             const success = await deleteUser(userId)
             if (success) {
                 setUsers(prev => prev.filter(user => user.id !== userId))
-                toast.success('Member removed from registry')
+                toast.success('Member removed from Settings')
                 setShowDeleteDialog(null)
             }
         } catch (error) {
-            toast.error('Protocol failure: Could not delete user')
+            toast.error('Setting failure: Could not delete user')
         } finally {
             setDeletingUserId(null)
         }
@@ -175,7 +175,7 @@ export const UserManagement = () => {
             {/* Micro Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Total Registry', value: stats.total, icon: Users, color: 'blue' },
+                    { label: 'Total Settings', value: stats.total, icon: Users, color: 'blue' },
                     { label: 'Authorized Access', value: stats.active, icon: UserCheck, color: 'emerald' },
                     { label: 'Credentials Pending', value: stats.pending, icon: Activity, color: 'rose' },
                 ].map((stat, idx) => (
@@ -249,14 +249,14 @@ export const UserManagement = () => {
                 </div>
             </div>
 
-            {/* Registry Table */}
+            {/* Settings Table */}
             <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden">
                 <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="relative flex-1 max-w-md group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400 group-focus-within:text-primary-900 transition-colors w-4 h-4" />
                         <input
                             type="text"
-                            placeholder="QUERY REGISTRY..."
+                            placeholder="QUERY Settings..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none text-primary-900"
@@ -296,7 +296,7 @@ export const UserManagement = () => {
                                     <tr key={i}><td colSpan={5} className="px-8 py-4"><Skeleton className="h-12 w-full rounded-2xl" /></td></tr>
                                 ))
                             ) : filteredUsers.length === 0 ? (
-                                <tr><td colSpan={5} className="px-8 py-20 text-center text-sm font-bold text-secondary-300 uppercase tracking-[0.3em]">No matching entities in registry</td></tr>
+                                <tr><td colSpan={5} className="px-8 py-20 text-center text-sm font-bold text-secondary-300 uppercase tracking-[0.3em]">No matching entities in Settings</td></tr>
                             ) : filteredUsers.map((u) => (
                                 <tr key={u.id} className="group hover:bg-gray-50/80 transition-colors">
                                     <td className="px-8 py-6">
@@ -381,7 +381,7 @@ export const UserManagement = () => {
                             <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mb-6">
                                 <UserMinus className="w-10 h-10 text-rose-500" />
                             </div>
-                            <h3 className="text-2xl font-black text-primary-900 tracking-tight leading-tight">Decommission member?</h3>
+                            <h3 className="text-2xl font-black text-primary-900 tracking-tight leading-tight">delet member?</h3>
                             <p className="text-secondary-500 font-medium mt-3 leading-relaxed">
                                 You are about to strip <span className="text-primary-900 font-black">@{showDeleteDialog.userName}</span> of all administrative privileges and access tokens. This action is recorded and irreversible.
                             </p>

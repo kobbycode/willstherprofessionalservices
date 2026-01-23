@@ -46,12 +46,12 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
             avatarUrl: ''
         }
         onChange({ ...config, testimonials: [newItem, ...items] })
-        toast.success('Advocacy slot initialized')
+        toast.success('Testimonial slot initialized')
     }
 
     const removeItem = (index: number) => {
         onChange({ ...config, testimonials: items.filter((_: any, i: number) => i !== index) })
-        toast.error('Testimonial record purged')
+        toast.error('Testimonial record Deleted')
     }
 
     const handleUpload = async (index: number, file: File) => {
@@ -60,7 +60,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
         try {
             const url = await uploadImage(file, `testimonials/avatar-${Date.now()}`)
             updateItem(index, 'avatarUrl', url)
-            toast.success('Identity asset synchronized')
+            toast.success('Identity asset saved')
         } catch (error) {
             toast.error('Asset upload failure')
         } finally {
@@ -82,7 +82,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Reputation Management</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Curation of client advocacy and social proof metrics</p>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Curation of client Testimonial and social proof metrics</p>
                 </div>
 
                 <button
@@ -99,7 +99,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                 </button>
             </div>
 
-            {/* Reputation Intelligence Stats */}
+            {/* Reputation Management Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
@@ -133,7 +133,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                         <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Elite Sentiment</p>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <p className="text-[9px] font-bold text-green-400 uppercase">Neural Optimization Active</p>
+                            <p className="text-[9px] font-bold text-green-400 uppercase">Auto Automatic Active</p>
                         </div>
                     </div>
                 </div>
@@ -237,7 +237,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
 
                                     <div className="flex-1 space-y-4 relative">
                                         <div className="flex items-center justify-between px-2">
-                                            <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">Advocacy Narrative</label>
+                                            <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">Testimonial Narrative</label>
                                             <Quote className="w-5 h-5 text-primary-900/10" />
                                         </div>
                                         <textarea
@@ -255,7 +255,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                             <span className="flex items-center gap-2"><Sparkles className="w-3 h-3 text-accent-500" /> Sentiment Optimized</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Layers className="w-3 h-3" /> System Synchronized
+                                            <Layers className="w-3 h-3" /> System saved
                                         </div>
                                     </div>
                                 </div>
@@ -269,13 +269,13 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                         <div className="w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center mb-10 border border-gray-100">
                             <Quote className="w-10 h-10 text-primary-900" />
                         </div>
-                        <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Advocacy Desk Dormant</h3>
+                        <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Testimonial Desk Dormant</h3>
                         <p className="text-secondary-400 font-medium max-w-[320px] mt-4 mb-10 leading-relaxed uppercase text-[10px] tracking-widest">No client testimonials have been registered. Initiate reputation building by adding your first advocate.</p>
                         <button
                             onClick={addItem}
                             className="px-8 py-5 bg-primary-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary-900/40 active:scale-95 transition-all"
                         >
-                            Establish Advocacy Slot
+                            Establish Testimonial Slot
                         </button>
                     </div>
                 )}
@@ -300,9 +300,9 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                 </div>
 
                                 <div className="space-y-3">
-                                    <h3 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Purge Protocol</h3>
+                                    <h3 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Delete Setting</h3>
                                     <p className="text-secondary-500 font-medium leading-relaxed uppercase text-[10px] tracking-widest px-4">
-                                        Confirm decommissioning of this client advocacy record. This operation is absolute and permanent.
+                                        Confirm deleting of this client Testimonial record. This operation is absolute and permanent.
                                     </p>
                                 </div>
 
@@ -317,7 +317,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                         onClick={() => { removeItem(testimonialToDelete); setTestimonialToDelete(null); }}
                                         className="flex-1 py-5 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/30 active:scale-95 transition-all"
                                     >
-                                        Execute Purge
+                                        Execute Delete
                                     </button>
                                 </div>
                             </div>

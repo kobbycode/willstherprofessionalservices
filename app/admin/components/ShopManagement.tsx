@@ -407,7 +407,7 @@ export default function ShopManagement() {
                                         <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Available for Purchase</span>
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Visual Asset</label>
+                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Image</label>
                                         <div className="flex items-center gap-4">
                                             <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex-shrink-0 relative">
                                                 {currentProduct.imageUrl ? (
