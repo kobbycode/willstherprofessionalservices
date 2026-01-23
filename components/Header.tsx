@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Phone, Mail, Menu, X, ShoppingBag, Heart } from 'lucide-react'
+import Image from 'next/image'
 import { useSiteConfig } from '@/lib/site-config'
 import { useShop } from '@/context/ShopContext'
 
@@ -92,9 +93,9 @@ const Header = () => {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-premium">
       {/* Top utility bar - hidden on mobile */}
-      <div className="hidden md:block bg-primary-700 text-white py-2">
+      <div className="hidden md:block bg-primary-950 text-white/90 py-2 border-b border-white/10">
         <div className="container-custom">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-4 lg:space-x-6">
@@ -115,16 +116,19 @@ const Header = () => {
       </div>
 
       {/* Main header */}
-      <div className="bg-primary-600">
+      <div className="bg-primary-900 shadow-lg">
         <div className="container-custom">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className="flex items-center group">
-                <img
+              <Link href="/" className="flex items-center group relative overflow-hidden rounded-xl border border-white/10 shadow-premium">
+                <Image
                   src="/logo-v2.jpg"
                   alt="Willsther Logo"
-                  className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
+                  width={160}
+                  height={64}
+                  priority
+                  className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </Link>
             </div>
@@ -182,7 +186,7 @@ const Header = () => {
 
               <button
                 onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                className="bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-6 rounded-lg shadow-premium hover:shadow-premium-hover transition-all duration-300 transform hover:-translate-y-0.5"
               >
                 Get Quote
               </button>

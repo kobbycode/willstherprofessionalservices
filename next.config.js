@@ -5,17 +5,17 @@ const nextConfig = {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
-  
+
   // Image optimization
   images: {
     domains: [
-      'images.unsplash.com', 
+      'images.unsplash.com',
       'firebasestorage.googleapis.com',
       'queenofclean.blog',
       'images.pexels.com',
-      'images.unsplash.com',
       'via.placeholder.com',
-      'picsum.photos'
+      'picsum.photos',
+      'i.ibb.co'
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -23,11 +23,11 @@ const nextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
   },
-  
+
   // Compression and optimization
   compress: true,
   poweredByHeader: false,
-  
+
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
     // Optimize bundle size in production
@@ -43,10 +43,10 @@ const nextConfig = {
         },
       }
     }
-    
+
     return config
   },
-  
+
   // Headers for better caching and MIME types
   async headers() {
     return [

@@ -21,14 +21,16 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full"
+            className="group bg-white rounded-2xl overflow-hidden shadow-premium hover:shadow-premium-hover transition-all duration-300 border border-gray-100 flex flex-col h-full"
         >
             <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-gray-100 cursor-pointer">
                 {product.imageUrl ? (
-                    <img
+                    <Image
                         src={product.imageUrl}
                         alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
@@ -49,7 +51,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                             {product.title}
                         </h3>
                     </Link>
-                    <span className="text-purple-600 font-bold text-lg whitespace-nowrap ml-3">
+                    <span className="text-primary-600 font-bold text-lg whitespace-nowrap ml-3">
                         GH₵{product.price.toFixed(2)}
                     </span>
                 </div>

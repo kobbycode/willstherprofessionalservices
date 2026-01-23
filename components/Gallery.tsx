@@ -32,7 +32,7 @@ const Gallery = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: i * 0.05 }}
               viewport={{ once: true }}
-              className="relative overflow-hidden rounded-xl border border-gray-100 shadow-sm bg-white"
+              className="relative overflow-hidden rounded-2xl border border-white/10 shadow-premium hover:shadow-premium-hover transition-all duration-500 bg-white group"
             >
               {g.imageUrl ? (
                 <div className="relative w-full h-64">
@@ -49,7 +49,9 @@ const Gallery = () => {
                 <div className="w-full h-64 bg-gray-100 flex items-center justify-center text-gray-400">No image</div>
               )}
               {g.caption && (
-                <div className="p-3 text-sm text-secondary-700 border-t">{g.caption}</div>
+                <div className="p-4 text-sm font-medium text-primary-900/80 bg-white border-t border-gray-50 italic">
+                  "{g.caption}"
+                </div>
               )}
             </motion.div>
           ))}

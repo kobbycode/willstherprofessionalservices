@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Shield, Users, Target, Award } from 'lucide-react'
+import Image from 'next/image'
 import { useSiteConfig } from '@/lib/site-config'
 
 const About = () => {
@@ -131,16 +132,15 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 group overflow-hidden flex flex-col h-full"
+              className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-2 border border-gray-100 group overflow-hidden flex flex-col h-full"
             >
-              <div className="relative mb-2 sm:mb-3 md:mb-4 flex-1">
-                <img
+              <div className="relative mb-2 sm:mb-3 md:mb-4 flex-1 h-[200px] sm:h-[240px] md:h-[280px]">
+                <Image
                   src={feature.image}
                   alt={feature.title}
-                  className="w-full h-full min-h-[200px] sm:min-h-[240px] md:min-h-[280px] object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
-                  }}
+                  fill
+                  className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
                 <div className={`absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 ${feature.color} rounded-full flex items-center justify-center shadow-lg`}>
                   <feature.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />

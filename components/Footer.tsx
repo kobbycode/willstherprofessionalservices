@@ -38,7 +38,7 @@ const Footer = () => {
   ]
 
   return (
-    <footer className="bg-secondary-900 text-white">
+    <footer className="bg-primary-950 text-white border-t border-white/5">
       <div className="container-custom py-12 md:py-16 px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-8 mb-8 md:mb-12">
           {/* Company Info */}
@@ -50,10 +50,10 @@ const Footer = () => {
             className="lg:col-span-1"
           >
             <div className="mb-4 md:mb-6">
-              <h3 className="text-xl md:text-2xl font-bold text-primary-400 mb-2">
+              <h3 className="text-xl md:text-2xl font-bold text-accent-500 mb-2">
                 Willsther
               </h3>
-              <p className="text-secondary-300 font-medium text-sm md:text-base">
+              <p className="text-primary-100 font-medium text-sm md:text-base">
                 Professional Services
               </p>
             </div>
@@ -62,16 +62,16 @@ const Footer = () => {
             </p>
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center space-x-2 md:space-x-3">
-                <Phone className="w-4 h-4 md:w-5 md:h-5 text-primary-400" />
-                <span className="text-secondary-300 text-sm md:text-base">{config.contactPhone || '(233) 594 850 005'}</span>
+                <Phone className="w-4 h-4 md:w-5 md:h-5 text-accent-500" />
+                <span className="text-primary-100/80 text-sm md:text-base">{config.contactPhone || '(233) 594 850 005'}</span>
               </div>
               <div className="flex items-center space-x-2 md:space-x-3">
-                <Mail className="w-4 h-4 md:w-5 md:h-5 text-primary-400" />
-                <span className="text-secondary-300 text-sm md:text-base">{config.contactEmail || 'willstherprofessionalservices@gmail.com'}</span>
+                <Mail className="w-4 h-4 md:w-5 md:h-5 text-accent-500" />
+                <span className="text-primary-100/80 text-sm md:text-base">{config.contactEmail || 'willstherprofessionalservices@gmail.com'}</span>
               </div>
               <div className="flex items-start space-x-2 md:space-x-3">
-                <MapPin className="w-4 h-4 md:w-5 md:h-5 text-primary-400 mt-0.5" />
-                <span className="text-secondary-300 text-sm md:text-base">
+                <MapPin className="w-4 h-4 md:w-5 md:h-5 text-accent-500 mt-0.5" />
+                <span className="text-primary-100/80 text-sm md:text-base">
                   {config.footer.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'}
                 </span>
               </div>
@@ -157,7 +157,7 @@ const Footer = () => {
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="w-8 h-8 md:w-10 md:h-10 bg-secondary-700 hover:bg-primary-600 rounded-lg flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
+                  className="w-8 h-8 md:w-10 md:h-10 bg-white/5 hover:bg-accent-500 rounded-lg flex items-center justify-center text-white transition-all duration-300 hover:scale-110 border border-white/10"
                   aria-label={social.label}
                 >
                   <social.icon className="w-4 h-4 md:w-5 md:h-5" />

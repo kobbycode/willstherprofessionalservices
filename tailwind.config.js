@@ -9,12 +9,17 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          900: '#0c4a6e',
+          50: '#f0f4fa',
+          100: '#e0eaf6',
+          200: '#c5d7ed',
+          300: '#9cbce0',
+          400: '#6d9ccf',
+          500: '#4a80bc',
+          600: '#36669e',
+          700: '#2c527e',
+          800: '#274669',
+          900: '#0a192f', // Royal Navy
+          950: '#172a46',
         },
         secondary: {
           50: '#f8fafc',
@@ -26,12 +31,22 @@ module.exports = {
           900: '#0f172a',
         },
         accent: {
-          50: '#fefce8',
-          100: '#fef9c3',
-          500: '#eab308',
-          600: '#ca8a04',
-          700: '#a16207',
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b', // Rich Gold
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
         }
+      },
+      boxShadow: {
+        'premium': '0 8px 30px rgba(0,0,0,0.12)',
+        'premium-hover': '0 20px 40px rgba(0,0,0,0.15)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

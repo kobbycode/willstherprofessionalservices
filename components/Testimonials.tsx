@@ -61,9 +61,8 @@ const Testimonials = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-5 h-5 ${
-          i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-        }`}
+        className={`w-5 h-5 ${i < rating ? 'text-accent-500 fill-current' : 'text-gray-200'
+          }`}
       />
     ))
   }
@@ -95,7 +94,7 @@ const Testimonials = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100"
+              className="bg-white rounded-2xl p-6 shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-2 border border-gray-100"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-1">
@@ -135,16 +134,17 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-center mt-16"
         >
-          <div className="bg-primary-600 rounded-2xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">
+          <div className="bg-primary-900 rounded-3xl p-8 text-white shadow-premium relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+            <h3 className="text-2xl font-bold mb-4 relative z-10">
               Join Our Happy Customers
             </h3>
-            <p className="text-primary-100 mb-6 text-lg">
+            <p className="text-primary-100 mb-6 text-lg relative z-10">
               Experience the same level of excellence that our customers rave about
             </p>
-            <a 
-              href="#contact" 
-              className="inline-block bg-white text-primary-700 hover:bg-primary-50 font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+            <a
+              href="#contact"
+              className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 relative z-10 shadow-lg"
             >
               Get Your Quote Today
             </a>

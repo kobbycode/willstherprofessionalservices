@@ -7,6 +7,7 @@ import {
   Car, Truck, Zap, Target
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useMemo, useState, useEffect } from 'react'
 
 const Services = () => {
@@ -137,7 +138,7 @@ const Services = () => {
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.3 }}
                   viewport={{ once: true }}
-                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100"
+                  className="bg-white rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-300 overflow-hidden group border border-gray-100"
                 >
                   <div className="p-5 flex flex-col items-center text-center">
                     <div className="w-14 h-14 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center mb-4 shadow-md group-hover:shadow-lg transition-all duration-300">
@@ -188,13 +189,12 @@ const Services = () => {
                   className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
                 >
                   <div className="relative h-48 md:h-56 overflow-hidden">
-                    <img
+                    <Image
                       src={category.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=600&h=400&fit=crop&crop=center'}
                       alt={category.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=600&h=400&fit=crop&crop=center'
-                      }}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                   </div>
@@ -258,16 +258,15 @@ const Services = () => {
                           viewport={{ once: true }}
                           className="bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
                         >
-                          <div className="relative flex-1">
-                            <img
+                          <div className="relative flex-1 h-[200px] sm:h-[220px] md:h-[240px]">
+                            <Image
                               src={service.image}
                               alt={service.title}
-                              className="w-full h-full min-h-[180px] sm:min-h-[200px] md:min-h-[240px] lg:min-h-[280px] object-cover group-hover:scale-105 transition-transform duration-300"
-                              onError={(e) => {
-                                e.currentTarget.src = 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
-                              }}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                             />
-                            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg">
+                            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg z-10">
                               <service.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
                             </div>
                           </div>

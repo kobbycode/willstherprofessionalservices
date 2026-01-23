@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Phone, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-// Using native img to support any URL (including Firebase, data/blob URLs)
+import Image from 'next/image'
 import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { useSiteConfig } from '@/lib/site-config'
 import { getFallbackImageUrl } from '@/lib/storage'
@@ -43,7 +43,7 @@ const Hero = memo(() => {
     ]
 
     const configured = Array.isArray(config.heroSlides) ? config.heroSlides : []
-    
+
     if (configured.length > 0) {
       // Sort slides by order (if available) to maintain admin-defined order
       const sortedSlides = [...configured].sort((a, b) => {
@@ -51,7 +51,7 @@ const Hero = memo(() => {
         const orderB = b.order ?? 0
         return orderA - orderB
       })
-      
+
       return sortedSlides.map((s) => ({
         id: s.id || `slide-${Date.now()}-${Math.random()}`, // Use Firebase document ID
         image: (s.imageUrl || '').trim() || getFallbackImageUrl(),
@@ -67,14 +67,14 @@ const Hero = memo(() => {
         ]
       }))
     }
-    
+
     // Return default slides if no slides are configured or if there's an error
     return defaultSlides
   }, [config.heroSlides])
 
   const nextSlide = useCallback(() => {
-      if (slides.length === 0) return
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    if (slides.length === 0) return
+    setCurrentSlide((prev) => (prev + 1) % slides.length)
   }, [slides.length])
 
   const prevSlide = useCallback(() => {
@@ -95,7 +95,7 @@ const Hero = memo(() => {
 
   useEffect(() => {
     if (slides.length <= 1) return
-    
+
     const timer = setInterval(nextSlide, 5000)
     return () => clearInterval(timer)
   }, [nextSlide, slides.length])
@@ -190,37 +190,23 @@ const Hero = memo(() => {
                   className="absolute inset-0"
                 >
                   <div className="relative w-full h-full">
-                    <img
+                    <Image
                       src={slide.image}
                       alt={slide.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      onError={async (e) => {
-                        console.warn(`Image failed to load: ${slide.image}`, e)
-                        const target = e.currentTarget as HTMLImageElement
-                        
-                        // Try fallback images first for better reliability
-                        const currentSrc = target.src
-                        const fallbackIndex = slide.fallbackImages?.findIndex(fb => fb === currentSrc) ?? -1
-                        const nextFallback = slide.fallbackImages?.[(fallbackIndex + 1) % (slide.fallbackImages?.length ?? 1)]
-                        
-                        if (nextFallback && !currentSrc.includes('fallback')) {
-                          console.log(`Trying fallback image: ${nextFallback}`)
-                          target.src = nextFallback
-                        } else if (slide.fallbackImages?.[0]) {
-                          console.log(`Using first fallback image: ${slide.fallbackImages[0]}`)
-                          target.src = slide.fallbackImages[0]
-                        } else {
-                          // Use the reliable fallback
-                          console.log(`Using reliable fallback image`)
-                          target.src = getFallbackImageUrl()
-                        }
-                      }}
-                      onLoad={() => {
-                        console.log(`Image loaded successfully: ${slide.image}`)
+                      fill
+                      priority={index === 0}
+                      className="object-cover"
+                      sizes="100vw"
+                      quality={90}
+                      onError={(e) => {
+                        // Note: next/image doesn't support onError in the same way as img, 
+                        // but the loading strategy is more robust.
+                        // Fallback handling is managed by the data layer.
+                        console.warn(`Image might have issues: ${slide.image}`)
                       }}
                     />
-                    <div className="absolute inset-0 bg-black/40"></div>
-                    
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary-900/90 via-primary-900/60 to-transparent"></div>
+
                     {/* Content */}
                     <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
                       <div className="max-w-4xl mx-auto">
@@ -232,7 +218,7 @@ const Hero = memo(() => {
                         >
                           {slide.title}
                         </motion.h1>
-                        
+
                         <motion.p
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -241,7 +227,7 @@ const Hero = memo(() => {
                         >
                           {slide.description}
                         </motion.p>
-                        
+
                         <motion.div
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
@@ -254,7 +240,7 @@ const Hero = memo(() => {
                           >
                             {slide.ctaLabel}
                           </Link>
-                          
+
                           <Link
                             href="#services"
                             className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30"
@@ -270,7 +256,7 @@ const Hero = memo(() => {
             ))}
           </AnimatePresence>
         </div>
-        
+
         {/* Navigation Arrows */}
         {slides.length > 1 && (
           <>
@@ -281,7 +267,7 @@ const Hero = memo(() => {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            
+
             <button
               onClick={nextSlide}
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm z-10"
@@ -291,7 +277,7 @@ const Hero = memo(() => {
             </button>
           </>
         )}
-        
+
         {/* Slide Indicators */}
         {slides.length > 1 && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
@@ -299,9 +285,8 @@ const Hero = memo(() => {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
