@@ -9,8 +9,9 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Product } from '@/types/product'
 import { useSiteConfig } from '@/lib/site-config'
-import { ShoppingBag, MessageCircle, ArrowLeft, Package, CheckCircle, X } from 'lucide-react'
+import { ShoppingBag, MessageCircle, ArrowLeft, Package, CheckCircle, X, Heart } from 'lucide-react'
 import Link from 'next/link'
+import { useShop } from '@/context/ShopContext'
 
 export default function ProductDetailPage() {
     const { id } = useParams()
@@ -19,6 +20,7 @@ export default function ProductDetailPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
     const { config } = useSiteConfig()
+    const { addToCart, toggleWishlist, isInWishlist } = useShop()
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -102,9 +104,9 @@ export default function ProductDetailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100"
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-0 md:gap-8">
                         {/* Image Section */}
-                        <div className="relative aspect-square md:aspect-auto bg-gray-100 overflow-hidden group">
+                        <div className="md:col-span-2 relative aspect-square bg-gray-100 overflow-hidden group">
                             {product.imageUrl ? (
                                 <img
                                     src={product.imageUrl}
@@ -124,7 +126,7 @@ export default function ProductDetailPage() {
                         </div>
 
                         {/* Content Section */}
-                        <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+                        <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-center">
                             <div className="flex items-center gap-2 text-purple-600 font-medium mb-4">
                                 <Package size={18} />
                                 <span>{product.category || 'Cleaning Product'}</span>
@@ -134,8 +136,8 @@ export default function ProductDetailPage() {
                                 {product.title}
                             </h1>
 
-                            <div className="flex items-center gap-4 mb-8">
-                                <span className="text-3xl md:text-4xl font-bold text-purple-600">
+                            <div className="flex items-center gap-4 mb-6">
+                                <span className="text-3xl font-bold text-purple-600">
                                     GH₵{product.price.toFixed(2)}
                                 </span>
                                 {product.inStock ? (
@@ -149,28 +151,47 @@ export default function ProductDetailPage() {
                                 )}
                             </div>
 
-                            <div className="prose prose-lg text-gray-600 mb-10 max-w-none">
+                            <div className="prose text-gray-600 mb-8 max-w-none text-sm md:text-base">
                                 <p>{product.description}</p>
                             </div>
 
-                            <div className="mt-auto pt-8 border-t border-gray-100">
+                            <div className="flex flex-col gap-3 mt-auto pt-6 border-t border-gray-100">
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => addToCart(product)}
+                                        disabled={!product.inStock}
+                                        className={`
+                                            flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-base transition-all duration-300
+                                            ${product.inStock
+                                                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-purple-500/30'
+                                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
+                                        `}
+                                    >
+                                        <ShoppingBag size={20} />
+                                        Add to Cart
+                                    </button>
+                                    <button
+                                        onClick={() => toggleWishlist(product)}
+                                        className={`
+                                            p-3 rounded-xl border-2 transition-all duration-300
+                                            ${isInWishlist(product.id)
+                                                ? 'border-red-500 text-red-500 bg-red-50'
+                                                : 'border-gray-200 text-gray-400 hover:border-purple-600 hover:text-purple-600'}
+                                        `}
+                                    >
+                                        <Heart size={24} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                                    </button>
+                                </div>
+
                                 <a
                                     href={product.inStock ? whatsappUrl : '#'}
                                     target={product.inStock ? '_blank' : undefined}
                                     rel={product.inStock ? "noopener noreferrer" : undefined}
-                                    className={`
-                    flex items-center justify-center gap-3 w-full py-4 px-8 rounded-xl font-bold text-lg transition-all duration-300 transform
-                    ${product.inStock
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 hover:-translate-y-1 hover:shadow-xl text-white'
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
-                  `}
+                                    className="flex items-center justify-center gap-2 text-green-600 font-semibold hover:text-green-700 transition-colors text-sm"
                                 >
-                                    <MessageCircle size={24} />
-                                    {product.inStock ? 'Order via WhatsApp' : 'Currently Unavailable'}
+                                    <MessageCircle size={16} />
+                                    Or order directly via WhatsApp
                                 </a>
-                                <p className="text-center text-sm text-gray-400 mt-4">
-                                    Secure checkout via WhatsApp messaging with our sales team.
-                                </p>
                             </div>
                         </div>
                     </div>

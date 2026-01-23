@@ -3,14 +3,16 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Phone, Mail, Menu, X } from 'lucide-react'
+import { Phone, Mail, Menu, X, ShoppingBag, Heart } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site-config'
+import { useShop } from '@/context/ShopContext'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const router = useRouter()
   const pathname = usePathname()
+  const { cartCount, setIsCartOpen } = useShop()
 
   const { config } = useSiteConfig()
 
@@ -47,21 +49,21 @@ const Header = () => {
         if (element) {
           const offsetTop = element.offsetTop
           const offsetHeight = element.offsetHeight
-          
+
           if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
             currentSection = section
             break
           }
         }
       }
-      
+
       setActiveSection(currentSection)
     }
 
     // Check on scroll and resize
     window.addEventListener('scroll', checkSection)
     window.addEventListener('resize', checkSection)
-    
+
     // Initial check
     checkSection()
 
@@ -119,9 +121,9 @@ const Header = () => {
             {/* Logo */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center group">
-                <img 
-                  src="/logo-v2.jpg" 
-                  alt="Willsther Logo" 
+                <img
+                  src="/logo-v2.jpg"
+                  alt="Willsther Logo"
                   className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover shadow-lg group-hover:shadow-xl transition-all duration-300"
                 />
               </Link>
@@ -134,9 +136,8 @@ const Header = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item)}
-                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${
-                      isActive(item) ? 'underline underline-offset-4' : ''
-                    }`}
+                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${isActive(item) ? 'underline underline-offset-4' : ''
+                      }`}
                   >
                     {item.name}
                     <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
@@ -145,9 +146,8 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${
-                      isActive(item) ? 'underline underline-offset-4' : ''
-                    }`}
+                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${isActive(item) ? 'underline underline-offset-4' : ''
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -157,8 +157,21 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* CTA Button - hidden on mobile */}
-            <div className="hidden lg:block">
+            {/* CTA Buttons - hidden on mobile */}
+            <div className="hidden lg:flex items-center gap-4">
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
+                aria-label="Open cart"
+              >
+                <ShoppingBag size={24} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-primary-600">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
               <button
                 onClick={() => handleNavigation({ href: '#contact', isHash: true })}
                 className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
@@ -167,14 +180,28 @@ const Header = () => {
               </button>
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 rounded-lg text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
-              aria-label="Toggle mobile menu"
-            >
-              {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
-            </button>
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-2 lg:hidden">
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
+              >
+                <ShoppingBag size={24} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 rounded-lg text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
+                aria-label="Toggle mobile menu"
+              >
+                {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -189,9 +216,8 @@ const Header = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item)}
-                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${
-                      isActive(item) ? 'underline underline-offset-4' : ''
-                    }`}
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
+                      }`}
                   >
                     {item.name}
                   </button>
@@ -199,9 +225,8 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${
-                      isActive(item) ? 'underline underline-offset-4' : ''
-                    }`}
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}

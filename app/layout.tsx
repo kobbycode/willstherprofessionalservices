@@ -3,8 +3,10 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/lib/auth-context'
+import { ShopProvider } from '@/context/ShopContext'
+import { CartDrawer } from '@/components/CartDrawer'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
@@ -102,7 +104,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-        
+
         {/* Structured Data */}
         <script
           type="application/ld+json"
@@ -162,14 +164,16 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          {children}
-          <Toaster 
-            position="top-right" 
-            toastOptions={{ 
-              style: { fontSize: '14px' },
-              duration: 4000,
-            }} 
-          />
+          <ShopProvider>
+            {children}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: { fontSize: '14px' },
+                duration: 4000,
+              }}
+            />
+          </ShopProvider>
         </AuthProvider>
         {false && (
           <script
