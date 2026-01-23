@@ -50,6 +50,7 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import HeroConfig from './HeroConfig'
 import ServicesConfig from './ServicesConfig'
 import ShopManagement from './ShopManagement'
+import AdminHeader from '@/components/AdminHeader'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -104,187 +105,123 @@ const AdminDashboard = () => {
   return (
     <AdminAuth>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Admin Header */}
-        <div className="bg-white shadow-lg border-b border-gray-200">
-          <div className="px-4 sm:px-6 py-4 sm:py-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3 sm:space-x-6">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Settings className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      Admin Dashboard
-                    </h1>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Manage your website content and settings</p>
-                  </div>
-                </div>
-                <div className="hidden lg:flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 text-sm font-semibold rounded-full border border-green-200">
-                    Live System
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200"
-                  title="Toggle Menu"
-                >
-                  {isMobileMenuOpen ? (
-                    <X className="w-5 h-5" />
-                  ) : (
-                    <MenuIcon className="w-5 h-5" />
-                  )}
-                </button>
-                <Link
-                  href="/admin/profile"
-                  className="p-2 sm:p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 group"
-                  title="Profile"
-                >
-                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                </Link>
-                <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 rounded-xl px-3 py-2 sm:px-4">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
-                    {user?.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt="Profile"
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-white text-xs sm:text-sm font-bold">
-                        {user?.displayName?.charAt(0) || 'A'}
-                      </span>
-                    )}
-                  </div>
-                  <div className="hidden sm:block">
-                    <p className="text-sm font-semibold text-gray-900">{user?.displayName || 'Admin User'}</p>
-                    <p className="text-xs text-gray-500">{user?.role === 'admin' ? 'Administrator' : user?.role === 'editor' ? 'Editor' : 'User'}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowLogoutDialog(true)}
-                  className="flex items-center space-x-2 px-2 sm:px-3 py-2 sm:px-4 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-200 border border-red-200 hover:border-red-300"
-                  title="Logout"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="text-sm font-medium hidden sm:block">Logout</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AdminHeader
+          title="Admin Dashboard"
+          subtitle="Professional Services Management"
+          showBadge={true}
+          showMobileMenuToggle={true}
+          isMobileMenuOpen={isMobileMenuOpen}
+          onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onLogoutClick={() => setShowLogoutDialog(true)}
+        />
 
         <div className="flex flex-col lg:flex-row">
           {/* Sidebar Navigation */}
-          <div className={`w-full lg:w-72 bg-white shadow-xl border-r border-gray-200 min-h-screen lg:min-h-0 transition-all duration-300 z-40 lg:z-auto ${isMobileMenuOpen ? 'block' : 'hidden lg:block'
+          <div className={`w-full lg:w-72 bg-[#f8fafc] shadow-premium border-r border-gray-100 min-h-screen lg:min-h-0 transition-all duration-300 z-40 lg:z-auto ${isMobileMenuOpen ? 'block' : 'hidden lg:block'
             }`}>
-            <nav className="p-4 sm:p-6">
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Navigation</h2>
-                <div className="space-y-1">
+            <nav className="p-4 sm:p-6 space-y-8">
+              <div>
+                <h2 className="text-xs font-bold text-primary-900/40 uppercase tracking-widest mb-4 px-4">Navigation</h2>
+                <div className="space-y-1.5">
                   {[
-                    { id: 'overview', label: 'Overview', icon: BarChart3, color: 'from-blue-500 to-blue-600' },
-                    { id: 'shop', label: 'Shop Management', icon: ShoppingBag, color: 'from-purple-600 to-pink-600' },
-                    { id: 'blog', label: 'Blog Management', icon: FileText, color: 'from-green-500 to-green-600' },
-                    { id: 'categories', label: 'Categories', icon: Filter, color: 'from-purple-500 to-purple-600' },
-                    { id: 'users', label: 'User Management', icon: Users, color: 'from-orange-500 to-orange-600' },
-                    { id: 'contact', label: 'Contact Forms', icon: MessageSquare, color: 'from-pink-500 to-pink-600' },
+                    { id: 'overview', label: 'Overview', icon: BarChart3 },
+                    { id: 'shop', label: 'Shop Management', icon: ShoppingBag },
+                    { id: 'blog', label: 'Blog Management', icon: FileText },
+                    { id: 'categories', label: 'Categories', icon: Filter },
+                    { id: 'users', label: 'User Management', icon: Users },
+                    { id: 'contact', label: 'Contact Forms', icon: MessageSquare },
                   ].map((item) => (
                     <button
                       key={item.id}
                       onClick={() => {
                         setActiveTab(item.id)
-                        setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
+                        setIsMobileMenuOpen(false)
                       }}
-                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
-                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
-                        : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${activeTab === item.id
+                        ? 'bg-primary-900 text-accent-500 shadow-lg translate-x-1'
+                        : 'text-secondary-600 hover:bg-white hover:text-primary-900 hover:shadow-sm'
                         }`}
                     >
-                      <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
-                        <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
+                      <div className={`p-2 rounded-lg transition-colors ${activeTab === item.id ? 'bg-accent-500/10' : 'bg-gray-100 group-hover:bg-primary-50'}`}>
+                        <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-accent-500' : 'text-primary-600'}`} />
                       </div>
-                      <span className="font-semibold text-sm sm:text-base">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Website Content</h2>
-                <div className="space-y-1">
-                  {[
-                    { id: 'hero', label: 'Hero Section', icon: ImageIcon, color: 'from-indigo-500 to-indigo-600' },
-                    { id: 'services', label: 'Services', icon: Wrench, color: 'from-teal-500 to-teal-600' },
-                    { id: 'about', label: 'About Section', icon: Quote, color: 'from-amber-500 to-amber-600' },
-                    { id: 'testimonials', label: 'Testimonials', icon: Quote, color: 'from-rose-500 to-rose-600' },
-                    { id: 'gallery', label: 'Gallery', icon: ImageIcon, color: 'from-cyan-500 to-cyan-600' },
-                  ].map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id)
-                        setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
-                      }}
-                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
-                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
-                        : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
-                        }`}
-                    >
-                      <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
-                        <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
-                      </div>
-                      <span className="font-semibold text-sm sm:text-base">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-6 sm:mb-8">
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Configuration</h2>
-                <div className="space-y-1">
-                  {[
-                    { id: 'settings', label: 'Website Settings', icon: Settings, color: 'from-gray-600 to-gray-700' },
-                    { id: 'navigation', label: 'Navigation', icon: MenuIcon, color: 'from-slate-500 to-slate-600' },
-                    { id: 'footer', label: 'Footer Settings', icon: Globe, color: 'from-zinc-500 to-zinc-600' },
-                    { id: 'seo', label: 'SEO Settings', icon: Globe, color: 'from-neutral-500 to-neutral-600' },
-                    { id: 'map', label: 'Map Settings', icon: MapIcon, color: 'from-stone-500 to-stone-600' },
-                  ].map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id)
-                        setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
-                      }}
-                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
-                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
-                        : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
-                        }`}
-                    >
-                      <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
-                        <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
-                      </div>
-                      <span className="font-semibold text-sm sm:text-base">{item.label}</span>
+                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Analytics</h2>
-                <div className="space-y-1">
+                <h2 className="text-xs font-bold text-primary-900/40 uppercase tracking-widest mb-4 px-4">Website Content</h2>
+                <div className="space-y-1.5">
+                  {[
+                    { id: 'hero', label: 'Hero Section', icon: ImageIcon },
+                    { id: 'services', label: 'Services', icon: Wrench },
+                    { id: 'about', label: 'About Section', icon: Quote },
+                    { id: 'testimonials', label: 'Testimonials', icon: Quote },
+                    { id: 'gallery', label: 'Gallery', icon: ImageIcon },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id)
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${activeTab === item.id
+                        ? 'bg-primary-900 text-accent-500 shadow-lg translate-x-1'
+                        : 'text-secondary-600 hover:bg-white hover:text-primary-900 hover:shadow-sm'
+                        }`}
+                    >
+                      <div className={`p-2 rounded-lg transition-colors ${activeTab === item.id ? 'bg-accent-500/10' : 'bg-gray-100 group-hover:bg-primary-50'}`}>
+                        <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-accent-500' : 'text-primary-600'}`} />
+                      </div>
+                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xs font-bold text-primary-900/40 uppercase tracking-widest mb-4 px-4">Configuration</h2>
+                <div className="space-y-1.5">
+                  {[
+                    { id: 'settings', label: 'Website Settings', icon: Settings },
+                    { id: 'navigation', label: 'Navigation', icon: MenuIcon },
+                    { id: 'footer', label: 'Footer Settings', icon: Globe },
+                    { id: 'seo', label: 'SEO Settings', icon: Globe },
+                    { id: 'map', label: 'Map Settings', icon: MapIcon },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id)
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${activeTab === item.id
+                        ? 'bg-primary-900 text-accent-500 shadow-lg translate-x-1'
+                        : 'text-secondary-600 hover:bg-white hover:text-primary-900 hover:shadow-sm'
+                        }`}
+                    >
+                      <div className={`p-2 rounded-lg transition-colors ${activeTab === item.id ? 'bg-accent-500/10' : 'bg-gray-100 group-hover:bg-primary-50'}`}>
+                        <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-accent-500' : 'text-primary-600'}`} />
+                      </div>
+                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xs font-bold text-primary-900/40 uppercase tracking-widest mb-4 px-4">Analytics</h2>
+                <div className="space-y-1.5">
                   <Link
                     href="/admin/analytics"
-                    className="w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group text-gray-600 hover:bg-gray-50 hover:shadow-md"
+                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group text-secondary-600 hover:bg-white hover:text-primary-900 hover:shadow-sm"
                   >
-                    <div className="p-1.5 sm:p-2 rounded-lg bg-gray-100 group-hover:bg-gray-200">
-                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                    <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-primary-50">
+                      <TrendingUp className="w-5 h-5 text-primary-600" />
                     </div>
-                    <span className="font-semibold text-sm sm:text-base">Analytics Dashboard</span>
+                    <span className="font-bold text-sm tracking-tight">Analytics Dashboard</span>
                   </Link>
                 </div>
               </div>
@@ -385,42 +322,43 @@ const AdminDashboard = () => {
       </div>
 
       {/* Logout Confirmation Dialog */}
+      {/* Logout Confirmation Dialog */}
       {showLogoutDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={handleBackdropClick}>
+        <div className="fixed inset-0 bg-primary-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4" onClick={handleBackdropClick}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-premium max-w-md w-full overflow-hidden border border-gray-100"
           >
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full">
-                <LogOut className="w-6 h-6 text-red-600" />
+            <div className="p-6">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+                  <LogOut className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary-900">Confirm Logout</h3>
+                  <p className="text-sm text-secondary-600">Are you sure you want to log out?</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Confirm Logout</h3>
-                <p className="text-sm text-gray-600">Are you sure you want to log out?</p>
+
+              <p className="text-secondary-600 mb-8 leading-relaxed">
+                You will be signed out of your account and redirected to the login page. Any unsaved changes may be lost.
+              </p>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowLogoutDialog(false)}
+                  className="flex-1 px-4 py-3 border border-gray-200 text-primary-900 rounded-xl hover:bg-gray-50 transition-all duration-200 font-bold text-sm uppercase tracking-wider"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-3 bg-primary-900 text-accent-500 rounded-xl hover:bg-primary-800 transition-all duration-200 font-bold text-sm uppercase tracking-wider shadow-lg shadow-primary-900/20"
+                >
+                  Logout Now
+                </button>
               </div>
-            </div>
-
-            <p className="text-gray-700 mb-6">
-              You will be signed out of your account and redirected to the login page. You will need to log in again to access the admin dashboard.
-            </p>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowLogoutDialog(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center space-x-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
             </div>
           </motion.div>
         </div>

@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  ArrowLeft, 
-  Save, 
-  User, 
-  Mail, 
-  Phone, 
-  Lock, 
+import {
+  ArrowLeft,
+  Save,
+  User,
+  Mail,
+  Phone,
+  Lock,
   Camera,
   Shield,
   Bell,
@@ -29,6 +29,7 @@ import { doc, updateDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
 import { uploadImage } from '@/lib/storage'
 import { useAuth } from '@/lib/auth-context'
+import AdminHeader from '@/components/AdminHeader'
 
 
 interface ProfileData {
@@ -67,7 +68,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('profile')
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const { user, signOut: authSignOut, refreshUser } = useAuth()
-  
+
   const [profileData, setProfileData] = useState<ProfileData>({
     name: 'Admin User',
     email: 'admin@willsther.com',
@@ -112,13 +113,13 @@ export default function ProfilePage() {
 
   // Load user profile data from auth context
   useEffect(() => {
-      if (user) {
+    if (user) {
       console.log('Loading profile data from auth context:', user)
       setOriginalEmail(user.email || 'admin@willsther.com')
-            setProfileData(prev => ({
-              ...prev,
-              name: user.displayName || 'Admin User',
-              email: user.email || 'admin@willsther.com',
+      setProfileData(prev => ({
+        ...prev,
+        name: user.displayName || 'Admin User',
+        email: user.email || 'admin@willsther.com',
         phone: user.phone || '+233 594 850 005',
         role: user.role === 'admin' ? 'Administrator' : user.role === 'editor' ? 'Editor' : 'User',
         bio: user.bio || 'System Administrator at Willsther Professional Services',
@@ -126,13 +127,13 @@ export default function ProfilePage() {
         timezone: user.timezone || 'Africa/Accra',
         avatar: user.photoURL || '/logo-v2.jpg',
         notifications: user.notifications || prev.notifications,
-              preferences: {
+        preferences: {
           theme: (user.preferences?.theme || 'light') as 'light' | 'dark' | 'auto',
           compactMode: user.preferences?.compactMode || false,
           autoSave: user.preferences?.autoSave ?? true
-              }
-            }))
-          }
+        }
+      }))
+    }
   }, [user])
 
   // Add timeout to redirect if authentication takes too long
@@ -203,18 +204,18 @@ export default function ProfilePage() {
       toast.error('Name is required')
       return false
     }
-    
+
     if (!profileData.email.trim()) {
       toast.error('Email is required')
       return false
     }
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(profileData.email)) {
       toast.error('Please enter a valid email address')
       return false
     }
-    
+
     if (profileData.phone && profileData.phone.trim()) {
       const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
       const cleanPhone = profileData.phone.replace(/[\s\-\(\)]/g, '')
@@ -223,7 +224,7 @@ export default function ProfilePage() {
         return false
       }
     }
-    
+
     return true
   }
 
@@ -251,7 +252,7 @@ export default function ProfilePage() {
             size: pendingAvatarFile.size,
             type: pendingAvatarFile.type
           })
-          
+
           const uploadedUrl = await uploadImage(pendingAvatarFile, 'profile-pictures')
           avatarUrlToUse = uploadedUrl
           setProfileData(prev => ({ ...prev, avatar: uploadedUrl }))
@@ -264,7 +265,7 @@ export default function ProfilePage() {
           console.error('Error message:', err?.message)
           console.error('Error stack:', err?.stack)
           console.error('=== END UPLOAD ERROR ===')
-          
+
           // If upload fails, continue with the current avatar
           toast.error('Image upload failed, but profile can still be updated')
         } finally {
@@ -290,7 +291,7 @@ export default function ProfilePage() {
       let firestoreSuccess = false
       let retryCount = 0
       const maxRetries = 3
-      
+
       while (!firestoreSuccess && retryCount < maxRetries) {
         try {
           await setDoc(userRef, updateData, { merge: true })
@@ -299,13 +300,13 @@ export default function ProfilePage() {
         } catch (firestoreError) {
           retryCount++
           console.error(`Firestore update attempt ${retryCount} failed:`, firestoreError)
-          
+
           if (retryCount >= maxRetries) {
             // If all retries fail, show error but don't crash
             toast.error('Profile update failed due to database connection issues. Please try again later.')
             throw firestoreError
           }
-          
+
           // Wait before retrying
           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
         }
@@ -313,13 +314,13 @@ export default function ProfilePage() {
 
       // Clear pending avatar selection after successful save
       if (pendingAvatarPreview) {
-        try { URL.revokeObjectURL(pendingAvatarPreview) } catch {}
+        try { URL.revokeObjectURL(pendingAvatarPreview) } catch { }
       }
       setPendingAvatarPreview(null)
       setPendingAvatarFile(null)
 
       toast.success('Profile updated successfully!')
-      
+
       // Refresh user data to ensure consistency
       try {
         await refreshUser()
@@ -360,7 +361,7 @@ export default function ProfilePage() {
     try {
       // Revoke previous preview if any
       if (pendingAvatarPreview) {
-        try { URL.revokeObjectURL(pendingAvatarPreview) } catch {}
+        try { URL.revokeObjectURL(pendingAvatarPreview) } catch { }
       }
       const previewUrl = URL.createObjectURL(file)
       setPendingAvatarFile(file)
@@ -383,7 +384,7 @@ export default function ProfilePage() {
       toast.error('New passwords do not match')
       return
     }
-    
+
     if (passwordData.newPassword.length < 8) {
       toast.error('Password must be at least 8 characters long')
       return
@@ -402,14 +403,14 @@ export default function ProfilePage() {
         user.email,
         passwordData.currentPassword
       )
-      
+
       if (auth.currentUser) {
-      await reauthenticateWithCredential(auth.currentUser, credential)
-      
-      // Change password
-      await updatePassword(auth.currentUser, passwordData.newPassword)
+        await reauthenticateWithCredential(auth.currentUser, credential)
+
+        // Change password
+        await updatePassword(auth.currentUser, passwordData.newPassword)
       }
-      
+
       toast.success('Password changed successfully!')
       setPasswordData({
         currentPassword: '',
@@ -432,7 +433,7 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     await authSignOut()
-      toast.success('Logged out successfully!')
+    toast.success('Logged out successfully!')
   }
 
   const tabs = [
@@ -450,7 +451,7 @@ export default function ProfilePage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Verifying access...</p>
           <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
-          <button 
+          <button
             onClick={() => router.push('/admin/login')}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -463,36 +464,13 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
-        <div className="px-4 sm:px-6 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-              <Link 
-                href="/admin" 
-                className="flex items-center space-x-2 text-white/90 hover:text-white transition-colors text-sm sm:text-base w-fit group"
-              >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
-                <span>Back to Admin</span>
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-white/30"></div>
-              <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Profile Settings</h1>
-                <p className="text-white/80 mt-1 text-sm sm:text-base">Manage your account and preferences</p>
-              </div>
-            </div>
-            
-            {/* Logout Button */}
-            <button
-              onClick={() => setShowLogoutDialog(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <AdminHeader
+        title="Profile Settings"
+        subtitle="Manage your account and preferences"
+        backLink="/admin"
+        backLabel="Back to Admin"
+        onLogoutClick={() => setShowLogoutDialog(true)}
+      />
 
       {/* Main Content */}
       <div className="p-4 sm:p-6 lg:p-8">
@@ -508,11 +486,10 @@ export default function ProfilePage() {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          activeTab === tab.id
+                        className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === tab.id
                             ? 'bg-blue-50 text-blue-700 border border-blue-200'
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         <Icon className="w-4 h-4" />
                         <span>{tab.name}</span>
@@ -550,11 +527,10 @@ export default function ProfilePage() {
                             target.src = '/logo-v2.jpg'; // Fallback image
                           }}
                         />
-                        <label className={`absolute -bottom-1 -right-1 p-1.5 rounded-full transition-colors cursor-pointer ${
-                          imageLoading 
-                            ? 'bg-gray-400 cursor-not-allowed' 
+                        <label className={`absolute -bottom-1 -right-1 p-1.5 rounded-full transition-colors cursor-pointer ${imageLoading
+                            ? 'bg-gray-400 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700'
-                        }`}>
+                          }`}>
                           {imageLoading ? (
                             <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
                           ) : (
@@ -585,7 +561,7 @@ export default function ProfilePage() {
                             onClick={async () => {
                               try {
                                 setProfileData(prev => ({ ...prev, avatar: '/logo-v2.jpg' }))
-                                
+
                                 // Update Firebase Auth profile
                                 const auth = getAuth()
                                 if (auth.currentUser) {
@@ -815,14 +791,12 @@ export default function ProfilePage() {
                         </div>
                         <button
                           onClick={() => handleNotificationChange('email')}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            profileData.notifications.email ? 'bg-blue-600' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${profileData.notifications.email ? 'bg-blue-600' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              profileData.notifications.email ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${profileData.notifications.email ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
@@ -833,14 +807,12 @@ export default function ProfilePage() {
                         </div>
                         <button
                           onClick={() => handleNotificationChange('push')}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            profileData.notifications.push ? 'bg-blue-600' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${profileData.notifications.push ? 'bg-blue-600' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              profileData.notifications.push ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${profileData.notifications.push ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
@@ -851,14 +823,12 @@ export default function ProfilePage() {
                         </div>
                         <button
                           onClick={() => handleNotificationChange('sms')}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            profileData.notifications.sms ? 'bg-blue-600' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${profileData.notifications.sms ? 'bg-blue-600' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              profileData.notifications.sms ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${profileData.notifications.sms ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
@@ -900,14 +870,12 @@ export default function ProfilePage() {
                         </div>
                         <button
                           onClick={() => handlePreferenceChange('compactMode', !profileData.preferences.compactMode)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            profileData.preferences.compactMode ? 'bg-blue-600' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${profileData.preferences.compactMode ? 'bg-blue-600' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              profileData.preferences.compactMode ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${profileData.preferences.compactMode ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
@@ -918,14 +886,12 @@ export default function ProfilePage() {
                         </div>
                         <button
                           onClick={() => handlePreferenceChange('autoSave', !profileData.preferences.autoSave)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            profileData.preferences.autoSave ? 'bg-blue-600' : 'bg-gray-200'
-                          }`}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${profileData.preferences.autoSave ? 'bg-blue-600' : 'bg-gray-200'
+                            }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              profileData.preferences.autoSave ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${profileData.preferences.autoSave ? 'translate-x-6' : 'translate-x-1'
+                              }`}
                           />
                         </button>
                       </div>
@@ -956,11 +922,11 @@ export default function ProfilePage() {
                 <p className="text-sm text-gray-600">Are you sure you want to log out?</p>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-6">
               You will be signed out of your account and redirected to the login page. Any unsaved changes will be lost.
             </p>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowLogoutDialog(false)}

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Save, Settings, Shield, Bell, Database, Globe, Lock, Palette, Users, FileText, Trash2, Download, Upload, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Save, Settings, Shield, Bell, Database, Globe, Lock, Palette, Users, FileText, Trash2, Download, Upload, RefreshCw, LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { useSiteConfig } from '@/lib/site-config'
+import AdminHeader from '@/components/AdminHeader'
 
 interface SystemSettings {
   maintenanceMode: boolean
@@ -73,7 +74,7 @@ export default function SettingsPage() {
         console.error('Error parsing saved settings:', error)
       }
     }
-    
+
     // Sync maintenance mode with site config
     if (config.maintenanceMode !== undefined) {
       setSettings(prev => ({ ...prev, maintenanceMode: config.maintenanceMode }))
@@ -181,47 +182,34 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <Link 
-                href="/admin" 
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base"
-              >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span>Back to Admin</span>
-              </Link>
-              <div className="hidden sm:block h-6 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Settings</h1>
-                <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage system configuration and preferences</p>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-              <button
-                onClick={() => setShowResetDialog(true)}
-                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
-              >
-                Reset
-              </button>
-              <button
-                onClick={saveSettings}
-                disabled={isSaving}
-                className="flex items-center justify-center sm:justify-start space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors text-sm"
-              >
-                {isSaving ? (
-                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
-                ) : (
-                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-                <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
-              </button>
-            </div>
+      <AdminHeader
+        title="Website Settings"
+        subtitle="Manage system configuration and preferences"
+        backLink="/admin"
+        backLabel="Back to Admin"
+        actions={
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowResetDialog(true)}
+              className="px-3 py-1.5 border border-white/20 rounded-lg text-primary-100 hover:bg-white/10 transition-colors text-xs font-bold uppercase tracking-wider"
+            >
+              Reset
+            </button>
+            <button
+              onClick={saveSettings}
+              disabled={isSaving}
+              className="flex items-center space-x-2 px-4 py-1.5 bg-accent-500 hover:bg-accent-600 disabled:bg-accent-500/50 text-primary-900 rounded-lg font-bold transition-colors text-xs uppercase tracking-wider shadow-lg"
+            >
+              {isSaving ? (
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-900"></div>
+              ) : (
+                <Save className="w-3 h-3" />
+              )}
+              <span>{isSaving ? 'Saving...' : 'Save'}</span>
+            </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-gray-200">
@@ -233,11 +221,10 @@ export default function SettingsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-3 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center space-x-2 px-3 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{tab.label}</span>
@@ -264,7 +251,7 @@ export default function SettingsPage() {
                   <Settings className="w-6 h-6 mr-2" />
                   General Settings
                 </h2>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -343,7 +330,7 @@ export default function SettingsPage() {
                   <Shield className="w-6 h-6 mr-2" />
                   Security Settings
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -393,7 +380,7 @@ export default function SettingsPage() {
                           max="32"
                         />
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center">
                           <input
@@ -404,7 +391,7 @@ export default function SettingsPage() {
                           />
                           <span className="ml-2 text-sm text-gray-600">Require uppercase letters</span>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <input
                             type="checkbox"
@@ -414,7 +401,7 @@ export default function SettingsPage() {
                           />
                           <span className="ml-2 text-sm text-gray-600">Require lowercase letters</span>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <input
                             type="checkbox"
@@ -424,7 +411,7 @@ export default function SettingsPage() {
                           />
                           <span className="ml-2 text-sm text-gray-600">Require numbers</span>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <input
                             type="checkbox"
@@ -453,7 +440,7 @@ export default function SettingsPage() {
                   <Bell className="w-6 h-6 mr-2" />
                   Notification Settings
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -504,7 +491,7 @@ export default function SettingsPage() {
                   <Palette className="w-6 h-6 mr-2" />
                   Appearance Settings
                 </h2>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -572,7 +559,7 @@ export default function SettingsPage() {
                   <Database className="w-6 h-6 mr-2" />
                   Backup & Export
                 </h2>
-                
+
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -618,7 +605,7 @@ export default function SettingsPage() {
                         <Download className="w-4 h-4" />
                         <span>Export Settings</span>
                       </button>
-                      
+
                       <label className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer">
                         <Upload className="w-4 h-4" />
                         <span>Import Settings</span>

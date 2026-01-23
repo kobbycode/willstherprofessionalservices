@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  ArrowLeft, 
-  TrendingUp, 
-  Users, 
-  FileText, 
-  Eye, 
-  Calendar, 
-  BarChart3, 
-  PieChart, 
+import {
+  ArrowLeft,
+  TrendingUp,
+  Users,
+  FileText,
+  Eye,
+  Calendar,
+  BarChart3,
+  PieChart,
   Activity,
   Globe,
   Settings,
@@ -24,6 +24,7 @@ import { fetchPosts } from '@/lib/blog'
 import { fetchCategories } from '@/lib/categories'
 import { fetchUsers, getUserStats } from '@/lib/users'
 import { useSiteConfig } from '@/lib/site-config'
+import AdminHeader from '@/components/AdminHeader'
 
 interface AnalyticsData {
   blogStats: {
@@ -74,7 +75,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
   const { config } = useSiteConfig()
-  
+
   // Fallback config in case useSiteConfig fails - moved outside component to prevent recreation
   const fallbackConfig = useMemo(() => ({
     hero: { slides: [] },
@@ -84,7 +85,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const loadAnalytics = async () => {
       setIsLoading(true)
-      
+
       // Add a timeout to prevent hanging
       const timeoutId = setTimeout(() => {
         console.warn('Analytics loading timeout - setting default data')
@@ -123,16 +124,16 @@ export default function AnalyticsPage() {
         setAnalytics(defaultAnalytics)
         setIsLoading(false)
       }, 10000) // 10 second timeout
-      
+
       try {
         console.log('Loading analytics data...')
-        
+
         // Fetch all data with individual error handling
         let posts: any[] = []
         let categories: string[] = []
         let users: any[] = []
         let userStats = { total: 0, active: 0, inactive: 0, pending: 0, admins: 0, editors: 0, users: 0 }
-        
+
         try {
           posts = await fetchPosts(false) // Get all posts including drafts
           console.log('Posts loaded:', posts.length)
@@ -140,7 +141,7 @@ export default function AnalyticsPage() {
           console.error('Error loading posts:', error)
           posts = []
         }
-        
+
         try {
           categories = await fetchCategories()
           console.log('Categories loaded:', categories.length)
@@ -148,7 +149,7 @@ export default function AnalyticsPage() {
           console.error('Error loading categories:', error)
           categories = []
         }
-        
+
         try {
           users = await fetchUsers()
           console.log('Users loaded:', users.length)
@@ -156,7 +157,7 @@ export default function AnalyticsPage() {
           console.error('Error loading users:', error)
           users = []
         }
-        
+
         try {
           userStats = await getUserStats()
           console.log('User stats loaded:', userStats)
@@ -207,12 +208,12 @@ export default function AnalyticsPage() {
             time: user.createdAt || ''
           }))
         ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-        .slice(0, 5)
+          .slice(0, 5)
 
         // Calculate performance metrics
         const publishRate = posts.length > 0 ? Math.round((publishedPosts.length / posts.length) * 100) : 0
         const userActivityRate = userStats.total > 0 ? Math.round((userStats.active / userStats.total) * 100) : 0
-        
+
         // Find top category
         const categoryCounts = publishedPosts.reduce((acc, post) => {
           const category = post.category || 'Uncategorized'
@@ -220,7 +221,7 @@ export default function AnalyticsPage() {
           return acc
         }, {} as Record<string, number>)
         const topCategory = Object.entries(categoryCounts)
-          .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'None'
+          .sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] || 'None'
 
         const analyticsData: AnalyticsData = {
           blogStats: {
@@ -309,7 +310,7 @@ export default function AnalyticsPage() {
     const date = new Date(dateString)
     const now = new Date()
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
+
     if (diffInHours < 24) {
       return `${diffInHours}h ago`
     } else if (diffInHours < 168) {
@@ -356,39 +357,24 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/admin" 
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back to Admin</span>
-              </Link>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-                <p className="text-gray-600 mt-1">Real-time insights and performance metrics</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as any)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-                <option value="1y">Last year</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AdminHeader
+        title="Analytics Dashboard"
+        subtitle="Real-time insights and performance metrics"
+        backLink="/admin"
+        backLabel="Back to Admin"
+        actions={
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value as any)}
+            className="px-4 py-1.5 bg-white/5 border border-white/20 rounded-lg text-primary-100 text-xs font-bold uppercase tracking-wider focus:ring-2 focus:ring-accent-500 focus:border-accent-500 backdrop-blur-md outline-none"
+          >
+            <option value="7d" className="bg-primary-900">Last 7 days</option>
+            <option value="30d" className="bg-primary-900">Last 30 days</option>
+            <option value="90d" className="bg-primary-900">Last 90 days</option>
+            <option value="1y" className="bg-primary-900">Last year</option>
+          </select>
+        }
+      />
 
       <div className="container-custom px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
@@ -477,7 +463,7 @@ export default function AnalyticsPage() {
                 <BarChart3 className="w-5 h-5 mr-2" />
                 Blog Statistics
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -568,23 +554,23 @@ export default function AnalyticsPage() {
                 <Users className="w-5 h-5 mr-2" />
                 User Statistics
               </h2>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Total Users</span>
                   <span className="text-lg font-bold text-gray-900">{analytics.userStats.total}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Active</span>
                   <span className="text-lg font-bold text-green-600">{analytics.userStats.active}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Pending</span>
                   <span className="text-lg font-bold text-yellow-600">{analytics.userStats.pending}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Inactive</span>
                   <span className="text-lg font-bold text-red-600">{analytics.userStats.inactive}</span>
@@ -624,7 +610,7 @@ export default function AnalyticsPage() {
                 <TrendingUp className="w-5 h-5 mr-2" />
                 Popular Posts
               </h2>
-              
+
               <div className="space-y-4">
                 {analytics.popularPosts.length > 0 ? (
                   analytics.popularPosts.map((post, index) => (
@@ -664,7 +650,7 @@ export default function AnalyticsPage() {
                 <Activity className="w-5 h-5 mr-2" />
                 Recent Activity
               </h2>
-              
+
               <div className="space-y-4">
                 {analytics.recentActivity.length > 0 ? (
                   analytics.recentActivity.map((activity, index) => (
@@ -702,7 +688,7 @@ export default function AnalyticsPage() {
               <Zap className="w-5 h-5 mr-2" />
               Performance Metrics
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
                 <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
