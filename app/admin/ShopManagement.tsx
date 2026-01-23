@@ -7,6 +7,7 @@ import { getDb } from '@/lib/firebase'
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { uploadImage } from '@/lib/storage'
 import { Product } from '@/types/product'
+import Skeleton from '@/components/Skeleton'
 
 export default function ShopManagement() {
     const [products, setProducts] = useState<Product[]>([])
@@ -148,7 +149,21 @@ export default function ShopManagement() {
             )}
 
             {isLoading ? (
-                <div className="text-center py-20 text-gray-400">Loading products...</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-white border border-gray-100 rounded-xl overflow-hidden p-0 space-y-4 shadow-sm">
+                            <Skeleton className="aspect-square w-full rounded-none" />
+                            <div className="p-4 space-y-3">
+                                <div className="flex justify-between">
+                                    <Skeleton className="h-6 w-1/2" />
+                                    <Skeleton className="h-6 w-1/4" />
+                                </div>
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <AnimatePresence>
