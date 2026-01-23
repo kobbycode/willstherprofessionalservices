@@ -134,16 +134,16 @@ const About = () => {
               viewport={{ once: true }}
               className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-2 border border-gray-100 group overflow-hidden flex flex-col h-full"
             >
-              <div className="relative mb-2 sm:mb-3 md:mb-4 flex-1 h-[200px] sm:h-[240px] md:h-[280px]">
+              <div className="relative mb-4 sm:mb-5 md:mb-6 aspect-[4/3] w-full overflow-hidden">
                 <Image
                   src={feature.image}
                   alt={feature.title}
                   fill
-                  className="object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                  className="object-cover rounded-xl group-hover:scale-110 transition-transform duration-500"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
-                <div className={`absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 ${feature.color} rounded-full flex items-center justify-center shadow-lg`}>
-                  <feature.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
+                <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 ${feature.color} rounded-full flex items-center justify-center shadow-lg border-2 border-white/50 backdrop-blur-sm z-10`}>
+                  <feature.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                 </div>
               </div>
               <div className="flex-1 flex flex-col">
