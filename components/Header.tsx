@@ -159,6 +159,14 @@ const Header = () => {
 
             {/* CTA Buttons - hidden on mobile */}
             <div className="hidden lg:flex items-center gap-4">
+              <Link
+                href="/wishlist"
+                className="relative p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
+                aria-label="Wishlist"
+              >
+                <Heart size={24} />
+              </Link>
+
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
@@ -182,6 +190,13 @@ const Header = () => {
 
             {/* Mobile Actions */}
             <div className="flex items-center gap-2 lg:hidden">
+              <Link
+                href="/wishlist"
+                className="p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
+              >
+                <Heart size={24} />
+              </Link>
+
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"

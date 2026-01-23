@@ -106,7 +106,7 @@ export default function ProductDetailPage() {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-0 md:gap-8">
                         {/* Image Section */}
-                        <div className="md:col-span-2 relative aspect-square bg-gray-100 overflow-hidden group">
+                        <div className="md:col-span-2 lg:col-span-2 relative aspect-square bg-gray-100 overflow-hidden group max-w-md mx-auto w-full">
                             {product.imageUrl ? (
                                 <img
                                     src={product.imageUrl}

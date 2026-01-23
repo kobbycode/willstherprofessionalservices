@@ -165,6 +165,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <ShopProvider>
+            <CartDrawer />
             {children}
             <Toaster
               position="top-right"
