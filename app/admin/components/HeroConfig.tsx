@@ -1,14 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { 
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
   Image as ImageIcon,
   Plus,
   Trash2,
   X,
-  ArrowUp,
-  ArrowDown
+  ChevronUp,
+  ChevronDown,
+  Edit3,
+  ExternalLink,
+  Layers,
+  Sparkles,
+  Camera,
+  MousePointer2,
+  ArrowRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
@@ -25,7 +32,6 @@ const HeroConfig = ({ config, onChange }: any) => {
   })
   const [editingSlideId, setEditingSlideId] = useState<string | null>(null)
   const [isUploadingNewSlideImage, setIsUploadingNewSlideImage] = useState(false)
-  const [uploadingSlides, setUploadingSlides] = useState<Record<string, boolean>>({})
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     slideId: '',
@@ -43,7 +49,7 @@ const HeroConfig = ({ config, onChange }: any) => {
   }
 
   const addSlide = () => {
-    setIsAddSlideModalOpen(true)
+    setEditingSlideId(null)
     setNewSlideData({
       imageUrl: '',
       title: '',
@@ -51,14 +57,15 @@ const HeroConfig = ({ config, onChange }: any) => {
       ctaLabel: '',
       ctaHref: ''
     })
+    setIsAddSlideModalOpen(true)
   }
 
   const createNewSlide = () => {
     if (!newSlideData.imageUrl.trim()) {
-      toast.error('Please provide an image for the slide')
+      toast.error('Image asset required')
       return
     }
-    
+
     const next = { ...config }
     next.heroSlides = [...heroSlides]
     next.heroSlides.push({
@@ -68,14 +75,7 @@ const HeroConfig = ({ config, onChange }: any) => {
     })
     onChange(next)
     setIsAddSlideModalOpen(false)
-    setNewSlideData({
-      imageUrl: '',
-      title: '',
-      subtitle: '',
-      ctaLabel: '',
-      ctaHref: ''
-    })
-    toast.success('Slide added successfully!')
+    toast.success('New cinematic slide deployed')
   }
 
   const editSlide = (slide: any) => {
@@ -90,18 +90,35 @@ const HeroConfig = ({ config, onChange }: any) => {
     setIsAddSlideModalOpen(true)
   }
 
+  const saveEditedSlide = () => {
+    if (!editingSlideId) return
+    if (!newSlideData.imageUrl.trim()) {
+      toast.error('Image asset required')
+      return
+    }
+
+    const next = { ...config }
+    next.heroSlides = [...heroSlides]
+    const index = next.heroSlides.findIndex((s: any) => s.id === editingSlideId)
+    if (index >= 0) {
+      next.heroSlides[index] = { ...next.heroSlides[index], ...newSlideData }
+      onChange(next)
+      setIsAddSlideModalOpen(false)
+      setEditingSlideId(null)
+      toast.success('Cinematic sequence updated')
+    }
+  }
+
   const updateSlideOrder = (id: string, direction: 'up' | 'down') => {
     const next = { ...config }
     next.heroSlides = [...heroSlides]
     const index = next.heroSlides.findIndex((s: any) => s.id === id)
     if (index >= 0) {
       if (direction === 'up' && index > 0) {
-        // Swap with previous item
         const temp = next.heroSlides[index - 1]
         next.heroSlides[index - 1] = next.heroSlides[index]
         next.heroSlides[index] = temp
       } else if (direction === 'down' && index < next.heroSlides.length - 1) {
-        // Swap with next item
         const temp = next.heroSlides[index + 1]
         next.heroSlides[index + 1] = next.heroSlides[index]
         next.heroSlides[index] = temp
@@ -110,72 +127,15 @@ const HeroConfig = ({ config, onChange }: any) => {
     }
   }
 
-  const saveEditedSlide = () => {
-    if (!editingSlideId) return
-    
-    if (!newSlideData.imageUrl.trim()) {
-      toast.error('Please provide an image for the slide')
-      return
-    }
-    
-    const next = { ...config }
-    next.heroSlides = [...heroSlides]
-    const index = next.heroSlides.findIndex((s: any) => s.id === editingSlideId)
-    if (index >= 0) {
-      next.heroSlides[index] = {
-        ...next.heroSlides[index],
-        ...newSlideData
-      }
-      onChange(next)
-      setIsAddSlideModalOpen(false)
-      setEditingSlideId(null)
-      setNewSlideData({
-        imageUrl: '',
-        title: '',
-        subtitle: '',
-        ctaLabel: '',
-        ctaHref: ''
-      })
-      toast.success('Slide updated successfully!')
-    }
-  }
-
   const handleSlideImageUpload = async (file: File) => {
     if (!file) return
-    
     setIsUploadingNewSlideImage(true)
-    
     try {
-      console.log('Starting image upload process...');
       const imageUrl = await uploadImage(file, `hero/slides/slide-${Date.now()}`)
       setNewSlideData(prev => ({ ...prev, imageUrl }))
-      toast.success('Slide image uploaded successfully!')
+      toast.success('Ultra-high-res asset uploaded')
     } catch (error) {
-      console.error('Failed to upload slide image:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      
-      // Provide specific guidance based on error type
-      if (errorMessage.includes('Firebase')) {
-        toast.error('Firebase Storage configuration issue. Please check your environment variables and Firebase setup.');
-      } else if (errorMessage.includes('CORS') || errorMessage.includes('preflight')) {
-        toast.error('CORS error: Please ensure your Firebase Storage CORS configuration is set up correctly and you\'ve deployed the cors.json file. Run: gsutil cors set cors.json gs://wilsther-profesional-services.firebasestorage.app');
-      } else if (errorMessage.includes('base64') || errorMessage.includes('data URL')) {
-        toast.error('Image is too large. Please use a smaller image or check your Firebase configuration.')
-      } else if (errorMessage.includes('compress')) {
-        // Try uploading without compression
-        try {
-          const imageUrl = await uploadImage(file, `hero/slides/slide-${Date.now()}`)
-          setNewSlideData(prev => ({ ...prev, imageUrl }))
-          toast.success('Slide image uploaded successfully!')
-        } catch (retryError) {
-          console.error('Retry upload failed:', retryError)
-          toast.error('Failed to upload image. Please try a smaller image or check your Firebase configuration.')
-        }
-      } else if (errorMessage.includes('timeout')) {
-        toast.error('Upload timed out. Please check your internet connection or try a smaller image.');
-      } else {
-        toast.error('Failed to upload image. Please try again or check your Firebase configuration.')
-      }
+      toast.error('Asset upload failed')
     } finally {
       setIsUploadingNewSlideImage(false)
     }
@@ -184,380 +144,310 @@ const HeroConfig = ({ config, onChange }: any) => {
   const confirmDeleteSlide = () => {
     const { slideId } = deleteDialog
     if (!slideId) return
-    
     const next = { ...config }
     next.heroSlides = heroSlides.filter((s: any) => s.id !== slideId)
     onChange(next)
     setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })
-    toast.success('Slide deleted successfully!')
-  }
-
-  const cancelDeleteSlide = () => {
-    setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })
+    toast.success('Asset purged from sequence')
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
-      <div className="flex items-center justify-between">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Hero Section Configuration</h2>
-          <p className="text-gray-600 mt-1">Manage your homepage hero slides</p>
+          <h2 className="text-3xl font-black text-primary-900 tracking-tight text-shadow-sm">Hero Experience</h2>
+          <p className="text-secondary-600 font-medium mt-1 uppercase tracking-[0.1em] text-[10px]">Orchestrate the first impression of your digital presence</p>
         </div>
-        <button 
-          onClick={addSlide} 
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+        <button
+          onClick={addSlide}
+          className="group px-6 py-3.5 bg-primary-900 text-white rounded-2xl shadow-xl shadow-primary-900/20 hover:shadow-primary-900/30 active:scale-95 transition-all flex items-center gap-3"
         >
-          <Plus className="w-5 h-5" />
-          <span>Add Slide</span>
+          <div className="p-1 px-2 border border-white/20 rounded-lg group-hover:border-white/40"><Plus className="w-4 h-4" /></div>
+          <span className="text-[11px] font-black uppercase tracking-widest">New Cinematic Slide</span>
         </button>
       </div>
-      
-      {heroSlides.length === 0 ? (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <ImageIcon className="w-8 h-8 text-blue-600" />
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 gap-8">
+        {heroSlides.length === 0 ? (
+          <div className="bg-white border-2 border-dashed border-gray-100 rounded-[2.5rem] p-24 text-center">
+            <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-gray-300">
+              <ImageIcon className="w-10 h-10" />
             </div>
+            <h3 className="text-xl font-black text-primary-900 mb-2 uppercase tracking-tight">The Stage is Empty</h3>
+            <p className="text-secondary-400 font-medium text-sm max-w-xs mx-auto">Begin your brand storytelling by adding your first ultra-high-resolution cinematic slide.</p>
           </div>
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">No Hero Slides Found</h3>
-          <p className="text-blue-700 mb-4">Get started by adding your first hero slide</p>
-          <button 
-            onClick={addSlide} 
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Add Your First Slide
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
-          {heroSlides.map((slide: any, index: number) => (
-            <div key={slide.id} className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-start justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Slide {index + 1}</h3>
-                <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => updateSlideOrder(slide.id, 'up')}
-                    disabled={index === 0}
-                    className={`p-1 rounded ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'}`}
-                    title="Move up"
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => updateSlideOrder(slide.id, 'down')}
-                    disabled={index === heroSlides.length - 1}
-                    className={`p-1 rounded ${index === heroSlides.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'}`}
-                    title="Move down"
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => editSlide(slide)}
-                    className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                    title="Edit slide"
-                  >
-                    <Plus className="w-4 h-4 rotate-45" />
-                  </button>
-                  <button 
-                    onClick={() => setDeleteDialog({ 
-                      isOpen: true, 
-                      slideId: slide.id, 
-                      slideTitle: slide.title || `Slide ${index + 1}` 
-                    })}
-                    className="p-1 text-red-600 hover:bg-red-50 rounded"
-                    title="Delete slide"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Image Preview */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
-                  {slide.imageUrl ? (
-                    <div className="relative">
-                      <img 
-                        src={slide.imageUrl}
-                        alt="Slide preview"
-                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop';
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg h-48 flex items-center justify-center">
-                      <span className="text-gray-500">No image</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Content */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                    <input 
-                      value={slide.title || ''} 
-                      onChange={(e) => updateSlide(slide.id, 'title', e.target.value)} 
-                      placeholder="Enter slide title"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-                    <textarea 
-                      value={slide.subtitle || ''} 
-                      onChange={(e) => updateSlide(slide.id, 'subtitle', e.target.value)} 
-                      placeholder="Enter slide subtitle"
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">CTA Label</label>
-                      <input 
-                        value={slide.ctaLabel || ''} 
-                        onChange={(e) => updateSlide(slide.id, 'ctaLabel', e.target.value)} 
-                        placeholder="Button text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">CTA Link</label>
-                      <input 
-                        value={slide.ctaHref || ''} 
-                        onChange={(e) => updateSlide(slide.id, 'ctaHref', e.target.value)} 
-                        placeholder="#section or /page"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {/* Add/Edit Slide Modal */}
-      {isAddSlideModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          onClick={(e) => {
-            // Close modal when clicking on backdrop
-            if (e.target === e.currentTarget) {
-              setIsAddSlideModalOpen(false)
-              setEditingSlideId(null)
-            }
-          }}
-        >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200 max-h-[90vh] flex flex-col"
-          >
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  {editingSlideId ? 'Edit Hero Slide' : 'Add New Hero Slide'}
-                </h3>
-                <button 
-                  onClick={() => {
-                    setIsAddSlideModalOpen(false)
-                    setEditingSlideId(null)
-                  }}
-                  className="text-gray-400 hover:text-gray-500"
+        ) : (
+          <div className="space-y-6">
+            <AnimatePresence mode='popLayout'>
+              {heroSlides.map((slide: any, index: number) => (
+                <motion.div
+                  key={slide.id}
+                  layout
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="group relative bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-auto lg:h-[300px]"
                 >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image *</label>
-                  
-                  {/* Image Preview */}
-                  {newSlideData.imageUrl && (
-                    <div className="mb-3">
-                      <img 
-                        src={newSlideData.imageUrl}
-                        alt="Slide preview"
-                        className="w-full max-h-64 object-contain rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=1974&auto=format&fit=crop';
-                        }}
-                      />
+                  {/* Order Controls - Overlay */}
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <button
+                      onClick={() => updateSlideOrder(slide.id, 'up')}
+                      disabled={index === 0}
+                      className="p-3 bg-white text-primary-900 rounded-2xl shadow-xl border border-gray-100 hover:bg-primary-900 hover:text-white disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-primary-900"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => updateSlideOrder(slide.id, 'down')}
+                      disabled={index === heroSlides.length - 1}
+                      className="p-3 bg-white text-primary-900 rounded-2xl shadow-xl border border-gray-100 hover:bg-primary-900 hover:text-white disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-primary-900"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Left: Preview */}
+                  <div className="lg:w-[450px] relative overflow-hidden bg-gray-900">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary-900/60 to-transparent z-10" />
+                    <img
+                      src={slide.imageUrl}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      alt="Preview"
+                    />
+                    <div className="absolute left-10 top-1/2 -translate-y-1/2 z-20 space-y-2 max-w-[80%]">
+                      <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg inline-flex items-center gap-2 border border-white/20">
+                        <Sparkles className="w-3 h-3 text-white" />
+                        <span className="text-white text-[9px] font-black uppercase tracking-widest">Preview Mode</span>
+                      </div>
+                      <h4 className="text-white text-xl font-black leading-tight drop-shadow-lg">{slide.title || 'Untitled Segment'}</h4>
                     </div>
-                  )}
-                  
-                  {/* Upload Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <label className="relative cursor-pointer bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                        <span className="text-sm font-medium">
-                          {isUploadingNewSlideImage ? 'Uploading...' : 'Upload Image'}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleSlideImageUpload(file);
-                          }}
-                          disabled={isUploadingNewSlideImage}
-                        />
-                      </label>
-                      {newSlideData.imageUrl && (
+                  </div>
+
+                  {/* Right: Intel */}
+                  <div className="flex-1 p-10 flex flex-col justify-between bg-white relative">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">Slide Identity Segment</p>
+                        <h3 className="text-2xl font-black text-primary-900 tracking-tight">{slide.title || 'Cinematic Header'}</h3>
+                        <p className="text-secondary-500 font-medium text-sm line-clamp-2 italic">"{slide.subtitle || 'No subtitle established for this segment'}"</p>
+                      </div>
+
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => setNewSlideData({...newSlideData, imageUrl: ''})}
-                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                          disabled={isUploadingNewSlideImage}
+                          onClick={() => editSlide(slide)}
+                          className="p-3 bg-gray-50 text-primary-900 rounded-2xl hover:bg-primary-900 hover:text-white transition-all shadow-sm"
                         >
-                          Clear Image
+                          <Edit3 className="w-4 h-4" />
                         </button>
-                      )}
+                        <button
+                          onClick={() => setDeleteDialog({ isOpen: true, slideId: slide.id, slideTitle: slide.title })}
+                          className="p-3 bg-gray-50 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    
-                    {/* URL Input as fallback */}
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                      <input 
-                        value={newSlideData.imageUrl || ''} 
-                        onChange={(e) => setNewSlideData({...newSlideData, imageUrl: e.target.value})} 
-                        placeholder="https://example.com/image.jpg"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                        disabled={isUploadingNewSlideImage}
-                      />
+
+                    <div className="flex items-center gap-8 pt-6 border-t border-gray-50 mt-auto">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Call to Action</span>
+                        <div className="flex items-center gap-2 group/cta">
+                          <span className="text-xs font-black text-primary-900 group-hover/cta:translate-x-1 transition-transform cursor-pointer">{slide.ctaLabel || 'Discover More'}</span>
+                          <ArrowRight className="w-3 h-3 text-secondary-300" />
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Protocol Path</span>
+                        <div className="flex items-center gap-2">
+                          <ExternalLink className="w-3 h-3 text-secondary-300" />
+                          <span className="text-xs font-bold text-secondary-400 lowercase">{slide.ctaHref || '#'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+
+      {/* Slide Portal - Modal */}
+      <AnimatePresence>
+        {isAddSlideModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-primary-900/60 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row max-h-[90vh]"
+            >
+              {/* Modal Left: Composition Preview */}
+              <div className="lg:w-80 bg-gray-50 border-r border-gray-100 p-10 flex flex-col gap-8 flex-shrink-0">
+                <div>
+                  <h3 className="text-xl font-black text-primary-900">Composition</h3>
+                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest mt-1">Asset configuration portal</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                    <div className="w-10 h-10 bg-primary-900/5 rounded-2xl flex items-center justify-center text-primary-900"><Camera className="w-5 h-5" /></div>
+                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Primary Visual</p>
+                    <div className="relative aspect-[4/5] bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
+                      <AnimatePresence mode='wait'>
+                        {newSlideData.imageUrl ? (
+                          <motion.img
+                            key={newSlideData.imageUrl}
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                            src={newSlideData.imageUrl}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
+                            <ImageIcon className="w-6 h-6 text-gray-300" />
+                            <span className="text-[8px] font-black text-secondary-300 uppercase tracking-[0.2em]">Pending Asset</span>
+                          </div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                  <input 
-                    value={newSlideData.title} 
-                    onChange={(e) => setNewSlideData({...newSlideData, title: e.target.value})} 
-                    placeholder="Enter slide title"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
+              </div>
+
+              {/* Modal Right: Intelligence Configuration */}
+              <div className="flex-1 flex flex-col overflow-hidden bg-white">
+                <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-white relative z-10">
+                  <h3 className="text-2xl font-black text-primary-900 tracking-tight">{editingSlideId ? 'Modify Sequence' : 'Assemble Segment'}</h3>
+                  <button onClick={() => setIsAddSlideModalOpen(false)} className="p-4 hover:bg-gray-100 rounded-2xl transition-all active:scale-95"><X className="w-6 h-6 text-secondary-400" /></button>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-                  <textarea 
-                    value={newSlideData.subtitle} 
-                    onChange={(e) => setNewSlideData({...newSlideData, subtitle: e.target.value})} 
-                    placeholder="Enter slide subtitle"
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">CTA Button Label</label>
-                    <input 
-                      value={newSlideData.ctaLabel} 
-                      onChange={(e) => setNewSlideData({...newSlideData, ctaLabel: e.target.value})} 
-                      placeholder="e.g., Get Quote"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
+
+                <div className="p-10 flex-1 overflow-y-auto space-y-10 custom-scrollbar">
+                  {/* Asset Upload Segment */}
+                  <div className="space-y-6">
+                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">01. Visual Registry</p>
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="flex-1">
+                        <label className="group relative flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 rounded-[2rem] hover:border-primary-900/30 hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden">
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleSlideImageUpload(e.target.files[0])} />
+                          {isUploadingNewSlideImage ? (
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="w-8 h-8 border-2 border-primary-900/10 border-t-primary-900 rounded-full animate-spin" />
+                              <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Uploading...</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center text-center gap-2">
+                              <Camera className="w-6 h-6 text-secondary-300 group-hover:scale-110 transition-transform" />
+                              <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Inject Asset</span>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                      <div className="flex-[2]">
+                        <input
+                          value={newSlideData.imageUrl}
+                          onChange={(e) => setNewSlideData({ ...newSlideData, imageUrl: e.target.value })}
+                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                          placeholder="Or enter heritage asset URL..."
+                        />
+                        <p className="text-[9px] font-bold text-secondary-400 mt-2 lowercase italic ml-2">Preferred resolution: 1920x1080 cinematic</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">CTA Link</label>
-                    <input 
-                      value={newSlideData.ctaHref} 
-                      onChange={(e) => setNewSlideData({...newSlideData, ctaHref: e.target.value})} 
-                      placeholder="e.g., #contact or /services"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
+
+                  {/* Narrative Segment */}
+                  <div className="space-y-6">
+                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">02. Sequence Narrative</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Primary Directive</label>
+                        <input
+                          value={newSlideData.title}
+                          onChange={(e) => setNewSlideData({ ...newSlideData, title: e.target.value })}
+                          placeholder="e.g. Elevate Your Lifestyle"
+                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Lifecycle Subtext</label>
+                        <input
+                          value={newSlideData.subtitle}
+                          onChange={(e) => setNewSlideData({ ...newSlideData, subtitle: e.target.value })}
+                          placeholder="e.g. Premium maintenance for elite assets"
+                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Action Descriptor</label>
+                        <input
+                          value={newSlideData.ctaLabel}
+                          onChange={(e) => setNewSlideData({ ...newSlideData, ctaLabel: e.target.value })}
+                          placeholder="e.g. Inquire Intelligence"
+                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Redirect Protocol</label>
+                        <input
+                          value={newSlideData.ctaHref}
+                          onChange={(e) => setNewSlideData({ ...newSlideData, ctaHref: e.target.value })}
+                          placeholder="e.g. /services"
+                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-10 border-t border-gray-100 flex items-center justify-between bg-gray-50/30 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <MousePointer2 className="w-5 h-5 text-secondary-300" />
+                    <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest">Deployment Verification Required</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <button onClick={() => setIsAddSlideModalOpen(false)} className="px-8 py-4 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:text-primary-900 transition-all">Abort</button>
+                    <button
+                      onClick={editingSlideId ? saveEditedSlide : createNewSlide}
+                      disabled={!newSlideData.imageUrl.trim() || isUploadingNewSlideImage}
+                      className="px-10 py-4 bg-primary-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary-900/20 active:scale-95 transition-all disabled:opacity-30 flex items-center gap-3"
+                    >
+                      <Layers className="w-4 h-4" />
+                      <span>{editingSlideId ? 'Push Update' : 'Finalize Segment'}</span>
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="p-6 border-t border-gray-200">
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => {
-                    setIsAddSlideModalOpen(false)
-                    setEditingSlideId(null)
-                  }}
-                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={editingSlideId ? saveEditedSlide : createNewSlide}
-                  disabled={!newSlideData.imageUrl.trim() || isUploadingNewSlideImage}
-                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
-                    !newSlideData.imageUrl.trim() || isUploadingNewSlideImage
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
-                  }`}
-                >
-                  <ImageIcon className="w-5 h-5" />
-                  <span>{editingSlideId ? 'Update Slide' : 'Add Slide'}</span>
-                </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Purge Confirmation Dialog */}
+      <AnimatePresence>
+        {deleteDialog.isOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-primary-900/60 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl text-center space-y-8"
+            >
+              <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto shadow-sm shadow-rose-500/10">
+                <Trash2 className="w-8 h-8" />
               </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
-      
-      {/* Delete Confirmation Dialog */}
-      {deleteDialog.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200"
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Confirm Deletion</h3>
-                <button 
-                  onClick={cancelDeleteSlide}
-                  className="text-gray-400 hover:text-gray-500"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+              <div className="space-y-4">
+                <h3 className="text-2xl font-black text-primary-900 tracking-tight uppercase">Confirm Purge Protocol</h3>
+                <p className="text-secondary-500 font-medium">Are you certain you wish to purge <span className="text-primary-900 font-black">"{deleteDialog.slideTitle}"</span> from the cinematic sequence? This operation is irreversible.</p>
               </div>
-              
-              <p className="text-gray-700 mb-6">
-                Are you sure you want to delete the slide <span className="font-semibold">"{deleteDialog.slideTitle}"</span>? 
-                This action cannot be undone.
-              </p>
-              
-              <div className="flex space-x-3">
-                <button
-                  onClick={cancelDeleteSlide}
-                  className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeleteSlide}
-                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors duration-200"
-                >
-                  Delete Slide
-                </button>
+              <div className="flex gap-4">
+                <button onClick={() => setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })} className="flex-1 py-4 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:bg-gray-50 rounded-2xl transition-all">Cancel</button>
+                <button onClick={confirmDeleteSlide} className="flex-1 py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/20 active:scale-95 transition-all">Execute Purge</button>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
