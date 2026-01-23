@@ -348,7 +348,7 @@ export const OverviewTab = ({ setActiveTab }: OverviewTabProps) => {
                             <div className="relative z-10">
                                 <h4 className="text-xs font-black text-accent-500 uppercase tracking-widest mb-2">Internal Benchmark</h4>
                                 <h3 className="text-2xl font-black text-white leading-tight">Service Efficiency is Outstanding</h3>
-                                <p className="text-secondary-400 text-sm mt-3 font-medium">Your current distribution shows a high utilization of service pages vs general content.</p>
+                                <p className="text-primary-100/70 text-sm mt-3 font-medium">Your current distribution shows a high utilization of service pages vs general content.</p>
                             </div>
                             <button
                                 onClick={() => setActiveTab('analytics')}
