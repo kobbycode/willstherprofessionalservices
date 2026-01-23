@@ -117,7 +117,7 @@ const AdminDashboard = () => {
 
   return (
     <AdminAuth>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         <AdminHeader
           title="Admin Dashboard"
           subtitle="Professional Services Management"
@@ -128,9 +128,9 @@ const AdminDashboard = () => {
           onLogoutClick={() => setShowLogoutDialog(true)}
         />
 
-        <div className="flex flex-col lg:flex-row">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
           {/* Sidebar Navigation */}
-          <div className={`w-full lg:w-72 bg-primary-900 shadow-premium border-r border-white/10 min-h-screen lg:min-h-0 transition-all duration-300 z-40 lg:z-auto ${isMobileMenuOpen ? 'block' : 'hidden lg:block'
+          <div className={`w-full lg:w-72 bg-primary-900 shadow-premium border-r border-white/10 lg:h-full overflow-y-auto transition-all duration-300 z-40 lg:z-auto custom-scrollbar ${isMobileMenuOpen ? 'flex' : 'hidden lg:flex'
             }`}>
             <nav className="p-4 sm:p-6 space-y-8">
               <div>
@@ -242,7 +242,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 p-3 sm:p-4 lg:p-6 xl:p-8">
+          <div className="flex-1 lg:h-full overflow-y-auto p-3 sm:p-4 lg:p-6 xl:p-8 custom-scrollbar">
             {activeTab === 'overview' && (
               <OverviewTab setActiveTab={setActiveTab} />
             )}
