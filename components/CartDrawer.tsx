@@ -5,7 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useShop } from '@/context/ShopContext'
 import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 
-import { CheckoutModal } from './CheckoutModal'
+import dynamic from 'next/dynamic'
+
+const CheckoutModal = dynamic(
+    () => import('./CheckoutModal').then((mod) => mod.CheckoutModal),
+    { ssr: false }
+)
 
 export const CartDrawer = () => {
     const { isCartOpen, setIsCartOpen, cart, updateQuantity, removeFromCart, cartTotal } = useShop()
