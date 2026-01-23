@@ -110,6 +110,7 @@ export const defaultSiteConfig: SiteConfig = {
 		{ name: 'Home', href: '#home', isHash: true, enabled: true },
 		{ name: 'About', href: '#about', isHash: true, enabled: true },
 		{ name: 'Services', href: '#services', isHash: true, enabled: true },
+		{ name: 'Shop', href: '/shop', isHash: false, enabled: true },
 		{ name: 'Blog', href: '/blog', isHash: false, enabled: true },
 		{ name: 'Contact', href: '#contact', isHash: true, enabled: true }
 	],
@@ -192,12 +193,12 @@ export function useSiteConfig() {
 	const loadFromServer = useCallback(async () => {
 		try {
 			if (typeof window === 'undefined') return
-			
+
 			// Load site config
 			const configRes = await fetch('/api/config/get', { cache: 'no-store' })
 			if (!configRes.ok) throw new Error(`HTTP ${configRes.status}`)
 			const { config: remoteConfig } = await configRes.json()
-			
+
 			// Load slides separately
 			const slidesRes = await fetch('/api/slides', { cache: 'no-store' })
 			// Even if slides fail to load, continue with the config
@@ -208,10 +209,10 @@ export function useSiteConfig() {
 			} else {
 				console.warn('Failed to load slides, using empty array')
 			}
-			
+
 			if (remoteConfig && typeof remoteConfig === 'object') {
-				const merged = { 
-					...defaultSiteConfig, 
+				const merged = {
+					...defaultSiteConfig,
 					...remoteConfig,
 					heroSlides: slides
 				}
@@ -252,7 +253,7 @@ export function useSiteConfig() {
 						id: doc.id,
 						...(doc.data() as any)
 					})) as HeroSlide[]
-					
+
 					setConfig((prev) => {
 						const next = { ...prev, heroSlides: slides }
 						saveSiteConfigToLocal(next)
@@ -281,21 +282,21 @@ export function useSiteConfig() {
 	const save = useCallback((next: SiteConfig) => {
 		setConfig(next)
 		saveSiteConfigToLocal(next)
-		;(async () => {
-			try {
-				// Check if we're on the client side
-				if (typeof window === 'undefined') return
-				
-				const db = getDb()
-				if (db) {
-					const ref = doc(db, 'config', 'hero')
-					await setDoc(ref, next, { merge: true })
+			; (async () => {
+				try {
+					// Check if we're on the client side
+					if (typeof window === 'undefined') return
+
+					const db = getDb()
+					if (db) {
+						const ref = doc(db, 'config', 'hero')
+						await setDoc(ref, next, { merge: true })
+					}
+				} catch (error) {
+					console.warn('Failed to save config to Firestore:', error)
+					// Continue without saving to Firestore
 				}
-			} catch (error) {
-				console.warn('Failed to save config to Firestore:', error)
-				// Continue without saving to Firestore
-			}
-		})()
+			})()
 	}, [])
 
 	const refresh = useCallback(() => {

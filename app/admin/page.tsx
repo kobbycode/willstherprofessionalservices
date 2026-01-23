@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Users, 
-  FileText, 
-  Settings, 
-  BarChart3, 
-  MessageSquare, 
+import {
+  Users,
+  FileText,
+  Settings,
+  BarChart3,
+  MessageSquare,
   Calendar,
   TrendingUp,
   Eye,
@@ -29,7 +29,8 @@ import {
   Mail,
   Phone,
   X,
-  User as UserIcon
+  User as UserIcon,
+  ShoppingBag
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDateHuman } from '@/lib/date'
@@ -46,6 +47,7 @@ import { getDb } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import HeroConfig from './HeroConfig'
 import ServicesConfig from './ServicesConfig'
+import ShopManagement from './ShopManagement'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -120,8 +122,8 @@ const AdminDashboard = () => {
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 text-sm font-semibold rounded-full border border-green-200">
                     Live System
-                </span>
-              </div>
+                  </span>
+                </div>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
@@ -135,8 +137,8 @@ const AdminDashboard = () => {
                     <MenuIcon className="w-5 h-5" />
                   )}
                 </button>
-                <Link 
-                  href="/admin/profile" 
+                <Link
+                  href="/admin/profile"
                   className="p-2 sm:p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 group"
                   title="Profile"
                 >
@@ -145,9 +147,9 @@ const AdminDashboard = () => {
                 <div className="flex items-center space-x-2 sm:space-x-3 bg-gray-50 rounded-xl px-3 py-2 sm:px-4">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
                     {user?.photoURL ? (
-                      <img 
-                        src={user.photoURL} 
-                        alt="Profile" 
+                      <img
+                        src={user.photoURL}
+                        alt="Profile"
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
@@ -176,38 +178,37 @@ const AdminDashboard = () => {
 
         <div className="flex flex-col lg:flex-row">
           {/* Sidebar Navigation */}
-          <div className={`w-full lg:w-72 bg-white shadow-xl border-r border-gray-200 min-h-screen lg:min-h-0 transition-all duration-300 z-40 lg:z-auto ${
-            isMobileMenuOpen ? 'block' : 'hidden lg:block'
-          }`}>
+          <div className={`w-full lg:w-72 bg-white shadow-xl border-r border-gray-200 min-h-screen lg:min-h-0 transition-all duration-300 z-40 lg:z-auto ${isMobileMenuOpen ? 'block' : 'hidden lg:block'
+            }`}>
             <nav className="p-4 sm:p-6">
               <div className="mb-6 sm:mb-8">
                 <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Navigation</h2>
                 <div className="space-y-1">
                   {[
                     { id: 'overview', label: 'Overview', icon: BarChart3, color: 'from-blue-500 to-blue-600' },
+                    { id: 'shop', label: 'Shop Management', icon: ShoppingBag, color: 'from-purple-600 to-pink-600' },
                     { id: 'blog', label: 'Blog Management', icon: FileText, color: 'from-green-500 to-green-600' },
                     { id: 'categories', label: 'Categories', icon: Filter, color: 'from-purple-500 to-purple-600' },
                     { id: 'users', label: 'User Management', icon: Users, color: 'from-orange-500 to-orange-600' },
                     { id: 'contact', label: 'Contact Forms', icon: MessageSquare, color: 'from-pink-500 to-pink-600' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
+                  ].map((item) => (
+                    <button
+                      key={item.id}
                       onClick={() => {
                         setActiveTab(item.id)
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
-                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${
-                        activeTab === item.id
+                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
                           ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
                           : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
-                      }`}
+                        }`}
                     >
                       <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
                         <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
                       </div>
                       <span className="font-semibold text-sm sm:text-base">{item.label}</span>
-                  </button>
-                ))}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -227,11 +228,10 @@ const AdminDashboard = () => {
                         setActiveTab(item.id)
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
-                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${
-                        activeTab === item.id
+                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
                           ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
                           : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
-                      }`}
+                        }`}
                     >
                       <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
                         <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
@@ -258,11 +258,10 @@ const AdminDashboard = () => {
                         setActiveTab(item.id)
                         setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
                       }}
-                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${
-                        activeTab === item.id
+                      className={`w-full flex items-center space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-left transition-all duration-200 group ${activeTab === item.id
                           ? `bg-gradient-to-r ${item.color} text-white shadow-lg transform scale-105`
                           : 'text-gray-600 hover:bg-gray-50 hover:shadow-md'
-                      }`}
+                        }`}
                     >
                       <div className={`p-1.5 sm:p-2 rounded-lg ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'}`}>
                         <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
@@ -294,6 +293,10 @@ const AdminDashboard = () => {
           <div className="flex-1 p-3 sm:p-4 lg:p-6 xl:p-8">
             {activeTab === 'overview' && (
               <OverviewTab setActiveTab={setActiveTab} />
+            )}
+
+            {activeTab === 'shop' && (
+              <ShopManagement />
             )}
 
             {activeTab === 'blog' && (
@@ -357,19 +360,19 @@ const AdminDashboard = () => {
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">
-              <button 
-                onClick={resetConfig} 
+              <button
+                onClick={resetConfig}
                 className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold"
               >
                 🔄 Reset to Default
               </button>
-              <button 
+              <button
                 onClick={() => {
                   console.log('Saving all config:', config)
                   console.log('Hero slides:', config.heroSlides)
                   saveConfig(config)
                   toast.success('All website settings saved successfully! 🎉')
-                }} 
+                }}
                 className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-200 hover:shadow-xl transform hover:scale-105"
               >
                 💾 Save All Changes
@@ -397,11 +400,11 @@ const AdminDashboard = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to log out?</p>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-6">
               You will be signed out of your account and redirected to the login page. You will need to log in again to access the admin dashboard.
             </p>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowLogoutDialog(false)}
@@ -469,44 +472,44 @@ const BlogManagement = () => {
   // Realtime subscription to posts so UI updates immediately
   useEffect(() => {
     let unsubscribe: undefined | (() => void)
-    ;(async () => {
-      try {
-        const { getDb } = await import('@/lib/firebase')
-        const { collection, query, orderBy, onSnapshot, limit: fsLimit } = await import('firebase/firestore')
-        const db = getDb()
-        const colRef = collection(db, 'posts')
-        let q: any
+      ; (async () => {
         try {
-          q = query(colRef, orderBy('createdAt', 'desc'), fsLimit(50))
-        } catch {
-          q = query(colRef, fsLimit(50))
-        }
-        unsubscribe = onSnapshot(q, (snap: import('firebase/firestore').QuerySnapshot<import('firebase/firestore').DocumentData>) => {
-          const list = snap.docs.map((d: any) => {
-            const data = d.data() || {}
-            return {
-              id: d.id,
-              title: data.title || '',
-              excerpt: data.excerpt || '',
-              content: data.content || '',
-              author: data.author || 'Willsther Team',
-              date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-              readTime: data.readTime || '1 min read',
-              category: data.category || 'General',
-              image: data.image || '',
-              tags: Array.isArray(data.tags) ? data.tags : [],
-              status: data.status || 'draft',
-              views: data.views || 0,
-              createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-              updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
-            } as BlogPost
+          const { getDb } = await import('@/lib/firebase')
+          const { collection, query, orderBy, onSnapshot, limit: fsLimit } = await import('firebase/firestore')
+          const db = getDb()
+          const colRef = collection(db, 'posts')
+          let q: any
+          try {
+            q = query(colRef, orderBy('createdAt', 'desc'), fsLimit(50))
+          } catch {
+            q = query(colRef, fsLimit(50))
+          }
+          unsubscribe = onSnapshot(q, (snap: import('firebase/firestore').QuerySnapshot<import('firebase/firestore').DocumentData>) => {
+            const list = snap.docs.map((d: any) => {
+              const data = d.data() || {}
+              return {
+                id: d.id,
+                title: data.title || '',
+                excerpt: data.excerpt || '',
+                content: data.content || '',
+                author: data.author || 'Willsther Team',
+                date: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+                readTime: data.readTime || '1 min read',
+                category: data.category || 'General',
+                image: data.image || '',
+                tags: Array.isArray(data.tags) ? data.tags : [],
+                status: data.status || 'draft',
+                views: data.views || 0,
+                createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+                updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+              } as BlogPost
+            })
+            setPosts(list)
           })
-          setPosts(list)
-        })
-      } catch (e) {
-        // ignore subscription errors
-      }
-    })()
+        } catch (e) {
+          // ignore subscription errors
+        }
+      })()
     return () => { if (unsubscribe) unsubscribe() }
   }, [])
 
@@ -602,7 +605,7 @@ const BlogManagement = () => {
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
+      post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || post.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -626,13 +629,13 @@ const BlogManagement = () => {
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Blog Management</h2>
             <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your blog posts and categories</p>
             <div className="flex flex-wrap gap-2 mt-2">
-              <Link 
-                href="/admin/test-status-fix" 
+              <Link
+                href="/admin/test-status-fix"
                 className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
               >
                 Fix Post Status
               </Link>
-              <button 
+              <button
                 onClick={async () => {
                   if (confirm('Publish all draft posts? This will make all posts visible on the website.')) {
                     try {
@@ -655,15 +658,15 @@ const BlogManagement = () => {
               </button>
             </div>
           </div>
-        <button
-          onClick={openCreate}
+          <button
+            onClick={openCreate}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center sm:justify-start space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
-        >
+          >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span>New Post</span>
-        </button>
+            <span>New Post</span>
+          </button>
         </div>
-        
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 sm:p-4 rounded-2xl shadow-lg">
@@ -778,8 +781,8 @@ const BlogManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                       {post.image ? (
-                        <img 
-                          src={post.image} 
+                        <img
+                          src={post.image}
                           alt={post.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -805,11 +808,10 @@ const BlogManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      post.status === 'published' 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${post.status === 'published'
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                      }`}>
                       {post.status}
                     </span>
                   </td>
@@ -819,23 +821,23 @@ const BlogManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateHuman(post.date, 'en-GB')}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button 
+                      <button
                         onClick={() => openEdit(post)}
                         className="text-blue-600 hover:text-blue-900"
                         title="Edit post"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      
+
                       {post.status === 'published' ? (
-                        <button 
+                        <button
                           className="text-yellow-600 hover:text-yellow-900"
                           title="Set as draft"
                           onClick={async () => {
                             try {
                               const { updatePostStatus } = await import('@/lib/blog')
                               await updatePostStatus(post.id, 'draft')
-                              setPosts((prev) => prev.map((p) => 
+                              setPosts((prev) => prev.map((p) =>
                                 p.id === post.id ? { ...p, status: 'draft' } : p
                               ))
                               toast.success('Post set as draft')
@@ -845,16 +847,16 @@ const BlogManagement = () => {
                           }}
                         >
                           <EyeOff className="w-4 h-4" />
-                      </button>
+                        </button>
                       ) : (
-                        <button 
+                        <button
                           className="text-green-600 hover:text-green-900"
                           title="Publish post"
                           onClick={async () => {
                             try {
                               const { updatePostStatus } = await import('@/lib/blog')
                               await updatePostStatus(post.id, 'published')
-                              setPosts((prev) => prev.map((p) => 
+                              setPosts((prev) => prev.map((p) =>
                                 p.id === post.id ? { ...p, status: 'published' } : p
                               ))
                               toast.success('Post published')
@@ -866,8 +868,8 @@ const BlogManagement = () => {
                           <Eye className="w-4 h-4" />
                         </button>
                       )}
-                      
-                      <button 
+
+                      <button
                         className="text-red-600 hover:text-red-900"
                         title="Delete post"
                         onClick={() => setShowDeleteDialog(post.id)}
@@ -896,11 +898,11 @@ const BlogManagement = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to delete this post?</p>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-6">
               This action cannot be undone. The post will be permanently removed from the system.
             </p>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteDialog(null)}
@@ -1081,8 +1083,8 @@ const CategoriesManagement = () => {
                   <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                     {editingId === c.id ? (
                       <>
-                        <button 
-                          className="text-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm" 
+                        <button
+                          className="text-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                           disabled={isUpdating}
                           onClick={async () => {
                             setIsUpdating(true)
@@ -1106,8 +1108,8 @@ const CategoriesManagement = () => {
                     ) : (
                       <>
                         <button className="text-blue-600 text-sm" onClick={() => { setEditingId(c.id); setEditingName(c.name) }}>Edit</button>
-                        <button 
-                          className="text-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm" 
+                        <button
+                          className="text-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                           disabled={isDeleting === c.id}
                           onClick={async () => {
                             setIsDeleting(c.id)
@@ -1170,7 +1172,7 @@ const UserManagement = () => {
     try {
       const { deleteUser } = await import('@/lib/users')
       const success = await deleteUser(userId)
-      
+
       if (success) {
         setUsers(prev => prev.filter(user => user.id !== userId))
         toast.success('User deleted successfully')
@@ -1190,7 +1192,7 @@ const UserManagement = () => {
     try {
       const { updateUser } = await import('@/lib/users')
       await updateUser(userId, { role: newRole })
-      setUsers(prev => prev.map(user => 
+      setUsers(prev => prev.map(user =>
         user.id === userId ? { ...user, role: newRole } : user
       ))
       toast.success('User role updated successfully')
@@ -1204,7 +1206,7 @@ const UserManagement = () => {
     try {
       const { updateUser } = await import('@/lib/users')
       await updateUser(userId, { status: newStatus })
-      setUsers(prev => prev.map(user => 
+      setUsers(prev => prev.map(user =>
         user.id === userId ? { ...user, status: newStatus } : user
       ))
       toast.success('User status updated successfully')
@@ -1216,10 +1218,10 @@ const UserManagement = () => {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter
     const matchesRole = roleFilter === 'all' || user.role === roleFilter
-    
+
     return matchesSearch && matchesStatus && matchesRole
   })
 
@@ -1266,7 +1268,7 @@ const UserManagement = () => {
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">User Management</h2>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage user accounts and permissions</p>
         </div>
-        <Link 
+        <Link
           href="/admin/users/new"
           className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center sm:justify-start space-x-2 w-full sm:w-auto"
         >
@@ -1288,7 +1290,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1300,7 +1302,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1312,7 +1314,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -1342,7 +1344,7 @@ const UserManagement = () => {
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Filter by Status</label>
             <select
@@ -1356,7 +1358,7 @@ const UserManagement = () => {
               <option value="pending">Pending</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Filter by Role</label>
             <select
@@ -1381,48 +1383,48 @@ const UserManagement = () => {
             <p className="text-gray-600 mt-2 text-sm">Loading users...</p>
           </div>
         ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Department</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">Permissions</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Last Login</th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Department</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">Permissions</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Last Login</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-3 sm:px-6 py-8 text-center text-gray-500 text-sm">
-                      {searchTerm || statusFilter !== 'all' || roleFilter !== 'all' 
-                        ? 'No users match your filters' 
+                      {searchTerm || statusFilter !== 'all' || roleFilter !== 'all'
+                        ? 'No users match your filters'
                         : 'No users found'}
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full flex items-center justify-center mr-2 sm:mr-3">
                             <span className="text-xs sm:text-sm font-medium text-gray-600">
                               {user.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium text-gray-900 truncate">{user.name}</div>
-                      <div className="text-xs sm:text-sm text-gray-500 truncate">{user.email}</div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium text-gray-900 truncate">{user.name}</div>
+                            <div className="text-xs sm:text-sm text-gray-500 truncate">{user.email}</div>
                             {user.phone && (
                               <div className="text-xs text-gray-400 truncate">{user.phone}</div>
                             )}
                           </div>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         <select
                           value={user.role}
                           onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'editor' | 'user')}
@@ -1432,8 +1434,8 @@ const UserManagement = () => {
                           <option value="editor">Editor</option>
                           <option value="user">User</option>
                         </select>
-                  </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         <select
                           value={user.status}
                           onChange={(e) => handleStatusChange(user.id, e.target.value as 'active' | 'inactive' | 'pending')}
@@ -1455,37 +1457,37 @@ const UserManagement = () => {
                               className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full"
                             >
                               {permission === 'all' ? 'All' : permission}
-                    </span>
+                            </span>
                           ))}
                         </div>
-                  </td>
+                      </td>
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
                         {user.lastLogin ? formatDate(user.lastLogin) : 'Never'}
                       </td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-1 sm:space-x-2">
                           <Link
                             href={`/admin/users/edit/${user.id}`}
                             className="text-blue-600 hover:text-blue-900 transition-colors p-1"
                             title="Edit user"
                           >
-                        <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </Link>
-                          <button 
+                          <button
                             onClick={() => setShowDeleteDialog({ userId: user.id, userName: user.name })}
                             className="text-red-600 hover:text-red-900 transition-colors"
                             title="Delete user"
                           >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))
                 )}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -1502,11 +1504,11 @@ const UserManagement = () => {
                 <p className="text-sm text-gray-600">Are you sure you want to delete this user?</p>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-6">
               Are you sure you want to delete <strong>{showDeleteDialog.userName}</strong>? This action cannot be undone.
             </p>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeleteDialog(null)}
@@ -1586,7 +1588,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         const { fetchCategories } = await import('@/lib/categories')
         const { getUserStats } = await import('@/lib/users')
         const { useSiteConfig } = await import('@/lib/site-config')
-        
+
         const [posts, categories, userStats] = await Promise.all([
           fetchPosts(false), // Get all posts including drafts
           fetchCategories(),
@@ -1599,7 +1601,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         // Calculate blog statistics
         const publishedPosts = posts.filter(p => p.status === 'published')
         const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0)
-        
+
         // Get popular posts (top 5 by views)
         const popularPosts = posts
           .filter(p => p.status === 'published')
@@ -1635,7 +1637,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         }
       }
     }
-    
+
     loadAnalytics()
     return () => { active = false }
   }, [])
@@ -1728,33 +1730,33 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
               </div>
             </div>
           </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Blog Statistics */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Blog Statistics</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Total Posts</span>
                   <span className="text-lg font-bold text-gray-900">{analytics.blogStats.totalPosts}</span>
-            </div>
-            <div className="flex items-center justify-between">
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Published Posts</span>
                   <span className="text-lg font-bold text-green-600">{analytics.blogStats.publishedPosts}</span>
-            </div>
-            <div className="flex items-center justify-between">
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Draft Posts</span>
                   <span className="text-lg font-bold text-yellow-600">{analytics.blogStats.draftPosts}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Categories</span>
                   <span className="text-lg font-bold text-blue-600">{analytics.siteStats.categories}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
             {/* Popular Posts */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Posts</h3>
               <div className="space-y-3">
                 {analytics.popularPosts.length === 0 ? (
@@ -1779,21 +1781,21 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">User Statistics</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Total Users</span>
                   <span className="text-sm font-medium text-gray-900">{analytics.userStats.total}</span>
-            </div>
-            <div className="flex items-center justify-between">
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Active Users</span>
                   <span className="text-sm font-medium text-green-600">{analytics.userStats.active}</span>
-            </div>
-            <div className="flex items-center justify-between">
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Administrators</span>
                   <span className="text-sm font-medium text-red-600">{analytics.userStats.admins}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Website Content</h3>
@@ -1801,7 +1803,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Hero Slides</span>
                   <span className="text-sm font-medium text-gray-900">{analytics.siteStats.heroSlides}</span>
-      </div>
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Services</span>
                   <span className="text-sm font-medium text-gray-900">{analytics.siteStats.services}</span>
@@ -1819,7 +1821,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Avg. Views per Post</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {analytics.blogStats.publishedPosts > 0 
+                    {analytics.blogStats.publishedPosts > 0
                       ? Math.round(analytics.blogStats.totalViews / analytics.blogStats.publishedPosts)
                       : 0}
                   </span>
@@ -1827,7 +1829,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Publish Rate</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {analytics.blogStats.totalPosts > 0 
+                    {analytics.blogStats.totalPosts > 0
                       ? Math.round((analytics.blogStats.publishedPosts / analytics.blogStats.totalPosts) * 100)
                       : 0}%
                   </span>
@@ -1835,7 +1837,7 @@ const OverviewTab = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">User Activity</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {analytics.userStats.total > 0 
+                    {analytics.userStats.total > 0
                       ? Math.round((analytics.userStats.active / analytics.userStats.total) * 100)
                       : 0}%
                   </span>
@@ -1908,10 +1910,10 @@ const ContactManagement = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3 sm:px-4 py-3 border-b space-y-3 sm:space-y-0">
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => setFilter('all')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter==='all'?'bg-blue-600 text-white':'bg-gray-100 text-gray-700'}`}>All</button>
-            <button onClick={() => setFilter('new')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter==='new'?'bg-blue-600 text-white':'bg-gray-100 text-gray-700'}`}>New</button>
-            <button onClick={() => setFilter('in_progress')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter==='in_progress'?'bg-blue-600 text-white':'bg-gray-100 text-gray-700'}`}>In Progress</button>
-            <button onClick={() => setFilter('completed')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter==='completed'?'bg-blue-600 text-white':'bg-gray-100 text-gray-700'}`}>Completed</button>
+            <button onClick={() => setFilter('all')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>All</button>
+            <button onClick={() => setFilter('new')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter === 'new' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>New</button>
+            <button onClick={() => setFilter('in_progress')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter === 'in_progress' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>In Progress</button>
+            <button onClick={() => setFilter('completed')} className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm ${filter === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Completed</button>
           </div>
           <div className="text-xs sm:text-sm text-gray-600">{filtered.length} submissions</div>
         </div>
@@ -1934,15 +1936,15 @@ const ContactManagement = () => {
               ) : (
                 filtered.map((s) => (
                   <tr key={s.id} className="hover:bg-gray-50 align-top">
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div>
                         <div className="text-sm font-medium text-gray-900">{s.firstName} {s.lastName}</div>
                         <div className="text-xs sm:text-sm text-gray-500">{s.email}{s.phone ? ` · ${s.phone}` : ''}</div>
                         <div className="text-xs text-gray-500 mt-2 max-w-md line-clamp-2">{s.message}</div>
-                    </div>
-                  </td>
+                      </div>
+                    </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">{s.service || '—'}</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <select
                         value={s.status}
                         onChange={(e) => changeStatus(s.id, e.target.value as any)}
@@ -1952,19 +1954,19 @@ const ContactManagement = () => {
                         <option value="in_progress">In Progress</option>
                         <option value="completed">Completed</option>
                       </select>
-                  </td>
+                    </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">{formatDateHuman(s.createdAt || '')}</td>
-                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-1 sm:space-x-2">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-1 sm:space-x-2">
                         <button title="View" className="text-blue-600 hover:text-blue-900 p-1">
-                        <Eye className="w-4 h-4" />
-                      </button>
+                          <Eye className="w-4 h-4" />
+                        </button>
                         <button title="Delete" onClick={() => remove(s.id)} className="text-red-600 hover:text-red-800 p-1">
                           <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))
               )}
             </tbody>
@@ -2019,7 +2021,7 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
             <input
               type="text"
               value={settings.siteName}
-              onChange={(e) => setSettings({...settings, siteName: e.target.value})}
+              onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -2030,7 +2032,7 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
             </label>
             <textarea
               value={settings.siteDescription}
-              onChange={(e) => setSettings({...settings, siteDescription: e.target.value})}
+              onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -2044,7 +2046,7 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
               <input
                 type="email"
                 value={settings.contactEmail}
-                onChange={(e) => setSettings({...settings, contactEmail: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -2056,7 +2058,7 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
               <input
                 type="text"
                 value={settings.contactPhone}
-                onChange={(e) => setSettings({...settings, contactPhone: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -2067,7 +2069,7 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
               type="checkbox"
               id="maintenanceMode"
               checked={settings.maintenanceMode}
-              onChange={(e) => setSettings({...settings, maintenanceMode: e.target.checked})}
+              onChange={(e) => setSettings({ ...settings, maintenanceMode: e.target.checked })}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="maintenanceMode" className="ml-2 block text-sm text-gray-900">
@@ -2105,7 +2107,7 @@ const WebsiteSettings = ({ config, onChange }: { config: any; onChange: (next: a
 // Config tabs (Hero, Services, About, Navigation, Footer, SEO, Map, Testimonials, Gallery)
 
 const NavigationConfig = ({ config, onChange }: any) => {
-  const navigation = config.navigation || { 
+  const navigation = config.navigation || {
     main: [
       { name: 'Services', href: '/services' },
       { name: 'About', href: '/about' },
@@ -2118,37 +2120,37 @@ const NavigationConfig = ({ config, onChange }: any) => {
       { name: 'Terms of Service', href: '/terms-of-service' }
     ]
   }
-  
+
   const update = (key: string, value: any) => onChange({ ...config, navigation: { ...navigation, [key]: value } })
-  
+
   const updateMainLink = (index: number, field: string, value: string) => {
     const newMain = [...navigation.main]
     newMain[index] = { ...newMain[index], [field]: value }
     update('main', newMain)
   }
-  
+
   const updateLegalLink = (index: number, field: string, value: string) => {
     const newLegal = [...navigation.legal]
     newLegal[index] = { ...newLegal[index], [field]: value }
     update('legal', newLegal)
   }
-  
+
   const addMainLink = () => {
     update('main', [...navigation.main, { name: 'New Link', href: '#' }])
   }
-  
+
   const addLegalLink = () => {
     update('legal', [...navigation.legal, { name: 'New Legal Link', href: '#' }])
   }
-  
+
   const removeMainLink = (index: number) => {
     update('main', navigation.main.filter((_: any, i: number) => i !== index))
   }
-  
+
   const removeLegalLink = (index: number) => {
     update('legal', navigation.legal.filter((_: any, i: number) => i !== index))
   }
-  
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <ConfigHeader title="Navigation" subtitle="Manage website navigation links" />
@@ -2188,7 +2190,7 @@ const NavigationConfig = ({ config, onChange }: any) => {
             </button>
           </div>
         </div>
-        
+
         {/* Legal Navigation */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Navigation</h3>
@@ -2251,13 +2253,13 @@ const FooterConfig = ({ config, onChange }: any) => {
   }
   const handleNewSocialLinkImageUpload = async (file: File) => {
     if (!file) return
-    
+
     setIsUploading(true)
-    
+
     try {
       const { uploadImage } = await import('@/lib/storage')
       const imageUrl = await uploadImage(file, `social-links/${Date.now()}`)
-      setNewSocialLink({...newSocialLink, icon: imageUrl})
+      setNewSocialLink({ ...newSocialLink, icon: imageUrl })
       toast.success('Social link icon uploaded successfully!')
     } catch (error) {
       console.error('Failed to upload social link icon:', error)
@@ -2276,22 +2278,22 @@ const FooterConfig = ({ config, onChange }: any) => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Copyright</label>
-              <input 
-                value={footer.copyright} 
-                onChange={(e) => update('copyright', e.target.value)} 
+              <input
+                value={footer.copyright}
+                onChange={(e) => update('copyright', e.target.value)}
                 placeholder="Enter copyright text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </div>
-          
+
           {/* Social Links Section */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Social Links</label>
               {footer.socialLinks.map((link: any, index: number) => (
                 <div key={index} className="flex items-center space-x-3">
-                  <img 
+                  <img
                     src={link.icon}
                     alt={link.name}
                     className="w-8 h-8 object-cover rounded-full border border-gray-200"
@@ -2320,11 +2322,11 @@ const FooterConfig = ({ config, onChange }: any) => {
           </div>
         </div>
       </div>
-      
+
       {/* Add Social Link Modal */}
       {isAddSocialLinkModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200"
@@ -2332,42 +2334,42 @@ const FooterConfig = ({ config, onChange }: any) => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">Add New Social Link</h3>
-                <button 
+                <button
                   onClick={() => setIsAddSocialLinkModalOpen(false)}
                   className="text-gray-400 hover:text-gray-500"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Social Link Name *</label>
-                  <input 
-                    value={newSocialLink.name} 
-                    onChange={(e) => setNewSocialLink({...newSocialLink, name: e.target.value})} 
+                  <input
+                    value={newSocialLink.name}
+                    onChange={(e) => setNewSocialLink({ ...newSocialLink, name: e.target.value })}
                     placeholder="Enter social link name"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Social Link URL</label>
-                  <input 
-                    value={newSocialLink.url} 
-                    onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})} 
+                  <input
+                    value={newSocialLink.url}
+                    onChange={(e) => setNewSocialLink({ ...newSocialLink, url: e.target.value })}
                     placeholder="Enter social link URL"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Social Link Icon</label>
-                  
+
                   {/* Image Preview */}
                   {newSocialLink.icon && (
                     <div className="mb-3">
-                      <img 
+                      <img
                         src={newSocialLink.icon}
                         alt="Social link preview"
                         className="w-full h-12 object-cover rounded-lg border border-gray-200"
@@ -2377,7 +2379,7 @@ const FooterConfig = ({ config, onChange }: any) => {
                       />
                     </div>
                   )}
-                  
+
                   {/* Upload Section */}
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -2398,7 +2400,7 @@ const FooterConfig = ({ config, onChange }: any) => {
                       </label>
                       {newSocialLink.icon && (
                         <button
-                          onClick={() => setNewSocialLink({...newSocialLink, icon: ''})}
+                          onClick={() => setNewSocialLink({ ...newSocialLink, icon: '' })}
                           className="px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
                           disabled={isUploading}
                         >
@@ -2406,22 +2408,22 @@ const FooterConfig = ({ config, onChange }: any) => {
                         </button>
                       )}
                     </div>
-                    
+
                     {/* URL Input as fallback */}
                     <div>
                       <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                      <input 
-                        value={newSocialLink.icon || ''} 
-                        onChange={(e) => setNewSocialLink({...newSocialLink, icon: e.target.value})} 
+                      <input
+                        value={newSocialLink.icon || ''}
+                        onChange={(e) => setNewSocialLink({ ...newSocialLink, icon: e.target.value })}
                         placeholder="https://example.com/image.jpg"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         disabled={isUploading}
                       />
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex space-x-3 mt-8">
                 <button
                   onClick={() => setIsAddSocialLinkModalOpen(false)}
@@ -2432,11 +2434,10 @@ const FooterConfig = ({ config, onChange }: any) => {
                 <button
                   onClick={addSocialLink}
                   disabled={!newSocialLink.name.trim()}
-                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
-                    !newSocialLink.name.trim() 
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${!newSocialLink.name.trim()
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
-                  }`}
+                    }`}
                 >
                   <Plus className="w-5 h-5" />
                   <span>Add Social Link</span>
@@ -2446,11 +2447,11 @@ const FooterConfig = ({ config, onChange }: any) => {
           </motion.div>
         </div>
       )}
-      
+
       {/* Delete Confirmation Dialog */}
       {socialLinkToDelete !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200"
@@ -2492,14 +2493,14 @@ const FooterConfig = ({ config, onChange }: any) => {
 const AboutConfig = ({ config, onChange }: any) => {
   const about = config.about || { title: '', content: '', imageUrl: '' }
   const [isUploading, setIsUploading] = useState(false)
-  
+
   const update = (key: string, value: string) => onChange({ ...config, about: { ...about, [key]: value } })
-  
+
   const handleAboutImageUpload = async (file: File) => {
     if (!file) return
-    
+
     setIsUploading(true)
-    
+
     try {
       const { uploadImage } = await import('@/lib/storage')
       const imageUrl = await uploadImage(file, `about/about-${Date.now()}`)
@@ -2522,35 +2523,35 @@ const AboutConfig = ({ config, onChange }: any) => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-              <input 
-                value={about.title} 
-                onChange={(e) => update('title', e.target.value)} 
+              <input
+                value={about.title}
+                onChange={(e) => update('title', e.target.value)}
                 placeholder="Enter about section title"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-              <textarea 
-                value={about.content} 
-                onChange={(e) => update('content', e.target.value)} 
+              <textarea
+                value={about.content}
+                onChange={(e) => update('content', e.target.value)}
                 placeholder="Enter about section content"
                 rows={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </div>
-          
+
           {/* Image Section */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">About Image</label>
-              
+
               {/* Image Preview */}
               {about.imageUrl && (
                 <div className="mb-3">
-                  <img 
+                  <img
                     src={about.imageUrl}
                     alt="About"
                     className="w-full h-48 object-cover rounded-lg border border-gray-200"
@@ -2560,7 +2561,7 @@ const AboutConfig = ({ config, onChange }: any) => {
                   />
                 </div>
               )}
-              
+
               {/* Upload Section */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
@@ -2589,15 +2590,15 @@ const AboutConfig = ({ config, onChange }: any) => {
                     </button>
                   )}
                 </div>
-                
+
                 {/* URL Input as fallback */}
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Or enter image URL:</label>
-                  <input 
-                    value={about.imageUrl || ''} 
-                    onChange={(e) => update('imageUrl', e.target.value)} 
+                  <input
+                    value={about.imageUrl || ''}
+                    onChange={(e) => update('imageUrl', e.target.value)}
                     placeholder="https://example.com/image.jpg"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     disabled={isUploading}
                   />
                 </div>
