@@ -55,10 +55,10 @@ export const CategoriesManagement = () => {
         try {
             await addCategory(name)
             setNewName('')
-            toast.success('Category entity saved')
+            toast.success('Category saved')
             load()
         } catch (e) {
-            toast.error('Entity injection failure')
+            toast.error('Failed to add category')
         } finally {
             setIsAdding(false)
         }
@@ -69,7 +69,7 @@ export const CategoriesManagement = () => {
         setIsUpdating(true)
         try {
             await updateCategory(id, editingName.trim())
-            toast.success('Metatdata recalibrated')
+            toast.success('Category updated')
             setEditingId(null)
             load()
         } catch (e) {
@@ -86,7 +86,7 @@ export const CategoriesManagement = () => {
             toast.error('Category Deleted')
             load()
         } catch (e) {
-            toast.error('Delete sequence aborted')
+            toast.error('Failed to delete')
         } finally {
             setIsDeleting(null)
         }
@@ -102,7 +102,7 @@ export const CategoriesManagement = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-12 pb-20"
         >
-            {/* Header & Category Injection */}
+            {/* Header & Add Category */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Category Manager</h2>
@@ -115,7 +115,7 @@ export const CategoriesManagement = () => {
                         <input
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Initialize New Category..."
+                            placeholder="Add new category..."
                             className="w-full pl-14 pr-8 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                         />
                     </div>
@@ -130,7 +130,7 @@ export const CategoriesManagement = () => {
                             ) : (
                                 <Plus className="w-4 h-4 text-accent-500" />
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Authorize Injection</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add Category</span>
                         </div>
                     </button>
                 </div>
@@ -145,7 +145,7 @@ export const CategoriesManagement = () => {
                     <div>
                         <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Global Settings</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Taxonomies</p>
+                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Categories</p>
                     </div>
                 </div>
 
@@ -297,7 +297,7 @@ export const CategoriesManagement = () => {
                                                     </button>
                                                     <button
                                                         disabled={isDeleting === c.id}
-                                                        onClick={() => (window.confirm('Execute Delete sequence for this Category?') && handleDelete(c.id))}
+                                                        onClick={() => (window.confirm('Delete this category?') && handleDelete(c.id))}
                                                         className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-50"
                                                     >
                                                         {isDeleting === c.id ? <div className="w-4 h-4 border-2 border-rose-500/10 border-t-rose-500 rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -314,9 +314,9 @@ export const CategoriesManagement = () => {
 
                 <div className="bg-primary-900/5 p-8 rounded-[3rem] border border-dashed border-primary-900/10 flex flex-col items-center justify-center gap-6">
                     <div className="flex items-center gap-4 text-[10px] font-black text-primary-900/30 uppercase tracking-[0.4em]">
-                        <Zap className="w-4 h-4" /> Auto Category Automatic Engine
+                        <Zap className="w-4 h-4" /> Category Auto-Save
                     </div>
-                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Structural modifications to the Category Manager are propagated instantaneously across the global edge network, ensuring high-frequency consistency for all downstream service Services and client interactions.</p>
+                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Changes to categories are saved automatically and applied across all services.</p>
                 </div>
             </div>
         </motion.div>

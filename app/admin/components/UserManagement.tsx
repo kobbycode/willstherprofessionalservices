@@ -75,7 +75,7 @@ export const UserManagement = () => {
             const success = await deleteUser(userId)
             if (success) {
                 setUsers(prev => prev.filter(user => user.id !== userId))
-                toast.success('Member removed from Settings')
+                toast.success('User deleted')
                 setShowDeleteDialog(null)
             }
         } catch (error) {
@@ -87,7 +87,7 @@ export const UserManagement = () => {
 
     const handleRoleChange = async (userId: string, newRole: 'super_admin' | 'admin' | 'editor' | 'user') => {
         if (!isSuperAdmin) {
-            toast.error('Permission denied: Action requires Super Admin clearance')
+            toast.error('Only Super Admins can do this')
             return
         }
         try {
@@ -95,9 +95,9 @@ export const UserManagement = () => {
             setUsers(prev => prev.map(user =>
                 user.id === userId ? { ...user, role: newRole } : user
             ))
-            toast.success('Privileges updated')
+            toast.success('Role changed')
         } catch (error) {
-            toast.error('Failed to update credentials')
+            toast.error('Failed to change role')
         }
     }
 
@@ -107,9 +107,9 @@ export const UserManagement = () => {
             setUsers(prev => prev.map(user =>
                 user.id === userId ? { ...user, status: newStatus } : user
             ))
-            toast.success('Access status modified')
+            toast.success('Status updated')
         } catch (error) {
-            toast.error('System synchronization error')
+            toast.error('Failed to update status')
         }
     }
 
@@ -145,8 +145,8 @@ export const UserManagement = () => {
             {/* Top Bar */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight">Identity & Access</h2>
-                    <p className="text-secondary-600 font-medium mt-1">Regulate administrative privileges and user demographics</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight">User Management</h2>
+                    <p className="text-secondary-600 font-medium mt-1">Manage user roles and permissions</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="hidden sm:flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1">
@@ -381,9 +381,9 @@ export const UserManagement = () => {
                             <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mb-6">
                                 <UserMinus className="w-10 h-10 text-rose-500" />
                             </div>
-                            <h3 className="text-2xl font-black text-primary-900 tracking-tight leading-tight">delet member?</h3>
+                            <h3 className="text-2xl font-black text-primary-900 tracking-tight leading-tight">Delete user?</h3>
                             <p className="text-secondary-500 font-medium mt-3 leading-relaxed">
-                                You are about to strip <span className="text-primary-900 font-black">@{showDeleteDialog.userName}</span> of all administrative privileges and access tokens. This action is recorded and irreversible.
+                                You are about to remove <span className="text-primary-900 font-black">@{showDeleteDialog.userName}</span> from the system. This action cannot be undone.
                             </p>
                             <div className="grid grid-cols-2 gap-4 mt-10">
                                 <button
@@ -398,7 +398,7 @@ export const UserManagement = () => {
                                     className="px-6 py-4 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {deletingUserId ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
-                                    <span>Confirm Revocation</span>
+                                    <span>Confirm Delete</span>
                                 </button>
                             </div>
                         </motion.div>
