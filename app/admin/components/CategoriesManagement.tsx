@@ -53,7 +53,10 @@ export const CategoriesManagement = () => {
 
     const handleAdd = async () => {
         const title = newTitle.trim()
-        if (!title) return
+        if (!title) {
+            toast.error('Please enter a category title')
+            return
+        }
         setIsAdding(true)
         try {
             await addServiceCategory({ title, subtitle: newSubtitle.trim(), imageUrl: '' })
@@ -204,7 +207,7 @@ export const CategoriesManagement = () => {
                     </div>
                     <button
                         onClick={handleAdd}
-                        disabled={isAdding || !newTitle.trim()}
+                        disabled={isAdding}
                         className="group relative px-10 py-4 bg-primary-900 text-white rounded-2xl shadow-xl shadow-primary-900/20 hover:shadow-primary-900/40 transition-all active:scale-95 overflow-hidden disabled:opacity-30 disabled:grayscale w-full sm:w-auto shrink-0"
                     >
                         <div className="relative flex items-center justify-center gap-3">

@@ -159,79 +159,98 @@ const Services = () => {
         {/* Services by Category Section */}
         {Object.keys(categorizedServices).length > 0 ? (
           <div className="space-y-16 sm:space-y-20 md:space-y-24">
-            {Object.entries(categorizedServices).map(([categoryName, categoryServices], categoryIndex) => {
-              // Find the category object to get subtitle and image
-              const categoryObj = categories.find(cat => cat.title === categoryName) || {};
+            {Object.entries(categorizedServices)
+              .sort(([nameA], [nameB]) => {
+                const priorityOrder = [
+                  'Cleaning Services',
+                  'Cleaning', // Fallback for variations
+                  'Maintenance',
+                  'Laundry Service',
+                  'Laundry', // Fallback for variations
+                  'Pest Control'
+                ];
+                let indexA = priorityOrder.findIndex(p => nameA.toLowerCase().includes(p.toLowerCase()));
+                let indexB = priorityOrder.findIndex(p => nameB.toLowerCase().includes(p.toLowerCase()));
 
-              return (
-                <motion.div
-                  key={categoryName}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  viewport={{ once: true }}
-                  className="text-center"
-                >
-                  <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${categoryIndex === 0 ? 'bg-blue-100' :
-                    categoryIndex === 1 ? 'bg-green-100' :
-                      categoryIndex === 2 ? 'bg-purple-100' :
-                        'bg-orange-100'
-                    }`}>
-                    <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${categoryIndex === 0 ? 'text-blue-700' :
-                      categoryIndex === 1 ? 'text-green-700' :
-                        categoryIndex === 2 ? 'text-purple-700' :
-                          'text-orange-700'
+                // If not found in priority list, move to the end
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+
+                return indexA - indexB;
+              })
+              .map(([categoryName, categoryServices], categoryIndex) => {
+                // Find the category object to get subtitle and image
+                const categoryObj = categories.find(cat => cat.title === categoryName) || {};
+
+                return (
+                  <motion.div
+                    key={categoryName}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    viewport={{ once: true }}
+                    className="text-center"
+                  >
+                    <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${categoryIndex === 0 ? 'bg-blue-100' :
+                      categoryIndex === 1 ? 'bg-green-100' :
+                        categoryIndex === 2 ? 'bg-purple-100' :
+                          'bg-orange-100'
                       }`}>
-                      {categoryName}
-                    </h3>
-                  </div>
+                      <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${categoryIndex === 0 ? 'text-blue-700' :
+                        categoryIndex === 1 ? 'text-green-700' :
+                          categoryIndex === 2 ? 'text-purple-700' :
+                            'text-orange-700'
+                        }`}>
+                        {categoryName}
+                      </h3>
+                    </div>
 
-                  {categoryObj.subtitle && (
-                    <p className="text-secondary-600 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base max-w-2xl mx-auto">
-                      {categoryObj.subtitle}
-                    </p>
-                  )}
+                    {categoryObj.subtitle && (
+                      <p className="text-secondary-600 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base max-w-2xl mx-auto">
+                        {categoryObj.subtitle}
+                      </p>
+                    )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                    {categoryServices.map((service, serviceIndex) => (
-                      <Link
-                        key={service.id || serviceIndex}
-                        href={`/services/${service.id}`}
-                        className="block h-full"
-                      >
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
-                          viewport={{ once: true }}
-                          className="bg-white rounded-lg sm:rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                      {categoryServices.map((service, serviceIndex) => (
+                        <Link
+                          key={service.id || serviceIndex}
+                          href={`/services/${service.id}`}
+                          className="block h-full"
                         >
-                          <div className="relative aspect-video w-full overflow-hidden">
-                            <Image
-                              src={service.image}
-                              alt={service.title}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-500"
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-accent-500 rounded-full flex items-center justify-center shadow-lg z-10 transform group-hover:scale-110 transition-transform duration-300 border border-white/20">
-                              <service.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
+                            viewport={{ once: true }}
+                            className="bg-white rounded-lg sm:rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
+                          >
+                            <div className="relative aspect-video w-full overflow-hidden">
+                              <Image
+                                src={service.image}
+                                alt={service.title}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <div className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-accent-500 rounded-full flex items-center justify-center shadow-lg z-10 transform group-hover:scale-110 transition-transform duration-300 border border-white/20">
+                                <service.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                              </div>
                             </div>
-                          </div>
-                          <div className="p-4 sm:p-5 flex-grow flex flex-col items-center justify-center bg-white relative">
-                            <h4 className="text-sm sm:text-base md:text-lg font-bold text-secondary-900 text-center group-hover:text-primary-600 transition-colors leading-tight">
-                              {service.title}
-                            </h4>
-                            <div className="mt-2 w-0 h-0.5 bg-accent-500 group-hover:w-12 transition-all duration-300 mx-auto"></div>
-                          </div>
-                        </motion.div>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              )
-            })}
+                            <div className="p-4 sm:p-5 flex-grow flex flex-col items-center justify-center bg-white relative">
+                              <h4 className="text-sm sm:text-base md:text-lg font-bold text-secondary-900 text-center group-hover:text-primary-600 transition-colors leading-tight">
+                                {service.title}
+                              </h4>
+                              <div className="mt-2 w-0 h-0.5 bg-accent-500 group-hover:w-12 transition-all duration-300 mx-auto"></div>
+                            </div>
+                          </motion.div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              })}
           </div>
         ) : (
           <div className="text-center py-12">
