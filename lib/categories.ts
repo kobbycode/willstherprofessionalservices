@@ -3,7 +3,7 @@
 import { getDb } from './firebase'
 import { collection, getDocs, addDoc, orderBy, query, doc, setDoc, deleteDoc } from 'firebase/firestore'
 
-const COLLECTION = 'service_categories'
+const COLLECTION = 'categories'
 
 // Category type with image, title, and subtitle
 export type ServiceCategory = {

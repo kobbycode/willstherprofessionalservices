@@ -5,7 +5,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 export async function GET() {
     try {
         const db = await getAdminDb()
-        const snapshot = await db.collection('service_categories').orderBy('createdAt', 'desc').get()
+        const snapshot = await db.collection('categories').orderBy('createdAt', 'desc').get()
 
         // Map to array format expected by Services.tsx
         const categories = snapshot.docs.map(doc => ({
