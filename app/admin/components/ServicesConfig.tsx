@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
-import { fetchCategoriesWithIds } from '@/lib/categories'
+import { fetchServiceCategories } from '@/lib/categories'
 
 const ServicesConfig = ({ config, onChange }: any) => {
   const [services, setServices] = useState<any[]>([])
@@ -115,14 +115,18 @@ const ServicesConfig = ({ config, onChange }: any) => {
 
       try {
         const fetchServicesPromise = fetch('/api/services', { cache: 'no-store' })
-        const fetchCategoriesPromise = fetchCategoriesWithIds()
+        const fetchCategoriesPromise = fetchServiceCategories()
 
         const [servicesResponse, categoriesList] = await Promise.race([
           Promise.all([fetchServicesPromise, fetchCategoriesPromise]),
           timeout
-        ]) as [Response, { id: string; name: string }[]]
+        ]) as [Response, any[]]
 
-        setCategories(categoriesList)
+        // Map service categories to simple id/name structure for dropdown if needed, 
+        // or just use the returned objects directly. 
+        // fetchServiceCategories returns { id, title, subtitle, imageUrl... }
+        // We map 'title' to 'name' for compatibility with the rest of this component's existing logic
+        setCategories(categoriesList.map(c => ({ id: c.id, name: c.title })))
 
         if (!servicesResponse.ok) {
           const errorText = await servicesResponse.text()
