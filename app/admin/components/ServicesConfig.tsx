@@ -21,12 +21,14 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
+import { fetchCategoriesWithIds } from '@/lib/categories'
 
 const ServicesConfig = ({ config, onChange }: any) => {
   const [services, setServices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [newServiceData, setNewServiceData] = useState({
     title: '',
     description: '',
@@ -89,6 +91,54 @@ const ServicesConfig = ({ config, onChange }: any) => {
     }
 
     loadServices()
+    const loadData = async () => {
+      let timeoutId: NodeJS.Timeout | null = null;
+      setError(null)
+      setLoading(true)
+
+      const timeout = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('Request timeout after 30 seconds'))
+        }, 30000)
+      })
+
+      try {
+        const fetchServicesPromise = fetch('/api/services', { cache: 'no-store' })
+        const fetchCategoriesPromise = fetchCategoriesWithIds()
+
+        const [servicesResponse, categoriesList] = await Promise.race([
+          Promise.all([fetchServicesPromise, fetchCategoriesPromise]),
+          timeout
+        ]) as [Response, { id: string; name: string }[]]
+
+        setCategories(categoriesList)
+
+        if (!servicesResponse.ok) {
+          const errorText = await servicesResponse.text()
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText)
+          } catch {
+            throw new Error(`Failed to fetch services: ${servicesResponse.status}`)
+          }
+          throw new Error(errorData.error || 'Failed to fetch services')
+        }
+
+        const text = await servicesResponse.text()
+        const data = JSON.parse(text)
+        setServices(data.services || [])
+
+      } catch (error) {
+        console.error('Error loading data:', error)
+        setError((error as Error).message)
+        toast.error('Failed to load data')
+      } finally {
+        setLoading(false)
+        if (timeoutId) clearTimeout(timeoutId)
+      }
+    }
+
+    loadData()
   }, [])
 
   const updateService = async (id: string, key: string, value: string) => {
@@ -212,7 +262,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
             <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
               <Plus className="w-5 h-5 text-accent-500" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Engineer New Service</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add New Service</span>
           </div>
         </button>
       </div>
@@ -224,9 +274,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
             <LayoutGrid className="w-8 h-8" />
           </div>
           <div>
-            <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Global Coverage</p>
+            <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Services</p>
             <p className="text-3xl font-black text-primary-900 mt-1">{services.length}</p>
-            <p className="text-[9px] font-bold text-green-600 uppercase mt-1">Operational Channels</p>
+            <p className="text-[9px] font-bold text-green-600 uppercase mt-1">Active Services</p>
           </div>
         </div>
 
@@ -235,9 +285,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
             <TrendingUp className="w-8 h-8" />
           </div>
           <div>
-            <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Market Presence</p>
+            <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Categories</p>
             <p className="text-3xl font-black text-primary-900 mt-1">{new Set(services.map(s => s.category)).size}</p>
-            <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Core Specializations</p>
+            <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Service Types</p>
           </div>
         </div>
 
@@ -247,11 +297,11 @@ const ServicesConfig = ({ config, onChange }: any) => {
             <ShieldCheck className="w-8 h-8" />
           </div>
           <div className="relative z-10">
-            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Security Status</p>
-            <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter transition-all group-hover:tracking-normal">Identity Verified</p>
+            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Security</p>
+            <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter transition-all group-hover:tracking-normal">Secure</p>
             <div className="flex items-center gap-2 mt-2">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <p className="text-[9px] font-bold text-green-400 uppercase">Master Sync Active</p>
+              <p className="text-[9px] font-bold text-green-400 uppercase">Synced</p>
             </div>
           </div>
         </div>
@@ -274,13 +324,13 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                      <p className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">Service ID</p>
+                      <p className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">ID</p>
                       <p className="text-xs font-black text-primary-900 uppercase">{s.id.substring(0, 8)}</p>
                     </div>
                     <div className="h-6 w-px bg-gray-100" />
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      <span className="text-[10px] font-black pointer-events-none text-secondary-300 uppercase tracking-widest">Active System</span>
+                      <span className="text-[10px] font-black pointer-events-none text-secondary-300 uppercase tracking-widest">Active</span>
                     </div>
                   </div>
 
@@ -296,7 +346,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Market Name</label>
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Service Name</label>
                       <input
                         value={s.title || ''}
                         onChange={(e) => updateService(s.id, 'title', e.target.value)}
@@ -305,18 +355,20 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       />
                     </div>
                     <div className="space-y-4">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Setting Category</label>
-                      <input
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Category</label>
+                      <select
                         value={s.category || ''}
                         onChange={(e) => updateService(s.id, 'category', e.target.value)}
-                        className="w-full px-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[12px] font-bold text-secondary-400 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                        placeholder="Category"
-                      />
+                        className="w-full px-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[12px] font-bold text-secondary-400 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none appearance-none"
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Operational Details (Description)</label>
+                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Description</label>
                     <textarea
                       value={s.description || ''}
                       onChange={(e) => updateService(s.id, 'description', e.target.value)}
@@ -330,7 +382,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 {/* Image Management */}
                 <div className="space-y-6 pt-6 border-t border-gray-50">
                   <div className="flex items-center justify-between px-2">
-                    <label className="text-[10px] font-black text-secondary-300 uppercase tracking-[0.2em]">Visual Identification Asset</label>
+                    <label className="text-[10px] font-black text-secondary-300 uppercase tracking-[0.2em]">Service Image</label>
                     <Zap className="w-4 h-4 text-accent-500 animate-pulse" />
                   </div>
 
@@ -339,7 +391,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       <label className="cursor-pointer block">
                         <div className="absolute inset-0 bg-primary-900 rounded-[2rem] flex flex-col items-center justify-center gap-3 opacity-0 group-hover/camera:opacity-100 transition-all z-20">
                           <Camera className="w-8 h-8 text-white" />
-                          <span className="text-[8px] font-black text-white uppercase tracking-widest text-center px-4">Update<br />Visual List</span>
+                          <span className="text-[8px] font-black text-white uppercase tracking-widest text-center px-4">Update<br />Image</span>
                         </div>
                         <div className="w-40 h-40 bg-gray-100 border-2 border-dashed border-gray-200 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative shadow-inner">
                           {s.imageUrl ? (
@@ -359,7 +411,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
 
                     <div className="flex-1 space-y-4 w-full">
                       <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 shadow-inner">
-                        <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-3">Asset Settings Path</p>
+                        <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-3">Image URL</p>
                         <div className="flex items-center gap-3">
                           <input
                             value={s.imageUrl || ''}
@@ -374,7 +426,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                         onClick={() => updateService(s.id, 'imageUrl', '')}
                         className="text-[10px] font-black text-rose-500 uppercase tracking-widest px-4 py-2 hover:bg-rose-50 rounded-xl transition-all"
                       >
-                        delet Asset
+                        Remove Image
                       </button>
                     </div>
                   </div>
@@ -389,13 +441,13 @@ const ServicesConfig = ({ config, onChange }: any) => {
             <div className="w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center mb-10 border border-gray-100">
               <Wrench className="w-10 h-10 text-primary-900" />
             </div>
-            <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Service Mesh Empty</h3>
-            <p className="text-secondary-400 font-medium max-w-[320px] mt-4 mb-10 leading-relaxed uppercase text-[10px] tracking-widest">Global operations are currently dormant. Initiate service mesh by engineering a new Service.</p>
+            <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">No Services Found</h3>
+            <p className="text-secondary-400 font-medium max-w-[320px] mt-4 mb-10 leading-relaxed uppercase text-[10px] tracking-widest">You haven't added any services yet. Click the button below to add one.</p>
             <button
               onClick={() => setIsAddServiceModalOpen(true)}
               className="px-8 py-5 bg-primary-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary-900/40 active:scale-95 transition-all"
             >
-              Initiate Engineering Sequence
+              Add First Service
             </button>
           </div>
         )}
@@ -413,8 +465,8 @@ const ServicesConfig = ({ config, onChange }: any) => {
             >
               <div className="p-10 border-b border-gray-50 flex items-center justify-between">
                 <div>
-                  <h3 className="text-3xl font-black text-primary-900 uppercase tracking-tight">Engineered Injection</h3>
-                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.3em] mt-1">Define new service Manager Service</p>
+                  <h3 className="text-3xl font-black text-primary-900 uppercase tracking-tight">Add New Service</h3>
+                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-[0.3em] mt-1">Enter service details below</p>
                 </div>
                 <button onClick={() => setIsAddServiceModalOpen(false)} className="p-4 hover:bg-gray-100 rounded-[2rem] transition-all active:scale-95">
                   <X className="w-8 h-8 text-secondary-300" />
@@ -426,7 +478,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                   {/* Left Side: Fields */}
                   <div className="space-y-8">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Project Specification Name</label>
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Service Name</label>
                       <input
                         value={newServiceData.title}
                         onChange={(e) => setNewServiceData({ ...newServiceData, title: e.target.value })}
@@ -435,16 +487,18 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Security Domain (Category)</label>
-                      <input
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Category</label>
+                      <select
                         value={newServiceData.category}
                         onChange={(e) => setNewServiceData({ ...newServiceData, category: e.target.value })}
-                        placeholder="e.g. Hygiene Excellence"
-                        className="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl text-sm font-bold text-secondary-400 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                      />
+                        className="w-full px-8 py-5 bg-gray-50 border-none rounded-3xl text-sm font-bold text-secondary-400 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none appearance-none"
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Operational Instructions</label>
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Description</label>
                       <textarea
                         value={newServiceData.description}
                         onChange={(e) => setNewServiceData({ ...newServiceData, description: e.target.value })}
@@ -460,7 +514,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     <div className="bg-primary-900 rounded-[3rem] p-8 text-white space-y-6 shadow-xl shadow-primary-900/30">
                       <div className="flex items-center gap-4">
                         <div className="p-3 bg-white/10 rounded-2xl text-accent-500"><Camera className="w-6 h-6" /></div>
-                        <h4 className="text-sm font-black uppercase tracking-widest">Visual Settings</h4>
+                        <h4 className="text-sm font-black uppercase tracking-widest">Service Image</h4>
                       </div>
 
                       <div className="h-64 bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative group">
@@ -469,25 +523,25 @@ const ServicesConfig = ({ config, onChange }: any) => {
                         ) : (
                           <div className="text-center px-6">
                             <Layers className="w-12 h-12 text-white/10 mx-auto mb-4" />
-                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Asset Undefined</p>
+                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">No Image</p>
                           </div>
                         )}
 
                         {isUploadingNewServiceImage && (
                           <div className="absolute inset-0 bg-primary-900/80 backdrop-blur-md flex flex-col items-center justify-center z-30">
                             <div className="w-12 h-12 border-4 border-white/10 border-t-accent-500 rounded-full animate-spin mb-4" />
-                            <p className="text-[10px] font-black uppercase tracking-widest">Synchronizing...</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest">Uploading...</p>
                           </div>
                         )}
 
                         <label className="absolute inset-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-all bg-primary-900/60 flex items-center justify-center">
-                          <span className="px-6 py-3 bg-white text-primary-900 font-black text-[9px] uppercase tracking-widest rounded-xl shadow-2xl">Upload Visual Identifier</span>
+                          <span className="px-6 py-3 bg-white text-primary-900 font-black text-[9px] uppercase tracking-widest rounded-xl shadow-2xl">Upload Image</span>
                           <input type="file" className="hidden" onChange={e => e.target.files?.[0] && handleNewServiceImageUpload(e.target.files[0])} disabled={isUploadingNewServiceImage} />
                         </label>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-2">Identifier Source URL</label>
+                        <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-2">Image URL</label>
                         <input
                           value={newServiceData.imageUrl}
                           onChange={(e) => setNewServiceData({ ...newServiceData, imageUrl: e.target.value })}
@@ -501,8 +555,8 @@ const ServicesConfig = ({ config, onChange }: any) => {
                       <div className="flex items-start gap-4">
                         <ShieldCheck className="w-6 h-6 text-green-500 shrink-0 mt-1" />
                         <div className="space-y-2">
-                          <h5 className="text-sm font-black text-primary-900 uppercase">Manager Guard</h5>
-                          <p className="text-[10px] font-medium text-secondary-500 leading-relaxed uppercase">Services are automatically encrypted and saved across the global edge network upon authorization.</p>
+                          <h5 className="text-sm font-black text-primary-900 uppercase">Auto-Save</h5>
+                          <p className="text-[10px] font-medium text-secondary-500 leading-relaxed uppercase">Your service details will be saved securely.</p>
                         </div>
                       </div>
                     </div>
@@ -511,14 +565,14 @@ const ServicesConfig = ({ config, onChange }: any) => {
               </div>
 
               <div className="p-10 border-t border-gray-50 bg-gray-50/50 flex gap-6">
-                <button onClick={() => setIsAddServiceModalOpen(false)} className="px-10 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] hover:text-primary-900 transition-all">Discard Detailso</button>
+                <button onClick={() => setIsAddServiceModalOpen(false)} className="px-10 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] hover:text-primary-900 transition-all">Cancel</button>
                 <button
                   onClick={createNewService}
                   disabled={!newServiceData.title.trim() || isUploadingNewServiceImage}
                   className="flex-1 py-5 bg-primary-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary-900/30 active:scale-[0.98] transition-all disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-4"
                 >
                   <Plus className="w-5 h-5" />
-                  <span>Authorize Engineering Sequence</span>
+                  <span>Create Service</span>
                 </button>
               </div>
             </motion.div>
@@ -545,9 +599,9 @@ const ServicesConfig = ({ config, onChange }: any) => {
                 </div>
 
                 <div className="space-y-3">
-                  <h3 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Delete Setting</h3>
+                  <h3 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Delete Service</h3>
                   <p className="text-secondary-500 font-medium leading-relaxed uppercase text-[10px] tracking-widest px-4">
-                    Confirm deleting of <span className="text-primary-900 font-black">{deleteDialog.serviceName}</span> across the global mesh network. This operation is absolute.
+                    Are you sure you want to delete <span className="text-primary-900 font-black">{deleteDialog.serviceName}</span>? This cannot be undone.
                   </p>
                 </div>
 
@@ -556,13 +610,13 @@ const ServicesConfig = ({ config, onChange }: any) => {
                     onClick={cancelDeleteService}
                     className="flex-1 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest hover:bg-gray-50 rounded-2xl transition-all"
                   >
-                    Abort
+                    Cancel
                   </button>
                   <button
                     onClick={confirmDeleteService}
                     className="flex-1 py-5 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/30 active:scale-95 transition-all"
                   >
-                    Execute Delete
+                    Delete
                   </button>
                 </div>
               </div>

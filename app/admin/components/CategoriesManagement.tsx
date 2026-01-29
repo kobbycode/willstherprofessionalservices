@@ -106,7 +106,7 @@ export const CategoriesManagement = () => {
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Category Manager</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Settings management for global service categories & metadata</p>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage service categories for your website</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-premium w-full lg:w-auto">
@@ -143,7 +143,7 @@ export const CategoriesManagement = () => {
                         <Boxes className="w-8 h-8" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Global Settings</p>
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Categories</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
                         <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Categories</p>
                     </div>
@@ -154,9 +154,9 @@ export const CategoriesManagement = () => {
                         <TrendingUp className="w-8 h-8" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Structural Health</p>
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">System Status</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">98.4%</p>
-                        <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Metadata Integrity</p>
+                        <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Data Quality</p>
                     </div>
                 </div>
 
@@ -166,11 +166,11 @@ export const CategoriesManagement = () => {
                         <ShieldCheck className="w-8 h-8" />
                     </div>
                     <div className="relative z-10">
-                        <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Security Status</p>
-                        <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Identity Verified</p>
+                        <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Security</p>
+                        <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Secure</p>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <p className="text-[9px] font-bold text-green-400 uppercase">Master Sync Active</p>
+                            <p className="text-[9px] font-bold text-green-400 uppercase">Synced</p>
                         </div>
                     </div>
                 </div>
@@ -184,7 +184,7 @@ export const CategoriesManagement = () => {
                         <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Filter structural List..."
+                            placeholder="Search categories..."
                             className="w-full pl-14 pr-8 py-4 bg-white border border-gray-100 rounded-[2rem] text-[11px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 transition-all outline-none shadow-premium"
                         />
                     </div>
@@ -206,9 +206,9 @@ export const CategoriesManagement = () => {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50">
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Identity List (ID)</th>
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Designation</th>
-                                <th className="px-10 py-6 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">System Operations</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category ID</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Name</th>
+                                <th className="px-10 py-6 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -224,8 +224,8 @@ export const CategoriesManagement = () => {
                                 <tr>
                                     <td colSpan={3} className="px-10 py-32 text-center">
                                         <Layers className="w-16 h-16 text-gray-100 mx-auto mb-6 opacity-50" />
-                                        <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">Settings Dormant</h3>
-                                        <p className="text-[10px] font-bold text-secondary-300 uppercase tracking-widest mt-2">{searchQuery ? 'Search parameter yielded zero results' : 'No taxonomies detected in master List'}</p>
+                                        <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">No Categories Found</h3>
+                                        <p className="text-[10px] font-bold text-secondary-300 uppercase tracking-widest mt-2">{searchQuery ? 'No categories match your search' : 'No categories found in the system'}</p>
                                     </td>
                                 </tr>
                             ) : filteredItems.map((c) => (
@@ -314,9 +314,9 @@ export const CategoriesManagement = () => {
 
                 <div className="bg-primary-900/5 p-8 rounded-[3rem] border border-dashed border-primary-900/10 flex flex-col items-center justify-center gap-6">
                     <div className="flex items-center gap-4 text-[10px] font-black text-primary-900/30 uppercase tracking-[0.4em]">
-                        <Zap className="w-4 h-4" /> Category Auto-Save
+                        <Zap className="w-4 h-4" /> Auto-Save
                     </div>
-                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Changes to categories are saved automatically and applied across all services.</p>
+                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Changes are saved automatically.</p>
                 </div>
             </div>
         </motion.div>
