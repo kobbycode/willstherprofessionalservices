@@ -16,7 +16,8 @@ import {
     Zap,
     Tag,
     Boxes,
-    Download
+    Download,
+    RefreshCw
 } from 'lucide-react'
 import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
@@ -100,6 +101,27 @@ export const CategoriesManagement = () => {
         item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
+    const handleMigrate = async () => {
+        if (!window.confirm('This will attempt to migrate categories from old data sources. Continue?')) return
+
+        setLoading(true)
+        try {
+            const res = await fetch('/api/migrate-categories')
+            const data = await res.json()
+            if (data.success) {
+                toast.success(`Migration successful! Migrated ${data.migratedCount} categories.`)
+                load()
+            } else {
+                toast.success('Migration finished: ' + (data.message || 'No changes'))
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error('Migration failed. See console.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleImportFromServices = async () => {
         if (!window.confirm('This will scan all your Services and add any missing categories to this list. Continue?')) return;
 
@@ -159,12 +181,21 @@ export const CategoriesManagement = () => {
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">What We Offer</h2>
                     <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage "What We Offer" cards and Service Categories</p>
-                    <button
-                        onClick={handleImportFromServices}
-                        className="text-[10px] font-bold text-accent-600 hover:text-accent-700 underline decoration-dashed underline-offset-4"
-                    >
-                        Sync from existing Services
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={handleMigrate}
+                            className="text-[10px] font-bold text-primary-600 hover:text-primary-700 underline decoration-dashed underline-offset-4 flex items-center gap-1"
+                        >
+                            <RefreshCw className="w-3 h-3" />
+                            Migrate Legacy Data
+                        </button>
+                        <button
+                            onClick={handleImportFromServices}
+                            className="text-[10px] font-bold text-accent-600 hover:text-accent-700 underline decoration-dashed underline-offset-4"
+                        >
+                            Sync from existing Services
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-premium w-full lg:w-auto">
