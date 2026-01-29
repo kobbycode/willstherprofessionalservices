@@ -19,14 +19,16 @@ import {
 } from 'lucide-react'
 import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
-import { fetchCategoriesWithIds, addCategory, updateCategory, deleteCategory } from '@/lib/categories'
+import { fetchServiceCategories, addServiceCategory, updateServiceCategory, deleteServiceCategory, ServiceCategory } from '@/lib/categories'
 
 export const CategoriesManagement = () => {
-    const [items, setItems] = useState<{ id: string; name: string }[]>([])
+    const [items, setItems] = useState<ServiceCategory[]>([])
     const [loading, setLoading] = useState(false)
-    const [newName, setNewName] = useState('')
+    const [newTitle, setNewTitle] = useState('')
+    const [newSubtitle, setNewSubtitle] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
-    const [editingName, setEditingName] = useState('')
+    const [editingTitle, setEditingTitle] = useState('')
+    const [editingSubtitle, setEditingSubtitle] = useState('')
     const [isAdding, setIsAdding] = useState(false)
     const [isUpdating, setIsUpdating] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
@@ -35,7 +37,7 @@ export const CategoriesManagement = () => {
     const load = async () => {
         setLoading(true)
         try {
-            const list = await fetchCategoriesWithIds()
+            const list = await fetchServiceCategories()
             setItems(list)
         } catch (e) {
             console.error('Failed to load categories:', e)
@@ -49,12 +51,13 @@ export const CategoriesManagement = () => {
     useEffect(() => { load() }, [])
 
     const handleAdd = async () => {
-        const name = newName.trim()
-        if (!name) return
+        const title = newTitle.trim()
+        if (!title) return
         setIsAdding(true)
         try {
-            await addCategory(name)
-            setNewName('')
+            await addServiceCategory({ title, subtitle: newSubtitle.trim(), imageUrl: '' })
+            setNewTitle('')
+            setNewSubtitle('')
             toast.success('Category saved')
             load()
         } catch (e) {
@@ -65,10 +68,10 @@ export const CategoriesManagement = () => {
     }
 
     const handleUpdate = async (id: string) => {
-        if (!editingName.trim()) return
+        if (!editingTitle.trim()) return
         setIsUpdating(true)
         try {
-            await updateCategory(id, editingName.trim())
+            await updateServiceCategory(id, { title: editingTitle.trim(), subtitle: editingSubtitle.trim() })
             toast.success('Category updated')
             setEditingId(null)
             load()
@@ -82,7 +85,7 @@ export const CategoriesManagement = () => {
     const handleDelete = async (id: string) => {
         setIsDeleting(id)
         try {
-            await deleteCategory(id)
+            await deleteServiceCategory(id)
             toast.error('Category Deleted')
             load()
         } catch (e) {
@@ -93,7 +96,7 @@ export const CategoriesManagement = () => {
     }
 
     const filteredItems = items.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
     return (
@@ -105,23 +108,32 @@ export const CategoriesManagement = () => {
             {/* Header & Add Category */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Category Manager</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage service categories for your website</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">What We Offer</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage "What We Offer" cards and Service Categories</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-premium w-full lg:w-auto">
-                    <div className="relative flex-1 sm:w-80">
+                    <div className="relative flex-1 sm:w-64">
                         <Tag className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300" />
                         <input
-                            value={newName}
-                            onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Add new category..."
-                            className="w-full pl-14 pr-8 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                            value={newTitle}
+                            onChange={(e) => setNewTitle(e.target.value)}
+                            placeholder="Category Title..."
+                            className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                        />
+                    </div>
+                    <div className="relative flex-1 sm:w-64">
+                        <Layers className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300" />
+                        <input
+                            value={newSubtitle}
+                            onChange={(e) => setNewSubtitle(e.target.value)}
+                            placeholder="Subtitle (optional)..."
+                            className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                         />
                     </div>
                     <button
                         onClick={handleAdd}
-                        disabled={isAdding || !newName.trim()}
+                        disabled={isAdding || !newTitle.trim()}
                         className="group relative px-10 py-4 bg-primary-900 text-white rounded-2xl shadow-xl shadow-primary-900/20 hover:shadow-primary-900/40 transition-all active:scale-95 overflow-hidden disabled:opacity-30 disabled:grayscale w-full sm:w-auto shrink-0"
                     >
                         <div className="relative flex items-center justify-center gap-3">
@@ -130,7 +142,7 @@ export const CategoriesManagement = () => {
                             ) : (
                                 <Plus className="w-4 h-4 text-accent-500" />
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add Category</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add Card</span>
                         </div>
                     </button>
                 </div>
@@ -143,9 +155,9 @@ export const CategoriesManagement = () => {
                         <Boxes className="w-8 h-8" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Categories</p>
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Cards</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Categories</p>
+                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Offerings</p>
                     </div>
                 </div>
 
@@ -176,7 +188,7 @@ export const CategoriesManagement = () => {
                 </div>
             </div>
 
-            {/* Settings Explorer */}
+            {/* List */}
             <div className="space-y-8">
                 <div className="flex items-center justify-between">
                     <div className="relative group/search w-full max-w-md">
@@ -206,8 +218,8 @@ export const CategoriesManagement = () => {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50">
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category ID</th>
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Name</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Details</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Subtitle</th>
                                 <th className="px-10 py-6 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Actions</th>
                             </tr>
                         </thead>
@@ -235,12 +247,33 @@ export const CategoriesManagement = () => {
                                     className="group hover:bg-gray-50/50 transition-colors"
                                 >
                                     <td className="px-10 py-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center text-secondary-300 border border-gray-100 group-hover:bg-primary-900 group-hover:text-white transition-all">
-                                                <Hash className="w-4 h-4" />
-                                            </div>
-                                            <span className="text-[11px] font-mono text-secondary-300 uppercase tracking-wider">{c.id.substring(0, 12)}...</span>
-                                        </div>
+                                        <AnimatePresence mode='wait'>
+                                            {editingId === c.id ? (
+                                                <motion.div
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: 10 }}
+                                                    className="relative"
+                                                >
+                                                    <input
+                                                        value={editingTitle}
+                                                        onChange={(e) => setEditingTitle(e.target.value)}
+                                                        className="w-full max-w-sm px-6 py-3 bg-white border-2 border-primary-900 rounded-xl text-[12px] font-black text-primary-900 outline-none shadow-xl"
+                                                        autoFocus
+                                                    />
+                                                </motion.div>
+                                            ) : (
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center text-secondary-300 border border-gray-100 group-hover:bg-primary-900 group-hover:text-white transition-all">
+                                                        <Hash className="w-4 h-4" />
+                                                    </div>
+                                                    <div>
+                                                        <span className="block text-[13px] font-black text-primary-900 uppercase tracking-tight">{c.title}</span>
+                                                        <span className="text-[10px] font-mono text-secondary-300 uppercase tracking-wider">{c.id.substring(0, 8)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </AnimatePresence>
                                     </td>
                                     <td className="px-10 py-8">
                                         <AnimatePresence mode='wait'>
@@ -252,20 +285,15 @@ export const CategoriesManagement = () => {
                                                     className="relative"
                                                 >
                                                     <input
-                                                        value={editingName}
-                                                        onChange={(e) => setEditingName(e.target.value)}
+                                                        value={editingSubtitle}
+                                                        onChange={(e) => setEditingSubtitle(e.target.value)}
                                                         className="w-full max-w-sm px-6 py-3 bg-white border-2 border-primary-900 rounded-xl text-[12px] font-black text-primary-900 outline-none shadow-xl"
-                                                        autoFocus
                                                     />
                                                 </motion.div>
                                             ) : (
-                                                <motion.span
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    className="text-[13px] font-black text-primary-900 uppercase tracking-tight"
-                                                >
-                                                    {c.name}
-                                                </motion.span>
+                                                <span className="text-[12px] font-medium text-secondary-500">
+                                                    {c.subtitle || <span className="text-secondary-300 italic">No subtitle</span>}
+                                                </span>
                                             )}
                                         </AnimatePresence>
                                     </td>
@@ -290,14 +318,14 @@ export const CategoriesManagement = () => {
                                             ) : (
                                                 <>
                                                     <button
-                                                        onClick={() => { setEditingId(c.id); setEditingName(c.name) }}
+                                                        onClick={() => { setEditingId(c.id); setEditingTitle(c.title); setEditingSubtitle(c.subtitle) }}
                                                         className="p-3 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
                                                     >
                                                         <Edit3 className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         disabled={isDeleting === c.id}
-                                                        onClick={() => (window.confirm('Delete this category?') && handleDelete(c.id))}
+                                                        onClick={() => (window.confirm('Delete this category and remove it from "What We Offer"?') && handleDelete(c.id))}
                                                         className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-50"
                                                     >
                                                         {isDeleting === c.id ? <div className="w-4 h-4 border-2 border-rose-500/10 border-t-rose-500 rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -316,7 +344,7 @@ export const CategoriesManagement = () => {
                     <div className="flex items-center gap-4 text-[10px] font-black text-primary-900/30 uppercase tracking-[0.4em]">
                         <Zap className="w-4 h-4" /> Auto-Save
                     </div>
-                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Changes are saved automatically.</p>
+                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Changes are saved automatically and reflect on the "What We Offer" section.</p>
                 </div>
             </div>
         </motion.div>

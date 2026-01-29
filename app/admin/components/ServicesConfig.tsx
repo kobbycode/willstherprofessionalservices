@@ -30,7 +30,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+  const [categories, setCategories] = useState<{ id: string, name: string }[]>([])
   const [newServiceData, setNewServiceData] = useState({
     title: '',
     description: '',
