@@ -22,11 +22,18 @@ const Services = () => {
 
     const loadData = async () => {
       try {
-        // Load categories
-        const categoriesRes = await fetch('/api/service-categories')
+        // Load categories from the unified Admin Categories source
+        const categoriesRes = await fetch('/api/categories', { cache: 'no-store' })
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json()
-          setCategories(categoriesData.categories || [])
+          console.log('Categories loaded:', categoriesData)
+          // Ensure we map the simple name to title if title is missing
+          setCategories(categoriesData.map((c: any) => ({
+            ...c,
+            title: c.name || c.title, // Handle both 'name' (from simple collection) and 'title'
+            subtitle: c.subtitle || 'Professional Service',
+            imageUrl: c.imageUrl // Will fallback in render if missing
+          })))
         }
 
         // Load services
@@ -149,14 +156,14 @@ const Services = () => {
           <div className="w-16 sm:w-20 md:w-24 h-1 bg-primary-500 mx-auto"></div>
         </div>
 
-        {/* Service Categories from Services - Display under What We Offer */}
-        {serviceCategoriesFromServices.length > 0 && (
+        {/* Service Categories (What We Offer) - Driven by Admin Categories */}
+        {categories.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12 md:mb-16">
-            {serviceCategoriesFromServices.map((category, index) => {
-              const IconComponent = getCategoryIcon(category);
+            {categories.map((category, index) => {
+              const IconComponent = getCategoryIcon(category.title);
               return (
                 <motion.div
-                  key={index}
+                  key={category.id || index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
@@ -170,8 +177,8 @@ const Services = () => {
                         <IconComponent />
                       </div>
                     </div>
-                    <h3 className="text-base font-bold text-secondary-800 group-hover:text-primary-600 transition-colors duration-300 px-2">
-                      {category}
+                    <h3 className="text-base font-bold text-secondary-800 group-hover:text-primary-600 transition-colors duration-300 px-2 line-clamp-2">
+                      {category.title}
                     </h3>
                     <div className="mt-3 w-8 h-1 bg-gradient-to-r from-primary-400 to-primary-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
