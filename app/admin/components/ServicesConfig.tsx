@@ -228,7 +228,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
       if (!response.ok) throw new Error('Failed to delete service')
       setServices(prev => prev.filter(s => s.id !== serviceId))
       setDeleteDialog({ isOpen: false, serviceId: '', serviceName: '' })
-      toast.error('Service deleted')
+      toast.success('Service deleted')
     } catch (error) {
       toast.error('deleting sequence failed')
     }
