@@ -15,7 +15,8 @@ import {
     Search,
     Zap,
     Tag,
-    Boxes
+    Boxes,
+    Download
 } from 'lucide-react'
 import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
@@ -99,6 +100,54 @@ export const CategoriesManagement = () => {
         item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
+    const handleImportFromServices = async () => {
+        if (!window.confirm('This will scan all your Services and add any missing categories to this list. Continue?')) return;
+
+        setIsAdding(true)
+        try {
+            // 1. Fetch current services
+            const servicesRes = await fetch('/api/services')
+            if (!servicesRes.ok) throw new Error('Failed to fetch services')
+            const servicesData = await servicesRes.json()
+            const services: any[] = servicesData.services || []
+
+            // 2. Extract unique categories
+            const usedCategories = new Set(services.map(s => s.category).filter(c => c && c.trim() !== ''))
+
+            // 3. Filter out ones we already have
+            const existingTitles = new Set(items.map(i => i.title.toLowerCase()))
+            const newCategoriesToAdd = Array.from(usedCategories).filter(c => !existingTitles.has(c.toLowerCase()))
+
+            if (newCategoriesToAdd.length === 0) {
+                toast.success('All service categories are already synced!')
+                return
+            }
+
+            toast.loading(`Importing ${newCategoriesToAdd.length} categories...`)
+
+            // 4. Add them
+            let addedCount = 0
+            for (const catTitle of newCategoriesToAdd) {
+                await addServiceCategory({
+                    title: catTitle,
+                    subtitle: 'Imported from Services',
+                    imageUrl: ''
+                })
+                addedCount++
+            }
+
+            toast.dismiss()
+            toast.success(`Successfully imported ${addedCount} categories`)
+            load()
+
+        } catch (error) {
+            console.error('Import failed:', error)
+            toast.error('Failed to import categories')
+        } finally {
+            setIsAdding(false)
+        }
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -110,6 +159,12 @@ export const CategoriesManagement = () => {
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">What We Offer</h2>
                     <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage "What We Offer" cards and Service Categories</p>
+                    <button
+                        onClick={handleImportFromServices}
+                        className="text-[10px] font-bold text-accent-600 hover:text-accent-700 underline decoration-dashed underline-offset-4"
+                    >
+                        Sync from existing Services
+                    </button>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-premium w-full lg:w-auto">
