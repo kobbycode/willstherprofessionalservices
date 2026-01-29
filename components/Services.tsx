@@ -31,7 +31,7 @@ const Services = () => {
           setCategories(categoriesData.map((c: any) => ({
             ...c,
             title: c.name || c.title, // Handle both 'name' (from simple collection) and 'title'
-            subtitle: c.subtitle || 'Professional Service',
+            subtitle: c.subtitle || '', // Allow empty if user removed it
             imageUrl: c.imageUrl // Will fallback in render if missing
           })))
         }
@@ -54,15 +54,15 @@ const Services = () => {
 
   // Group services by category
   const categorizedServices = useMemo(() => {
+    const grouped: Record<string, any[]> = {}
+
+    // ALWAYS initialize with empty arrays for all categories so they show up even if empty
+    const categoryNames = categories.map(cat => cat.title);
+    categoryNames.forEach(catName => {
+      grouped[catName] = [];
+    });
+
     if (services && services.length > 0) {
-      const grouped: Record<string, any[]> = {}
-
-      // Initialize with empty arrays for all categories
-      const categoryNames = categories.map(cat => cat.title);
-      categoryNames.forEach(catName => {
-        grouped[catName] = [];
-      });
-
       // Add services to their respective categories
       const iconPool = [Home, Building, Users, Wrench, Sparkles, Shield, Clock, Star, Car, Truck, Zap, Target]
       services.forEach((svc, idx) => {
@@ -74,10 +74,11 @@ const Services = () => {
           image: svc.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
         })
       })
-
-      return grouped
     }
-    return {}
+
+    // Only return categories that actually exist in our categories list
+    // OR if they have services even if not in categories list (to avoid losing data)
+    return grouped
   }, [services, categories])
 
   // Extract unique service categories from services
