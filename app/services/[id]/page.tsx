@@ -183,6 +183,17 @@ export default function ServiceDetails() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
                         >
+                            {/* Service Image */}
+                            <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="aspect-video relative rounded-xl overflow-hidden bg-gray-100">
+                                    <img
+                                        src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
+                                        alt={service.title}
+                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                                    />
+                                </div>
+                            </div>
+
                             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Overview</h2>
                                 <div className="prose prose-lg max-w-none text-gray-600">

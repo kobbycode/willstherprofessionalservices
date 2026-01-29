@@ -17,7 +17,9 @@ import {
   Settings,
   MoreVertical,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Search,
+  Filter
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
@@ -41,6 +43,15 @@ const ServicesConfig = ({ config, onChange }: any) => {
     isOpen: false,
     serviceId: '',
     serviceName: ''
+  })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
+
+  const filteredServices = services.filter(service => {
+    const matchesSearch = (service?.title?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (service?.description?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+    const matchesCategory = filterCategory ? service.category === filterCategory : true
+    return matchesSearch && matchesCategory
   })
 
   // Load services from API
@@ -307,10 +318,38 @@ const ServicesConfig = ({ config, onChange }: any) => {
         </div>
       </div>
 
+      {/* Search & Filter Controls */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-[2rem] border border-gray-100 shadow-sm">
+        <div className="relative w-full md:w-96 group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search services..."
+            className="w-full pl-14 pr-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 placeholder:text-secondary-300 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+          />
+        </div>
+
+        <div className="relative w-full md:w-64 group">
+          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="w-full pl-14 pr-10 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none appearance-none cursor-pointer"
+          >
+            <option value="">All Categories</option>
+            {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+          </select>
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-secondary-300" />
+          </div>
+        </div>
+      </div>
+
       {/* Services Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
         <AnimatePresence mode='popLayout'>
-          {services.map((s: any) => (
+          {filteredServices.map((s: any) => (
             <motion.div
               key={s.id}
               layout
