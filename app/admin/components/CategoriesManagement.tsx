@@ -19,7 +19,6 @@ import {
     Download,
     RefreshCw
 } from 'lucide-react'
-import Skeleton from '@/components/Skeleton'
 import toast from 'react-hot-toast'
 import { fetchServiceCategories, addServiceCategory, updateServiceCategory, deleteServiceCategory, ServiceCategory } from '@/lib/categories'
 
@@ -181,21 +180,7 @@ export const CategoriesManagement = () => {
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">What We Offer</h2>
                     <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage "What We Offer" cards and Service Categories</p>
-                    <div className="flex gap-4">
-                        <button
-                            onClick={handleMigrate}
-                            className="text-[10px] font-bold text-primary-600 hover:text-primary-700 underline decoration-dashed underline-offset-4 flex items-center gap-1"
-                        >
-                            <RefreshCw className="w-3 h-3" />
-                            Migrate Legacy Data
-                        </button>
-                        <button
-                            onClick={handleImportFromServices}
-                            className="text-[10px] font-bold text-accent-600 hover:text-accent-700 underline decoration-dashed underline-offset-4"
-                        >
-                            Sync from existing Services
-                        </button>
-                    </div>
+
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-3 rounded-[2rem] border border-gray-100 shadow-premium w-full lg:w-auto">
@@ -228,7 +213,7 @@ export const CategoriesManagement = () => {
                             ) : (
                                 <Plus className="w-4 h-4 text-accent-500" />
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add Card</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add Category</span>
                         </div>
                     </button>
                 </div>
