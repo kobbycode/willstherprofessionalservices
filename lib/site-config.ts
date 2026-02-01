@@ -110,7 +110,7 @@ export const defaultSiteConfig: SiteConfig = {
 	siteName: 'Willsther Professional Services',
 	siteDescription: 'Professional cleaning and maintenance services',
 	contactEmail: 'willstherprofessionalservices@gmail.com',
-	contactPhone: '(233) 594 850 005',
+	contactPhone: '0208267704',
 	maintenanceMode: false,
 	systemSettings: {
 		maintenanceMode: false,

@@ -13,7 +13,7 @@ const Contact = () => {
     {
       icon: Phone,
       title: 'Phone Numbers',
-      details: [config.contactPhone || '(233) 594 850 005'],
+      details: [config.contactPhone || '0208267704'],
       color: 'bg-green-500'
     },
     {
@@ -67,7 +67,7 @@ const Contact = () => {
     try {
       setIsSubmitting(true)
       await createContactSubmission({ firstName, lastName, email, phone, service, message })
-      ;(e.currentTarget as HTMLFormElement).reset()
+        ; (e.currentTarget as HTMLFormElement).reset()
       toast.success('Message sent successfully!')
     } catch (err) {
       toast.error('Failed to send message. Please try again.')
