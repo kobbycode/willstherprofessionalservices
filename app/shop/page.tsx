@@ -67,7 +67,7 @@ export default function ShopPage() {
             <Header />
 
             {/* Hero Section */}
-            <div className="relative bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white py-20 px-4">
+            <div className="relative bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 text-white pt-24 pb-16 px-4">
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute inset-0 bg-black/40" />
                     <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />

@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
 
                         {/* Image Gallery - Left Side */}
-                        <div className="lg:col-span-5 p-5 bg-gray-50">
+                        <div className="lg:col-span-4 p-4 bg-gray-50">
                             {/* Main Image */}
                             <div className="relative aspect-square bg-white rounded-lg overflow-hidden mb-4 border border-gray-200">
                                 {currentImage ? (
@@ -224,7 +224,7 @@ export default function ProductDetailPage() {
                         </div>
 
                         {/* Product Info - Middle */}
-                        <div className="lg:col-span-4 p-5 border-r border-gray-100">
+                        <div className="lg:col-span-4 p-4 border-r border-gray-100">
                             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 leading-tight">
                                 {product.title}
                             </h1>
@@ -297,7 +297,7 @@ export default function ProductDetailPage() {
                         </div>
 
                         {/* Buy Box - Right Side (Sticky) */}
-                        <div className="lg:col-span-3 p-5 bg-gray-50/50">
+                        <div className="lg:col-span-4 p-4 bg-gray-50/50">
                             <div className="sticky top-24">
                                 {/* Quantity Selector */}
                                 <div className="mb-4">
