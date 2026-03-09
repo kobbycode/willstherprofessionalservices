@@ -22,6 +22,7 @@ interface ShopContextType {
     setIsCartOpen: (isOpen: boolean) => void
     cartTotal: number
     cartCount: number
+    wishlistCount: number
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined)
@@ -106,6 +107,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     const cartTotal = cart.reduce((total, item) => total + (item.product.price * item.quantity), 0)
     const cartCount = cart.reduce((count, item) => count + item.quantity, 0)
+    const wishlistCount = wishlist.length
 
     return (
         <ShopContext.Provider value={{
@@ -120,7 +122,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             isInWishlist,
             setIsCartOpen,
             cartTotal,
-            cartCount
+            cartCount,
+            wishlistCount
         }}>
             {children}
         </ShopContext.Provider>

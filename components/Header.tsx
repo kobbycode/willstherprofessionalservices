@@ -5,15 +5,15 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Phone, Mail, Menu, X, ShoppingBag, Heart } from 'lucide-react'
 import Image from 'next/image'
-import { useSiteConfig } from '@/lib/site-config'
 import { useShop } from '@/context/ShopContext'
+import { useSiteConfig } from '@/lib/site-config'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const router = useRouter()
   const pathname = usePathname()
-  const { cartCount, setIsCartOpen } = useShop()
+  const { cartCount, wishlistCount, setIsCartOpen } = useShop()
 
   const { config } = useSiteConfig()
 
@@ -169,6 +169,11 @@ const Header = () => {
                 aria-label="Wishlist"
               >
                 <Heart size={24} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-primary-600">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               <button
@@ -199,6 +204,11 @@ const Header = () => {
                 className="p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
               >
                 <Heart size={24} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               <button

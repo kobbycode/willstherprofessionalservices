@@ -10,65 +10,94 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Skeleton from './Skeleton'
 import { useMemo, useState, useEffect } from 'react'
+import { getDb } from '@/lib/firebase'
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
 
 const Services = () => {
   const [services, setServices] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Load services and categories from API
+  // Load services and categories from Firestore Client SDK
   useEffect(() => {
-    console.log('Services component: Loading services and categories...')
+    console.log('Services component: Subscribing to services and categories...')
+    const db = getDb()
 
-    const loadData = async () => {
-      try {
-        // Load categories from the unified Admin Categories source
-        const categoriesRes = await fetch('/api/categories', { cache: 'no-store' })
-        if (categoriesRes.ok) {
-          const categoriesData = await categoriesRes.json()
-          console.log('Categories loaded:', categoriesData)
-          // Ensure we map the simple name to title if title is missing
-          setCategories(categoriesData.map((c: any) => ({
-            ...c,
-            title: c.name || c.title,
-            subtitle: c.subtitle || '',
-            imageUrl: c.imageUrl
-          })))
+    // 1. Subscribe to Categories
+    const categoriesQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'))
+    const unsubscribeCategories = onSnapshot(categoriesQuery, (snapshot) => {
+      const categoriesData = snapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          title: data.name || data.title,
+          subtitle: data.subtitle || '',
+          imageUrl: data.imageUrl
         }
+      })
+      console.log('Categories synced:', categoriesData.length)
+      setCategories(categoriesData)
+    }, (error) => {
+      console.error('Error syncing categories:', error)
+    })
 
-        // Load services
-        const servicesRes = await fetch('/api/services', { cache: 'no-store' })
-        if (!servicesRes.ok) throw new Error('Failed to fetch services')
-        const servicesData = await servicesRes.json()
-        console.log('Services loaded:', servicesData.services?.length || 0, 'services')
-        setServices(servicesData.services || [])
-        setLoading(false)
-      } catch (error) {
-        console.error('Error loading data:', error)
-        setLoading(false)
-      }
+    // 2. Subscribe to Services
+    const servicesQuery = query(collection(db, 'services'), orderBy('createdAt', 'desc'))
+    const unsubscribeServices = onSnapshot(servicesQuery, (snapshot) => {
+      const servicesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      console.log('Services synced:', servicesData.length)
+      setServices(servicesData)
+      setLoading(false)
+    }, (error) => {
+      console.error('Error syncing services:', error)
+      setLoading(false)
+    })
+
+    return () => {
+      unsubscribeCategories()
+      unsubscribeServices()
     }
-
-    loadData()
   }, [])
 
   // Group services by category
   const categorizedServices = useMemo(() => {
     const grouped: Record<string, any[]> = {}
 
-    // ALWAYS initialize with empty arrays for all categories so they show up even if empty
-    const categoryNames = categories.map(cat => cat.title);
-    categoryNames.forEach(catName => {
-      grouped[catName] = [];
+    // 1. Initialize with specific categories from the Admin 'categories' collection
+    const categoryMap = new Map<string, string>(); // lowercase -> original case
+
+    categories.forEach(cat => {
+      const title = cat.title || cat.name || '';
+      if (title) {
+        grouped[title] = [];
+        categoryMap.set(title.toLowerCase(), title);
+      }
     });
 
     if (services && services.length > 0) {
-      // Add services to their respective categories
       const iconPool = [Home, Building, Users, Wrench, Sparkles, Shield, Clock, Star, Car, Truck, Zap, Target]
+
       services.forEach((svc, idx) => {
-        const cat = svc.category || 'General'
-        if (!grouped[cat]) grouped[cat] = []
-        grouped[cat].push({
+        const rawCat = svc.category || 'General';
+        const lowerCat = rawCat.toLowerCase();
+
+        // Find matching category from Admin list (case-insensitive)
+        let targetCat = categoryMap.get(lowerCat);
+
+        // If not found in Admin list, use the service's own category
+        if (!targetCat) {
+          targetCat = rawCat;
+        }
+
+        if (!grouped[targetCat as string]) {
+          grouped[targetCat as string] = [];
+        }
+
+        grouped[targetCat as string].push({
           ...svc,
           icon: iconPool[idx % iconPool.length],
           image: svc.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
@@ -76,19 +105,8 @@ const Services = () => {
       })
     }
 
-    // Only return categories that actually exist in our categories list
-    // OR if they have services even if not in categories list (to avoid losing data)
     return grouped
   }, [services, categories])
-
-  // Extract unique service categories from services
-  const serviceCategoriesFromServices = useMemo(() => {
-    if (services && services.length > 0) {
-      const uniqueCategories = Array.from(new Set(services.map(service => service.category || 'General')))
-      return uniqueCategories
-    }
-    return []
-  }, [services])
 
   // Get icon for category
   const getCategoryIcon = (category: string) => {
@@ -103,7 +121,6 @@ const Services = () => {
       'General': Target,
     }
 
-    // Default to Wrench if no match
     const categoryKey = Object.keys(iconMap).find(key =>
       category.toLowerCase().includes(key.toLowerCase())
     )
@@ -164,24 +181,20 @@ const Services = () => {
               .sort(([nameA], [nameB]) => {
                 const priorityOrder = [
                   'Cleaning Services',
-                  'Cleaning', // Fallback for variations
                   'Maintenance',
                   'Laundry Service',
-                  'Laundry', // Fallback for variations
                   'Pest Control'
                 ];
-                let indexA = priorityOrder.findIndex(p => nameA.toLowerCase().includes(p.toLowerCase()));
-                let indexB = priorityOrder.findIndex(p => nameB.toLowerCase().includes(p.toLowerCase()));
+                let indexA = priorityOrder.findIndex(p => nameA.toLowerCase() === p.toLowerCase());
+                let indexB = priorityOrder.findIndex(p => nameB.toLowerCase() === p.toLowerCase());
 
-                // If not found in priority list, move to the end
                 if (indexA === -1) indexA = 999;
                 if (indexB === -1) indexB = 999;
 
                 return indexA - indexB;
               })
               .map(([categoryName, categoryServices], categoryIndex) => {
-                // Find the category object to get subtitle and image
-                const categoryObj = categories.find(cat => cat.title === categoryName) || {};
+                const categoryObj = categories.find(cat => (cat.title || cat.name) === categoryName) || {};
 
                 return (
                   <motion.div

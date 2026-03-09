@@ -103,74 +103,7 @@ export const CategoriesManagement = () => {
         item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
-    const handleMigrate = async () => {
-        if (!window.confirm('This will attempt to migrate categories from old data sources. Continue?')) return
 
-        setLoading(true)
-        try {
-            const res = await fetch('/api/migrate-categories')
-            const data = await res.json()
-            if (data.success) {
-                toast.success(`Migration successful! Migrated ${data.migratedCount} categories.`)
-                load()
-            } else {
-                toast.success('Migration finished: ' + (data.message || 'No changes'))
-            }
-        } catch (error) {
-            console.error(error)
-            toast.error('Migration failed. See console.')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleImportFromServices = async () => {
-        if (!window.confirm('This will scan all your Services and add any missing categories to this list. Continue?')) return;
-
-        setIsAdding(true)
-        try {
-            // 1. Fetch current services
-            const servicesRes = await fetch('/api/services')
-            if (!servicesRes.ok) throw new Error('Failed to fetch services')
-            const servicesData = await servicesRes.json()
-            const services: any[] = servicesData.services || []
-
-            // 2. Extract unique categories
-            const usedCategories = new Set(services.map(s => s.category).filter(c => c && c.trim() !== ''))
-
-            // 3. Filter out ones we already have
-            const existingTitles = new Set(items.map(i => i.title.toLowerCase()))
-            const newCategoriesToAdd = Array.from(usedCategories).filter(c => !existingTitles.has(c.toLowerCase()))
-
-            if (newCategoriesToAdd.length === 0) {
-                toast.success('All service categories are already synced!')
-                return
-            }
-
-            toast.loading(`Importing ${newCategoriesToAdd.length} categories...`)
-
-            // 4. Add them
-            let addedCount = 0
-            for (const catTitle of newCategoriesToAdd) {
-                await addServiceCategory({
-                    title: catTitle,
-                    subtitle: 'Imported from Services',
-                    imageUrl: ''
-                })
-                addedCount++
-            }
-
-            toast.dismiss()
-            toast.success(`Successfully imported ${addedCount} categories`)
-            load()
-
-        } catch (error) {
-            console.error('Import failed:', error)
-            toast.error('Failed to import categories')
-        } finally {
-            setIsAdding(false)
-        }
-    }
 
     return (
         <motion.div
@@ -222,46 +155,6 @@ export const CategoriesManagement = () => {
                 </div>
             </div>
 
-            {/* Metric Management */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
-                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
-                        <Boxes className="w-8 h-8" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Cards</p>
-                        <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Active Offerings</p>
-                    </div>
-                </div>
-
-                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
-                    <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-3xl flex items-center justify-center">
-                        <TrendingUp className="w-8 h-8" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">System Status</p>
-                        <p className="text-3xl font-black text-primary-900 mt-1">98.4%</p>
-                        <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Data Quality</p>
-                    </div>
-                </div>
-
-                <div className="bg-primary-900 p-8 rounded-[2.5rem] shadow-2xl shadow-primary-900/20 flex items-center gap-6 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl flex items-center justify-center transition-all group-hover:scale-150 duration-[2s]" />
-                    <div className="relative z-10 w-16 h-16 bg-white/10 text-accent-500 rounded-3xl flex items-center justify-center">
-                        <ShieldCheck className="w-8 h-8" />
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Security</p>
-                        <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Secure</p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            <p className="text-[9px] font-bold text-green-400 uppercase">Synced</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* List */}
             <div className="space-y-8">
                 <div className="flex items-center justify-between">
@@ -273,18 +166,6 @@ export const CategoriesManagement = () => {
                             placeholder="Search categories..."
                             className="w-full pl-14 pr-8 py-4 bg-white border border-gray-100 rounded-[2rem] text-[11px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 transition-all outline-none shadow-premium"
                         />
-                    </div>
-
-                    <div className="hidden md:flex items-center gap-4 text-[9px] font-black text-secondary-300 uppercase tracking-[0.2em]">
-                        <div className="flex items-center gap-2">
-                            <Check className="w-4 h-4 text-green-500" />
-                            Real-time Sync
-                        </div>
-                        <div className="w-1 h-1 bg-gray-200 rounded-full" />
-                        <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-accent-500" />
-                            Fast-Path Enabled
-                        </div>
                     </div>
                 </div>
 
@@ -414,12 +295,7 @@ export const CategoriesManagement = () => {
                     </table>
                 </div>
 
-                <div className="bg-primary-900/5 p-8 rounded-[3rem] border border-dashed border-primary-900/10 flex flex-col items-center justify-center gap-6">
-                    <div className="flex items-center gap-4 text-[10px] font-black text-primary-900/30 uppercase tracking-[0.4em]">
-                        <Zap className="w-4 h-4" /> Auto-Save
-                    </div>
-                    <p className="text-[10px] font-medium text-secondary-400 uppercase tracking-widest text-center max-w-xl leading-relaxed">Changes are saved automatically and reflect on the "What We Offer" section.</p>
-                </div>
+
             </div>
         </motion.div>
     )

@@ -4,7 +4,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 export async function POST(request: NextRequest) {
   try {
     const { heroSlides } = await request.json()
-    
+
     if (!heroSlides || !Array.isArray(heroSlides)) {
       return NextResponse.json(
         { error: 'Invalid heroSlides data' },
@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
     }
 
     const db = await getAdminDb()
-    
+
     // Save to Firestore in the structure expected by useSiteConfig
-    await db.collection('config').doc('hero').set({
+    await db.collection('config').doc('site').set({
       heroSlides,
       updatedAt: new Date().toISOString()
     }, { merge: true })

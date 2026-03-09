@@ -282,45 +282,6 @@ const ServicesConfig = ({ config, onChange }: any) => {
         </button>
       </div>
 
-      {/* Management Row (Stats) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
-            <LayoutGrid className="w-8 h-8" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Services</p>
-            <p className="text-3xl font-black text-primary-900 mt-1">{services.length}</p>
-            <p className="text-[9px] font-bold text-green-600 uppercase mt-1">Active Services</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-premium flex items-center gap-6">
-          <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-3xl flex items-center justify-center">
-            <TrendingUp className="w-8 h-8" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Categories</p>
-            <p className="text-3xl font-black text-primary-900 mt-1">{new Set(services.map(s => s.category)).size}</p>
-            <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Service Types</p>
-          </div>
-        </div>
-
-        <div className="bg-primary-900 p-8 rounded-[2.5rem] shadow-2xl shadow-primary-900/20 flex items-center gap-6 text-white relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-white/10 transition-all duration-700" />
-          <div className="relative z-10 w-16 h-16 bg-white/10 text-accent-500 rounded-3xl flex items-center justify-center">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Security</p>
-            <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter transition-all group-hover:tracking-normal">Secure</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <p className="text-[9px] font-bold text-green-400 uppercase">Synced</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Search & Filter Controls */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-[2rem] border border-gray-100 shadow-sm">

@@ -55,7 +55,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; connect-src 'self' https://firestore.googleapis.com https://*.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+            value: "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; connect-src 'self' https://firestore.googleapis.com https://*.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://www.gstatic.com wss:; frame-src 'self' https://www.google.com https://maps.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
           },
           {
             key: 'X-Content-Type-Options',

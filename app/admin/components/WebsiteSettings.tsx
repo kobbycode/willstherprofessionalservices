@@ -10,6 +10,11 @@ import {
     Settings,
     ShieldCheck,
     Activity,
+    MapPin,
+    Facebook,
+    Instagram,
+    Twitter,
+    Linkedin,
     Save,
     RotateCcw,
     Zap
@@ -27,7 +32,8 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
         siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
         contactEmail: config.contactEmail || 'info@willsther.com',
         contactPhone: config.contactPhone || '+233 594 850 005',
-        maintenanceMode: !!config.maintenanceMode
+        maintenanceMode: !!config.maintenanceMode,
+        address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
     })
 
     useEffect(() => {
@@ -36,13 +42,26 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
             siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
             contactEmail: config.contactEmail || 'info@willsther.com',
             contactPhone: config.contactPhone || '+233 594 850 005',
-            maintenanceMode: !!config.maintenanceMode
+            maintenanceMode: !!config.maintenanceMode,
+            address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
         })
     }, [config])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onChange({ ...config, ...settings })
+        const nextConfig = {
+            ...config,
+            siteName: settings.siteName,
+            siteDescription: settings.siteDescription,
+            contactEmail: settings.contactEmail,
+            contactPhone: settings.contactPhone,
+            maintenanceMode: settings.maintenanceMode,
+            footer: {
+                ...config.footer,
+                address: settings.address
+            }
+        }
+        onChange(nextConfig)
         toast.success('Core Setting parameters updated successfully')
     }
 
@@ -52,7 +71,8 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
             siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
             contactEmail: config.contactEmail || 'info@willsther.com',
             contactPhone: config.contactPhone || '+233 594 850 005',
-            maintenanceMode: !!config.maintenanceMode
+            maintenanceMode: !!config.maintenanceMode,
+            address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
         })
         toast.error('Local settings reverted to global Settings')
     }
@@ -130,27 +150,42 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
                             </div>
                         </div>
 
-                        <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Support Liaison Email</label>
-                                <div className="relative group">
-                                    <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
-                                    <input
-                                        type="email"
-                                        value={settings.contactEmail}
-                                        onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
-                                        className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                                    />
+                        <div className="p-10 space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Support Liaison Email</label>
+                                    <div className="relative group">
+                                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
+                                        <input
+                                            type="email"
+                                            value={settings.contactEmail}
+                                            onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+                                            className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Emergency Voice Setting</label>
+                                    <div className="relative group">
+                                        <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
+                                        <input
+                                            type="text"
+                                            value={settings.contactPhone}
+                                            onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
+                                            className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                                        />
+                                    </div>
                                 </div>
                             </div>
+
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Emergency Voice Setting</label>
+                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">HQ Physical Address</label>
                                 <div className="relative group">
-                                    <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
+                                    <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
                                     <input
                                         type="text"
-                                        value={settings.contactPhone}
-                                        onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
+                                        value={settings.address}
+                                        onChange={(e) => setSettings({ ...settings, address: e.target.value })}
                                         className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                                     />
                                 </div>

@@ -4,14 +4,19 @@ import { getAdminDb } from '@/lib/firebase-admin'
 export async function GET() {
   try {
     const db = await getAdminDb()
-    const doc = await db.collection('config').doc('hero').get()
-    if (!doc.exists) {
-      const response = NextResponse.json({ config: null })
-      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
-      response.headers.set('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
-      return response
+    const doc = await db.collection('config').doc('site').get()
+
+    let data = {}
+    if (doc.exists) {
+      data = doc.data() || {}
+    } else {
+      // Try fallback to 'hero' if 'site' doesn't exist yet
+      const heroDoc = await db.collection('config').doc('hero').get()
+      if (heroDoc.exists) {
+        data = heroDoc.data() || {}
+      }
     }
-    const data = doc.data() || {}
+
     const response = NextResponse.json({ config: data })
     response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
     response.headers.set('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')

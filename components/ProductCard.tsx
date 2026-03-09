@@ -105,53 +105,56 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             )}
 
             {/* Content Section - More compact */}
-            <div className="p-3 flex flex-col flex-grow">
-                {/* Title & Price */}
-                <Link href={`/shop/${product.id}`} className="block mb-2 group/title">
-                    <h3 className="text-sm font-bold text-gray-900 line-clamp-2 mb-1 group-hover/title:text-purple-600 transition-colors">
-                        {product.title}
-                    </h3>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-black text-purple-600">
-                            GH₵{product.price.toFixed(2)}
-                        </span>
-                        {product.category && (
-                            <span className="text-[10px] text-gray-500 font-medium">
-                                {product.category}
-                            </span>
-                        )}
-                    </div>
-                </Link>
+            <div className="p-4 flex flex-col flex-grow">
+                {/* Category & Title */}
+                <div className="mb-2">
+                    {product.category && (
+                        <p className="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] mb-1">
+                            {product.category}
+                        </p>
+                    )}
+                    <Link href={`/shop/${product.id}`} className="block group/title">
+                        <h3 className="text-[13px] font-bold text-gray-900 line-clamp-2 leading-snug group-hover/title:text-purple-600 transition-colors">
+                            {product.title}
+                        </h3>
+                    </Link>
+                </div>
 
-                {/* Action Buttons - More compact */}
-                <div className="mt-auto flex gap-1.5">
-                    <button
-                        onClick={() => {
-                            addToCart(product)
-                            setIsCartOpen(true)
-                        }}
-                        disabled={!product.inStock}
-                        className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg font-semibold text-xs transition-all duration-300 ${product.inStock
-                            ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                    >
-                        <ShoppingBag size={14} />
-                        Add to Cart
-                    </button>
-                    <a
-                        href={product.inStock ? whatsappUrl : '#'}
-                        target={product.inStock ? '_blank' : undefined}
-                        rel={product.inStock ? "noopener noreferrer" : undefined}
-                        onClick={(e) => !product.inStock && e.preventDefault()}
-                        className={`flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${product.inStock
-                            ? 'bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}
-                        title="Order via WhatsApp"
-                    >
-                        <MessageCircle size={16} />
-                    </a>
+                {/* Price & Actions */}
+                <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
+                    <span className="text-base font-black text-gray-900">
+                        GH₵{product.price.toFixed(2)}
+                    </span>
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                addToCart(product)
+                                setIsCartOpen(true)
+                            }}
+                            disabled={!product.inStock}
+                            className={`p-2.5 rounded-xl transition-all duration-300 ${product.inStock
+                                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20 active:scale-90'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                }`}
+                            title="Add to Cart"
+                        >
+                            <ShoppingBag size={16} />
+                        </button>
+                        <a
+                            href={product.inStock ? whatsappUrl : '#'}
+                            target={product.inStock ? '_blank' : undefined}
+                            rel={product.inStock ? "noopener noreferrer" : undefined}
+                            onClick={(e) => !product.inStock && e.preventDefault()}
+                            className={`p-2.5 rounded-xl transition-all duration-300 ${product.inStock
+                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 active:scale-90'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                }`}
+                            title="Order via WhatsApp"
+                        >
+                            <MessageCircle size={16} />
+                        </a>
+                    </div>
                 </div>
             </div>
         </motion.div>
