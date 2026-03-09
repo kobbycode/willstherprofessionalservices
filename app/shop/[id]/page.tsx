@@ -13,6 +13,7 @@ import { ShoppingBag, MessageCircle, ArrowLeft, Package, CheckCircle, X, Heart }
 import Link from 'next/link'
 import { useShop } from '@/context/ShopContext'
 import Skeleton from '@/components/Skeleton'
+import Image from 'next/image'
 
 export default function ProductDetailPage() {
     const { id } = useParams()
@@ -20,8 +21,18 @@ export default function ProductDetailPage() {
     const [product, setProduct] = useState<Product | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const { config } = useSiteConfig()
     const { addToCart, toggleWishlist, isInWishlist } = useShop()
+
+    // Get images array - use images array if available, fallback to single imageUrl
+    const productImages = product?.images && product.images.length > 0
+        ? product.images
+        : product?.imageUrl
+            ? [product.imageUrl]
+            : []
+
+    const currentImage = productImages[selectedImageIndex] || ''
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -48,6 +59,11 @@ export default function ProductDetailPage() {
 
         fetchProduct()
     }, [id])
+
+    // Reset selected image when product changes
+    useEffect(() => {
+        setSelectedImageIndex(0)
+    }, [product?.id])
 
     if (isLoading) {
         return (
@@ -128,29 +144,64 @@ export default function ProductDetailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100"
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-0 md:gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                         {/* Image Section */}
-                        <div className="md:col-span-2 lg:col-span-2 relative aspect-square bg-gray-100 overflow-hidden group max-w-md mx-auto w-full">
-                            {product.imageUrl ? (
-                                <img
-                                    src={product.imageUrl}
-                                    alt={product.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                    <ShoppingBag size={80} className="opacity-30" />
-                                </div>
-                            )}
-                            {!product.inStock && (
-                                <div className="absolute top-6 left-6 px-4 py-2 bg-red-500 text-white font-bold rounded-lg shadow-lg">
-                                    OUT OF STOCK
+                        <div className="relative bg-gray-100">
+                            {/* Main Image */}
+                            <div className="relative aspect-square overflow-hidden">
+                                {currentImage ? (
+                                    <Image
+                                        src={currentImage}
+                                        alt={product.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700"
+                                        sizes="(max-width: 1024px) 100vw, 50vw"
+                                        priority
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                        <ShoppingBag size={80} className="opacity-30" />
+                                    </div>
+                                )}
+                                {!product.inStock && (
+                                    <div className="absolute top-6 left-6 px-4 py-2 bg-red-500 text-white font-bold rounded-lg shadow-lg">
+                                        OUT OF STOCK
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Thumbnail Gallery - only show if multiple images */}
+                            {productImages.length > 1 && (
+                                <div className="p-4 bg-gray-50 border-t border-gray-100">
+                                    <div className="flex gap-2 overflow-x-auto pb-2">
+                                        {productImages.map((img, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setSelectedImageIndex(idx)}
+                                                className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${idx === selectedImageIndex
+                                                        ? 'border-purple-500 shadow-md ring-2 ring-purple-200'
+                                                        : 'border-transparent opacity-70 hover:opacity-100'
+                                                    }`}
+                                            >
+                                                <Image
+                                                    src={img}
+                                                    alt={`${product.title} ${idx + 1}`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="80px"
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-gray-500 text-center mt-2">
+                                        Click on a thumbnail to view different image
+                                    </p>
                                 </div>
                             )}
                         </div>
 
                         {/* Content Section */}
-                        <div className="md:col-span-3 p-8 md:p-10 flex flex-col justify-center">
+                        <div className="p-8 md:p-10 lg:p-12 flex flex-col justify-center">
                             <div className="flex items-center gap-2 text-purple-600 font-medium mb-4">
                                 <Package size={18} />
                                 <span>{product.category || 'Cleaning Product'}</span>

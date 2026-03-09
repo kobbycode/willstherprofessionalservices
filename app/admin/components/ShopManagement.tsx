@@ -19,7 +19,9 @@ import {
     ArrowUpRight,
     Tag,
     Layers,
-    AlertCircle
+    AlertCircle,
+    Upload,
+    XCircle
 } from 'lucide-react'
 import {
     BarChart,
@@ -118,11 +120,19 @@ export default function ShopManagement() {
             const db = getDb()
             if (!db) throw new Error("Database not initialized")
 
+            // Build images array - use new images array, fallback to single imageUrl for backwards compatibility
+            const images = currentProduct.images && currentProduct.images.length > 0
+                ? currentProduct.images
+                : currentProduct.imageUrl
+                    ? [currentProduct.imageUrl]
+                    : []
+
             const productData = {
                 title: currentProduct.title,
                 description: currentProduct.description || '',
                 price: Number(currentProduct.price),
-                imageUrl: currentProduct.imageUrl || '',
+                imageUrl: images[0] || '', // Keep first image as main for backwards compatibility
+                images: images,
                 inStock: currentProduct.inStock ?? true,
                 category: currentProduct.category || 'Cleaning',
                 updatedAt: serverTimestamp()
@@ -168,11 +178,47 @@ export default function ShopManagement() {
     const handleImageUpload = async (file: File) => {
         try {
             const url = await uploadImage(file, 'products')
-            setCurrentProduct(prev => ({ ...prev, imageUrl: url }))
+            const currentImages = currentProduct.images || []
+            setCurrentProduct(prev => ({
+                ...prev,
+                images: [...currentImages, url],
+                imageUrl: currentImages.length === 0 ? url : prev.imageUrl
+            }))
             toast.success("Image uploaded")
         } catch (err) {
             toast.error("Image upload failed")
         }
+    }
+
+    // Batch upload multiple images at once (for better performance)
+    const handleMultipleImageUpload = async (files: FileList) => {
+        try {
+            const fileArray = Array.from(files)
+            // Upload all images in parallel
+            const urls = await Promise.all(
+                fileArray.map(file => uploadImage(file, 'products'))
+            )
+            const currentImages = currentProduct.images || []
+            const newImages = [...currentImages, ...urls]
+            setCurrentProduct(prev => ({
+                ...prev,
+                images: newImages,
+                imageUrl: currentImages.length === 0 ? urls[0] : prev.imageUrl
+            }))
+            toast.success(`${urls.length} image(s) uploaded`)
+        } catch (err) {
+            toast.error("Image upload failed")
+        }
+    }
+
+    const handleRemoveImage = (index: number) => {
+        const currentImages = currentProduct.images || []
+        const newImages = currentImages.filter((_, i) => i !== index)
+        setCurrentProduct(prev => ({
+            ...prev,
+            images: newImages,
+            imageUrl: newImages.length > 0 ? newImages[0] : ''
+        }))
     }
 
     return (
@@ -185,7 +231,7 @@ export default function ShopManagement() {
                 </div>
                 <button
                     onClick={() => {
-                        setCurrentProduct({ inStock: true, category: 'Cleaning' })
+                        setCurrentProduct({ inStock: true, category: 'Cleaning', images: [] })
                         setIsEditing(true)
                     }}
                     className="flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-primary-900 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl shadow-accent-500/20 active:scale-95"
@@ -301,10 +347,22 @@ export default function ShopManagement() {
                             className="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-premium transition-all duration-500 group relative"
                         >
                             <div className="relative aspect-square bg-gray-50">
-                                {p.imageUrl ? (
-                                    <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                {/* Show first image from images array or fallback to imageUrl */}
+                                {(p.images && p.images.length > 0 ? p.images[0] : p.imageUrl) ? (
+                                    <img
+                                        src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl}
+                                        alt={p.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center"><ImageIcon className="w-10 h-10 text-gray-200" /></div>
+                                )}
+                                {/* Show image count badge if multiple images */}
+                                {p.images && p.images.length > 1 && (
+                                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
+                                        <ImageIcon size={10} />
+                                        {p.images.length}
+                                    </div>
                                 )}
                                 <div className="absolute top-4 left-4">
                                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">{p.category}</span>
@@ -406,22 +464,58 @@ export default function ShopManagement() {
                                         </label>
                                         <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Available for Purchase</span>
                                     </div>
+
+                                    {/* Multiple Images Upload */}
                                     <div className="col-span-2">
-                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Image</label>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex-shrink-0 relative">
-                                                {currentProduct.imageUrl ? (
-                                                    <img src={currentProduct.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                                ) : <ImageIcon className="w-6 h-6 m-auto text-gray-200" />}
+                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">
+                                            Images {currentProduct.images && currentProduct.images.length > 0 && `(${currentProduct.images.length})`}
+                                        </label>
+
+                                        {/* Image Preview Grid */}
+                                        {currentProduct.images && currentProduct.images.length > 0 && (
+                                            <div className="grid grid-cols-4 gap-3 mb-4">
+                                                {currentProduct.images.map((img, idx) => (
+                                                    <div key={idx} className="relative aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group">
+                                                        <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveImage(idx)}
+                                                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <XCircle size={16} />
+                                                        </button>
+                                                        {idx === 0 && (
+                                                            <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-purple-600 text-white text-[8px] font-bold rounded">
+                                                                MAIN
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                ))}
                                             </div>
-                                            <label className="flex-1 px-6 py-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center cursor-pointer hover:border-primary-900 transition-colors group">
-                                                <span className="text-[10px] font-black text-secondary-400 group-hover:text-primary-900 uppercase tracking-widest">Select Visual Artifact</span>
-                                                <input type="file" className="hidden" accept="image/*" onChange={e => {
-                                                    const file = e.target.files?.[0]
-                                                    if (file) uploadImage(file, 'products').then(url => setCurrentProduct(prev => ({ ...prev, imageUrl: url })))
-                                                }} />
-                                            </label>
-                                        </div>
+                                        )}
+
+                                        {/* Upload Button */}
+                                        <label className="flex items-center justify-center gap-3 px-6 py-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-primary-900 transition-colors group">
+                                            <Upload className="w-5 h-5 text-secondary-400 group-hover:text-primary-900" />
+                                            <span className="text-[10px] font-black text-secondary-400 group-hover:text-primary-900 uppercase tracking-widest">
+                                                Add More Images
+                                            </span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={e => {
+                                                    const files = e.target.files
+                                                    if (files) {
+                                                        handleMultipleImageUpload(files)
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        <p className="text-[9px] text-gray-400 mt-2 ml-1">
+                                            Upload multiple images. First image will be the main product image.
+                                        </p>
                                     </div>
                                 </div>
 

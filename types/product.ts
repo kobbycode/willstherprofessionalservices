@@ -4,7 +4,8 @@ export interface Product {
     title: string;
     description: string;
     price: number;
-    imageUrl: string;
+    imageUrl: string; // Legacy single image field (kept for backwards compatibility)
+    images?: string[]; // New array of images for gallery support
     category?: string;
     inStock: boolean;
     createdAt: any; // Firestore Timestamp

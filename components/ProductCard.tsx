@@ -6,6 +6,7 @@ import { ShoppingBag, MessageCircle, Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useShop } from '@/context/ShopContext'
+import { useState, useEffect } from 'react'
 
 interface ProductCardProps {
     product: Product
@@ -13,23 +14,39 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, contactPhone }: ProductCardProps) {
-    const { addToCart, toggleWishlist, isInWishlist } = useShop()
+    const { addToCart, toggleWishlist, isInWishlist, setIsCartOpen } = useShop()
     const whatsappNumber = contactPhone.replace(/\D/g, '')
     const message = encodeURIComponent(`Hi, I am interested in buying *${product.title}* listed for GH₵${product.price}`)
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`
+
+    // Get images array - use images array if available, fallback to single imageUrl
+    const productImages = product.images && product.images.length > 0
+        ? product.images
+        : product.imageUrl
+            ? [product.imageUrl]
+            : []
+
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+
+    // Reset selected image when product changes
+    useEffect(() => {
+        setSelectedImageIndex(0)
+    }, [product.id])
+
+    const currentImage = productImages[selectedImageIndex] || ''
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col"
+            className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 h-full flex flex-col"
         >
             {/* Image Section */}
-            <Link href={`/shop/${product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100 cursor-pointer">
-                {product.imageUrl ? (
+            <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-gray-100 cursor-pointer">
+                {currentImage ? (
                     <Image
-                        src={product.imageUrl}
+                        src={currentImage}
                         alt={product.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -37,7 +54,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                        <ShoppingBag size={48} className="opacity-30" />
+                        <ShoppingBag size={32} className="opacity-30" />
                     </div>
                 )}
 
@@ -47,52 +64,79 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         e.preventDefault()
                         toggleWishlist(product)
                     }}
-                    className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(product.id)
-                            ? 'bg-red-500 text-white shadow-lg'
-                            : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-110'
+                    className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(product.id)
+                        ? 'bg-red-500 text-white shadow-lg'
+                        : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-110'
                         }`}
                 >
-                    <Heart size={16} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                    <Heart size={14} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                 </button>
 
                 {/* Stock Badge */}
                 {!product.inStock && (
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm">
                         OUT OF STOCK
                     </div>
                 )}
             </Link>
 
-            {/* Content Section */}
-            <div className="p-4 flex flex-col flex-grow">
+            {/* Thumbnail Gallery - only show if multiple images */}
+            {productImages.length > 1 && (
+                <div className="flex gap-1 px-2 py-1.5 bg-gray-50 overflow-x-auto">
+                    {productImages.map((img, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setSelectedImageIndex(idx)}
+                            className={`relative w-10 h-10 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all ${idx === selectedImageIndex
+                                ? 'border-purple-500 shadow-sm'
+                                : 'border-transparent opacity-70 hover:opacity-100'
+                                }`}
+                        >
+                            <Image
+                                src={img}
+                                alt={`${product.title} ${idx + 1}`}
+                                fill
+                                className="object-cover"
+                                sizes="40px"
+                            />
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Content Section - More compact */}
+            <div className="p-3 flex flex-col flex-grow">
                 {/* Title & Price */}
-                <Link href={`/shop/${product.id}`} className="block mb-3 group/title">
-                    <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-1 group-hover/title:text-purple-600 transition-colors">
+                <Link href={`/shop/${product.id}`} className="block mb-2 group/title">
+                    <h3 className="text-sm font-bold text-gray-900 line-clamp-2 mb-1 group-hover/title:text-purple-600 transition-colors">
                         {product.title}
                     </h3>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-black text-purple-600">
+                        <span className="text-lg font-black text-purple-600">
                             GH₵{product.price.toFixed(2)}
                         </span>
                         {product.category && (
-                            <span className="text-xs text-gray-500 font-medium">
+                            <span className="text-[10px] text-gray-500 font-medium">
                                 {product.category}
                             </span>
                         )}
                     </div>
                 </Link>
 
-                {/* Action Buttons */}
-                <div className="mt-auto flex gap-2">
+                {/* Action Buttons - More compact */}
+                <div className="mt-auto flex gap-1.5">
                     <button
-                        onClick={() => addToCart(product)}
+                        onClick={() => {
+                            addToCart(product)
+                            setIsCartOpen(true)
+                        }}
                         disabled={!product.inStock}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-semibold text-sm transition-all duration-300 ${product.inStock
-                                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg font-semibold text-xs transition-all duration-300 ${product.inStock
+                            ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}
                     >
-                        <ShoppingBag size={16} />
+                        <ShoppingBag size={14} />
                         Add to Cart
                     </button>
                     <a
@@ -100,13 +144,13 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         target={product.inStock ? '_blank' : undefined}
                         rel={product.inStock ? "noopener noreferrer" : undefined}
                         onClick={(e) => !product.inStock && e.preventDefault()}
-                        className={`flex items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${product.inStock
-                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        className={`flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${product.inStock
+                            ? 'bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}
                         title="Order via WhatsApp"
                     >
-                        <MessageCircle size={18} />
+                        <MessageCircle size={16} />
                     </a>
                 </div>
             </div>
