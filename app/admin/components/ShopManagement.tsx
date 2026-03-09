@@ -135,6 +135,7 @@ export default function ShopManagement() {
                 images: images,
                 inStock: currentProduct.inStock ?? true,
                 category: currentProduct.category || 'Cleaning',
+                specifications: currentProduct.specifications || {},
                 updatedAt: serverTimestamp()
             }
 
@@ -452,6 +453,81 @@ export default function ShopManagement() {
                                             placeholder="DESCRIBE THE ASSET..."
                                         />
                                     </div>
+
+                                    {/* Specifications Section */}
+                                    <div className="col-span-2">
+                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">
+                                            Specifications
+                                        </label>
+
+                                        {currentProduct.specifications && Object.keys(currentProduct.specifications).length > 0 ? (
+                                            <div className="space-y-2 mb-3">
+                                                {Object.entries(currentProduct.specifications).map(([key, value]) => (
+                                                    <div key={`spec-${key}`} className="flex items-center gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={key}
+                                                            onChange={e => {
+                                                                const newSpecs = { ...currentProduct.specifications }
+                                                                const val = newSpecs[key]
+                                                                const newKey = e.target.value.trim()
+
+                                                                // Prevent overwriting existing keys (except the current one being edited)
+                                                                if (newKey && newKey !== key && !newSpecs[newKey]) {
+                                                                    delete newSpecs[key]
+                                                                    newSpecs[newKey] = val
+                                                                    setCurrentProduct({ ...currentProduct, specifications: newSpecs })
+                                                                } else if (newKey === key || !newKey) {
+                                                                    // No change or empty key - don't update
+                                                                }
+                                                            }}
+                                                            className="flex-1 px-4 py-2 bg-gray-50 border-none rounded-xl text-xs font-bold uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                            placeholder="SPEC NAME"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={value}
+                                                            onChange={e => {
+                                                                const newSpecs = { ...currentProduct.specifications }
+                                                                newSpecs[key] = e.target.value
+                                                                setCurrentProduct({ ...currentProduct, specifications: newSpecs })
+                                                            }}
+                                                            className="flex-1 px-4 py-2 bg-gray-50 border-none rounded-xl text-xs font-medium focus:ring-2 focus:ring-primary-900 outline-none"
+                                                            placeholder="VALUE"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newSpecs = { ...currentProduct.specifications }
+                                                                delete newSpecs[key]
+                                                                setCurrentProduct({ ...currentProduct, specifications: newSpecs })
+                                                            }}
+                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                                                        >
+                                                            <XCircle size={18} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-gray-400 mb-3">No specifications added yet</p>
+                                        )}
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newSpecs = currentProduct.specifications ? { ...currentProduct.specifications } : {}
+                                                const newKey = `spec_${Object.keys(newSpecs).length + 1}`
+                                                newSpecs[newKey] = ''
+                                                setCurrentProduct({ ...currentProduct, specifications: newSpecs })
+                                            }}
+                                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
+                                        >
+                                            <Plus size={16} />
+                                            Add Specification
+                                        </button>
+                                    </div>
+
                                     <div className="flex items-center gap-4">
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input

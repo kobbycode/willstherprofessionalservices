@@ -9,4 +9,5 @@ export interface Product {
     category?: string;
     inStock: boolean;
     createdAt: any; // Firestore Timestamp
+    specifications?: Record<string, string>; // Key-value pairs for product specifications
 }
