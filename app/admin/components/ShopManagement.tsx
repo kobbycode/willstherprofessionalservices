@@ -245,7 +245,7 @@ export default function ShopManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                     { label: 'Total Products', value: stats.total, icon: Package, color: 'blue' },
-                    { label: 'Inventory Value', value: `$${stats.totalValue.toLocaleString()}`, icon: DollarSign, color: 'emerald' },
+                    { label: 'Inventory Value', value: `GH₵${stats.totalValue.toLocaleString()}`, icon: DollarSign, color: 'emerald' },
                     { label: 'In Stock', value: stats.inStock, icon: CheckCircle, color: 'purple' },
                     { label: 'Out of Stock', value: stats.outOfStock, icon: AlertCircle, color: 'rose' },
                 ].map((stat, idx) => (
@@ -382,7 +382,7 @@ export default function ShopManagement() {
                             <div className="p-6">
                                 <h4 className="font-black text-primary-900 tracking-tight text-lg mb-1 leading-tight">{p.title}</h4>
                                 <div className="flex items-center justify-between mt-4">
-                                    <span className="text-xl font-black text-primary-900">${p.price}</span>
+                                    <span className="text-xl font-black text-primary-900">GH₵{p.price}</span>
                                     <div className={`w-2 h-2 rounded-full ${p.inStock ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`}></div>
                                 </div>
                             </div>
@@ -421,7 +421,7 @@ export default function ShopManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Price (USD)</label>
+                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Price (GHS)</label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300" />
                                             <input
