@@ -30,9 +30,9 @@ const Services = () => {
           // Ensure we map the simple name to title if title is missing
           setCategories(categoriesData.map((c: any) => ({
             ...c,
-            title: c.name || c.title, // Handle both 'name' (from simple collection) and 'title'
-            subtitle: c.subtitle || '', // Allow empty if user removed it
-            imageUrl: c.imageUrl // Will fallback in render if missing
+            title: c.name || c.title,
+            subtitle: c.subtitle || '',
+            imageUrl: c.imageUrl
           })))
         }
 

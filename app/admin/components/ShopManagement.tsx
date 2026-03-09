@@ -336,12 +336,12 @@ export default function ShopManagement() {
             {/* Modal */}
             <AnimatePresence>
                 {isEditing && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-primary-900/40 backdrop-blur-md">
+                    <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 sm:p-6 bg-primary-900/40 backdrop-blur-md overflow-y-auto">
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
+                            className="bg-white w-full max-w-2xl max-h-[90vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col my-8"
                         >
                             <div className="p-8 border-b border-gray-100 flex items-center justify-between">
                                 <div>
@@ -351,7 +351,7 @@ export default function ShopManagement() {
                                 <button onClick={() => setIsEditing(false)} className="p-3 hover:bg-gray-100 rounded-2xl transition-colors"><X className="w-6 h-6 text-secondary-400" /></button>
                             </div>
 
-                            <form onSubmit={handleSave} className="p-8 space-y-6">
+                            <form onSubmit={handleSave} className="p-8 space-y-6 overflow-y-auto">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="col-span-2">
                                         <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Asset Name</label>

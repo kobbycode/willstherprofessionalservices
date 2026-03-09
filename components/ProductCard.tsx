@@ -2,9 +2,10 @@
 
 import { Product } from '@/types/product'
 import { motion } from 'framer-motion'
-import { ShoppingBag, MessageCircle } from 'lucide-react'
+import { ShoppingBag, MessageCircle, Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useShop } from '@/context/ShopContext'
 
 interface ProductCardProps {
     product: Product
@@ -12,6 +13,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, contactPhone }: ProductCardProps) {
+    const { addToCart, toggleWishlist, isInWishlist } = useShop()
     const whatsappNumber = contactPhone.replace(/\D/g, '')
     const message = encodeURIComponent(`Hi, I am interested in buying *${product.title}* listed for GH₵${product.price}`)
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`
@@ -21,65 +23,90 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group bg-white rounded-2xl overflow-hidden shadow-premium hover:shadow-premium-hover transition-all duration-300 border border-gray-100 flex flex-col h-full"
+            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col"
         >
-            <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-gray-100 cursor-pointer">
+            {/* Image Section */}
+            <Link href={`/shop/${product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100 cursor-pointer">
                 {product.imageUrl ? (
                     <Image
                         src={product.imageUrl}
                         alt={product.title}
                         fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
-                        <ShoppingBag size={48} className="opacity-50" />
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                        <ShoppingBag size={48} className="opacity-30" />
                     </div>
                 )}
+
+                {/* Wishlist Button */}
+                <button
+                    onClick={(e) => {
+                        e.preventDefault()
+                        toggleWishlist(product)
+                    }}
+                    className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(product.id)
+                            ? 'bg-red-500 text-white shadow-lg'
+                            : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-110'
+                        }`}
+                >
+                    <Heart size={16} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                </button>
+
+                {/* Stock Badge */}
                 {!product.inStock && (
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                    <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm">
                         OUT OF STOCK
                     </div>
                 )}
             </Link>
 
-            <div className="p-5 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-2">
-                    <Link href={`/shop/${product.id}`} className="hover:text-purple-600 transition-colors">
-                        <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
-                            {product.title}
-                        </h3>
-                    </Link>
-                    <span className="text-primary-600 font-bold text-lg whitespace-nowrap ml-3">
-                        GH₵{product.price.toFixed(2)}
-                    </span>
-                </div>
+            {/* Content Section */}
+            <div className="p-4 flex flex-col flex-grow">
+                {/* Title & Price */}
+                <Link href={`/shop/${product.id}`} className="block mb-3 group/title">
+                    <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-1 group-hover/title:text-purple-600 transition-colors">
+                        {product.title}
+                    </h3>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-black text-purple-600">
+                            GH₵{product.price.toFixed(2)}
+                        </span>
+                        {product.category && (
+                            <span className="text-xs text-gray-500 font-medium">
+                                {product.category}
+                            </span>
+                        )}
+                    </div>
+                </Link>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5em] flex-grow">
-                    {product.description}
-                </p>
-
-                <div className="mt-auto pt-4 flex gap-3">
-                    <Link
-                        href={`/shop/${product.id}`}
-                        className="flex-1 flex items-center justify-center py-3 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200"
+                {/* Action Buttons */}
+                <div className="mt-auto flex gap-2">
+                    <button
+                        onClick={() => addToCart(product)}
+                        disabled={!product.inStock}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-semibold text-sm transition-all duration-300 ${product.inStock
+                                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
                     >
-                        View Details
-                    </Link>
+                        <ShoppingBag size={16} />
+                        Add to Cart
+                    </button>
                     <a
                         href={product.inStock ? whatsappUrl : '#'}
                         target={product.inStock ? '_blank' : undefined}
                         rel={product.inStock ? "noopener noreferrer" : undefined}
-                        className={`
-                            flex items-center justify-center p-3 rounded-xl transition-all duration-200
-                            ${product.inStock
-                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
-                        `}
+                        onClick={(e) => !product.inStock && e.preventDefault()}
+                        className={`flex items-center justify-center p-2.5 rounded-xl transition-all duration-300 ${product.inStock
+                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
                         title="Order via WhatsApp"
                     >
-                        <MessageCircle size={20} />
+                        <MessageCircle size={18} />
                     </a>
                 </div>
             </div>
