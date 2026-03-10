@@ -19,6 +19,13 @@ const Header = () => {
 
   const navigation = useMemo(() => {
     const base = (config?.navigation || []).filter((item) => item.enabled !== false)
+
+    // Always ensure Shop is in the navigation
+    const hasShop = base.some((item: any) => item.href === '/shop')
+    if (!hasShop) {
+      base.push({ name: 'Shop', href: '/shop', enabled: true })
+    }
+
     return base
   }, [config])
 
