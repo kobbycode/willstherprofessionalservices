@@ -258,6 +258,7 @@ export const defaultSiteConfig: SiteConfig = {
 }
 
 const STORAGE_KEY = 'siteConfig'
+const DIRTY_KEY = 'siteConfig_isDirty'
 
 export function loadSiteConfigFromLocal(): SiteConfig {
 	if (typeof window === 'undefined') return defaultSiteConfig
@@ -271,12 +272,20 @@ export function loadSiteConfigFromLocal(): SiteConfig {
 	}
 }
 
-export function saveSiteConfigToLocal(config: SiteConfig) {
+export function saveSiteConfigToLocal(config: SiteConfig, isDirty?: boolean) {
 	if (typeof window === 'undefined') return
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
+	if (isDirty !== undefined) {
+		localStorage.setItem(DIRTY_KEY, isDirty ? 'true' : 'false')
+	}
 }
 
-import { useEffect, useState, useCallback, useMemo, createContext, useContext } from 'react'
+export function loadIsDirtyFromLocal(): boolean {
+	if (typeof window === 'undefined') return false
+	return localStorage.getItem(DIRTY_KEY) === 'true'
+}
+
+import { useEffect, useState, useCallback, useMemo, createContext, useContext, useRef } from 'react'
 import { getDb } from './firebase'
 import { doc, setDoc, onSnapshot, collection, query, orderBy } from 'firebase/firestore'
 
@@ -286,6 +295,7 @@ interface SiteContextType {
 	setConfig: (next: SiteConfig) => void
 	saveConfig: (next: SiteConfig) => Promise<{ success: boolean; error?: string }>
 	isLoaded: boolean
+	isDirty: boolean
 	refresh: () => void
 }
 
@@ -294,20 +304,29 @@ const SiteContext = createContext<SiteContextType | undefined>(undefined)
 export function SiteProvider({ children }: { children: React.ReactNode }) {
 	const [config, setConfigState] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
+	const [isDirty, setIsDirty] = useState(false)
 
 	// Local update only - updates state and localStorage immediately
 	const setConfig = useCallback((next: SiteConfig) => {
+		console.log('SiteProvider: Local update made. Marking as DIRTY.')
 		setConfigState(next)
-		saveSiteConfigToLocal(next)
+		setIsDirty(true)
+		saveSiteConfigToLocal(next, true)
 	}, [])
 
 	const loadFromServer = useCallback(async () => {
 		try {
 			if (typeof window === 'undefined') return
 
-			console.log('--- SiteProvider Sync Start ---')
-			console.log('Fetching fresh configuration...')
+			// Check if we have unsaved changes before even starting the fetch
+			const currentlyDirty = loadIsDirtyFromLocal()
 			
+			console.log('--- SiteProvider Sync Start ---')
+			if (currentlyDirty) {
+				console.log('UNSAVED CHANGES DETECTED. Background sync will only fetch, not merge to prevent overwrites.')
+			}
+			
+			console.log('Fetching fresh configuration...')
 			const [configRes, slidesRes] = await Promise.all([
 				fetch('/api/config/get', { cache: 'no-store' }),
 				fetch('/api/slides', { cache: 'no-store' })
@@ -317,21 +336,24 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 			if (configRes.ok) {
 				const data = await configRes.json()
 				remoteConfig = data.config || {}
-				console.log('Remote config received. Keys:', Object.keys(remoteConfig))
-				if (remoteConfig.gallery) console.log('Remote Gallery count:', remoteConfig.gallery.length)
+				console.log('Remote config received.')
 			}
 
 			let slides: HeroSlide[] = []
 			if (slidesRes.ok) {
 				const data = await slidesRes.json()
 				slides = data.slides || []
-				console.log('Remote slides received. Count:', slides.length)
 			}
 
-			if (Object.keys(remoteConfig).length > 0 || slides.length > 0) {
+			// ONLY merge if we are not dirty, OR if it's the very first load
+			if (!currentlyDirty && (Object.keys(remoteConfig).length > 0 || slides.length > 0)) {
 				setConfigState((prev) => {
-					console.log('Current local state Gallery count:', prev.gallery?.length || 0)
-					
+					// Double check dirty state inside the functional update
+					if (loadIsDirtyFromLocal()) {
+						console.log('Skipping merge: state became dirty during fetch.')
+						return prev
+					}
+
 					// Merge default, current local (for settings not on server), and remote
 					const merged = {
 						...defaultSiteConfig,
@@ -341,60 +363,50 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 					}
 
 					// Arrays MUST be completely overwritten by server if they exist there
-					// to ensure deletions persist after a refresh
 					const arrayKeys: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services']
 					for (const key of arrayKeys) {
 						if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
-							console.log(`Overwriting key "${key}" with server data to ensure consistency/deletions`)
 							;(merged as any)[key] = remoteConfig[key]
 						}
 					}
 
-					// Navigation is a special case (object structure)
 					if (remoteConfig.navigation) {
 						merged.navigation = remoteConfig.navigation
 					}
 
-					console.log('Final merged Gallery count:', merged.gallery?.length || 0)
-					saveSiteConfigToLocal(merged)
+					console.log('Successfully merged server config into local state.')
+					saveSiteConfigToLocal(merged, false)
 					return merged
 				})
+			} else if (currentlyDirty) {
+				console.log('Merge SKIPPED because of unsaved local changes.')
 			}
+
 			console.log('--- SiteProvider Sync End ---')
 		} catch (error) {
 			console.error('SiteProvider: Sync failed:', error)
 			console.log('--- SiteProvider Sync Error ---')
-			const cached = loadSiteConfigFromLocal()
-			if (cached && cached !== defaultSiteConfig) {
-				setConfigState(cached)
-			}
 		} finally {
 			setIsLoaded(true)
 		}
 	}, [])
 
 	useEffect(() => {
-		// 1. Load from local storage for immediate UI
 		const cached = loadSiteConfigFromLocal()
-		if (cached) {
-			console.log('SiteProvider: Loaded from LocalStorage. Gallery count:', cached.gallery?.length || 0)
-			setConfigState(cached)
-		}
+		const cachedDirty = loadIsDirtyFromLocal()
 		
-		// 2. Load from server to sync
+		if (cached) setConfigState(cached)
+		if (cachedDirty) setIsDirty(true)
+		
 		loadFromServer()
 
-		// 3. Refresh every 10 minutes
 		const interval = setInterval(loadFromServer, 600000)
 		return () => clearInterval(interval)
 	}, [loadFromServer])
 
 	const saveConfig = useCallback(async (dataToSave?: SiteConfig): Promise<{ success: boolean; error?: string }> => {
 		const target = dataToSave || config
-		console.log('SiteProvider: PERSISTING TO SERVER...', { 
-			galleryCount: target.gallery?.length,
-			keys: Object.keys(target)
-		})
+		console.log('SiteProvider: PERSISTING TO SERVER...', { galleryCount: target.gallery?.length })
 
 		try {
 			const response = await fetch('/api/config/save', {
@@ -408,12 +420,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				throw new Error(errorData.error || 'Failed to save configuration')
 			}
 
-			const result = await response.json()
-			console.log('SiteProvider: Server save SUCCESSFUL', result)
+			console.log('SiteProvider: Server save SUCCESSFUL. Clearing dirty flag.')
 			
-			// After successful save, update local state to be exactly what was saved
 			setConfigState(target)
-			saveSiteConfigToLocal(target)
+			setIsDirty(false)
+			saveSiteConfigToLocal(target, false)
 			
 			return { success: true }
 		} catch (error) {
@@ -424,11 +435,12 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 	const value = useMemo(() => ({
 		config,
-		setConfig,      // Local only
-		saveConfig,     // Server persistence
+		setConfig,
+		saveConfig,
 		isLoaded,
+		isDirty,
 		refresh: loadFromServer
-	}), [config, setConfig, saveConfig, isLoaded, loadFromServer])
+	}), [config, setConfig, saveConfig, isLoaded, isDirty, loadFromServer])
 
 	return (
 		<SiteContext.Provider value={value}>

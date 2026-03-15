@@ -44,14 +44,16 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
         })
     }
 
-    const updateItem = (index: number, key: string, value: any) => {
-        const nextItems = [...items]
-        nextItems[index] = { ...nextItems[index], [key]: value }
+    const updateItem = (id: string, key: string, value: any) => {
+        const nextItems = items.map((item: any) => 
+            item.id === id ? { ...item, [key]: value } : item
+        )
         updateStats('items', nextItems)
     }
 
     const addItem = () => {
         const newItem = {
+            id: `stat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             icon: 'Building',
             number: '0',
             label: 'New Stat',
@@ -61,8 +63,8 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
         toast.success('New stat added')
     }
 
-    const removeItem = (index: number) => {
-        updateStats('items', items.filter((_: any, i: number) => i !== index))
+    const removeItem = (id: string) => {
+        updateStats('items', items.filter((item: any) => item.id !== id))
         toast.error('Stat removed')
     }
 
@@ -134,9 +136,9 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <AnimatePresence mode='popLayout'>
-                    {items.map((item: any, i: number) => (
+                    {items.map((item: any) => (
                         <motion.div
-                            key={i}
+                            key={item.id}
                             layout
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -148,7 +150,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                     <LayoutGrid className="w-5 h-5" />
                                 </div>
                                 <button
-                                    onClick={() => removeItem(i)}
+                                    onClick={() => removeItem(item.id)}
                                     className="w-8 h-8 rounded-xl flex items-center justify-center text-rose-500 hover:bg-rose-50 transition-colors"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -160,7 +162,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                     <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Number (e.g. 100+)</label>
                                     <input
                                         value={item.number || ''}
-                                        onChange={(e) => updateItem(i, 'number', e.target.value)}
+                                        onChange={(e) => updateItem(item.id, 'number', e.target.value)}
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-2xl font-black text-primary-900 focus:ring-2 focus:ring-primary-900 transition-all outline-none"
                                         placeholder="e.g. 100%"
                                     />
@@ -170,7 +172,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                     <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Label</label>
                                     <input
                                         value={item.label || ''}
-                                        onChange={(e) => updateItem(i, 'label', e.target.value)}
+                                        onChange={(e) => updateItem(item.id, 'label', e.target.value)}
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[11px] font-bold text-secondary-600 focus:ring-2 focus:ring-primary-900 transition-all outline-none"
                                         placeholder="Satisfied Customers"
                                     />
@@ -183,7 +185,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                         </label>
                                         <select
                                             value={item.icon || 'Building'}
-                                            onChange={(e) => updateItem(i, 'icon', e.target.value)}
+                                            onChange={(e) => updateItem(item.id, 'icon', e.target.value)}
                                             className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-[10px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 outline-none"
                                         >
                                             {iconOptions.map(opt => (
@@ -198,7 +200,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                         </label>
                                         <select
                                             value={item.color || 'bg-primary-500'}
-                                            onChange={(e) => updateItem(i, 'color', e.target.value)}
+                                            onChange={(e) => updateItem(item.id, 'color', e.target.value)}
                                             className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-[10px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 outline-none"
                                         >
                                             {colorOptions.map(opt => (

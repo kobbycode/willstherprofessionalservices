@@ -25,18 +25,19 @@ interface GalleryConfigProps {
 
 export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
     const items = config.gallery || []
-    const [isUploading, setIsUploading] = useState<number | null>(null)
+    const [isUploading, setIsUploading] = useState<string | null>(null)
 
-    const updateItem = (index: number, key: string, value: any) => {
+    const updateItem = (id: string, key: string, value: any) => {
         const next = { ...config }
-        next.gallery = [...items]
-        next.gallery[index] = { ...next.gallery[index], [key]: value }
+        next.gallery = items.map((item: any) => 
+            item.id === id ? { ...item, [key]: value } : item
+        )
         onChange(next)
     }
 
     const addItem = () => {
         const newItem = {
-            id: Date.now().toString(),
+            id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             imageUrl: '',
             caption: ''
         }
@@ -44,19 +45,20 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
         toast.success('Added new image slot')
     }
 
-    const removeItem = (index: number) => {
-        onChange({ ...config, gallery: items.filter((_: any, i: number) => i !== index) })
+    const removeItem = (id: string) => {
+        onChange({ ...config, gallery: items.filter((item: any) => item.id !== id) })
         toast.error('Image removed')
     }
 
-    const handleUpload = async (index: number, file: File) => {
+    const handleUpload = async (id: string, file: File) => {
         if (!file) return
-        setIsUploading(index)
+        setIsUploading(id)
         try {
             const url = await uploadImage(file, `gallery/asset-${Date.now()}`)
-            updateItem(index, 'imageUrl', url)
+            updateItem(id, 'imageUrl', url)
             toast.success('Image uploaded')
         } catch (error) {
+            console.error('Upload error:', error)
             toast.error('Upload failed')
         } finally {
             setIsUploading(null)
@@ -155,7 +157,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
 
                                 <div className="absolute inset-0 bg-primary-900/40 opacity-0 group-hover/camera:opacity-100 transition-all flex items-center justify-center gap-4 backdrop-blur-sm">
                                     <button
-                                        onClick={() => removeItem(i)}
+                                        onClick={() => removeItem(g.id)}
                                         className="p-4 bg-rose-500 text-white rounded-2xl shadow-xl shadow-rose-500/30 hover:bg-rose-600 active:scale-95 transition-all"
                                     >
                                         <Trash2 className="w-5 h-5" />
@@ -164,11 +166,11 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                                         <div className="p-4 bg-white text-primary-900 rounded-2xl shadow-xl hover:bg-gray-50 active:scale-95 transition-all">
                                             <Camera className="w-5 h-5" />
                                         </div>
-                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(i, e.target.files[0])} disabled={isUploading !== null} />
+                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(g.id, e.target.files[0])} disabled={isUploading !== null} />
                                     </label>
                                 </div>
 
-                                {isUploading === i && (
+                                {isUploading === g.id && (
                                     <div className="absolute inset-0 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center z-30">
                                         <div className="w-10 h-10 border-4 border-primary-900/10 border-t-primary-900 rounded-full animate-spin mb-4" />
                                         <p className="text-[9px] font-black text-primary-900 uppercase tracking-widest">Synchronizing...</p>
@@ -182,7 +184,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-inner flex items-center gap-3">
                                         <input
                                             value={g.imageUrl || ''}
-                                            onChange={(e) => updateItem(i, 'imageUrl', e.target.value)}
+                                            onChange={(e) => updateItem(g.id, 'imageUrl', e.target.value)}
                                             className="flex-1 bg-transparent border-none text-[10px] font-mono text-secondary-400 focus:ring-0 truncate p-0"
                                             placeholder="https://example.com/image.jpg"
                                         />
@@ -196,7 +198,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                                         <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-secondary-200 group-focus-within/input:text-primary-900 transition-colors" />
                                         <input
                                             value={g.caption || ''}
-                                            onChange={(e) => updateItem(i, 'caption', e.target.value)}
+                                            onChange={(e) => updateItem(g.id, 'caption', e.target.value)}
                                             className="w-full pl-10 pr-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[11px] font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none shadow-premium-sm"
                                             placeholder="e.g. Our team working"
                                         />

@@ -26,19 +26,20 @@ interface TestimonialsConfigProps {
 
 export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps) => {
     const items = config.testimonials || []
-    const [isUploading, setIsUploading] = useState<number | null>(null)
-    const [testimonialToDelete, setTestimonialToDelete] = useState<number | null>(null)
+    const [isUploading, setIsUploading] = useState<string | null>(null)
+    const [testimonialToDelete, setTestimonialToDelete] = useState<string | null>(null)
 
-    const updateItem = (index: number, key: string, value: any) => {
+    const updateItem = (id: string, key: string, value: any) => {
         const next = { ...config }
-        next.testimonials = [...items]
-        next.testimonials[index] = { ...next.testimonials[index], [key]: value }
+        next.testimonials = items.map((item: any) => 
+            item.id === id ? { ...item, [key]: value } : item
+        )
         onChange(next)
     }
 
     const addItem = () => {
         const newItem = {
-            id: Date.now().toString(),
+            id: `testimonial-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             name: '',
             role: '',
             content: '',
@@ -49,17 +50,17 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
         toast.success('Testimonial slot initialized')
     }
 
-    const removeItem = (index: number) => {
-        onChange({ ...config, testimonials: items.filter((_: any, i: number) => i !== index) })
+    const removeItem = (id: string) => {
+        onChange({ ...config, testimonials: items.filter((item: any) => item.id !== id) })
         toast.error('Testimonial record Deleted')
     }
 
-    const handleUpload = async (index: number, file: File) => {
+    const handleUpload = async (id: string, file: File) => {
         if (!file) return
-        setIsUploading(index)
+        setIsUploading(id)
         try {
             const url = await uploadImage(file, `testimonials/avatar-${Date.now()}`)
-            updateItem(index, 'avatarUrl', url)
+            updateItem(id, 'avatarUrl', url)
             toast.success('Identity asset saved')
         } catch (error) {
             toast.error('Asset upload failure')
@@ -141,7 +142,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
 
             <div className="space-y-8">
                 <AnimatePresence mode='popLayout'>
-                    {items.map((t: any, i: number) => (
+                    {items.map((t: any) => (
                         <motion.div
                             key={t.id}
                             layout
@@ -170,13 +171,13 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                                         <p className="text-[9px] font-black text-secondary-200 uppercase tracking-widest">Identity<br />Missing</p>
                                                     </div>
                                                 )}
-                                                {isUploading === i && (
+                                                {isUploading === t.id && (
                                                     <div className="absolute inset-0 bg-white/80 backdrop-blur-md flex items-center justify-center z-30">
                                                         <div className="w-10 h-10 border-4 border-primary-900/10 border-t-primary-900 rounded-full animate-spin" />
                                                     </div>
                                                 )}
                                             </div>
-                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(i, e.target.files[0])} disabled={isUploading !== null} />
+                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(t.id, e.target.files[0])} disabled={isUploading !== null} />
                                         </label>
                                     </div>
 
@@ -185,7 +186,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                             <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Advocate Name</label>
                                             <input
                                                 value={t.name}
-                                                onChange={(e) => updateItem(i, 'name', e.target.value)}
+                                                onChange={(e) => updateItem(t.id, 'name', e.target.value)}
                                                 className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                                                 placeholder="Full Identity"
                                             />
@@ -194,7 +195,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                             <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Designation / Entity</label>
                                             <input
                                                 value={t.role || ''}
-                                                onChange={(e) => updateItem(i, 'role', e.target.value)}
+                                                onChange={(e) => updateItem(t.id, 'role', e.target.value)}
                                                 className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold text-secondary-400 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                                                 placeholder="e.g. CEO, Legacy Group"
                                             />
@@ -212,7 +213,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                                     {[1, 2, 3, 4, 5].map(star => (
                                                         <button
                                                             key={star}
-                                                            onClick={() => updateItem(i, 'rating', star)}
+                                                            onClick={() => updateItem(t.id, 'rating', star)}
                                                             className="transition-all hover:scale-125 hover:rotate-12 active:scale-90"
                                                         >
                                                             <Star className={`w-6 h-6 ${star <= (t.rating || 5) ? 'fill-accent-500 text-accent-500' : 'text-gray-200'}`} />
@@ -228,7 +229,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                         </div>
 
                                         <button
-                                            onClick={() => setTestimonialToDelete(i)}
+                                            onClick={() => setTestimonialToDelete(t.id)}
                                             className="p-5 text-rose-500 hover:bg-rose-50 rounded-3xl transition-all active:scale-95 group/del"
                                         >
                                             <Trash2 className="w-6 h-6 group-hover/del:rotate-6" />
@@ -242,7 +243,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                         </div>
                                         <textarea
                                             value={t.content || ''}
-                                            onChange={(e) => updateItem(i, 'content', e.target.value)}
+                                            onChange={(e) => updateItem(t.id, 'content', e.target.value)}
                                             rows={6}
                                             className="w-full px-8 py-6 bg-gray-50/50 border-none rounded-[2.5rem] text-[13px] font-medium text-secondary-600 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none resize-none leading-relaxed italic"
                                             placeholder="Document client feedback manuscript..."
@@ -314,7 +315,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                         Abort
                                     </button>
                                     <button
-                                        onClick={() => { removeItem(testimonialToDelete); setTestimonialToDelete(null); }}
+                                        onClick={() => { if (testimonialToDelete) { removeItem(testimonialToDelete); setTestimonialToDelete(null); } }}
                                         className="flex-1 py-5 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/30 active:scale-95 transition-all"
                                     >
                                         Execute Delete
