@@ -18,13 +18,46 @@ const Header = () => {
   const { config } = useSiteConfig()
 
   const navigation = useMemo(() => {
-    const base = (config?.navigation || []).filter((item) => item.enabled !== false)
+    // Handle both array and object formats for navigation
+    const rawNav = config?.navigation
+    let base: any[] = []
 
-    // Always ensure Shop is in the navigation
-    const hasShop = base.some((item: any) => item.href === '/shop')
-    if (!hasShop) {
-      base.push({ name: 'Shop', href: '/shop', enabled: true })
+    if (Array.isArray(rawNav)) {
+      base = [...rawNav]
+    } else if (rawNav && typeof rawNav === 'object' && Array.isArray((rawNav as any).main)) {
+      base = [...(rawNav as any).main]
     }
+
+    base = base.filter((item) => item.enabled !== false)
+
+    // Helper to ensure an item exists and has the correct href/properties
+    const ensureItem = (name: string, href: string, isHash: boolean, insertAfter?: string) => {
+      const index = base.findIndex(item =>
+        item.name.toLowerCase() === name.toLowerCase() ||
+        item.href === href ||
+        (item.isHash && item.href === `#${name.toLowerCase()}`) ||
+        (item.isHash && (item.href === `/${href}` || item.href === href))
+      )
+
+      if (index !== -1) {
+        // Update existing item to ensure it points to the correct page
+        base[index] = { ...base[index], name, href, isHash, enabled: true }
+      } else {
+        // Add new item
+        const newItem = { name, href, isHash, enabled: true }
+        if (insertAfter) {
+          const afterIndex = base.findIndex(item => item.name.toLowerCase().includes(insertAfter.toLowerCase()))
+          if (afterIndex !== -1) {
+            base.splice(afterIndex + 1, 0, newItem)
+            return
+          }
+        }
+        base.push(newItem)
+      }
+    }
+
+    ensureItem('Gallery', '/gallery', false, 'Services')
+    ensureItem('Shop', '/shop', false, 'Gallery')
 
     return base
   }, [config])

@@ -72,7 +72,10 @@ export type SiteConfig = {
 		content: string
 		imageUrl?: string
 	}
-	navigation: NavigationItem[]
+	navigation: {
+		main: NavigationItem[]
+		legal: NavigationItem[]
+	} | NavigationItem[]
 	footer: {
 		address?: string
 		description?: string
@@ -160,16 +163,22 @@ export const defaultSiteConfig: SiteConfig = {
 			'We provide a full range of professional cleaning services for residential, commercial, and industrial clients across Ghana.',
 		imageUrl: ''
 	},
-	navigation: [
-		{ name: 'Home', href: '/', isHash: false, enabled: true },
-		{ name: 'About', href: '/#about', isHash: true, enabled: true },
-		{ name: 'Services', href: '/#services', isHash: true, enabled: true },
-		{ name: 'Gallery', href: '/gallery', isHash: false, enabled: true },
-		{ name: 'Stats', href: '/#stats', isHash: true, enabled: true },
-		{ name: 'Shop', href: '/shop', isHash: false, enabled: true },
-		{ name: 'Blog', href: '/blog', isHash: false, enabled: true },
-		{ name: 'Contact', href: '/#contact', isHash: true, enabled: true }
-	],
+	navigation: {
+		main: [
+			{ name: 'Home', href: '/', isHash: false, enabled: true },
+			{ name: 'About', href: '/#about', isHash: true, enabled: true },
+			{ name: 'Services', href: '/#services', isHash: true, enabled: true },
+			{ name: 'Gallery', href: '/gallery', isHash: false, enabled: true },
+			{ name: 'Stats', href: '/#stats', isHash: true, enabled: true },
+			{ name: 'Shop', href: '/shop', isHash: false, enabled: true },
+			{ name: 'Blog', href: '/blog', isHash: false, enabled: true },
+			{ name: 'Contact', href: '/#contact', isHash: true, enabled: true }
+		],
+		legal: [
+			{ name: 'Privacy Policy', href: '/privacy-policy', isHash: false, enabled: true },
+			{ name: 'Terms of Service', href: '/terms-of-service', isHash: false, enabled: true }
+		]
+	},
 	footer: {
 		address: 'Mahogany Street, #7 New Achimota, Accra, Ghana',
 		description: 'Professional maintenance, refurbishment, and cleaning services for industrial, commercial, and domestic properties.',
