@@ -292,14 +292,22 @@ interface SiteContextType {
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
 
 export function SiteProvider({ children }: { children: React.ReactNode }) {
-	const [config, setConfig] = useState<SiteConfig>(defaultSiteConfig)
+	const [config, setConfigState] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
+
+	// Local update only - updates state and localStorage immediately
+	const setConfig = useCallback((next: SiteConfig) => {
+		setConfigState(next)
+		saveSiteConfigToLocal(next)
+	}, [])
 
 	const loadFromServer = useCallback(async () => {
 		try {
 			if (typeof window === 'undefined') return
 
-			console.log('SiteProvider: Loading config from server...')
+			console.log('--- SiteProvider Sync Start ---')
+			console.log('Fetching fresh configuration...')
+			
 			const [configRes, slidesRes] = await Promise.all([
 				fetch('/api/config/get', { cache: 'no-store' }),
 				fetch('/api/slides', { cache: 'no-store' })
@@ -309,44 +317,56 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 			if (configRes.ok) {
 				const data = await configRes.json()
 				remoteConfig = data.config || {}
+				console.log('Remote config received. Keys:', Object.keys(remoteConfig))
+				if (remoteConfig.gallery) console.log('Remote Gallery count:', remoteConfig.gallery.length)
 			}
 
 			let slides: HeroSlide[] = []
 			if (slidesRes.ok) {
 				const data = await slidesRes.json()
 				slides = data.slides || []
+				console.log('Remote slides received. Count:', slides.length)
 			}
 
 			if (Object.keys(remoteConfig).length > 0 || slides.length > 0) {
-				setConfig((prev) => {
-					// We trust the server config as the primary source of truth
+				setConfigState((prev) => {
+					console.log('Current local state Gallery count:', prev.gallery?.length || 0)
+					
+					// Merge default, current local (for settings not on server), and remote
 					const merged = {
 						...defaultSiteConfig,
+						...prev,
 						...remoteConfig,
-						// If we fetched slides specifically, they are the truth for heroSlides
-						// Only fallback if slides fetch failed or returned nothing AND remoteConfig has nothing
 						heroSlides: slides.length > 0 ? slides : (remoteConfig.heroSlides || prev.heroSlides)
 					}
 
-					// Special case for arrays: if the key exists on server (even if empty), use it
-					// This ensures deletions are reflected
-					const arrayKeys: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services', 'navigation']
-					arrayKeys.forEach(key => {
+					// Arrays MUST be completely overwritten by server if they exist there
+					// to ensure deletions persist after a refresh
+					const arrayKeys: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services']
+					for (const key of arrayKeys) {
 						if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
-							(merged as any)[key] = remoteConfig[key]
+							console.log(`Overwriting key "${key}" with server data to ensure consistency/deletions`)
+							;(merged as any)[key] = remoteConfig[key]
 						}
-					})
+					}
 
-					console.log('SiteProvider: Merged configuration:', merged)
+					// Navigation is a special case (object structure)
+					if (remoteConfig.navigation) {
+						merged.navigation = remoteConfig.navigation
+					}
+
+					console.log('Final merged Gallery count:', merged.gallery?.length || 0)
 					saveSiteConfigToLocal(merged)
 					return merged
 				})
 			}
+			console.log('--- SiteProvider Sync End ---')
 		} catch (error) {
-			console.error('SiteProvider: Failed to load from server:', error)
+			console.error('SiteProvider: Sync failed:', error)
+			console.log('--- SiteProvider Sync Error ---')
 			const cached = loadSiteConfigFromLocal()
 			if (cached && cached !== defaultSiteConfig) {
-				setConfig(cached)
+				setConfigState(cached)
 			}
 		} finally {
 			setIsLoaded(true)
@@ -354,47 +374,61 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 	}, [])
 
 	useEffect(() => {
-		// Initial load
+		// 1. Load from local storage for immediate UI
 		const cached = loadSiteConfigFromLocal()
-		if (cached) setConfig(cached)
+		if (cached) {
+			console.log('SiteProvider: Loaded from LocalStorage. Gallery count:', cached.gallery?.length || 0)
+			setConfigState(cached)
+		}
+		
+		// 2. Load from server to sync
 		loadFromServer()
 
-		// Refresh every 5 minutes
-		const interval = setInterval(loadFromServer, 300000)
+		// 3. Refresh every 10 minutes
+		const interval = setInterval(loadFromServer, 600000)
 		return () => clearInterval(interval)
 	}, [loadFromServer])
 
-	const save = useCallback(async (next: SiteConfig): Promise<{ success: boolean; error?: string }> => {
-		// Optimistic update
-		setConfig(next)
-		saveSiteConfigToLocal(next)
+	const saveConfig = useCallback(async (dataToSave?: SiteConfig): Promise<{ success: boolean; error?: string }> => {
+		const target = dataToSave || config
+		console.log('SiteProvider: PERSISTING TO SERVER...', { 
+			galleryCount: target.gallery?.length,
+			keys: Object.keys(target)
+		})
 
 		try {
-			console.log('SiteProvider: Saving to server...')
 			const response = await fetch('/api/config/save', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(next),
+				body: JSON.stringify(target),
 			})
+
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}))
-				throw new Error(errorData.error || 'Failed to save')
+				throw new Error(errorData.error || 'Failed to save configuration')
 			}
-			console.log('SiteProvider: Save successful')
+
+			const result = await response.json()
+			console.log('SiteProvider: Server save SUCCESSFUL', result)
+			
+			// After successful save, update local state to be exactly what was saved
+			setConfigState(target)
+			saveSiteConfigToLocal(target)
+			
 			return { success: true }
 		} catch (error) {
-			console.error('SiteProvider: Save failed:', error)
+			console.error('SiteProvider: Server save FAILED:', error)
 			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
 		}
-	}, [])
+	}, [config])
 
 	const value = useMemo(() => ({
 		config,
-		setConfig: save,  // For backwards compatibility - fires and forgets
-		saveConfig: save,  // New - returns promise with success status
+		setConfig,      // Local only
+		saveConfig,     // Server persistence
 		isLoaded,
 		refresh: loadFromServer
-	}), [config, isLoaded, save, loadFromServer])
+	}), [config, setConfig, saveConfig, isLoaded, loadFromServer])
 
 	return (
 		<SiteContext.Provider value={value}>
