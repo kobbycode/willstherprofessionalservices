@@ -85,10 +85,16 @@ const Header = () => {
     if (item.isHash) {
       // For hash links, navigate to home page first if not already there
       if (pathname !== '/') {
-        router.push('/' + item.href)
+        // If it's already an absolute hash link like "/#about", just push it
+        if (item.href.startsWith('/')) {
+            router.push(item.href)
+        } else {
+            router.push('/' + item.href)
+        }
       } else {
         // If already on home page, just scroll to section
-        const element = document.querySelector(item.href)
+        const targetId = item.href.startsWith('/') ? item.href.split('#')[1] : item.href.substring(1)
+        const element = document.getElementById(targetId)
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' })
         }

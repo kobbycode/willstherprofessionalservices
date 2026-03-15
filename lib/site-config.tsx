@@ -161,14 +161,14 @@ export const defaultSiteConfig: SiteConfig = {
 		imageUrl: ''
 	},
 	navigation: [
-		{ name: 'Home', href: '#home', isHash: true, enabled: true },
-		{ name: 'About', href: '#about', isHash: true, enabled: true },
-		{ name: 'Services', href: '#services', isHash: true, enabled: true },
-		{ name: 'Gallery', href: '#gallery', isHash: true, enabled: true },
-		{ name: 'Stats', href: '#stats', isHash: true, enabled: true },
+		{ name: 'Home', href: '/', isHash: false, enabled: true },
+		{ name: 'About', href: '/#about', isHash: true, enabled: true },
+		{ name: 'Services', href: '/#services', isHash: true, enabled: true },
+		{ name: 'Gallery', href: '/gallery', isHash: false, enabled: true },
+		{ name: 'Stats', href: '/#stats', isHash: true, enabled: true },
 		{ name: 'Shop', href: '/shop', isHash: false, enabled: true },
 		{ name: 'Blog', href: '/blog', isHash: false, enabled: true },
-		{ name: 'Contact', href: '#contact', isHash: true, enabled: true }
+		{ name: 'Contact', href: '/#contact', isHash: true, enabled: true }
 	],
 	footer: {
 		address: 'Mahogany Street, #7 New Achimota, Accra, Ghana',
@@ -267,23 +267,29 @@ export function saveSiteConfigToLocal(config: SiteConfig) {
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
 }
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, createContext, useContext } from 'react'
 import { getDb } from './firebase'
 import { doc, setDoc, onSnapshot, collection, query, orderBy } from 'firebase/firestore'
 
-export function useSiteConfig() {
+// Context for global site configuration
+interface SiteContextType {
+	config: SiteConfig
+	setConfig: (next: SiteConfig) => void
+	isLoaded: boolean
+	refresh: () => void
+}
+
+const SiteContext = createContext<SiteContextType | undefined>(undefined)
+
+export function SiteProvider({ children }: { children: React.ReactNode }) {
 	const [config, setConfig] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
-	const [lastFetch, setLastFetch] = useState(0)
 
 	const loadFromServer = useCallback(async () => {
 		try {
 			if (typeof window === 'undefined') return
 
-			// Load site config
-			console.log('Attempting to load site config from server...')
-
-			// Fetch main config and slides in parallel
+			console.log('SiteProvider: Loading config from server...')
 			const [configRes, slidesRes] = await Promise.all([
 				fetch('/api/config/get', { cache: 'no-store' }),
 				fetch('/api/slides', { cache: 'no-store' })
@@ -293,65 +299,39 @@ export function useSiteConfig() {
 			if (configRes.ok) {
 				const data = await configRes.json()
 				remoteConfig = data.config || {}
-				console.log('Loaded remote config from /api/config/get:', remoteConfig)
-			} else {
-				console.warn(`Failed to load remote config from /api/config/get: HTTP ${configRes.status}`)
 			}
 
 			let slides: HeroSlide[] = []
 			if (slidesRes.ok) {
 				const data = await slidesRes.json()
 				slides = data.slides || []
-				console.log('Loaded slides from /api/slides:', slides)
-			} else {
-				console.warn(`Failed to load slides from /api/slides: HTTP ${slidesRes.status}, using empty array`)
 			}
 
 			if (Object.keys(remoteConfig).length > 0 || slides.length > 0) {
 				setConfig((prev) => {
-					// Start with default, then apply current local state, then remote config
-					// This ensures local changes (e.g., from Firestore updates) are not overwritten
-					// by an older remote config, unless the remote config explicitly provides a value.
+					// Merge strategy: Default < Remote < Slides
+					// We prioritize server data for arrays to ensure "deletions" or "empty" states persist
 					const merged = {
 						...defaultSiteConfig,
-						...prev, // Apply current state to preserve any real-time updates not yet saved to server
 						...remoteConfig,
+						heroSlides: slides.length > 0 ? slides : (remoteConfig.heroSlides || prev.heroSlides)
 					}
 
-					// Prioritize server data for specific arrays if they exist in remoteConfig
-					// This ensures that if the server has an empty array, it overwrites local data.
-					if (remoteConfig.gallery !== undefined) {
-						merged.gallery = remoteConfig.gallery;
-					}
-					if (remoteConfig.stats !== undefined) {
-						merged.stats = remoteConfig.stats;
-					}
-					if (remoteConfig.testimonials !== undefined) {
-						merged.testimonials = remoteConfig.testimonials;
-					}
-					if (remoteConfig.services !== undefined) {
-						merged.services = remoteConfig.services;
-					}
-					if (remoteConfig.navigation !== undefined) {
-						merged.navigation = remoteConfig.navigation;
-					}
+					// Explicitly handle arrays that might be empty on server
+					const arrays: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services', 'navigation']
+					arrays.forEach(key => {
+						if (remoteConfig[key] !== undefined) {
+							(merged as any)[key] = remoteConfig[key]
+						}
+					})
 
-					// Always overwrite heroSlides if we got actual slides from the API
-					// This is because slides are managed separately and should always reflect the latest from /api/slides
-					merged.heroSlides = slides
-
-					console.log('Merged site configuration set to state:', merged)
+					console.log('SiteProvider: Merged configuration:', merged)
 					saveSiteConfigToLocal(merged)
-					setLastFetch(Date.now())
-					console.log('Site config successfully updated from server and merged with local state.')
 					return merged
 				})
-			} else {
-				console.log('No new remote config or slides to merge. Using current state or local cache.')
 			}
 		} catch (error) {
-			console.warn('Failed to load site config from server, attempting to use local cache or defaults:', error)
-			// Try to load from local storage as fallback
+			console.error('SiteProvider: Failed to load from server:', error)
 			const cached = loadSiteConfigFromLocal()
 			if (cached && cached !== defaultSiteConfig) {
 				setConfig(cached)
@@ -362,80 +342,61 @@ export function useSiteConfig() {
 	}, [])
 
 	useEffect(() => {
-		// Load from local cache immediately
+		// Initial load
 		const cached = loadSiteConfigFromLocal()
-		setConfig(cached)
-		setIsLoaded(true)
+		if (cached) setConfig(cached)
+		loadFromServer()
 
-		// Always fetch fresh config from server immediately
-		setTimeout(loadFromServer, 0)
-
-		// Real-time updates from Firestore for slides (only if Firebase is available)
-		let unsubscribe: (() => void) | undefined
-		try {
-			// Real-time synchronization is disabled to support unified configuration management
-			// We rely on loadFromServer and manual saves for better consistency
-		} catch (error) {
-			console.warn('Firestore subscription not available, using polling only:', error)
-		}
-
-		// Lightweight periodic refresh as a fallback safety net
-		const intervalId = setInterval(() => {
-			loadFromServer()
-		}, 300000) // Increased from 60 seconds to 300 seconds (5 minutes)
-
-		return () => {
-			clearInterval(intervalId)
-			if (unsubscribe) unsubscribe()
-		}
+		// Refresh every 5 minutes
+		const interval = setInterval(loadFromServer, 300000)
+		return () => clearInterval(interval)
 	}, [loadFromServer])
 
-	const save = useCallback((next: SiteConfig) => {
+	const save = useCallback(async (next: SiteConfig) => {
+		// Optimistic update
 		setConfig(next)
 		saveSiteConfigToLocal(next)
-		
-		; (async () => {
-			try {
-				if (typeof window === 'undefined') return
 
-				console.log('Sending config to server /api/config/save:', next)
-				const response = await fetch('/api/config/save', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(next),
-				})
-				
-				if (!response.ok) {
-					const errData = await response.json()
-					console.error('Server failed to save config:', errData)
-					throw new Error(errData.error || 'Failed to save to server')
-				}
-				
-				const result = await response.json()
-				console.log('Config saved successfully to server:', result)
-
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`)
-				}
-				
-				console.log('Site config saved to server successfully')
-			} catch (error) {
-				console.warn('Failed to save config to server, will retry later or rely on local:', error)
-				// The local state and localStorage are already updated, 
-				// so the user sees their changes immediately.
-			}
-		})()
+		try {
+			console.log('SiteProvider: Saving to server...')
+			const response = await fetch('/api/config/save', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(next),
+			})
+			if (!response.ok) throw new Error('Failed to save')
+			console.log('SiteProvider: Save successful')
+		} catch (error) {
+			console.error('SiteProvider: Save failed:', error)
+		}
 	}, [])
 
-	const refresh = useCallback(() => {
-		loadFromServer()
-	}, [loadFromServer])
+	const value = useMemo(() => ({
+		config,
+		setConfig: save,
+		isLoaded,
+		refresh: loadFromServer
+	}), [config, isLoaded, save, loadFromServer])
 
-	const memoizedConfig = useMemo(() => config, [config])
+	return (
+		<SiteContext.Provider value={value}>
+			{children}
+		</SiteContext.Provider>
+	)
+}
 
-	return { config: memoizedConfig, setConfig: save, isLoaded, refresh }
+export function useSiteConfig() {
+	const context = useContext(SiteContext)
+	if (context === undefined) {
+		// Fallback for components used outside Provider (though rare in this app)
+		return {
+			config: defaultSiteConfig,
+			setConfig: () => {},
+			isLoaded: false,
+			refresh: () => {}
+		}
+	}
+	return context
 }
 
 

@@ -12,8 +12,8 @@ export async function GET() {
     
     // Add caching headers
     const response = NextResponse.json({ slides })
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
-    response.headers.set('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
+    response.headers.set('Cache-Control', 'no-store, max-age=0')
+    return response
     
     return response
   } catch (error) {
@@ -43,8 +43,7 @@ export async function GET() {
         }
       ]
       const response = NextResponse.json({ slides: defaultSlides })
-      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
-      response.headers.set('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30')
+      response.headers.set('Cache-Control', 'no-store, max-age=0')
       return response
     }
     return NextResponse.json({ error: 'Failed to fetch slides' }, { status: 500 })

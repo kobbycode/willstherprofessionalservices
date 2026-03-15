@@ -27,7 +27,17 @@ const Gallery = () => {
     )
   }
 
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    return (
+      <section className="section-padding bg-white" id="gallery">
+        <div className="container-custom px-4 text-center">
+            <div className="py-20 text-secondary-400 font-medium">
+                No images available in the gallery yet. Stay tuned!
+            </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="section-padding bg-white" id="gallery">

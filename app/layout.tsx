@@ -4,6 +4,7 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/lib/auth-context'
 import { ShopProvider } from '@/context/ShopContext'
+import { SiteProvider } from '@/lib/site-config'
 import { CartDrawer } from '@/components/CartDrawer'
 
 const inter = Inter({
@@ -164,17 +165,19 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <ShopProvider>
-            <CartDrawer />
-            {children}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                style: { fontSize: '14px' },
-                duration: 4000,
-              }}
-            />
-          </ShopProvider>
+          <SiteProvider>
+            <ShopProvider>
+              <CartDrawer />
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  style: { fontSize: '14px' },
+                  duration: 4000,
+                }}
+              />
+            </ShopProvider>
+          </SiteProvider>
         </AuthProvider>
         {false && (
           <script
