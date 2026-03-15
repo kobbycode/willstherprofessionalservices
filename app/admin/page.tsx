@@ -114,17 +114,23 @@ const AdminDashboard = () => {
     }
   }
 
+  // Store the latest config in a ref so handleSaveAll can access it
+  const configRef = useRef(config)
+  configRef.current = config
+
   // Simple wrapper for onChange - just updates local state synchronously
   const handleConfigChange = (next: any) => {
+    configRef.current = next  // Keep ref in sync immediately
     setConfig(next)
   }
 
   const handleSaveAll = async () => {
     try {
       setIsSaving(true)
-      console.log('Saving all config:', config)
-      console.log('Gallery items:', config.gallery)
-      const result = await saveConfigFn(config)
+      const currentConfig = configRef.current  // Use ref for latest value
+      console.log('Saving all config:', currentConfig)
+      console.log('Gallery items:', currentConfig.gallery)
+      const result = await saveConfigFn(currentConfig)
       if (!result.success) {
         throw new Error(result.error || 'Failed to save to server')
       }
