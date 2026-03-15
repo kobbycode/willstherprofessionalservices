@@ -284,6 +284,7 @@ import { doc, setDoc, onSnapshot, collection, query, orderBy } from 'firebase/fi
 interface SiteContextType {
 	config: SiteConfig
 	setConfig: (next: SiteConfig) => void
+	saveConfig: (next: SiteConfig) => Promise<{ success: boolean; error?: string }>
 	isLoaded: boolean
 	refresh: () => void
 }
@@ -363,7 +364,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 		return () => clearInterval(interval)
 	}, [loadFromServer])
 
-	const save = useCallback(async (next: SiteConfig) => {
+	const save = useCallback(async (next: SiteConfig): Promise<{ success: boolean; error?: string }> => {
 		// Optimistic update
 		setConfig(next)
 		saveSiteConfigToLocal(next)
@@ -375,16 +376,22 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(next),
 			})
-			if (!response.ok) throw new Error('Failed to save')
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}))
+				throw new Error(errorData.error || 'Failed to save')
+			}
 			console.log('SiteProvider: Save successful')
+			return { success: true }
 		} catch (error) {
 			console.error('SiteProvider: Save failed:', error)
+			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
 		}
 	}, [])
 
 	const value = useMemo(() => ({
 		config,
-		setConfig: save,
+		setConfig: save,  // For backwards compatibility - fires and forgets
+		saveConfig: save,  // New - returns promise with success status
 		isLoaded,
 		refresh: loadFromServer
 	}), [config, isLoaded, save, loadFromServer])
@@ -402,9 +409,10 @@ export function useSiteConfig() {
 		// Fallback for components used outside Provider (though rare in this app)
 		return {
 			config: defaultSiteConfig,
-			setConfig: () => {},
+			setConfig: () => { },
+			saveConfig: async () => ({ success: false, error: 'SiteConfig not initialized' }),
 			isLoaded: false,
-			refresh: () => {}
+			refresh: () => { }
 		}
 	}
 	return context

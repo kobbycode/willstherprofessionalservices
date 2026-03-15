@@ -77,8 +77,9 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
-  const { config, setConfig } = useSiteConfig()
+  const { config, setConfig, saveConfig: saveConfigFn } = useSiteConfig()
   const { user, signOut: authSignOut } = useAuth()
 
   const handleLogout = async () => {
@@ -113,7 +114,23 @@ const AdminDashboard = () => {
     }
   }
 
-  const saveConfig = (next: any) => setConfig(next)
+  const handleSaveAll = async () => {
+    try {
+      setIsSaving(true)
+      console.log('Saving all config:', config)
+      console.log('Gallery items:', config.gallery)
+      const result = await saveConfigFn(config)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save to server')
+      }
+      toast.success('All website settings saved successfully! 🎉')
+    } catch (error) {
+      console.error('Save error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to save settings')
+    } finally {
+      setIsSaving(false)
+    }
+  }
   const resetConfig = () => setConfig(defaultSiteConfig)
 
   return (
@@ -274,47 +291,47 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'settings' && (
-              <WebsiteSettings config={config} onChange={saveConfig} />
+              <WebsiteSettings config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'hero' && (
-              <HeroConfig config={config} onChange={saveConfig} />
+              <HeroConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'services' && (
-              <ServicesConfig config={config} onChange={saveConfig} />
+              <ServicesConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'about' && (
-              <AboutConfig config={config} onChange={saveConfig} />
+              <AboutConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'navigation' && (
-              <NavigationConfig config={config} onChange={saveConfig} />
+              <NavigationConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'footer' && (
-              <FooterConfig config={config} onChange={saveConfig} />
+              <FooterConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'seo' && (
-              <SEOConfig config={config} onChange={saveConfig} />
+              <SEOConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'map' && (
-              <MapConfig config={config} onChange={saveConfig} />
+              <MapConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'testimonials' && (
-              <TestimonialsConfig config={config} onChange={saveConfig} />
+              <TestimonialsConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'gallery' && (
-              <GalleryConfig config={config} onChange={saveConfig} />
+              <GalleryConfig config={config} onChange={setConfig} />
             )}
 
             {activeTab === 'stats' && (
-              <StatsConfig config={config} onChange={saveConfig} />
+              <StatsConfig config={config} onChange={setConfig} />
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">
@@ -325,15 +342,11 @@ const AdminDashboard = () => {
                 🔄 Reset to Default
               </button>
               <button
-                onClick={() => {
-                  console.log('Saving all config:', config)
-                  console.log('Hero slides:', config.heroSlides)
-                  saveConfig(config)
-                  toast.success('All website settings saved successfully! 🎉')
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-200 hover:shadow-xl transform hover:scale-105"
+                onClick={handleSaveAll}
+                disabled={isSaving}
+                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-200 hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                💾 Save All Changes
+                {isSaving ? '⏳ Saving...' : '💾 Save All Changes'}
               </button>
             </div>
           </div>
