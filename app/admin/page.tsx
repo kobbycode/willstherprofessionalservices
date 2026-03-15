@@ -64,6 +64,7 @@ import { SEOConfig } from './components/SEOConfig'
 import { MapConfig } from './components/MapConfig'
 import { TestimonialsConfig } from './components/TestimonialsConfig'
 import { GalleryConfig } from './components/GalleryConfig'
+import { StatsConfig } from './components/StatsConfig'
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -173,6 +174,7 @@ const AdminDashboard = () => {
                     { id: 'about', label: 'About Section', icon: Quote },
                     { id: 'testimonials', label: 'Testimonials', icon: Quote },
                     { id: 'gallery', label: 'Gallery', icon: ImageIcon },
+                    { id: 'stats', label: 'Stats', icon: BarChart3 },
                   ].map((item) => (
                     <button
                       key={item.id}
@@ -309,6 +311,10 @@ const AdminDashboard = () => {
 
             {activeTab === 'gallery' && (
               <GalleryConfig config={config} onChange={saveConfig} />
+            )}
+
+            {activeTab === 'stats' && (
+              <StatsConfig config={config} onChange={saveConfig} />
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">

@@ -1,38 +1,26 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Users, Building, Star, TrendingUp } from 'lucide-react'
+import { Users, Building, Star, TrendingUp, LucideIcon } from 'lucide-react'
+import { useSiteConfig } from '@/lib/site-config'
+
+const iconMap: Record<string, LucideIcon> = {
+  Users,
+  Building,
+  Star,
+  TrendingUp
+}
 
 const Stats = () => {
-  const stats = [
-    {
-      icon: Building,
-      number: '30',
-      label: 'Institution / Household per month',
-      color: 'bg-primary-500'
-    },
-    {
-      icon: Users,
-      number: '23',
-      label: 'Working Experts',
-      color: 'bg-accent-500'
-    },
-    {
-      icon: Star,
-      number: '100%',
-      label: 'Satisfied Customers',
-      color: 'bg-green-500'
-    },
-    {
-      icon: TrendingUp,
-      number: '∞',
-      label: 'Growth Potential',
-      color: 'bg-purple-500'
-    }
-  ]
+  const { config } = useSiteConfig()
+  const { title, subtitle, items } = config.stats || {
+    title: 'Our Services in Numbers',
+    subtitle: 'Delivering exceptional results through dedicated expertise and proven track record',
+    items: []
+  }
 
   return (
-    <section className="section-padding bg-primary-600 text-white">
+    <section className="section-padding bg-primary-600 text-white" id="stats">
       <div className="container-custom">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -42,42 +30,45 @@ const Stats = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            Our Services in Numbers
+            {title}
           </h2>
           <div className="w-24 h-1 bg-white mx-auto mb-8"></div>
           <p className="text-xl text-primary-100 max-w-3xl mx-auto">
-            Delivering exceptional results through dedicated expertise and proven track record
+            {subtitle}
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              viewport={{ once: true }}
-              className="text-center group"
-            >
-              <div className="relative mb-6">
-                <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
-                  <stat.icon className="w-12 h-12 text-white" />
+          {items.map((stat, index) => {
+            const Icon = iconMap[stat.icon] || Building
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="text-center group"
+              >
+                <div className="relative mb-6">
+                  <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <Icon className="w-12 h-12 text-white" />
+                  </div>
+                  <div className={`absolute inset-0 ${stat.color} rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
                 </div>
-                <div className={`absolute inset-0 ${stat.color} rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
-              </div>
-              
-              <div className="mb-4">
-                <span className="text-5xl md:text-6xl font-bold text-white">
-                  {stat.number}
-                </span>
-              </div>
-              
-              <p className="text-lg text-primary-100 font-medium leading-relaxed">
-                {stat.label}
-              </p>
-            </motion.div>
-          ))}
+                
+                <div className="mb-4">
+                  <span className="text-5xl md:text-6xl font-bold text-white">
+                    {stat.number}
+                  </span>
+                </div>
+                
+                <p className="text-lg text-primary-100 font-medium leading-relaxed">
+                  {stat.label}
+                </p>
+              </motion.div>
+            )
+          })}
         </div>
 
         <motion.div

@@ -104,6 +104,16 @@ export type SiteConfig = {
 	}
 	testimonials: Testimonial[]
 	gallery: { id: string; imageUrl: string; caption?: string }[]
+	stats: {
+		title: string
+		subtitle: string
+		items: {
+			icon: string
+			number: string
+			label: string
+			color: string
+		}[]
+	}
 }
 
 export const defaultSiteConfig: SiteConfig = {
@@ -203,7 +213,37 @@ export const defaultSiteConfig: SiteConfig = {
 		zoom: 14
 	},
 	testimonials: [],
-	gallery: []
+	gallery: [],
+	stats: {
+		title: 'Our Services in Numbers',
+		subtitle: 'Delivering exceptional results through dedicated expertise and proven track record',
+		items: [
+			{
+				icon: 'Building',
+				number: '30',
+				label: 'Institution / Household per month',
+				color: 'bg-primary-500'
+			},
+			{
+				icon: 'Users',
+				number: '23',
+				label: 'Working Experts',
+				color: 'bg-accent-500'
+			},
+			{
+				icon: 'Star',
+				number: '100%',
+				label: 'Satisfied Customers',
+				color: 'bg-green-500'
+			},
+			{
+				icon: 'TrendingUp',
+				number: '∞',
+				label: 'Growth Potential',
+				color: 'bg-purple-500'
+			}
+		]
+	}
 }
 
 const STORAGE_KEY = 'siteConfig'

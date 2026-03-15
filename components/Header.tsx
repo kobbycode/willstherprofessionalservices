@@ -46,7 +46,7 @@ const Header = () => {
   useEffect(() => {
     if (pathname !== '/') return
 
-    const sections = ['home', 'about', 'services', 'contact']
+    const sections = ['home', 'about', 'services', 'gallery', 'stats', 'contact']
     let currentSection = 'home'
 
     const checkSection = () => {
