@@ -121,7 +121,7 @@ const AdminDashboard = () => {
       <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         <AdminHeader
           title="Admin Dashboard"
-          subtitle="Professional Services Management"
+          subtitle="Manage your website"
           showBadge={true}
           showMobileMenuToggle={true}
           isMobileMenuOpen={isMobileMenuOpen}
@@ -138,12 +138,12 @@ const AdminDashboard = () => {
                 <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Navigation</h2>
                 <div className="space-y-1.5">
                   {[
-                    { id: 'overview', label: 'Overview', icon: BarChart3 },
-                    { id: 'shop', label: 'Shop Management', icon: ShoppingBag },
-                    { id: 'blog', label: 'Blog Management', icon: FileText },
+                    { id: 'overview', label: 'Dashboard', icon: BarChart3 },
+                    { id: 'shop', label: 'Shop', icon: ShoppingBag },
+                    { id: 'blog', label: 'Blog', icon: FileText },
                     { id: 'categories', label: 'Categories', icon: Filter },
-                    { id: 'users', label: 'User Management', icon: Users, restricted: true },
-                    { id: 'contact', label: 'Contact Forms', icon: MessageSquare },
+                    { id: 'users', label: 'Users', icon: Users, restricted: true },
+                    { id: 'contact', label: 'Inquiries', icon: MessageSquare },
                   ].filter(item => !item.restricted || (user?.role === 'super_admin')).map((item) => (
                     <button
                       key={item.id}
@@ -200,11 +200,11 @@ const AdminDashboard = () => {
                 <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Configuration</h2>
                 <div className="space-y-1.5">
                   {[
-                    { id: 'settings', label: 'Website Settings', icon: Settings },
-                    { id: 'navigation', label: 'Navigation', icon: MenuIcon },
-                    { id: 'footer', label: 'Footer Settings', icon: Globe },
-                    { id: 'seo', label: 'SEO Settings', icon: Globe },
-                    { id: 'map', label: 'Map Settings', icon: MapIcon },
+                    { id: 'settings', label: 'General', icon: Settings },
+                    { id: 'navigation', label: 'Menu', icon: MenuIcon },
+                    { id: 'footer', label: 'Footer', icon: Globe },
+                    { id: 'seo', label: 'SEO', icon: Globe },
+                    { id: 'map', label: 'Map', icon: MapIcon },
                   ].map((item) => (
                     <button
                       key={item.id}

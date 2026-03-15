@@ -14,13 +14,19 @@ export async function POST(request: NextRequest) {
 
     const db = await getAdminDb()
 
-    // Save to Firestore in the structure expected by useSiteConfig
-    await db.collection('config').doc('site').set({
+    // Save to Firestore in the structure    console.log('=== CONFIG SAVE API START ===')
+    console.log('Received data keys:', Object.keys(data))
+    if (data.gallery) console.log('Gallery items count:', data.gallery.length)
+    if (data.stats) console.log('Stats title:', data.stats.title)
+
+    const savePath = db.collection('config').doc('site')
+    await savePath.set({
       ...data,
       updatedAt: new Date().toISOString()
     }, { merge: true })
 
-    return NextResponse.json({ success: true })
+    console.log('=== CONFIG SAVE API SUCCESS ===')
+    return NextResponse.json({ success: true, savedAt: new Date().toISOString(), data })
   } catch (error) {
     console.error('Error saving site config:', error)
     return NextResponse.json(

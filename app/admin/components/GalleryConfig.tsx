@@ -11,8 +11,7 @@ import {
     Layers,
     ExternalLink,
     Monitor,
-    Sparkles,
-    Zap,
+    Settings,
     ShieldCheck,
     LayoutGrid
 } from 'lucide-react'
@@ -42,12 +41,12 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
             caption: ''
         }
         onChange({ ...config, gallery: [newItem, ...items] })
-        toast.success('Asset slot initialized')
+        toast.success('Added new image slot')
     }
 
     const removeItem = (index: number) => {
         onChange({ ...config, gallery: items.filter((_: any, i: number) => i !== index) })
-        toast.error('Asset deleted')
+        toast.error('Image removed')
     }
 
     const handleUpload = async (index: number, file: File) => {
@@ -56,9 +55,9 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
         try {
             const url = await uploadImage(file, `gallery/asset-${Date.now()}`)
             updateItem(index, 'imageUrl', url)
-            toast.success('Image saved')
+            toast.success('Image uploaded')
         } catch (error) {
-            toast.error('Asset upload failure')
+            toast.error('Upload failed')
         } finally {
             setIsUploading(null)
         }
@@ -73,8 +72,8 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
             {/* Header & Global Add */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Visual Image Gallery</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global media gallery & Image identifiers</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Gallery Images</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Upload and manage images for the website gallery</p>
                 </div>
 
                 <button
@@ -86,7 +85,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                         <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
                             <Plus className="w-5 h-5 text-accent-500" />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Deploy New Asset</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add New Image</span>
                     </div>
                 </button>
             </div>
@@ -98,9 +97,9 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                         <ImageIcon className="w-8 h-8" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Vault Capacity</p>
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Total Images</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">{items.length}</p>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Global Images</p>
+                        <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Images in Gallery</p>
                     </div>
                 </div>
 
@@ -109,9 +108,9 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                         <Monitor className="w-8 h-8" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Media Density</p>
+                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Image Quality</p>
                         <p className="text-3xl font-black text-primary-900 mt-1">High</p>
-                        <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Optimized for Retina</p>
+                        <p className="text-[9px] font-bold text-amber-600 uppercase mt-1">Optimized for Web</p>
                     </div>
                 </div>
 
@@ -121,8 +120,8 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                         <ShieldCheck className="w-8 h-8" />
                     </div>
                     <div className="relative z-10">
-                        <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">CDN Status</p>
-                        <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Edge Verified</p>
+                        <p className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">Storage Status</p>
+                        <p className="text-xl font-black text-white mt-1 uppercase tracking-tighter">Connected</p>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                             <p className="text-[9px] font-bold text-green-400 uppercase">Auto Distribution Active</p>
@@ -150,7 +149,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                                 ) : (
                                     <div className="text-center">
                                         <Layers className="w-12 h-12 text-gray-100 mx-auto mb-4" />
-                                        <p className="text-[9px] font-black text-secondary-200 uppercase tracking-widest">Master Asset Undefined</p>
+                                        <p className="text-[9px] font-black text-secondary-200 uppercase tracking-widest">No Image Selected</p>
                                     </div>
                                 )}
 
@@ -179,27 +178,27 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
 
                             <div className="p-8 space-y-6">
                                 <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Asset Identifier Path</label>
+                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Image URL</label>
                                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-inner flex items-center gap-3">
                                         <input
                                             value={g.imageUrl || ''}
                                             onChange={(e) => updateItem(i, 'imageUrl', e.target.value)}
                                             className="flex-1 bg-transparent border-none text-[10px] font-mono text-secondary-400 focus:ring-0 truncate p-0"
-                                            placeholder="https://visual-Settings.com/..."
+                                            placeholder="https://example.com/image.jpg"
                                         />
                                         <ExternalLink className="w-3 h-3 text-secondary-200" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Descriptive Caption</label>
+                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Caption</label>
                                     <div className="relative group/input">
-                                        <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-secondary-200 group-focus-within/input:text-primary-900 transition-colors" />
+                                        <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-secondary-200 group-focus-within/input:text-primary-900 transition-colors" />
                                         <input
                                             value={g.caption || ''}
                                             onChange={(e) => updateItem(i, 'caption', e.target.value)}
                                             className="w-full pl-10 pr-6 py-4 bg-gray-50/50 border-none rounded-2xl text-[11px] font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none shadow-premium-sm"
-                                            placeholder="e.g. Industrial Sanitation Grid"
+                                            placeholder="e.g. Our team working"
                                         />
                                     </div>
                                 </div>
@@ -228,8 +227,8 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                     <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl mb-10 border border-gray-100">
                         <LayoutGrid className="w-16 h-16 text-primary-900/10" />
                     </div>
-                    <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">Visual Storage Dormant</h3>
-                    <p className="max-w-md text-center text-secondary-400 font-medium mt-4 text-[11px] uppercase tracking-widest leading-relaxed">The Image Gallery is currently empty. Initiate visual synchronization by deploying high-integrity media files to the global Settings.</p>
+                    <h3 className="text-2xl font-black text-primary-900 uppercase tracking-tight">No Images Yet</h3>
+                    <p className="max-w-md text-center text-secondary-400 font-medium mt-4 text-[11px] uppercase tracking-widest leading-relaxed">Your gallery is currently empty. Click "Add New Image" above to start building your gallery.</p>
                 </div>
             )}
         </motion.div>

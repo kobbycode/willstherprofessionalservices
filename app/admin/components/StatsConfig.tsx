@@ -7,7 +7,7 @@ import {
     Trash2,
     Type,
     FileText,
-    Zap,
+    Settings,
     LayoutGrid,
     Users,
     Building,
@@ -58,12 +58,12 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
             color: 'bg-primary-500'
         }
         updateStats('items', [...items, newItem])
-        toast.success('Stat metrics initialized')
+        toast.success('New stat added')
     }
 
     const removeItem = (index: number) => {
         updateStats('items', items.filter((_: any, i: number) => i !== index))
-        toast.error('Metric deleted')
+        toast.error('Stat removed')
     }
 
     return (
@@ -75,8 +75,8 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Performance Metrics</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of global performance statistics and organizational impact</p>
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Website Stats</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage labels and numbers for the stats section</p>
                 </div>
 
                 <button
@@ -88,7 +88,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                         <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
                             <Plus className="w-5 h-5 text-accent-500" />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Deploy New Metric</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add New Stat</span>
                     </div>
                 </button>
             </div>
@@ -98,13 +98,13 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                 <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
                     <div className="flex items-center gap-3">
                         <Type className="w-5 h-5 text-primary-900" />
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Section Identification</h3>
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Titles</h3>
                     </div>
                 </div>
 
                 <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Main Heading</label>
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Main Title</label>
                         <div className="relative group/input">
                             <Hash className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                             <input
@@ -117,7 +117,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Supporting Narrative</label>
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Subtitle</label>
                         <div className="relative group/input">
                             <FileText className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                             <input
@@ -157,7 +157,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
 
                             <div className="p-8 space-y-6">
                                 <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Metric Value</label>
+                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Number (e.g. 100+)</label>
                                     <input
                                         value={item.number || ''}
                                         onChange={(e) => updateItem(i, 'number', e.target.value)}
@@ -167,7 +167,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Identifier Label</label>
+                                    <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2">Label</label>
                                     <input
                                         value={item.label || ''}
                                         onChange={(e) => updateItem(i, 'label', e.target.value)}
@@ -179,7 +179,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-3">
                                         <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2 flex items-center gap-2">
-                                            <Zap className="w-3 h-3" /> Icon
+                                            <Settings className="w-3 h-3" /> Icon
                                         </label>
                                         <select
                                             value={item.icon || 'Building'}
@@ -194,7 +194,7 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
 
                                     <div className="space-y-3">
                                         <label className="text-[9px] font-black text-secondary-300 uppercase tracking-widest px-2 flex items-center gap-2">
-                                            <Palette className="w-3 h-3" /> Aura
+                                            <Palette className="w-3 h-3" /> Color
                                         </label>
                                         <select
                                             value={item.color || 'bg-primary-500'}
