@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     await savePath.set({
       ...data,
       updatedAt: new Date().toISOString()
-    }, { merge: true })
+    })
 
     console.log('=== CONFIG SAVE API SUCCESS ===')
     return NextResponse.json({ success: true, savedAt: new Date().toISOString(), data })

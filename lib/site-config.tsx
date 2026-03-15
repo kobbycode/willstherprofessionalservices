@@ -318,18 +318,20 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 			if (Object.keys(remoteConfig).length > 0 || slides.length > 0) {
 				setConfig((prev) => {
-					// Merge strategy: Default < Remote < Slides
-					// We prioritize server data for arrays to ensure "deletions" or "empty" states persist
+					// We trust the server config as the primary source of truth
 					const merged = {
 						...defaultSiteConfig,
 						...remoteConfig,
+						// If we fetched slides specifically, they are the truth for heroSlides
+						// Only fallback if slides fetch failed or returned nothing AND remoteConfig has nothing
 						heroSlides: slides.length > 0 ? slides : (remoteConfig.heroSlides || prev.heroSlides)
 					}
 
-					// Explicitly handle arrays that might be empty on server
-					const arrays: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services', 'navigation']
-					arrays.forEach(key => {
-						if (remoteConfig[key] !== undefined) {
+					// Special case for arrays: if the key exists on server (even if empty), use it
+					// This ensures deletions are reflected
+					const arrayKeys: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services', 'navigation']
+					arrayKeys.forEach(key => {
+						if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
 							(merged as any)[key] = remoteConfig[key]
 						}
 					})
