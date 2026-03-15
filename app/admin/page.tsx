@@ -114,6 +114,11 @@ const AdminDashboard = () => {
     }
   }
 
+  // Simple wrapper for onChange - just updates local state synchronously
+  const handleConfigChange = (next: any) => {
+    setConfig(next)
+  }
+
   const handleSaveAll = async () => {
     try {
       setIsSaving(true)
@@ -291,47 +296,47 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'settings' && (
-              <WebsiteSettings config={config} onChange={setConfig} />
+              <WebsiteSettings config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'hero' && (
-              <HeroConfig config={config} onChange={setConfig} />
+              <HeroConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'services' && (
-              <ServicesConfig config={config} onChange={setConfig} />
+              <ServicesConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'about' && (
-              <AboutConfig config={config} onChange={setConfig} />
+              <AboutConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'navigation' && (
-              <NavigationConfig config={config} onChange={setConfig} />
+              <NavigationConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'footer' && (
-              <FooterConfig config={config} onChange={setConfig} />
+              <FooterConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'seo' && (
-              <SEOConfig config={config} onChange={setConfig} />
+              <SEOConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'map' && (
-              <MapConfig config={config} onChange={setConfig} />
+              <MapConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'testimonials' && (
-              <TestimonialsConfig config={config} onChange={setConfig} />
+              <TestimonialsConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'gallery' && (
-              <GalleryConfig config={config} onChange={setConfig} />
+              <GalleryConfig config={config} onChange={handleConfigChange} />
             )}
 
             {activeTab === 'stats' && (
-              <StatsConfig config={config} onChange={setConfig} />
+              <StatsConfig config={config} onChange={handleConfigChange} />
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">
