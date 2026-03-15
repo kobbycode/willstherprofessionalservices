@@ -3,11 +3,11 @@ import { getAdminDb } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
-    const { heroSlides } = await request.json()
+    const data = await request.json()
 
-    if (!heroSlides || !Array.isArray(heroSlides)) {
+    if (!data || typeof data !== 'object') {
       return NextResponse.json(
-        { error: 'Invalid heroSlides data' },
+        { error: 'Invalid configuration data' },
         { status: 400 }
       )
     }
@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
 
     // Save to Firestore in the structure expected by useSiteConfig
     await db.collection('config').doc('site').set({
-      heroSlides,
+      ...data,
       updatedAt: new Date().toISOString()
     }, { merge: true })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error saving hero config:', error)
+    console.error('Error saving site config:', error)
     return NextResponse.json(
       { error: 'Failed to save configuration' },
       { status: 500 }

@@ -164,6 +164,8 @@ export const defaultSiteConfig: SiteConfig = {
 		{ name: 'Home', href: '#home', isHash: true, enabled: true },
 		{ name: 'About', href: '#about', isHash: true, enabled: true },
 		{ name: 'Services', href: '#services', isHash: true, enabled: true },
+		{ name: 'Gallery', href: '#gallery', isHash: true, enabled: true },
+		{ name: 'Stats', href: '#stats', isHash: true, enabled: true },
 		{ name: 'Shop', href: '/shop', isHash: false, enabled: true },
 		{ name: 'Blog', href: '/blog', isHash: false, enabled: true },
 		{ name: 'Contact', href: '#contact', isHash: true, enabled: true }
@@ -295,15 +297,17 @@ export function useSiteConfig() {
 			}
 
 			if (remoteConfig && typeof remoteConfig === 'object') {
+				console.log('Remote config fetched:', remoteConfig)
 				const merged = {
 					...defaultSiteConfig,
 					...remoteConfig,
 					heroSlides: slides
 				}
+				console.log('Merged config set to state:', merged)
 				setConfig(merged)
 				saveSiteConfigToLocal(merged)
 				setLastFetch(Date.now())
-				console.log('Site config loaded from server:', merged)
+				console.log('Site config successfully updated from server')
 			}
 		} catch (error) {
 			console.warn('Failed to load site config from server, using local cache or defaults:', error)
@@ -366,21 +370,30 @@ export function useSiteConfig() {
 	const save = useCallback((next: SiteConfig) => {
 		setConfig(next)
 		saveSiteConfigToLocal(next)
-			; (async () => {
-				try {
-					// Check if we're on the client side
-					if (typeof window === 'undefined') return
+		
+		; (async () => {
+			try {
+				if (typeof window === 'undefined') return
 
-					const db = getDb()
-					if (db) {
-						const ref = doc(db, 'config', 'site')
-						await setDoc(ref, next, { merge: true })
-					}
-				} catch (error) {
-					console.warn('Failed to save config to Firestore:', error)
-					// Continue without saving to Firestore
+				const response = await fetch('/api/config/save', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(next),
+				})
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`)
 				}
-			})()
+				
+				console.log('Site config saved to server successfully')
+			} catch (error) {
+				console.warn('Failed to save config to server, will retry later or rely on local:', error)
+				// The local state and localStorage are already updated, 
+				// so the user sees their changes immediately.
+			}
+		})()
 	}, [])
 
 	const refresh = useCallback(() => {
