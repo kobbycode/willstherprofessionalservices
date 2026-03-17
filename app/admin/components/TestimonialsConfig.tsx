@@ -30,11 +30,12 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
     const [testimonialToDelete, setTestimonialToDelete] = useState<string | null>(null)
 
     const updateItem = (id: string, key: string, value: any) => {
-        const next = { ...config }
-        next.testimonials = items.map((item: any) => 
-            item.id === id ? { ...item, [key]: value } : item
-        )
-        onChange(next)
+        onChange((prev: any) => ({
+            ...prev,
+            testimonials: (prev.testimonials || []).map((item: any) => 
+                item.id === id ? { ...item, [key]: value } : item
+            )
+        }))
     }
 
     const addItem = () => {
@@ -46,12 +47,18 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
             rating: 5,
             avatarUrl: ''
         }
-        onChange({ ...config, testimonials: [newItem, ...items] })
+        onChange((prev: any) => ({
+            ...prev,
+            testimonials: [newItem, ...(prev.testimonials || [])]
+        }))
         toast.success('Testimonial slot initialized')
     }
 
     const removeItem = (id: string) => {
-        onChange({ ...config, testimonials: items.filter((item: any) => item.id !== id) })
+        onChange((prev: any) => ({
+            ...prev,
+            testimonials: (prev.testimonials || []).filter((item: any) => item.id !== id)
+        }))
         toast.error('Testimonial record Deleted')
     }
 

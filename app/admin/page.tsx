@@ -118,10 +118,16 @@ const AdminDashboard = () => {
   const configRef = useRef(config)
   configRef.current = config
 
-  // Simple wrapper for onChange - just updates local state synchronously
+  // Simple wrapper for onChange - now supports functional updates
   const handleConfigChange = (next: any) => {
-    configRef.current = next  // Keep ref in sync immediately
-    setConfig(next)
+    if (typeof next === 'function') {
+      const resolved = next(configRef.current)
+      configRef.current = resolved
+      setConfig(next)
+    } else {
+      configRef.current = next
+      setConfig(next)
+    }
   }
 
   const handleSaveAll = async () => {

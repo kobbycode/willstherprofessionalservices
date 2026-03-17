@@ -292,7 +292,7 @@ import { doc, setDoc, onSnapshot, collection, query, orderBy } from 'firebase/fi
 // Context for global site configuration
 interface SiteContextType {
 	config: SiteConfig
-	setConfig: (next: SiteConfig) => void
+	setConfig: (next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => void
 	saveConfig: (next: SiteConfig) => Promise<{ success: boolean; error?: string }>
 	isLoaded: boolean
 	isDirty: boolean
@@ -307,11 +307,15 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 	const [isDirty, setIsDirty] = useState(false)
 
 	// Local update only - updates state and localStorage immediately
-	const setConfig = useCallback((next: SiteConfig) => {
-		console.log('SiteProvider: Local update made. Marking as DIRTY.')
-		setConfigState(next)
+	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {
+		console.log('SiteProvider: Local update requested.')
+		setConfigState((prev) => {
+			const resolvedNext = typeof next === 'function' ? next(prev) : next
+			console.log('SiteProvider: Resolved next state. Marking as DIRTY.')
+			saveSiteConfigToLocal(resolvedNext, true)
+			return resolvedNext
+		})
 		setIsDirty(true)
-		saveSiteConfigToLocal(next, true)
 	}, [])
 
 	const loadFromServer = useCallback(async () => {

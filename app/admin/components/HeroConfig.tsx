@@ -39,13 +39,17 @@ const HeroConfig = ({ config, onChange }: any) => {
   })
 
   const updateSlide = (id: string, key: string, value: string) => {
-    const next = { ...config }
-    next.heroSlides = [...heroSlides]
-    const index = next.heroSlides.findIndex((s: any) => s.id === id)
-    if (index >= 0) {
-      next.heroSlides[index] = { ...next.heroSlides[index], [key]: value }
-      onChange(next)
-    }
+    onChange((prev: any) => {
+      const next = { ...prev }
+      const heroSlides = prev.heroSlides || []
+      const index = heroSlides.findIndex((s: any) => s.id === id)
+      if (index >= 0) {
+        const nextSlides = [...heroSlides]
+        nextSlides[index] = { ...nextSlides[index], [key]: value }
+        next.heroSlides = nextSlides
+      }
+      return next
+    })
   }
 
   const addSlide = () => {
@@ -66,14 +70,17 @@ const HeroConfig = ({ config, onChange }: any) => {
       return
     }
 
-    const next = { ...config }
-    next.heroSlides = [...heroSlides]
-    next.heroSlides.push({
-      id: `slide_${Date.now()}`,
-      ...newSlideData,
-      order: next.heroSlides.length
-    })
-    onChange(next)
+    onChange((prev: any) => ({
+      ...prev,
+      heroSlides: [
+        ...(prev.heroSlides || []),
+        {
+          id: `slide_${Date.now()}`,
+          ...newSlideData,
+          order: (prev.heroSlides || []).length
+        }
+      ]
+    }))
     setIsAddSlideModalOpen(false)
     toast.success('New slide added')
   }
@@ -97,34 +104,41 @@ const HeroConfig = ({ config, onChange }: any) => {
       return
     }
 
-    const next = { ...config }
-    next.heroSlides = [...heroSlides]
-    const index = next.heroSlides.findIndex((s: any) => s.id === editingSlideId)
-    if (index >= 0) {
-      next.heroSlides[index] = { ...next.heroSlides[index], ...newSlideData }
-      onChange(next)
-      setIsAddSlideModalOpen(false)
-      setEditingSlideId(null)
-      toast.success('Slide updated')
-    }
+    onChange((prev: any) => {
+      const next = { ...prev }
+      const currentSlides = prev.heroSlides || []
+      const index = currentSlides.findIndex((s: any) => s.id === editingSlideId)
+      if (index >= 0) {
+        const nextSlides = [...currentSlides]
+        nextSlides[index] = { ...nextSlides[index], ...newSlideData }
+        next.heroSlides = nextSlides
+      }
+      return next
+    })
+    setIsAddSlideModalOpen(false)
+    setEditingSlideId(null)
+    toast.success('Slide updated')
   }
 
   const updateSlideOrder = (id: string, direction: 'up' | 'down') => {
-    const next = { ...config }
-    next.heroSlides = [...heroSlides]
-    const index = next.heroSlides.findIndex((s: any) => s.id === id)
-    if (index >= 0) {
-      if (direction === 'up' && index > 0) {
-        const temp = next.heroSlides[index - 1]
-        next.heroSlides[index - 1] = next.heroSlides[index]
-        next.heroSlides[index] = temp
-      } else if (direction === 'down' && index < next.heroSlides.length - 1) {
-        const temp = next.heroSlides[index + 1]
-        next.heroSlides[index + 1] = next.heroSlides[index]
-        next.heroSlides[index] = temp
+    onChange((prev: any) => {
+      const next = { ...prev }
+      const currentSlides = [...(prev.heroSlides || [])]
+      const index = currentSlides.findIndex((s: any) => s.id === id)
+      if (index >= 0) {
+        if (direction === 'up' && index > 0) {
+          const temp = currentSlides[index - 1]
+          currentSlides[index - 1] = currentSlides[index]
+          currentSlides[index] = temp
+        } else if (direction === 'down' && index < currentSlides.length - 1) {
+          const temp = currentSlides[index + 1]
+          currentSlides[index + 1] = currentSlides[index]
+          currentSlides[index] = temp
+        }
+        next.heroSlides = currentSlides
       }
-      onChange(next)
-    }
+      return next
+    })
   }
 
   const handleSlideImageUpload = async (file: File) => {
@@ -144,9 +158,10 @@ const HeroConfig = ({ config, onChange }: any) => {
   const confirmDeleteSlide = () => {
     const { slideId } = deleteDialog
     if (!slideId) return
-    const next = { ...config }
-    next.heroSlides = heroSlides.filter((s: any) => s.id !== slideId)
-    onChange(next)
+    onChange((prev: any) => ({
+      ...prev,
+      heroSlides: (prev.heroSlides || []).filter((s: any) => s.id !== slideId)
+    }))
     setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })
     toast.success('Slide deleted')
   }

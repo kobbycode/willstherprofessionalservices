@@ -528,17 +528,48 @@ export default function ShopManagement() {
                                         </button>
                                     </div>
 
-                                    <div className="flex items-center gap-4">
-                                        <label className="relative inline-flex items-center cursor-pointer">
+                                    {/* Availability Toggle — prominently styled */}
+                                    <div className={`col-span-2 rounded-2xl border-2 p-5 flex items-center justify-between transition-all duration-300 ${
+                                        (currentProduct.inStock ?? true)
+                                            ? 'bg-emerald-50 border-emerald-300 shadow-md shadow-emerald-100'
+                                            : 'bg-gray-50 border-gray-200'
+                                    }`}>
+                                        <div className="flex items-center gap-4">
+                                            {/* Animated status dot */}
+                                            <div className={`relative flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+                                                (currentProduct.inStock ?? true) ? 'bg-emerald-500' : 'bg-gray-300'
+                                            }`}>
+                                                {(currentProduct.inStock ?? true) && (
+                                                    <span className="absolute inset-0 rounded-xl bg-emerald-500 animate-ping opacity-30" />
+                                                )}
+                                                <CheckCircle className={`w-5 h-5 relative z-10 ${
+                                                    (currentProduct.inStock ?? true) ? 'text-white' : 'text-gray-500'
+                                                }`} />
+                                            </div>
+                                            <div>
+                                                <p className={`text-[11px] font-black uppercase tracking-widest ${
+                                                    (currentProduct.inStock ?? true) ? 'text-emerald-800' : 'text-gray-500'
+                                                }`}>
+                                                    {(currentProduct.inStock ?? true) ? 'Available for Purchase' : 'Not Available'}
+                                                </p>
+                                                <p className={`text-[10px] font-medium mt-0.5 ${
+                                                    (currentProduct.inStock ?? true) ? 'text-emerald-600' : 'text-gray-400'
+                                                }`}>
+                                                    {(currentProduct.inStock ?? true)
+                                                        ? 'Customers can add this product to cart'
+                                                        : 'Product is hidden from the shop'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                                             <input
                                                 type="checkbox"
                                                 className="sr-only peer"
                                                 checked={currentProduct.inStock ?? true}
                                                 onChange={e => setCurrentProduct({ ...currentProduct, inStock: e.target.checked })}
                                             />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-900"></div>
+                                            <div className="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 shadow-inner transition-colors duration-300"></div>
                                         </label>
-                                        <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Available for Purchase</span>
                                     </div>
 
                                     {/* Multiple Images Upload */}

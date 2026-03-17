@@ -38,17 +38,28 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
     const items = stats.items || []
 
     const updateStats = (key: string, value: any) => {
-        onChange({
-            ...config,
-            stats: { ...stats, [key]: value }
-        })
+        onChange((prev: any) => ({
+            ...prev,
+            stats: {
+                ...(prev.stats || {}),
+                [key]: value
+            }
+        }))
     }
 
     const updateItem = (id: string, key: string, value: any) => {
-        const nextItems = items.map((item: any) => 
-            item.id === id ? { ...item, [key]: value } : item
-        )
-        updateStats('items', nextItems)
+        onChange((prev: any) => {
+            const next = { ...prev }
+            const stats = prev.stats || {}
+            const items = stats.items || []
+            next.stats = {
+                ...stats,
+                items: items.map((item: any) => 
+                    item.id === id ? { ...item, [key]: value } : item
+                )
+            }
+            return next
+        })
     }
 
     const addItem = () => {
@@ -59,12 +70,24 @@ export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
             label: 'New Stat',
             color: 'bg-primary-500'
         }
-        updateStats('items', [...items, newItem])
+        onChange((prev: any) => ({
+            ...prev,
+            stats: {
+                ...(prev.stats || {}),
+                items: [...(prev.stats?.items || []), newItem]
+            }
+        }))
         toast.success('New stat added')
     }
 
     const removeItem = (id: string) => {
-        updateStats('items', items.filter((item: any) => item.id !== id))
+        onChange((prev: any) => ({
+            ...prev,
+            stats: {
+                ...(prev.stats || {}),
+                items: (prev.stats?.items || []).filter((item: any) => item.id !== id)
+            }
+        }))
         toast.error('Stat removed')
     }
 

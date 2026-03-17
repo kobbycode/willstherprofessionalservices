@@ -28,11 +28,14 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
     const [isUploading, setIsUploading] = useState<string | null>(null)
 
     const updateItem = (id: string, key: string, value: any) => {
-        const next = { ...config }
-        next.gallery = items.map((item: any) => 
-            item.id === id ? { ...item, [key]: value } : item
-        )
-        onChange(next)
+        onChange((prev: any) => {
+            const next = { ...prev }
+            const gallery = prev.gallery || []
+            next.gallery = gallery.map((item: any) => 
+                item.id === id ? { ...item, [key]: value } : item
+            )
+            return next
+        })
     }
 
     const addItem = () => {
@@ -41,12 +44,18 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
             imageUrl: '',
             caption: ''
         }
-        onChange({ ...config, gallery: [newItem, ...items] })
+        onChange((prev: any) => ({
+            ...prev,
+            gallery: [newItem, ...(prev.gallery || [])]
+        }))
         toast.success('Added new image slot')
     }
 
     const removeItem = (id: string) => {
-        onChange({ ...config, gallery: items.filter((item: any) => item.id !== id) })
+        onChange((prev: any) => ({
+            ...prev,
+            gallery: (prev.gallery || []).filter((item: any) => item.id !== id)
+        }))
         toast.error('Image removed')
     }
 
