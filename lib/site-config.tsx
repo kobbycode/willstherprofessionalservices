@@ -309,9 +309,16 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 	// Local update only - updates state and localStorage immediately
 	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {
 		console.log('SiteProvider: Local update requested.')
+		// Log config updates for debugging
+		console.log('SiteProvider: setConfig triggered', typeof next === 'function' ? 'functional update' : 'direct update')
+		
 		setConfigState((prev) => {
 			const resolvedNext = typeof next === 'function' ? next(prev) : next
-			console.log('SiteProvider: Resolved next state. Marking as DIRTY.')
+			console.log('SiteProvider: State resolved. Previous keys:', Object.keys(prev || {}), 'New keys:', Object.keys(resolvedNext || {}))
+			if (resolvedNext.gallery) {
+				console.log('SiteProvider: Gallery count:', resolvedNext.gallery.length)
+			}
+			console.log('SiteProvider: Marking state as DIRTY.')
 			saveSiteConfigToLocal(resolvedNext, true)
 			return resolvedNext
 		})
