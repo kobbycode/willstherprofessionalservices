@@ -142,7 +142,10 @@ export default function ProductDetailPage() {
         )
     }
 
-    const whatsappNumber = config.contactPhone.replace(/\D/g, '')
+    let whatsappNumber = config.contactPhone.replace(/\D/g, '')
+    if (whatsappNumber.startsWith('0') && whatsappNumber.length === 10) {
+        whatsappNumber = '233' + whatsappNumber.substring(1)
+    }
     const message = encodeURIComponent(`Hi, I am interested in buying *${product.title}* listed for GH₵${product.price}`)
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`
     const productUrl = typeof window !== 'undefined' ? window.location.href : ''
@@ -258,12 +261,12 @@ export default function ProductDetailPage() {
                                         </span>
                                         <div className="h-2 w-2 rounded-full bg-gray-200" />
                                         {product.inStock ? (
-                                            <span className="flex items-center gap-2 text-green-600 font-bold bg-green-50 px-4 py-2 rounded-xl text-sm border border-green-100">
+                                            <span className="flex items-center gap-2 text-green-600 font-bold bg-green-50 px-4 py-2 rounded-xl text-sm border border-green-100 shadow-sm">
                                                 <CheckCircle size={18} /> Instantly Available
                                             </span>
                                         ) : (
-                                            <span className="flex items-center gap-2 text-red-500 font-bold bg-red-50 px-4 py-2 rounded-xl text-sm border border-red-100">
-                                                <X size={18} /> Currently Unavailable
+                                            <span className="flex items-center gap-2 text-red-600 font-black bg-red-50 px-4 py-2 rounded-xl text-sm border-2 border-red-500 shadow-lg shadow-red-200 animate-pulse">
+                                                <X size={18} strokeWidth={3} /> Currently Unavailable
                                             </span>
                                         )}
                                     </div>

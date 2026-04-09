@@ -31,7 +31,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
         siteName: config.siteName || 'Willsther Professional Services',
         siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
         contactEmail: config.contactEmail || 'info@willsther.com',
-        contactPhone: config.contactPhone || '+233 594 850 005',
+        contactPhone: config.contactPhone || '0208267704',
         maintenanceMode: !!config.maintenanceMode,
         address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
     })
@@ -41,7 +41,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
             siteName: config.siteName || 'Willsther Professional Services',
             siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
             contactEmail: config.contactEmail || 'info@willsther.com',
-            contactPhone: config.contactPhone || '+233 594 850 005',
+            contactPhone: config.contactPhone || '0208267704',
             maintenanceMode: !!config.maintenanceMode,
             address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
         })
@@ -70,7 +70,7 @@ export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
             siteName: config.siteName || 'Willsther Professional Services',
             siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
             contactEmail: config.contactEmail || 'info@willsther.com',
-            contactPhone: config.contactPhone || '+233 594 850 005',
+            contactPhone: config.contactPhone || '0208267704',
             maintenanceMode: !!config.maintenanceMode,
             address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
         })

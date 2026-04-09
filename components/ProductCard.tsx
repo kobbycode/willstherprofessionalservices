@@ -2,7 +2,7 @@
 
 import { Product } from '@/types/product'
 import { motion } from 'framer-motion'
-import { ShoppingBag, MessageCircle, Heart } from 'lucide-react'
+import { ShoppingBag, MessageCircle, Heart, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useShop } from '@/context/ShopContext'
@@ -15,7 +15,11 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, contactPhone }: ProductCardProps) {
     const { addToCart, toggleWishlist, isInWishlist, setIsCartOpen } = useShop()
-    const whatsappNumber = contactPhone.replace(/\D/g, '')
+    let whatsappNumber = contactPhone.replace(/\D/g, '')
+    // If it starts with 0 and is likely a Ghana number (10 digits), prepend 233 and remove 0
+    if (whatsappNumber.startsWith('0') && whatsappNumber.length === 10) {
+        whatsappNumber = '233' + whatsappNumber.substring(1)
+    }
     const message = encodeURIComponent(`Hi, I am interested in buying *${product.title}* listed for GH₵${product.price}`)
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`
 
@@ -73,8 +77,14 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                 </button>
 
                 {/* Stock Badge */}
-                {!product.inStock && (
-                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full shadow-lg backdrop-blur-sm">
+                {product.inStock ? (
+                    <div className="absolute top-3 left-3 px-3 py-1 bg-green-500 text-white text-[11px] font-black rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        IN STOCK
+                    </div>
+                ) : (
+                    <div className="absolute top-3 left-3 px-3 py-1 bg-red-600 text-white text-[11px] font-black rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 border border-white/20 animate-bounce-subtle">
+                        <X size={12} strokeWidth={3} />
                         OUT OF STOCK
                     </div>
                 )}
