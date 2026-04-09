@@ -416,9 +416,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 	}, [loadFromServer])
 
 	const saveConfig = useCallback(async (dataToSave?: SiteConfig): Promise<{ success: boolean; error?: string }> => {
+		// Use the provided data or fallback to the current state.
+		// NOTE: If calling this without args, the 'config' value might be stale due to closure.
 		const target = dataToSave || config
-		console.log('SiteProvider: PERSISTING TO SERVER...', { galleryCount: target.gallery?.length })
-
+		console.log('SiteProvider: saveConfig triggered. Target gallery items:', target.gallery?.length || 0)
+		
 		try {
 			const response = await fetch('/api/config/save', {
 				method: 'POST',
@@ -428,21 +430,23 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}))
+				console.error('SiteProvider: Save FAILED on server:', errorData)
 				throw new Error(errorData.error || 'Failed to save configuration')
 			}
 
-			console.log('SiteProvider: Server save SUCCESSFUL. Clearing dirty flag.')
+			console.log('SiteProvider: Save SUCCESS. Updating local state and clearing dirty flag.')
 			
+			// Update state and persistence
 			setConfigState(target)
 			setIsDirty(false)
 			saveSiteConfigToLocal(target, false)
 			
 			return { success: true }
-		} catch (error) {
-			console.error('SiteProvider: Server save FAILED:', error)
-			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+		} catch (error: any) {
+			console.error('SiteProvider: Save network/server error:', error.message)
+			return { success: false, error: error.message || 'Network error' }
 		}
-	}, [config])
+	}, [config]) // Added config to dependencies to avoid stale target
 
 	const value = useMemo(() => ({
 		config,
@@ -469,6 +473,7 @@ export function useSiteConfig() {
 			setConfig: () => { },
 			saveConfig: async () => ({ success: false, error: 'SiteConfig not initialized' }),
 			isLoaded: false,
+			isDirty: false,
 			refresh: () => { }
 		}
 	}

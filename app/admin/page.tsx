@@ -79,7 +79,7 @@ const AdminDashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
-  const { config, setConfig, saveConfig: saveConfigFn } = useSiteConfig()
+  const { config, setConfig, saveConfig: saveConfigFn, isDirty } = useSiteConfig()
   const { user, signOut: authSignOut } = useAuth()
 
   const handleLogout = async () => {
@@ -116,7 +116,15 @@ const AdminDashboard = () => {
 
   // Store the latest config in a ref so handleSaveAll can access it
   const configRef = useRef(config)
-  configRef.current = config
+  
+  // Sync state to ref on initial load or from provider
+  useEffect(() => {
+    // Only overwrite local ref if we are NOT currently dirty
+    if (config && !isDirty) {
+      console.log('AdminPage: Syncing provider config to local ref (not dirty)')
+      configRef.current = config
+    }
+  }, [config, isDirty])
 
   // Simple wrapper for onChange - now supports functional updates
   const handleConfigChange = (next: any) => {
@@ -133,17 +141,20 @@ const AdminDashboard = () => {
   const handleSaveAll = async () => {
     try {
       setIsSaving(true)
-      const currentConfig = configRef.current  // Use ref for latest value
-      console.log('Saving all config:', currentConfig)
-      console.log('Gallery items:', currentConfig.gallery)
-      const result = await saveConfigFn(currentConfig)
+      const target = configRef.current
+      console.log('AdminPage: handleSaveAll triggered. Gallery count:', target.gallery?.length || 0)
+      
+      const result = await saveConfigFn(target)
+      
       if (!result.success) {
         throw new Error(result.error || 'Failed to save to server')
       }
+      
       toast.success('All website settings saved successfully! 🎉')
-    } catch (error) {
-      console.error('Save error:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to save settings')
+      // Provider will clear isDirty, which will trigger our useEffect above to sync the returned config
+    } catch (error: any) {
+      console.error('AdminPage: Save failed:', error)
+      toast.error(error.message || 'Failed to save settings')
     } finally {
       setIsSaving(false)
     }
