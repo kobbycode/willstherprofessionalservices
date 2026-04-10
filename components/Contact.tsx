@@ -130,7 +130,7 @@ const Contact = () => {
                       <info.icon className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-secondary-900 mb-1 font-outfit uppercase tracking-[0.2em] text-[10px]">
+                      <h4 className="font-bold text-secondary-900 mb-1 font-outfit uppercase tracking-[0.2em] text-xs">
                         {info.title}
                       </h4>
                       {info.details.map((detail, detailIndex) => {
@@ -139,20 +139,20 @@ const Contact = () => {
 
                         if (isPhone) {
                           return (
-                            <a key={detailIndex} href={`tel:${detail.split(' / ')[0]}`} className="text-secondary-600 text-xs font-medium font-inter hover:text-primary-500 transition-colors block">
+                            <a key={detailIndex} href={`tel:${detail.split(' / ')[0]}`} className="text-secondary-600 text-sm font-medium font-inter hover:text-primary-500 transition-colors block">
                               {detail}
                             </a>
                           );
                         }
                         if (isEmail) {
                           return (
-                            <a key={detailIndex} href={`mailto:${detail}`} className="text-secondary-600 text-xs font-medium font-inter hover:text-primary-500 transition-colors block">
+                            <a key={detailIndex} href={`mailto:${detail}`} className="text-secondary-600 text-sm font-medium font-inter hover:text-primary-500 transition-colors block">
                               {detail}
                             </a>
                           );
                         }
                         return (
-                          <p key={detailIndex} className="text-secondary-600 text-xs font-medium font-inter">
+                          <p key={detailIndex} className="text-secondary-600 text-sm font-medium font-inter">
                             {detail}
                           </p>
                         );
