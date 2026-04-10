@@ -41,8 +41,8 @@ const Contact = () => {
 
   const socialLinks = [
     { icon: Facebook, href: config.footer.social?.facebook || '#', label: 'Facebook' },
-    { icon: Twitter, href: config.footer.social?.twitter || '#', label: 'Twitter' },
-    { icon: Instagram, href: config.footer.social?.instagram || '#', label: 'Instagram' },
+    { icon: Twitter, href: config.footer.social?.twitter || 'https://x.com/willsther', label: 'Twitter' },
+    { icon: Instagram, href: config.footer.social?.instagram || 'https://www.instagram.com/willstherprofessionalservices?utm_source=qr&igsh=bG04azZsODFmOGN5', label: 'Instagram' },
     { icon: Linkedin, href: config.footer.social?.linkedin || '#', label: 'LinkedIn' }
   ]
 
