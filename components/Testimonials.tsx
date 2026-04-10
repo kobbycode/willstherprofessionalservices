@@ -150,19 +150,19 @@ const Testimonials = () => {
               </div>
 
               <div className="flex-grow mb-6">
-                <h4 className="text-sm font-bold text-secondary-900 mb-3 font-outfit uppercase tracking-widest">
+                <h4 className="text-base font-bold text-secondary-900 mb-3 font-outfit uppercase tracking-widest">
                   {testimonial.title}
                 </h4>
-                <p className="text-[11px] sm:text-xs text-secondary-600 leading-relaxed font-inter italic">
+                <p className="text-sm sm:text-base text-secondary-600 leading-relaxed font-inter italic">
                   "{testimonial.comment}"
                 </p>
               </div>
 
               <div className="pt-6 border-t border-secondary-100 mt-auto">
-                <p className="font-bold text-secondary-900 text-sm font-outfit tracking-tight">
+                <p className="font-bold text-secondary-900 text-base font-outfit tracking-tight">
                   {testimonial.name}
                 </p>
-                <p className="text-[9px] font-bold text-primary-600 uppercase tracking-widest mt-1">
+                <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mt-1">
                   Verified Client
                 </p>
               </div>
