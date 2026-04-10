@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion'
 import {
   Home, Building, Users, Wrench,
-  Sparkles, Shield, Clock, Star,
-  Car, Truck, Zap, Target
+  Droplets, Shield, Clock, Star,
+  Car, Truck, Zap, Target, Hammer, ShieldCheck
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -79,7 +79,7 @@ const Services = () => {
     });
 
     if (services && services.length > 0) {
-      const iconPool = [Home, Building, Users, Wrench, Sparkles, Shield, Clock, Star, Car, Truck, Zap, Target]
+      const iconPool = [Home, Building, Users, Wrench, Hammer, Shield, Clock, Star, Car, Truck, Zap, Target]
 
       services.forEach((svc, idx) => {
         const rawCat = svc.category || 'General';
@@ -111,7 +111,7 @@ const Services = () => {
   // Get icon for category
   const getCategoryIcon = (category: string) => {
     const iconMap: Record<string, React.ComponentType<any>> = {
-      'Cleaning': Sparkles,
+      'Cleaning': Droplets,
       'Maintenance': Wrench,
       'Construction': Building,
       'Consulting': Users,
@@ -130,7 +130,7 @@ const Services = () => {
 
   if (loading) {
     return (
-      <section id="services" className="section-padding bg-secondary-50">
+      <section id="services" className="section-padding bg-white">
         <div className="container-custom px-4">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
             <Skeleton className="h-10 w-48 mx-auto mb-4" />
@@ -164,137 +164,171 @@ const Services = () => {
   }
 
   return (
-    <section id="services" className="section-padding bg-secondary-50">
-      <div className="container-custom px-4">
-        {/* What We Offer heading - always show */}
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-secondary-900 mb-4">
-            What We Offer
-          </h2>
-          <div className="w-16 sm:w-20 md:w-24 h-1 bg-primary-500 mx-auto"></div>
+    <section id="services" className="section-padding relative overflow-hidden bg-white">
+      {/* Ambient background decorations */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/30 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-[100px] -z-10 -translate-x-1/4 translate-y-1/4" />
+
+      <div className="container-custom px-4 relative z-10">
+        <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+              Our Expertise
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
+              Solutions Tailored <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">For Perfection</span>
+            </h2>
+            <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
+          </motion.div>
         </div>
 
-        {/* Services by Category Section */}
         {Object.keys(categorizedServices).length > 0 ? (
-          <div className="space-y-16 sm:space-y-20 md:space-y-24">
+          <div className="space-y-20">
             {Object.entries(categorizedServices)
               .sort(([nameA], [nameB]) => {
-                const priorityOrder = [
-                  'Cleaning Services',
-                  'Maintenance',
-                  'Laundry Service',
-                  'Pest Control'
-                ];
+                const priorityOrder = ['Cleaning Services', 'Maintenance', 'Laundry Service', 'Pest Control'];
                 let indexA = priorityOrder.findIndex(p => nameA.toLowerCase() === p.toLowerCase());
                 let indexB = priorityOrder.findIndex(p => nameB.toLowerCase() === p.toLowerCase());
-
-                if (indexA === -1) indexA = 999;
-                if (indexB === -1) indexB = 999;
-
-                return indexA - indexB;
+                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
               })
               .map(([categoryName, categoryServices], categoryIndex) => {
                 const categoryObj = categories.find(cat => (cat.title || cat.name) === categoryName) || {};
 
                 return (
-                  <motion.div
-                    key={categoryName}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    viewport={{ once: true }}
-                    className="text-center"
-                  >
-                    <div className={`inline-block px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 rounded-none mb-4 sm:mb-6 md:mb-8 ${categoryIndex === 0 ? 'bg-blue-100' :
-                      categoryIndex === 1 ? 'bg-green-100' :
-                        categoryIndex === 2 ? 'bg-purple-100' :
-                          'bg-orange-100'
-                      }`}>
-                      <h3 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-center ${categoryIndex === 0 ? 'text-blue-700' :
-                        categoryIndex === 1 ? 'text-green-700' :
-                          categoryIndex === 2 ? 'text-purple-700' :
-                            'text-orange-700'
-                        }`}>
+                  <div key={categoryName} className="relative">
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.8 }}
+                      viewport={{ once: true }}
+                      className="flex items-center gap-6 mb-8"
+                    >
+                      <div className="h-px flex-grow bg-gradient-to-r from-transparent via-secondary-100 to-transparent lg:to-secondary-100"></div>
+                      <h3 className="text-xl md:text-2xl font-bold font-outfit uppercase tracking-[0.2em] text-secondary-900 flex-shrink-0">
                         {categoryName}
                       </h3>
-                    </div>
+                      <div className="h-px flex-grow bg-gradient-to-l from-transparent via-secondary-100 to-transparent"></div>
+                    </motion.div>
 
                     {categoryObj.subtitle && (
-                      <p className="text-secondary-600 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base max-w-2xl mx-auto">
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="text-secondary-500 mb-12 text-center max-w-2xl mx-auto font-light"
+                      >
                         {categoryObj.subtitle}
-                      </p>
+                      </motion.p>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                       {categoryServices.map((service, serviceIndex) => (
-                        <Link
+                        <motion.div
                           key={service.id || serviceIndex}
-                          href={`/services/${service.id}`}
-                          className="block h-full"
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
+                          viewport={{ once: true }}
                         >
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6, delay: serviceIndex * 0.1 }}
-                            viewport={{ once: true }}
-                            className="bg-white rounded-lg sm:rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-1 border border-gray-100 group overflow-hidden flex flex-col h-full cursor-pointer"
-                          >
-                            <div className="relative aspect-video w-full overflow-hidden">
-                              <Image
-                                src={service.image}
-                                alt={service.title}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              <div className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-accent-500 rounded-full flex items-center justify-center shadow-lg z-10 transform group-hover:scale-110 transition-transform duration-300 border border-white/20">
-                                <service.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                          <Link href={`/services/${service.id}`} className="group block">
+                            <div className="bg-white border border-secondary-100 rounded-[2.5rem] p-2 transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl hover:shadow-secondary-200 relative overflow-hidden backdrop-blur-3xl">
+                              <div className="aspect-[4/5] relative rounded-[2rem] overflow-hidden">
+                                <Image
+                                  src={service.image}
+                                  alt={service.title}
+                                  fill
+                                  className="object-cover group-hover:scale-110 transition-transform duration-1000"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-700"></div>
+                                
+                                <div className="absolute top-6 right-6 w-12 h-12 bg-white/90 rounded-2xl flex items-center justify-center border border-white/30 backdrop-blur-xl z-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-500 shadow-lg">
+                                  <service.icon className="w-6 h-6 text-primary-600" />
+                                </div>
+
+                                <div className="absolute bottom-8 left-8 right-8 text-center translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+                                  <h4 className="text-xl font-black text-white font-outfit uppercase tracking-wider mb-2 text-shadow">
+                                    {service.title}
+                                  </h4>
+                                  <div className="w-12 h-1 bg-primary-500 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                                </div>
                               </div>
                             </div>
-                            <div className="p-4 sm:p-5 flex-grow flex flex-col items-center justify-center bg-white relative">
-                              <h4 className="text-sm sm:text-base md:text-lg font-bold text-secondary-900 text-center group-hover:text-primary-600 transition-colors leading-tight">
-                                {service.title}
-                              </h4>
-                              <div className="mt-2 w-0 h-0.5 bg-accent-500 group-hover:w-12 transition-all duration-300 mx-auto"></div>
-                            </div>
-                          </motion.div>
-                        </Link>
+                          </Link>
+                        </motion.div>
                       ))}
                     </div>
-                  </motion.div>
+                  </div>
                 )
               })}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="inline-block p-4 bg-blue-50 rounded-full mb-4">
-              <Wrench className="w-12 h-12 text-blue-500" />
+          <div className="text-center py-20 bg-white border border-secondary-100 rounded-[3rem] shadow-xl">
+            <div className="w-20 h-20 bg-primary-600/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Wrench className="w-10 h-10 text-primary-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Services Available</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              We're working on adding new services. Please check back later.
+            <h3 className="text-2xl font-black text-secondary-900 mb-2 font-outfit uppercase tracking-tight">Services Coming Soon</h3>
+            <p className="text-secondary-500 font-light max-w-md mx-auto">
+              We are currently curating the best professional solutions for you. Stay tuned.
             </p>
           </div>
         )}
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          transition={{ duration: 1 }}
           viewport={{ once: true }}
-          className="text-center mt-8 sm:mt-12 md:mt-16"
+          className="mt-32"
         >
-          <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg border border-gray-100">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-secondary-900 mb-2 sm:mb-3 md:mb-4">
-              Need a Custom Solution?
-            </h3>
-            <p className="text-secondary-600 mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-base">
-              We offer tailored maintenance and cleaning solutions to meet your specific requirements.
-            </p>
-            <a href="#contact" className="btn-primary text-xs sm:text-sm md:text-base px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3">
-              Get a Quote
-            </a>
+          <div className="bg-white border border-secondary-100 rounded-[4rem] p-12 md:p-20 relative overflow-hidden shadow-3xl shadow-secondary-200/20">
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary-600/5 blur-[100px] rounded-full -mr-48 -mt-48" />
+            <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600/5 blur-[80px] rounded-full -ml-32 -mb-32" />
+            
+            <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h3 className="text-4xl md:text-6xl font-black text-secondary-900 mb-6 font-outfit tracking-tighter leading-tight">
+                  Need a Custom <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500">Service Plan?</span>
+                </h3>
+                <p className="text-secondary-600 text-lg md:text-xl font-light leading-relaxed mb-10 max-w-xl">
+                  Whether it's industrial maintenance or premium commercial cleaning, we tailor our expertise to match your vision of excellence.
+                </p>
+                <Link
+                  href="#contact"
+                  className="inline-flex items-center justify-center px-12 py-5 bg-primary-600 hover:bg-primary-700 text-white font-black font-outfit rounded-2xl transition-all duration-300 transform hover:-translate-y-1 shadow-2xl shadow-primary-500/30 gap-4 uppercase tracking-wider text-sm"
+                >
+                  Start a Conversation
+                  <Target size={20} />
+                </Link>
+              </div>
+              <div className="hidden lg:block relative">
+                <div className="absolute inset-0 bg-primary-600/10 blur-3xl rounded-full" />
+                <div className="relative bg-white border border-secondary-100 rounded-[3rem] p-8 rotate-3 shadow-xl">
+                  <div className="flex items-center gap-6 mb-6">
+                    <div className="w-16 h-16 bg-primary-600 rounded-3xl flex items-center justify-center shadow-xl">
+                      <ShieldCheck className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-secondary-900 font-black text-xl font-outfit uppercase">Elite Standards</div>
+                      <div className="text-secondary-500 text-sm font-medium">Beyond expectations. Always.</div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="h-2 w-full bg-secondary-50 rounded-full overflow-hidden border border-secondary-100">
+                      <div className="h-full w-[95%] bg-primary-600 rounded-full" />
+                    </div>
+                    <div className="h-2 w-3/4 bg-secondary-50 rounded-full overflow-hidden border border-secondary-100">
+                      <div className="h-full w-[90%] bg-blue-500 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>

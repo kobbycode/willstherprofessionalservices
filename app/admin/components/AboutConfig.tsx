@@ -9,7 +9,6 @@ import {
     Layers,
     Type,
     FileText,
-    Sparkles,
     ExternalLink,
     Zap
 } from 'lucide-react'
@@ -85,7 +84,7 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
                             <div className="space-y-4">
                                 <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Hero Name (Title)</label>
                                 <div className="relative group/input">
-                                    <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
+                                    <Type className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                                     <input
                                         value={about.title || ''}
                                         onChange={(e) => update('title', e.target.value)}
@@ -144,7 +143,7 @@ export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
                                         animate={{ scale: 1 }}
                                         src={about.imageUrl}
                                         alt="About Narrative"
-                                        className="w-full h-full object-cover grayscale group-hover/camera:grayscale-0 group-hover/camera:scale-105 transition-all duration-[1.5s]"
+                                        className="w-full h-full object-cover group-hover/camera:scale-105 transition-all duration-[1.5s]"
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-secondary-200">

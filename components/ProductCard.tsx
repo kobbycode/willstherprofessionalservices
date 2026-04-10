@@ -44,7 +44,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 h-full flex flex-col"
+            className="p-5 rounded-2xl bg-white border border-gray-200/60 relative group transition-all duration-300 hover:shadow-2xl hover:shadow-primary-900/10 hover:-translate-y-1 h-full flex flex-col shadow-sm"
         >
             {/* Image Section */}
             <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-gray-100 cursor-pointer">
@@ -78,13 +78,13 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
 
                 {/* Stock Badge */}
                 {product.inStock ? (
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-green-500 text-white text-[11px] font-black rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-green-500 text-white text-[9px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                        <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
                         IN STOCK
                     </div>
                 ) : (
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-red-600 text-white text-[11px] font-black rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 border border-white/20 animate-bounce-subtle">
-                        <X size={12} strokeWidth={3} />
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-red-600 text-white text-[9px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                        <X size={10} strokeWidth={3} />
                         OUT OF STOCK
                     </div>
                 )}
@@ -92,14 +92,14 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
 
             {/* Thumbnail Gallery - only show if multiple images */}
             {productImages.length > 1 && (
-                <div className="flex gap-1 px-2 py-1.5 bg-gray-50 overflow-x-auto">
+                <div className="flex gap-1 px-1.5 py-1 bg-white overflow-x-auto">
                     {productImages.map((img, idx) => (
                         <button
                             key={idx}
                             onClick={() => setSelectedImageIndex(idx)}
-                            className={`relative w-10 h-10 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all ${idx === selectedImageIndex
-                                ? 'border-purple-500 shadow-sm'
-                                : 'border-transparent opacity-70 hover:opacity-100'
+                            className={`relative w-8 h-8 flex-shrink-0 rounded-md overflow-hidden border transition-all ${idx === selectedImageIndex
+                                ? 'border-primary-500 shadow-sm'
+                                : 'border-transparent opacity-60 hover:opacity-100'
                                 }`}
                         >
                             <Image
@@ -107,7 +107,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                                 alt={`${product.title} ${idx + 1}`}
                                 fill
                                 className="object-cover"
-                                sizes="40px"
+                                sizes="32px"
                             />
                         </button>
                     ))}
@@ -115,54 +115,54 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             )}
 
             {/* Content Section - More compact */}
-            <div className="p-4 flex flex-col flex-grow">
+            <div className="p-3.5 flex flex-col flex-grow">
                 {/* Category & Title */}
                 <div className="mb-2">
                     {product.category && (
-                        <p className="text-[10px] font-black text-purple-600 uppercase tracking-[0.2em] mb-1">
+                        <p className="text-[9px] font-semibold text-primary-600 uppercase tracking-[0.2em] mb-1">
                             {product.category}
                         </p>
                     )}
                     <Link href={`/shop/${product.id}`} className="block group/title">
-                        <h3 className="text-[13px] font-bold text-gray-900 line-clamp-2 leading-snug group-hover/title:text-purple-600 transition-colors">
+                        <h3 className="text-[12px] font-semibold text-gray-900 line-clamp-2 leading-snug group-hover/title:text-primary-600 transition-colors">
                             {product.title}
                         </h3>
                     </Link>
                 </div>
 
                 {/* Price & Actions */}
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
-                    <span className="text-base font-black text-gray-900">
+                <div className="mt-auto pt-3 flex items-center justify-between border-t border-gray-50">
+                    <span className="text-[14px] font-bold text-gray-900 italic font-outfit">
                         GH₵{product.price.toFixed(2)}
                     </span>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                         <button
                             onClick={() => {
                                 addToCart(product)
                                 setIsCartOpen(true)
                             }}
                             disabled={!product.inStock}
-                            className={`p-2.5 rounded-xl transition-all duration-300 ${product.inStock
-                                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20 active:scale-90'
+                            className={`p-2 rounded-lg transition-all duration-300 ${product.inStock
+                                ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-md active:scale-95'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             title="Add to Cart"
                         >
-                            <ShoppingBag size={16} />
+                            <ShoppingBag size={14} />
                         </button>
                         <a
                             href={product.inStock ? whatsappUrl : '#'}
                             target={product.inStock ? '_blank' : undefined}
                             rel={product.inStock ? "noopener noreferrer" : undefined}
                             onClick={(e) => !product.inStock && e.preventDefault()}
-                            className={`p-2.5 rounded-xl transition-all duration-300 ${product.inStock
-                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 active:scale-90'
+                            className={`p-2 rounded-lg transition-all duration-300 ${product.inStock
+                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md active:scale-95'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             title="Order via WhatsApp"
                         >
-                            <MessageCircle size={16} />
+                            <MessageCircle size={14} />
                         </a>
                     </div>
                 </div>

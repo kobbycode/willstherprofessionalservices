@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import MaintenanceMode from '@/components/MaintenanceMode'
 import { useSiteConfig } from '@/lib/site-config'
 import { motion } from 'framer-motion'
@@ -67,13 +65,12 @@ export default function ServiceDetails() {
     if (loading) {
         return (
             <main className="min-h-screen flex flex-col bg-gray-50">
-                <Header />
                 {/* Skeleton Hero */}
-                <div className="relative py-20 bg-primary-900 border-b border-white/10">
+                <div className="relative py-20 bg-white border-b border-gray-100">
                     <div className="container-custom px-4 relative z-10 space-y-4">
-                        <Skeleton className="h-6 w-32 bg-white/20" />
-                        <Skeleton className="h-6 w-24 bg-white/20 rounded-full" />
-                        <Skeleton className="h-12 w-3/4 bg-white/20" />
+                        <Skeleton className="h-6 w-32 bg-gray-100" />
+                        <Skeleton className="h-6 w-24 bg-gray-100 rounded-full" />
+                        <Skeleton className="h-12 w-3/4 bg-gray-100" />
                     </div>
                 </div>
 
@@ -113,7 +110,6 @@ export default function ServiceDetails() {
                         </div>
                     </div>
                 </div>
-                <Footer />
             </main>
         )
     }
@@ -121,7 +117,6 @@ export default function ServiceDetails() {
     if (error || !service) {
         return (
             <main className="min-h-screen flex flex-col">
-                <Header />
                 <div className="flex-1 container-custom px-4 py-20 text-center">
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
                     <p className="text-gray-600 mb-8">{error || "The service you're looking for doesn't exist."}</p>
@@ -129,33 +124,30 @@ export default function ServiceDetails() {
                         Back to Services
                     </Link>
                 </div>
-                <Footer />
             </main>
         )
     }
 
     return (
-        <main className="min-h-screen flex flex-col bg-gray-50">
-            <Header />
-
+        <main className="min-h-screen flex flex-col bg-white">
             {/* Hero Banner */}
-            <section className="relative py-20 bg-secondary-900 text-white overflow-hidden">
+            <section className="relative py-20 bg-white text-secondary-900 overflow-hidden border-b border-gray-100">
                 <div className="absolute inset-0">
                     <img
                         src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
                         alt={service.title}
-                        className="w-full h-full object-cover opacity-20"
+                        className="w-full h-full object-cover opacity-[0.03]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-secondary-900/90 to-secondary-900/70"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/95 to-white/80"></div>
                 </div>
 
                 <div className="container-custom px-4 relative z-10">
                     <Link
                         href="/#services"
-                        className="inline-flex items-center text-gray-300 hover:text-white mb-6 transition-colors"
+                        className="inline-flex items-center text-secondary-500 hover:text-primary-600 mb-6 transition-colors group"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Services
+                        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Back to Services</span>
                     </Link>
 
                     <motion.div
@@ -163,10 +155,10 @@ export default function ServiceDetails() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <span className="inline-block py-1 px-3 rounded-full bg-primary-600/30 border border-primary-500/50 text-primary-300 text-sm font-medium mb-4">
+                        <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-100 text-primary-600 text-[10px] font-bold uppercase tracking-widest mb-6 shadow-sm">
                             {service.category}
                         </span>
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight">
+                        <h1 className="text-3xl md:text-4xl font-semibold mb-6 text-secondary-900 leading-tight tracking-tight">
                             {service.title}
                         </h1>
                     </motion.div>
@@ -197,7 +189,7 @@ export default function ServiceDetails() {
                             </div>
 
                             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Overview</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-6 uppercase tracking-wider">Service Overview</h2>
                                 <div className="prose prose-lg max-w-none text-gray-600">
                                     {service.description ? (
                                         service.description.split('\n').map((paragraph, idx) => (
@@ -213,7 +205,7 @@ export default function ServiceDetails() {
 
                             {/* Display features if we had them in the database, currently placeholders or derived */}
                             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                                <h3 className="text-xl font-bold text-gray-900 mb-6">Why Choose Us</h3>
+                                <h3 className="text-base font-semibold text-gray-900 mb-6 uppercase tracking-wider">Why Choose Us</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {[
                                         "Professional & Experienced Team",
@@ -238,9 +230,9 @@ export default function ServiceDetails() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                         >
                             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
-                                <div className="p-6 bg-secondary-900 text-white">
-                                    <h3 className="text-xl font-bold mb-2">Book This Service</h3>
-                                    <p className="text-gray-300 text-sm">Get a quote or schedule an appointment today.</p>
+                                <div className="p-6 bg-white border-b border-gray-100">
+                                    <h3 className="text-lg font-semibold mb-2 text-secondary-900">Book This Service</h3>
+                                    <p className="text-secondary-500 text-sm">Get a quote or schedule an appointment today.</p>
                                 </div>
 
                                 <div className="p-6 space-y-6">
@@ -268,7 +260,7 @@ export default function ServiceDetails() {
 
                                     <Link
                                         href="/#contact"
-                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-primary-600/20"
+                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md shadow-primary-600/10 active:scale-95"
                                     >
                                         Contact Us Now
                                     </Link>
@@ -278,8 +270,6 @@ export default function ServiceDetails() {
                     </div>
                 </div>
             </section>
-
-            <Footer />
         </main>
     )
 }

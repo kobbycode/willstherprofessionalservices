@@ -9,7 +9,6 @@ import {
     Globe,
     ShieldCheck,
     Target,
-    Sparkles,
     Link,
     Layers,
     FileText,
@@ -185,7 +184,7 @@ export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
                     </div>
 
                     <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-premium space-y-8 relative overflow-hidden">
-                        <Sparkles className="absolute top-8 right-8 w-12 h-12 text-gray-50" />
+                        <Zap className="absolute top-8 right-8 w-12 h-12 text-gray-50" />
                         <div className="space-y-2">
                             <h4 className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Settings Insights</h4>
                             <p className="text-[9px] font-bold text-secondary-400 uppercase leading-relaxed tracking-tight">A well-structured SEO Settings ensures that search nodes can accurately categorize and prioritize your entity in global results.</p>

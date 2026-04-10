@@ -141,7 +141,18 @@ const AdminDashboard = () => {
   const handleSaveAll = async () => {
     try {
       setIsSaving(true)
-      const target = configRef.current
+      const target = { ...configRef.current }
+      
+      // Filter out any gallery items that do not have an image URL
+      if (target.gallery) {
+        const originalCount = target.gallery.length
+        target.gallery = target.gallery.filter((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
+        const filteredCount = target.gallery.length
+        if (originalCount > filteredCount) {
+          console.log(`AdminPage: Filtered out ${originalCount - filteredCount} empty gallery items.`)
+        }
+      }
+
       console.log('AdminPage: handleSaveAll triggered. Gallery count:', target.gallery?.length || 0)
       
       const result = await saveConfigFn(target)

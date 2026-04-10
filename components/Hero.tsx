@@ -145,11 +145,11 @@ const Hero = memo(() => {
   }
 
   return (
-    <section id="home" className="relative min-h-screen bg-white overflow-hidden">
+    <section id="home" className="relative h-screen bg-secondary-950 overflow-hidden pt-14 sm:pt-16">
       {/* Loading State */}
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+        <div className="absolute inset-0 bg-white flex items-center justify-center z-[100]">
+          <div className="w-20 h-20 border-2 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
         </div>
       )}
 
@@ -157,11 +157,10 @@ const Hero = memo(() => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative w-full"
+        transition={{ duration: 1.2 }}
+        className="relative w-full h-full"
       >
-        {/* Carousel Container */}
-        <div className="relative h-screen w-full">
+        <div className="relative h-full w-full">
           <AnimatePresence initial={false} custom={currentSlide}>
             {slides.map((slide, index) => (
               index === currentSlide && (
@@ -173,8 +172,8 @@ const Hero = memo(() => {
                   animate="center"
                   exit="exit"
                   transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 }
+                    x: { type: "spring", stiffness: 200, damping: 30 },
+                    opacity: { duration: 0.6 }
                   }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
@@ -189,41 +188,64 @@ const Hero = memo(() => {
                   }}
                   className="absolute inset-0"
                 >
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={slide.image}
-                      alt={slide.title}
-                      fill
-                      priority={index === 0}
-                      className="object-cover"
-                      sizes="100vw"
-                      quality={90}
-                      onError={(e) => {
-                        // Note: next/image doesn't support onError in the same way as img, 
-                        // but the loading strategy is more robust.
-                        // Fallback handling is managed by the data layer.
-                        console.warn(`Image might have issues: ${slide.image}`)
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary-900/90 via-primary-900/60 to-transparent"></div>
+                  <div className="relative w-full h-full overflow-hidden">
+                    {/* Background Image with Parallax-esque Scale */}
+                    <motion.div 
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 10, ease: "linear" }}
+                      className="absolute inset-0 w-full h-full"
+                    >
+                      <Image
+                        src={slide.image}
+                        alt={slide.title}
+                        fill
+                        priority={index === 0}
+                        className="object-cover"
+                        sizes="100vw"
+                        quality={95}
+                      />
+                    </motion.div>
+                    
+                    {/* Dark Premium Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+                    
+                    {/* Ambient Light */}
+                    <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary-500/10 blur-[120px] rounded-full"></div>
 
                     {/* Content */}
-                    <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
-                      <div className="max-w-4xl mx-auto">
-                        <motion.h1
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.2, duration: 0.8 }}
-                          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6"
+                    <div className="absolute inset-0 flex items-center px-4 md:px-12 lg:px-24">
+                      <div className="max-w-5xl">
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.3, duration: 0.8 }}
+                          className="flex items-center gap-4 mb-3"
                         >
-                          {slide.title}
+                          <div className="w-6 h-[1px] bg-primary-400"></div>
+                          <span className="text-white font-bold tracking-[0.5em] uppercase text-[9px] sm:text-[10px]">
+                            Premier Property Solutions
+                          </span>
+                        </motion.div>
+                        
+                        <motion.h1
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                          className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-4 leading-tight tracking-[0.15em] font-outfit text-secondary-900 uppercase italic"
+                        >
+                          {slide.title.split(' ').map((word, i) => (
+                            <span key={i} className={i === 1 ? 'text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-200 inline-block' : 'inline-block mr-2 text-white'}>
+                              {word}
+                            </span>
+                          ))}
                         </motion.h1>
 
                         <motion.p
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.4, duration: 0.8 }}
-                          className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 max-w-2xl mx-auto"
+                          transition={{ delay: 0.7, duration: 0.8 }}
+                          className="text-[10px] sm:text-[11px] lg:text-xs mb-8 max-w-sm text-white/70 font-normal leading-relaxed text-balance tracking-widest uppercase"
                         >
                           {slide.description}
                         </motion.p>
@@ -231,21 +253,25 @@ const Hero = memo(() => {
                         <motion.div
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.6, duration: 0.8 }}
-                          className="flex flex-col sm:flex-row gap-4 justify-center"
+                          transition={{ delay: 0.9, duration: 0.8 }}
+                          className="flex flex-col sm:flex-row gap-4 items-start sm:items-center"
                         >
                           <Link
                             href={slide.ctaLink}
-                            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-semibold rounded-lg transition-all duration-500 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[11px] uppercase tracking-[0.2em] font-outfit overflow-hidden"
                           >
-                            {slide.ctaLabel}
+                            <span className="relative z-10 flex items-center gap-2">
+                              {slide.ctaLabel}
+                              <ChevronRight className="w-3 h-3 transform group-hover:translate-x-1 transition-transform" />
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                           </Link>
 
                           <Link
                             href="#services"
-                            className="px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30"
+                            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-[11px] uppercase tracking-[0.2em] font-outfit"
                           >
-                            Our Services
+                            Our Portfolio
                           </Link>
                         </motion.div>
                       </div>
@@ -257,41 +283,47 @@ const Hero = memo(() => {
           </AnimatePresence>
         </div>
 
-        {/* Navigation Arrows */}
+        {/* Navigation Controls */}
         {slides.length > 1 && (
-          <>
+          <div className="absolute bottom-10 right-10 flex items-center gap-2 z-20">
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm z-10"
+              className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
               aria-label="Previous slide"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 transform group-hover:-translate-x-0.5 transition-transform" />
             </button>
-
+            <div className="h-6 w-[1px] bg-white/10 mx-1"></div>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm z-10"
+              className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
               aria-label="Next slide"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 transform group-hover:translate-x-0.5 transition-transform" />
             </button>
-          </>
-        )}
-
-        {/* Slide Indicators */}
-        {slides.length > 1 && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
-                  }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
           </div>
         )}
+
+        {/* Indicators */}
+        <div className="absolute left-10 bottom-10 flex items-center gap-2.5 z-20">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`h-1 rounded-full transition-all duration-500 ${index === currentSlide ? 'w-10 bg-primary-500' : 'w-3 bg-secondary-200 hover:bg-secondary-300'}`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Scroll Hint */}
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-white/40"
+        >
+          <div className="w-[1px] h-20 bg-gradient-to-b from-secondary-200 to-transparent"></div>
+        </motion.div>
       </motion.div>
     </section>
   )

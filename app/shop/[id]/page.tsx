@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { getDb } from '@/lib/firebase'
 import { doc, getDoc, collection, getDocs, query, where, limit } from 'firebase/firestore'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import { Product } from '@/types/product'
 import { useSiteConfig } from '@/lib/site-config'
 import {
@@ -102,7 +100,6 @@ export default function ProductDetailPage() {
     if (isLoading) {
         return (
             <main className="min-h-screen bg-gray-50">
-                <Header />
                 <div className="container mx-auto px-4 py-6">
                     <Skeleton className="h-5 w-40 mb-6" />
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -117,7 +114,6 @@ export default function ProductDetailPage() {
                         </div>
                     </div>
                 </div>
-                <Footer />
             </main>
         )
     }
@@ -125,7 +121,6 @@ export default function ProductDetailPage() {
     if (error || !product) {
         return (
             <main className="min-h-screen bg-gray-50">
-                <Header />
                 <div className="container mx-auto px-4 py-20 text-center">
                     <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-8 border border-gray-200">
                         <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" />
@@ -137,7 +132,6 @@ export default function ProductDetailPage() {
                         </Link>
                     </div>
                 </div>
-                <Footer />
             </main>
         )
     }
@@ -162,14 +156,13 @@ export default function ProductDetailPage() {
 
     return (
         <main className="min-h-screen bg-gray-50/50 pb-20">
-            <Header />
 
             <div className="container mx-auto px-4 pt-28 pb-12">
                 {/* Breadcrumb - Glassmorphism */}
                 <motion.nav
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-xs md:text-sm text-gray-500 mb-8"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-[10px] md:text-xs text-gray-500 mb-8"
                 >
                     <Link href="/" className="hover:text-purple-600 transition-colors">Home</Link>
                     <span className="text-gray-300">/</span>
@@ -185,11 +178,11 @@ export default function ProductDetailPage() {
                 </motion.nav>
 
                 {/* Main Product Section - Premium Integrated Design */}
-                <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
+                <div className="bg-white rounded-[1.5rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
 
                         {/* Image Gallery - Focused & Modern */}
-                        <div className="lg:col-span-5 p-6 md:p-10 bg-gray-50/50">
+                        <div className="lg:col-span-5 p-4 md:p-8 bg-gray-50/50">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -245,18 +238,18 @@ export default function ProductDetailPage() {
                         </div>
 
                         {/* Product Detail Content */}
-                        <div className="lg:col-span-7 p-8 md:p-12 lg:p-16 flex flex-col">
+                        <div className="lg:col-span-7 p-4 md:p-8 lg:p-10 flex flex-col">
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="space-y-8"
                             >
                                 <div>
-                                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-[1.1]">
+                                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 mb-4 tracking-tight leading-[1.1]">
                                         {product.title}
                                     </h1>
                                     <div className="flex flex-wrap items-center gap-6">
-                                        <span className="text-4xl font-black text-purple-600">
+                                        <span className="text-xl md:text-2xl font-black text-purple-600">
                                             GH₵{product.price.toFixed(2)}
                                         </span>
                                         <div className="h-2 w-2 rounded-full bg-gray-200" />
@@ -272,29 +265,29 @@ export default function ProductDetailPage() {
                                     </div>
                                 </div>
 
-                                <div className="prose prose-lg text-gray-600 max-w-none border-l-4 border-purple-100 pl-6 py-2 leading-relaxed">
+                                <div className="prose prose-base text-gray-600 max-w-none border-l-4 border-purple-100 pl-6 py-2 leading-relaxed">
                                     <p className="whitespace-pre-line">{product.description}</p>
                                 </div>
 
                                 {/* Modernized Buy Box Section */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-gray-100">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
                                     <div className="space-y-6">
                                         <div>
                                             <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Select Quantity</label>
                                             <div className="inline-flex items-center p-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                                                 <button
                                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                                    className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95 disabled:opacity-50"
+                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95 disabled:opacity-50"
                                                     disabled={quantity <= 1}
                                                 >
-                                                    <Minus size={20} />
+                                                    <Minus size={18} />
                                                 </button>
                                                 <span className="w-16 text-center font-black text-xl text-gray-900">{quantity}</span>
                                                 <button
                                                     onClick={() => setQuantity(Math.min(20, quantity + 1))}
-                                                    className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95"
+                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95"
                                                 >
-                                                    <Plus size={20} />
+                                                    <Plus size={18} />
                                                 </button>
                                             </div>
                                         </div>
@@ -303,7 +296,7 @@ export default function ProductDetailPage() {
                                             <button
                                                 onClick={handleAddToCart}
                                                 disabled={!product.inStock}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-5 px-8 rounded-2xl font-black text-lg transition-all duration-300 transform ${product.inStock
+                                                className={`flex-1 flex items-center justify-center gap-3 py-3.5 px-8 rounded-2xl font-black text-base transition-all duration-300 transform ${product.inStock
                                                     ? 'bg-purple-600 text-white shadow-xl shadow-purple-200 hover:bg-purple-700 hover:-translate-y-1'
                                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                     }`}
@@ -338,8 +331,8 @@ export default function ProductDetailPage() {
 
                                     {/* Benefits/Specs Section */}
                                     <div className="space-y-6">
-                                        <div className="bg-purple-50 rounded-[2rem] p-8 border border-purple-100 space-y-4">
-                                            <h3 className="text-xs font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
+                                        <div className="bg-purple-50 rounded-[1.25rem] p-5 border border-purple-100 space-y-3">
+                                            <h3 className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
                                             <div className="space-y-4">
                                                 <div className="flex gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-purple-600">
@@ -432,8 +425,6 @@ export default function ProductDetailPage() {
                     </div>
                 )}
             </div>
-
-            <Footer />
         </main>
     )
 }

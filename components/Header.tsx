@@ -129,7 +129,7 @@ const Header = () => {
         const targetId = item.href.startsWith('/') ? item.href.split('#')[1] : item.href.substring(1)
         const element = document.getElementById(targetId)
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' })
+          element.scrollIntoView({ behavior: 'auto' })
         }
       }
     }
@@ -147,11 +147,15 @@ const Header = () => {
             <div className="flex items-center space-x-4 lg:space-x-6">
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-primary-200" />
-                <span className="font-medium">{config.contactPhone || '0208267704'}</span>
+                <a href={`tel:${config.contactPhone || '0208267704'}`} className="font-medium hover:text-primary-200 transition-colors">
+                  {config.contactPhone || '0208267704'}
+                </a>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-primary-200" />
-                <span className="font-medium">{config.contactEmail || 'willstherprofessionalservices@gmail.com'}</span>
+                <a href={`mailto:${config.contactEmail || 'willstherprofessionalservices@gmail.com'}`} className="font-medium hover:text-primary-200 transition-colors">
+                  {config.contactEmail || 'willstherprofessionalservices@gmail.com'}
+                </a>
               </div>
             </div>
             <div className="text-primary-200 text-xs">

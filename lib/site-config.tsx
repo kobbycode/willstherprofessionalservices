@@ -123,7 +123,7 @@ export const defaultSiteConfig: SiteConfig = {
 	siteName: 'Willsther Professional Services',
 	siteDescription: 'Professional cleaning and maintenance services',
 	contactEmail: 'willstherprofessionalservices@gmail.com',
-	contactPhone: '0208267704',
+	contactPhone: '0594850005 / 0208267704',
 	maintenanceMode: false,
 	systemSettings: {
 		maintenanceMode: false,
@@ -184,13 +184,16 @@ export const defaultSiteConfig: SiteConfig = {
 		description: 'Professional maintenance, refurbishment, and cleaning services for industrial, commercial, and domestic properties.',
 		social: {
 			facebook: '',
-			instagram: '',
-			twitter: '',
+			instagram: 'https://www.instagram.com/willstherprofessionalservices?utm_source=qr&igsh=bG04azZsODFmOGN5',
+			twitter: 'https://x.com/willsther',
 			linkedin: ''
 		},
 		copyright: `© ${new Date().getFullYear()} Willsther Professional Services. All rights reserved.`,
 		links: {
 			services: [
+				{ name: 'Our services', href: '/#services' },
+				{ name: 'Fumigation', href: '#services' },
+				{ name: 'Laundry', href: '#services' },
 				{ name: 'Residential Cleaning', href: '#services' },
 				{ name: 'Commercial Cleaning', href: '#services' },
 				{ name: 'Industrial Cleaning', href: '#services' },

@@ -70,7 +70,7 @@ const Testimonials = () => {
 
   if (!isLoaded && (!config.testimonials || config.testimonials.length === 0)) {
     return (
-      <section className="section-padding bg-secondary-50">
+      <section className="section-padding bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 mb-6 opacity-30">
@@ -108,86 +108,97 @@ const Testimonials = () => {
   }
 
   return (
-    <section className="section-padding bg-secondary-50">
-      <div className="container-custom">
+    <section className="section-padding relative overflow-hidden bg-white" id="testimonials">
+      {/* Decorative elements */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-100 dark:bg-primary-900/10 rounded-full blur-[100px] -z-10" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-50 dark:bg-blue-900/10 rounded-full blur-[120px] -z-10" />
+
+      <div className="container-custom relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 mb-6">
-            What Our Customers Say
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+            Success Stories
+          </span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
+            Trust the <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Excellence</span>
           </h2>
-          <div className="w-24 h-1 bg-primary-500 mx-auto mb-8"></div>
-          <p className="text-xl text-secondary-600 max-w-3xl mx-auto">
-            Don't just take our word for it - hear from our satisfied customers
-          </p>
+          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:-translate-y-2 border border-gray-100"
+              className="bg-white border border-secondary-100 rounded-[2.5rem] p-10 hover:shadow-2xl hover:shadow-secondary-200/20 transition-all duration-500 flex flex-col h-full group shadow-xl shadow-secondary-200/5"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-1">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-1.5 p-1 px-3 bg-slate-50 rounded-full">
                   {renderStars(testimonial.rating)}
                 </div>
-                <Quote className="w-8 h-8 text-primary-200" />
+                <div className="w-12 h-12 flex items-center justify-center bg-secondary-900 rounded-2xl group-hover:bg-primary-600 transition-colors duration-500 shadow-lg shadow-secondary-900/10">
+                  <Quote className="w-6 h-6 text-white" />
+                </div>
               </div>
 
-              <div className="mb-4">
-                <h4 className="text-lg font-semibold text-secondary-900 mb-2">
+              <div className="flex-grow mb-6">
+                <h4 className="text-sm font-bold text-secondary-900 mb-3 font-outfit uppercase tracking-widest">
                   {testimonial.title}
                 </h4>
-                <p className="text-secondary-600 leading-relaxed">
-                  {testimonial.comment}
+                <p className="text-[11px] sm:text-xs text-secondary-600 leading-relaxed font-inter italic">
+                  "{testimonial.comment}"
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-gray-100">
-                <p className="font-medium text-secondary-900">
+              <div className="pt-6 border-t border-secondary-100 mt-auto">
+                <p className="font-bold text-secondary-900 text-sm font-outfit tracking-tight">
                   {testimonial.name}
                 </p>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-sm text-secondary-500">Rating:</span>
-                  <span className="text-sm font-medium text-secondary-700">
-                    {testimonial.rating} out of 5
-                  </span>
-                </div>
+                <p className="text-[9px] font-bold text-primary-600 uppercase tracking-widest mt-1">
+                  Verified Client
+                </p>
               </div>
             </motion.div>
           ))}
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
           viewport={{ once: true }}
-          className="text-center mt-16"
+          className="text-center mt-24"
         >
-          <div className="bg-primary-900 rounded-3xl p-8 text-white shadow-premium relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
-            <h3 className="text-2xl font-bold mb-4 relative z-10">
-              Join Our Happy Customers
-            </h3>
-            <p className="text-primary-100 mb-6 text-lg relative z-10">
-              Experience the same level of excellence that our customers rave about
-            </p>
-            <a
-              href="#contact"
-              className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 relative z-10 shadow-lg"
-            >
-              Get Your Quote Today
-            </a>
+          <div className="bg-white border border-secondary-100 rounded-[3rem] p-12 relative overflow-hidden group shadow-2xl shadow-secondary-200/20">
+            {/* Animated background decorative element */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            <div className="relative z-10 max-w-2xl mx-auto text-center">
+              <h3 className="text-3xl md:text-4xl font-black mb-6 text-secondary-900 font-outfit tracking-tight leading-tight uppercase">
+                Ready to Experience <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Premium Care?</span>
+              </h3>
+              <p className="text-secondary-600 mb-10 text-lg font-light leading-relaxed font-inter">
+                Experience the same level of excellence that our customers rave about. Let us transform your environment today.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <a
+                  href="#contact"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-secondary-900 hover:bg-primary-600 text-white font-black py-4 px-12 rounded-2xl transition-all duration-500 transform hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-xs"
+                >
+                  Get Your Quote Today
+                  <Quote className="w-4 h-4 rotate-180" />
+                </a>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>

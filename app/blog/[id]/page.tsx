@@ -2,8 +2,6 @@
 
 import { Calendar, Clock, User, ArrowLeft, Share2, BookOpen } from 'lucide-react'
 import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import Skeleton from '@/components/Skeleton'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
@@ -89,7 +87,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="pt-20">
           <div className="container-custom px-4 py-8 md:py-12">
             <div className="flex flex-col gap-8">
@@ -115,7 +112,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     )
   }
@@ -124,7 +120,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <div className="pt-20">
         <div className="bg-primary-900 shadow-premium border-b border-white/10 mt-8">
           <div className="container-custom px-4 py-6">
@@ -265,7 +260,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           </button>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

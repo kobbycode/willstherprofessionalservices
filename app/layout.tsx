@@ -1,17 +1,30 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Outfit } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/lib/auth-context'
 import { ShopProvider } from '@/context/ShopContext'
 import { SiteProvider } from '@/lib/site-config'
 import { CartDrawer } from '@/components/CartDrawer'
+import { ThemeProvider } from '@/components/ThemeProvider'
+import AmbientBackground from '@/components/AmbientBackground'
+import LayoutWrapper from '@/components/LayoutWrapper'
+import NextTopLoader from 'nextjs-toploader'
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
-  fallback: ['system-ui', 'arial']
+  fallback: ['system-ui', 'arial'],
+  variable: '--font-inter',
+})
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
+  variable: '--font-outfit',
 })
 
 export const metadata: Metadata = {
@@ -163,22 +176,37 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
-        <AuthProvider>
-          <SiteProvider>
-            <ShopProvider>
-              <CartDrawer />
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  style: { fontSize: '14px' },
-                  duration: 4000,
-                }}
-              />
-            </ShopProvider>
-          </SiteProvider>
-        </AuthProvider>
+      <body className={`${inter.variable} ${outfit.variable} font-sans`}>
+        <NextTopLoader
+          color="#36669e"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #36669e,0 0 5px #36669e"
+        />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>
+            <SiteProvider>
+              <ShopProvider>
+                <CartDrawer />
+                <LayoutWrapper>
+                  {children}
+                </LayoutWrapper>
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    style: { fontSize: '14px' },
+                    duration: 4000,
+                  }}
+                />
+              </ShopProvider>
+            </SiteProvider>
+          </AuthProvider>
+        </ThemeProvider>
         {false && (
           <script
             dangerouslySetInnerHTML={{

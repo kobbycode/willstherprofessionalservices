@@ -399,7 +399,7 @@ const ServicesConfig = ({ config, onChange }: any) => {
                         </div>
                         <div className="w-40 h-40 bg-gray-100 border-2 border-dashed border-gray-200 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative shadow-inner">
                           {s.imageUrl ? (
-                            <img src={s.imageUrl} className="w-full h-full object-cover grayscale group-hover/camera:grayscale-0 transition-all duration-700" alt="" />
+                            <img src={s.imageUrl} className="w-full h-full object-cover transition-all duration-700" alt="" />
                           ) : (
                             <Layers className="w-10 h-10 text-gray-200" />
                           )}

@@ -12,7 +12,7 @@ import {
   Edit3,
   ExternalLink,
   Layers,
-  Sparkles,
+  Eye,
   Camera,
   MousePointer2,
   ArrowRight
@@ -233,7 +233,7 @@ const HeroConfig = ({ config, onChange }: any) => {
                     />
                     <div className="absolute left-10 top-1/2 -translate-y-1/2 z-20 space-y-2 max-w-[80%]">
                       <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg inline-flex items-center gap-2 border border-white/20">
-                        <Sparkles className="w-3 h-3 text-white" />
+                        <Eye className="w-3 h-3 text-white" />
                         <span className="text-white text-[9px] font-black uppercase tracking-widest">Preview Mode</span>
                       </div>
                       <h4 className="text-white text-xl font-black leading-tight drop-shadow-lg">{slide.title || 'Untitled Segment'}</h4>

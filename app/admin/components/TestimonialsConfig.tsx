@@ -12,7 +12,6 @@ import {
     ShieldCheck,
     TrendingUp,
     User,
-    Sparkles,
     Layers,
     X
 } from 'lucide-react'
@@ -171,7 +170,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                             </div>
                                             <div className="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-100 rounded-[3rem] flex items-center justify-center overflow-hidden relative shadow-inner">
                                                 {t.avatarUrl ? (
-                                                    <img src={t.avatarUrl} className="w-full h-full object-cover grayscale group-hover/camera:grayscale-0 transition-all duration-[1s]" alt="" />
+                                                    <img src={t.avatarUrl} className="w-full h-full object-cover transition-all duration-[1s]" alt="" />
                                                 ) : (
                                                     <div className="text-center">
                                                         <User className="w-16 h-16 text-gray-200 mx-auto mb-4" />
@@ -260,7 +259,7 @@ export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps
                                     <div className="mt-8 pt-8 border-t border-gray-50 flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-secondary-300">
                                         <div className="flex items-center gap-4">
                                             <span className="px-3 py-1 bg-gray-100 rounded-lg">ID: {t.id?.substring(0, 8)}</span>
-                                            <span className="flex items-center gap-2"><Sparkles className="w-3 h-3 text-accent-500" /> Sentiment Optimized</span>
+                                            <span className="flex items-center gap-2"><ShieldCheck className="w-3 h-3 text-accent-500" /> Sentiment Optimized</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Layers className="w-3 h-3" /> System saved

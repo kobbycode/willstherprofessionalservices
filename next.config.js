@@ -8,14 +8,14 @@ const nextConfig = {
 
   // Image optimization
   images: {
-    domains: [
-      'images.unsplash.com',
-      'firebasestorage.googleapis.com',
-      'queenofclean.blog',
-      'images.pexels.com',
-      'via.placeholder.com',
-      'picsum.photos',
-      'i.ibb.co'
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'firebasestorage.googleapis.com' },
+      { protocol: 'https', hostname: 'queenofclean.blog' },
+      { protocol: 'https', hostname: 'images.pexels.com' },
+      { protocol: 'https', hostname: 'via.placeholder.com' },
+      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'i.ibb.co' }
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

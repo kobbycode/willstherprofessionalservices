@@ -7,7 +7,8 @@ import Skeleton from '@/components/Skeleton'
 
 const Gallery = () => {
   const { config, isLoaded } = useSiteConfig()
-  const items = Array.isArray(config.gallery) ? config.gallery : []
+  const items = (Array.isArray(config.gallery) ? config.gallery : [])
+    .filter(g => g.imageUrl && g.imageUrl.trim() !== '')
 
   if (!isLoaded && items.length === 0) {
     return (
@@ -40,46 +41,67 @@ const Gallery = () => {
   }
 
   return (
-    <section className="section-padding bg-white" id="gallery">
-      <div className="container-custom px-4">
+    <section className="section-padding relative overflow-hidden bg-transparent" id="gallery">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-100 dark:bg-primary-900/20 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100 dark:bg-blue-900/20 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/2" />
+
+      <div className="container-custom px-4 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 0.8, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-4">Gallery</h2>
-          <div className="w-20 h-1 bg-primary-500 mx-auto" />
+          <span className="text-primary-600 dark:text-primary-400 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+            Portfolio
+          </span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4 font-outfit tracking-tight uppercase">
+            Visual <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Excellence</span>
+          </h2>
+          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {items.map((g, i) => (
             <motion.div
               key={g.id || i}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="relative overflow-hidden rounded-2xl border border-white/10 shadow-premium hover:shadow-premium-hover transition-all duration-500 bg-white group"
+              className="group relative h-[400px] overflow-hidden rounded-[2.5rem] bg-slate-200 dark:bg-slate-800 shadow-2xl hover:shadow-primary-500/20 transition-all duration-500"
             >
               {g.imageUrl ? (
-                <div className="relative w-full h-64">
+                <>
                   <Image
                     src={g.imageUrl}
                     alt={g.caption || 'Gallery image'}
                     fill
                     priority={i < 3}
-                    className="object-cover"
+                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
-                </div>
+                  
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                  
+                  {/* Content Overlay */}
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                    {g.caption && (
+                      <div className="glass-card p-4 rounded-[1.5rem] backdrop-blur-xl">
+                        <p className="text-white text-[10px] sm:text-[11px] font-bold font-outfit uppercase tracking-widest leading-tight mb-2">
+                          {g.caption}
+                        </p>
+                        <div className="w-6 h-0.5 bg-primary-500 rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
-                <div className="w-full h-64 bg-gray-100 flex items-center justify-center text-gray-400">No image</div>
-              )}
-              {g.caption && (
-                <div className="p-4 text-sm font-medium text-primary-900/80 bg-white border-t border-gray-50 italic">
-                  "{g.caption}"
+                <div className="w-full h-full flex items-center justify-center text-slate-400 font-medium italic">
+                  Image coming soon
                 </div>
               )}
             </motion.div>

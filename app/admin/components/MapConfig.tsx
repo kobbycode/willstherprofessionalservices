@@ -150,7 +150,7 @@ export const MapConfig = ({ config, onChange }: MapConfigProps) => {
                                 {map.embedUrl ? (
                                     <iframe
                                         src={map.embedUrl}
-                                        className="w-full h-full border-none grayscale contrast-[1.2] invert-[0.05] group-hover/map:grayscale-0 transition-all duration-1000"
+                                        className="w-full h-full border-none contrast-[1.2] invert-[0.05] transition-all duration-1000"
                                         loading="lazy"
                                     />
                                 ) : (

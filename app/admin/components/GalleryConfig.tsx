@@ -60,15 +60,20 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
     }
 
     const handleUpload = async (id: string, file: File) => {
-        if (!file) return
+        if (!file || isUploading) return
         setIsUploading(id)
+        const toastId = toast.loading('Uploading legacy asset...')
         try {
             const url = await uploadImage(file, `gallery/asset-${Date.now()}`)
-            updateItem(id, 'imageUrl', url)
-            toast.success('Image uploaded')
+            if (url) {
+                updateItem(id, 'imageUrl', url)
+                toast.success('Asset synchronized successfully', { id: toastId })
+            } else {
+                throw new Error('Upload returned empty URL')
+            }
         } catch (error) {
             console.error('Upload error:', error)
-            toast.error('Upload failed')
+            toast.error('Synchronization failed. Please try again.', { id: toastId })
         } finally {
             setIsUploading(null)
         }
@@ -156,7 +161,7 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
                             {/* Visual Identification Area */}
                             <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center relative overflow-hidden group/camera">
                                 {g.imageUrl ? (
-                                    <img src={g.imageUrl} alt="" className="w-full h-full object-cover grayscale group-hover/camera:grayscale-0 group-hover/camera:scale-105 transition-all duration-[1.5s]" />
+                                    <img src={g.imageUrl} alt="" className="w-full h-full object-cover group-hover/camera:scale-105 transition-all duration-[1.5s]" />
                                 ) : (
                                     <div className="text-center">
                                         <Layers className="w-12 h-12 text-gray-100 mx-auto mb-4" />
