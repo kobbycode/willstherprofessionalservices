@@ -66,11 +66,15 @@ const Contact = () => {
 
     try {
       setIsSubmitting(true)
+      console.log('Submitting contact form with:', { firstName, lastName, email, phone, service, message })
       await createContactSubmission({ firstName, lastName, email, phone, service, message })
-        ; (e.currentTarget as HTMLFormElement).reset()
+      console.log('Contact submission successful')
+      ; (e.currentTarget as HTMLFormElement).reset()
       toast.success('Message sent successfully!')
     } catch (err) {
-      toast.error('Failed to send message. Please try again.')
+      console.error('Contact submission error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      toast.error(`Failed to send message: ${errorMessage}`)
     } finally {
       setIsSubmitting(false)
     }
