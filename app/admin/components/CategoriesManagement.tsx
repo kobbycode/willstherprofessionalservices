@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { fetchServiceCategories, addServiceCategory, updateServiceCategory, deleteServiceCategory, ServiceCategory } from '@/lib/categories'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 export const CategoriesManagement = () => {
     const [items, setItems] = useState<ServiceCategory[]>([])
@@ -34,6 +35,7 @@ export const CategoriesManagement = () => {
     const [isUpdating, setIsUpdating] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
+    const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; categoryId: string | null }>({ open: false, categoryId: null })
 
     const load = async () => {
         setLoading(true)
@@ -86,11 +88,13 @@ export const CategoriesManagement = () => {
         }
     }
 
-    const handleDelete = async (id: string) => {
-        setIsDeleting(id)
+    const handleDelete = async () => {
+        if (!deleteConfirm.categoryId) return
+        setIsDeleting(deleteConfirm.categoryId)
         try {
-            await deleteServiceCategory(id)
-            toast.error('Category Deleted')
+            await deleteServiceCategory(deleteConfirm.categoryId)
+            toast.success('Category Deleted')
+            setDeleteConfirm({ open: false, categoryId: null })
             load()
         } catch (e) {
             toast.error('Failed to delete')
@@ -106,6 +110,7 @@ export const CategoriesManagement = () => {
 
 
     return (
+        <>
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -280,7 +285,7 @@ export const CategoriesManagement = () => {
                                                     </button>
                                                     <button
                                                         disabled={isDeleting === c.id}
-                                                        onClick={() => (window.confirm('Delete this category and remove it from "What We Offer"?') && handleDelete(c.id))}
+                                                        onClick={() => setDeleteConfirm({ open: true, categoryId: c.id })}
                                                         className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-50"
                                                     >
                                                         {isDeleting === c.id ? <div className="w-4 h-4 border-2 border-rose-500/10 border-t-rose-500 rounded-full animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -298,5 +303,16 @@ export const CategoriesManagement = () => {
 
             </div>
         </motion.div>
+
+        <ConfirmDialog
+            isOpen={deleteConfirm.open}
+            onClose={() => setDeleteConfirm({ open: false, categoryId: null })}
+            onConfirm={handleDelete}
+            title="Delete Category"
+            message="Are you sure you want to delete this category? It will also be removed from 'What We Offer'."
+            confirmText="Delete"
+            type="danger"
+        />
+        </>
     )
 }

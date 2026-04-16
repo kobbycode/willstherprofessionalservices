@@ -43,6 +43,7 @@ import Skeleton from '@/components/Skeleton'
 import { useAuth } from '@/lib/auth-context'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899']
 
@@ -53,6 +54,7 @@ export default function ShopManagement() {
     const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({})
     const [searchTerm, setSearchTerm] = useState('')
     const [isSaving, setIsSaving] = useState(false)
+    const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; productId: string | null }>({ open: false, productId: null })
     const { user: currentUser } = useAuth()
     const isSuperAdmin = currentUser?.role === 'super_admin'
 
@@ -159,18 +161,18 @@ export default function ShopManagement() {
         }
     }
 
-    const handleDelete = async (productId: string) => {
-        if (!isSuperAdmin) {
+    const handleDelete = async () => {
+        if (!isSuperAdmin || !deleteConfirm.productId) {
             toast.error("Only super admins can delete products")
             return
         }
-        if (!window.confirm("Are you sure you want to delete this product?")) return
 
         try {
             const db = getDb()
             if (!db) return
-            await deleteDoc(doc(db, 'products', productId))
+            await deleteDoc(doc(db, 'products', deleteConfirm.productId))
             toast.success("Product deleted")
+            setDeleteConfirm({ open: false, productId: null })
         } catch (err) {
             toast.error("Failed to delete product")
         }
@@ -376,7 +378,7 @@ export default function ShopManagement() {
                                 <div className="absolute top-4 right-4 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 flex flex-col gap-2">
                                     <button onClick={() => { setCurrentProduct(p); setIsEditing(true); }} className="p-2.5 bg-white text-primary-900 rounded-xl shadow-lg hover:bg-primary-900 hover:text-white transition-all"><Edit className="w-4 h-4" /></button>
                                     {isSuperAdmin && (
-                                        <button onClick={() => handleDelete(p.id)} className="p-2.5 bg-white text-rose-500 rounded-xl shadow-lg hover:bg-rose-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
+                                        <button onClick={() => setDeleteConfirm({ open: true, productId: p.id })} className="p-2.5 bg-white text-rose-500 rounded-xl shadow-lg hover:bg-rose-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
                                     )}
                                 </div>
                             </div>
@@ -645,6 +647,16 @@ export default function ShopManagement() {
                     </div>
                 )}
             </AnimatePresence>
+
+            <ConfirmDialog
+                isOpen={deleteConfirm.open}
+                onClose={() => setDeleteConfirm({ open: false, productId: null })}
+                onConfirm={handleDelete}
+                title="Delete Product"
+                message="Are you sure you want to delete this product? This action cannot be undone."
+                confirmText="Delete"
+                type="danger"
+            />
         </motion.div>
     )
 }

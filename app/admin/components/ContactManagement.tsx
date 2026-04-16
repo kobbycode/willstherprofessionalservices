@@ -38,6 +38,7 @@ import toast from 'react-hot-toast'
 import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, type ContactSubmission } from '@/lib/contacts'
 import { formatDateHuman } from '@/lib/date'
 import { useAuth } from '@/lib/auth-context'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 const STATUS_COLORS = {
     new: '#3B82F6',
@@ -51,6 +52,7 @@ export const ContactManagement = () => {
     const [filter, setFilter] = useState<'all' | 'new' | 'in_progress' | 'completed'>('all')
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null)
+    const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; contactId: string | null }>({ open: false, contactId: null })
     const { user: currentUser } = useAuth()
     const isSuperAdmin = currentUser?.role === 'super_admin'
 
@@ -82,16 +84,16 @@ export const ContactManagement = () => {
         }
     }
 
-    const remove = async (id: string) => {
-        if (!isSuperAdmin) {
+    const remove = async () => {
+        if (!isSuperAdmin || !deleteConfirm.contactId) {
             toast.error('Administrative override required for deletion')
             return
         }
-        if (!confirm('Permanent deletion will Delete this record. Proceed?')) return
         try {
-            await deleteContactSubmission(id)
-            setSubmissions(prev => prev.filter(s => s.id !== id))
+            await deleteContactSubmission(deleteConfirm.contactId)
+            setSubmissions(prev => prev.filter(s => s.id !== deleteConfirm.contactId))
             toast.success('Record Deleted from Settings')
+            setDeleteConfirm({ open: false, contactId: null })
         } catch {
             toast.error('Settings deletion failed')
         }
@@ -125,6 +127,7 @@ export const ContactManagement = () => {
     }, [submissions])
 
     return (
+        <>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-10">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -301,7 +304,7 @@ export const ContactManagement = () => {
                                             </button>
                                             {isSuperAdmin && (
                                                 <button
-                                                    onClick={() => remove(s.id)}
+                                                    onClick={() => setDeleteConfirm({ open: true, contactId: s.id })}
                                                     className="p-2.5 bg-white text-rose-500 rounded-xl shadow-sm border border-gray-100 hover:bg-rose-500 hover:text-white transition-all"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -419,5 +422,16 @@ export const ContactManagement = () => {
                 )}
             </AnimatePresence>
         </motion.div>
+
+        <ConfirmDialog
+            isOpen={deleteConfirm.open}
+            onClose={() => setDeleteConfirm({ open: false, contactId: null })}
+            onConfirm={remove}
+            title="Delete Contact"
+            message="Are you sure you want to delete this contact submission? This action cannot be undone."
+            confirmText="Delete"
+            type="danger"
+        />
+        </>
     )
 }
