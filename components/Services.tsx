@@ -177,7 +177,7 @@ const Services = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+            <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
               Our Expertise
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -220,7 +220,7 @@ const Services = () => {
                       <motion.p 
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
-                        className="text-secondary-500 mb-12 text-center max-w-2xl mx-auto font-light"
+                        className="text-secondary-500 mb-12 text-center max-w-2xl mx-auto font-medium"
                       >
                         {categoryObj.subtitle}
                       </motion.p>
@@ -272,7 +272,7 @@ const Services = () => {
               <Wrench className="w-10 h-10 text-primary-600" />
             </div>
             <h3 className="text-2xl font-black text-secondary-900 mb-2 font-outfit uppercase tracking-tight">Services Coming Soon</h3>
-            <p className="text-secondary-500 font-light max-w-md mx-auto">
+            <p className="text-secondary-500 font-medium max-w-md mx-auto">
               We are currently curating the best professional solutions for you. Stay tuned.
             </p>
           </div>
@@ -295,7 +295,7 @@ const Services = () => {
                   Need a Custom <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500">Service Plan?</span>
                 </h3>
-                <p className="text-secondary-600 text-lg md:text-xl font-light leading-relaxed mb-10 max-w-xl">
+                <p className="text-secondary-600 text-lg md:text-xl font-medium leading-relaxed mb-10 max-w-xl">
                   Whether it's industrial maintenance or premium commercial cleaning, we tailor our expertise to match your vision of excellence.
                 </p>
                 <Link

@@ -130,7 +130,7 @@ const Stats = () => {
                   <div className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-1 font-outfit">
                     <Counter value={stat.number} />
                   </div>
-                  <p className="text-[10px] sm:text-[11px] font-bold text-primary-600 uppercase tracking-[0.3em]">
+                  <p className="text-[12px] sm:text-[13px] font-bold text-primary-600 uppercase tracking-[0.3em]">
                     {stat.label}
                   </p>
                 </div>
@@ -162,7 +162,7 @@ const Stats = () => {
                 Ready to Experience <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400 italic">Premium</span> Service?
               </h3>
               
-              <p className="text-secondary-600 mb-10 text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed">
+              <p className="text-secondary-600 mb-10 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
                 Join our premium clientele and witness the transformation of your property with our bespoke professional solutions.
               </p>
               

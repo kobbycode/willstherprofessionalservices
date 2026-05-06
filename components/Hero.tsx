@@ -223,7 +223,7 @@ const Hero = memo(() => {
                           className="flex items-center gap-4 mb-3"
                         >
                           <div className="w-6 h-[1px] bg-primary-400"></div>
-                          <span className="text-white font-bold tracking-[0.5em] uppercase text-[9px] sm:text-[10px]">
+                          <span className="text-white font-bold tracking-[0.5em] uppercase text-[11px] sm:text-[12px]">
                             Premier Property Solutions
                           </span>
                         </motion.div>
@@ -245,7 +245,7 @@ const Hero = memo(() => {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.7, duration: 0.8 }}
-                          className="text-[10px] sm:text-[11px] lg:text-xs mb-8 max-w-sm text-white/70 font-normal leading-relaxed text-balance tracking-widest uppercase"
+                          className="text-[12px] sm:text-[13px] lg:text-sm mb-8 max-w-sm text-white/70 font-medium leading-relaxed text-balance tracking-widest uppercase"
                         >
                           {slide.description}
                         </motion.p>
@@ -258,7 +258,7 @@ const Hero = memo(() => {
                         >
                           <Link
                             href={slide.ctaLink}
-                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-semibold rounded-lg transition-all duration-500 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[11px] uppercase tracking-[0.2em] font-outfit overflow-hidden"
+                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-semibold rounded-lg transition-all duration-500 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[13px] uppercase tracking-[0.2em] font-outfit overflow-hidden"
                           >
                             <span className="relative z-10 flex items-center gap-2">
                               {slide.ctaLabel}
@@ -269,7 +269,7 @@ const Hero = memo(() => {
 
                           <Link
                             href="#services"
-                            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-[11px] uppercase tracking-[0.2em] font-outfit"
+                            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-[13px] uppercase tracking-[0.2em] font-outfit"
                           >
                             Our Portfolio
                           </Link>

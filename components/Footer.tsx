@@ -29,7 +29,7 @@ const Footer = () => {
                 WILLSTHER
               </span>
             </div>
-            <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-8 font-medium max-w-sm">
+            <p className="text-white/60 text-sm sm:text-base leading-relaxed mb-8 font-medium max-w-sm">
               Elevating the standard of real estate and property management through excellence, integrity, and innovation. Your trusted partner in premier property solutions.
             </p>
             <div className="flex gap-3">
@@ -54,7 +54,7 @@ const Footer = () => {
 
           {/* Links Column 1 */}
           <div className="lg:col-span-2">
-            <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-[0.2em] mb-8">Quick Links</h4>
+            <h4 className="text-sm sm:text-base font-bold text-white uppercase tracking-[0.2em] mb-8">Quick Links</h4>
             <ul className="space-y-4">
               {[
                 { name: "Home", href: "/" },
@@ -66,7 +66,7 @@ const Footer = () => {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-primary-400 text-xs sm:text-sm transition-all duration-300 flex items-center group font-medium"
+                    className="text-white/60 hover:text-primary-400 text-sm sm:text-base transition-all duration-300 flex items-center group font-medium"
                   >
                     <ArrowRight className="w-3 h-3 mr-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                     {link.name}
@@ -78,7 +78,7 @@ const Footer = () => {
 
           {/* Links Column 2 */}
           <div className="lg:col-span-3">
-            <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-[0.2em] mb-8">Our Services</h4>
+            <h4 className="text-sm sm:text-base font-bold text-white uppercase tracking-[0.2em] mb-8">Our Services</h4>
             <ul className="grid grid-cols-1 gap-4">
               {(config.footer.links?.services || [
                 { name: 'Our services', href: '/#services' },
@@ -92,7 +92,7 @@ const Footer = () => {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/60 hover:text-primary-400 text-xs sm:text-sm transition-all duration-300 flex items-center group font-medium"
+                    className="text-white/60 hover:text-primary-400 text-sm sm:text-base transition-all duration-300 flex items-center group font-medium"
                   >
                     <ArrowRight className="w-3 h-3 mr-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                     {link.name}
@@ -104,19 +104,19 @@ const Footer = () => {
 
           {/* Links Column 3 - Newsletter Section */}
           <div className="lg:col-span-3">
-            <h4 className="text-xs sm:text-sm font-bold text-white uppercase tracking-[0.2em] mb-8">Newsletter</h4>
-            <p className="text-white/60 text-xs sm:text-sm mb-6 leading-relaxed font-medium">
+            <h4 className="text-sm sm:text-base font-bold text-white uppercase tracking-[0.2em] mb-8">Newsletter</h4>
+            <p className="text-white/60 text-sm sm:text-base mb-6 leading-relaxed font-medium">
               Join our exclusive list for the latest property updates and real estate insights.
             </p>
             <form className="relative group">
               <input
                 type="email"
                 placeholder="Email address"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs sm:text-sm focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400 transition-all duration-300 text-white placeholder:text-white/30"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-400 transition-all duration-300 text-white placeholder:text-white/30"
               />
               <button
                 type="submit"
-                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-all duration-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider"
+                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-all duration-300 text-[12px] sm:text-sm font-bold uppercase tracking-wider"
               >
                 Join
               </button>
@@ -124,13 +124,13 @@ const Footer = () => {
             
             {/* Contact Details below newsletter on mobile, side by side on desktop? No, let's keep it simple. */}
             <div className="mt-8 space-y-3">
-              <div className="flex items-center gap-3 text-white/60 text-xs sm:text-sm font-medium">
+              <div className="flex items-center gap-3 text-white/60 text-sm sm:text-base font-medium">
                 <Mail className="w-4 h-4 text-primary-400" />
                 <a href={`mailto:${config.contactEmail || "willstherprofessionalservices@gmail.com"}`} className="hover:text-primary-400 transition-colors">
                   {config.contactEmail || "willstherprofessionalservices@gmail.com"}
                 </a>
               </div>
-              <div className="flex items-center gap-3 text-white/60 text-xs sm:text-sm font-medium">
+              <div className="flex items-center gap-3 text-white/60 text-sm sm:text-base font-medium">
                 <Phone className="w-4 h-4 text-primary-400" />
                 <a href={`tel:${config.contactPhone?.split(' / ')[0] || "0594850005"}`} className="hover:text-primary-400 transition-colors">
                   {config.contactPhone === "0208267704" ? "0594850005 / 0208267704" : (config.contactPhone || "0594850005 / 0208267704")}
@@ -142,7 +142,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] sm:text-xs text-white/40 font-medium order-2 md:order-1">
+          <p className="text-[12px] sm:text-sm text-white/40 font-medium order-2 md:order-1">
             © {currentYear} WILLSTHER. All rights reserved.
           </p>
         </div>

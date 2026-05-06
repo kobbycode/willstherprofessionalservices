@@ -121,7 +121,7 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
             Success Stories
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -186,7 +186,7 @@ const Testimonials = () => {
                 Ready to Experience <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Premium Care?</span>
               </h3>
-              <p className="text-secondary-600 mb-10 text-lg font-light leading-relaxed font-inter">
+              <p className="text-secondary-600 mb-10 text-lg font-medium leading-relaxed font-inter">
                 Experience the same level of excellence that our customers rave about. Let us transform your environment today.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">

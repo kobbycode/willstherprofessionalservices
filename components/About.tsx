@@ -53,7 +53,7 @@ const About = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
             Our Identity
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -73,7 +73,7 @@ const About = () => {
             <h3 className="text-3xl md:text-5xl font-black text-secondary-900 font-outfit leading-[1.1] tracking-tight">
               {config.about.title || 'Professional Maintenance & Cleaning Services'}
             </h3>
-            <p className="text-xl text-secondary-600 leading-relaxed font-inter font-light">
+            <p className="text-xl text-secondary-600 leading-relaxed font-inter font-medium">
               {config.about.content || 'WILLSTHER PROFESSIONAL SERVICES is a fast-growing industrial, commercial, and household maintenance services provider committed to delivering unparalleled quality.'}
             </p>
             
@@ -167,7 +167,7 @@ const About = () => {
               <h4 className="text-2xl font-black text-secondary-900 mb-4 font-outfit tracking-tight">
                 {feature.title}
               </h4>
-              <p className="text-secondary-600 leading-relaxed font-inter font-light mb-8">
+              <p className="text-secondary-600 leading-relaxed font-inter font-medium mb-8">
                 {feature.description}
               </p>
 
