@@ -20,7 +20,7 @@ import {
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
 
-const HeroConfig = ({ config, onChange }: any) => {
+const HeroConfig = ({ config, onChange, onSave }: any) => {
   const heroSlides = config.heroSlides || []
   const [isAddSlideModalOpen, setIsAddSlideModalOpen] = useState(false)
   const [newSlideData, setNewSlideData] = useState({

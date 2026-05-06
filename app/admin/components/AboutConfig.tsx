@@ -18,9 +18,10 @@ import { uploadImage } from '@/lib/storage'
 interface AboutConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const AboutConfig = ({ config, onChange }: AboutConfigProps) => {
+export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
     const about = config.about || { title: '', content: '', imageUrl: '' }
     const [isUploading, setIsUploading] = useState(false)
 

@@ -13,7 +13,8 @@ import {
     Monitor,
     Settings,
     ShieldCheck,
-    LayoutGrid
+    LayoutGrid,
+    Save
 } from 'lucide-react'
 import { uploadImage } from '@/lib/storage'
 import toast from 'react-hot-toast'
@@ -21,20 +22,31 @@ import toast from 'react-hot-toast'
 interface GalleryConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
-    const items = config.gallery || []
+export const GalleryConfig = ({ config, onChange, onSave }: GalleryConfigProps) => {
+    const items = React.useMemo(() => {
+        const gallery = config.gallery || []
+        // Ensure every item has a unique ID, otherwise deletion/editing will fail
+        return gallery.map((item: any, index: number) => ({
+            ...item,
+            id: item.id || `legacy-${index}-${Date.now()}`
+        }))
+    }, [config.gallery])
+
     const [isUploading, setIsUploading] = useState<string | null>(null)
 
     const updateItem = (id: string, key: string, value: any) => {
+        console.log(`GalleryConfig: Updating item ${id}, ${key} = ${value}`)
         onChange((prev: any) => {
-            const next = { ...prev }
-            const gallery = prev.gallery || []
-            next.gallery = gallery.map((item: any) => 
-                item.id === id ? { ...item, [key]: value } : item
-            )
-            return next
+            const gallery = Array.isArray(prev.gallery) ? prev.gallery : []
+            const nextGallery = gallery.map((item: any) => {
+                // Handle both id and possibly missing id for legacy items
+                if (item.id === id) return { ...item, [key]: value }
+                return item
+            })
+            return { ...prev, gallery: nextGallery }
         })
     }
 
@@ -44,18 +56,23 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
             imageUrl: '',
             caption: ''
         }
+        console.log('GalleryConfig: Adding new item slot')
         onChange((prev: any) => ({
             ...prev,
-            gallery: [newItem, ...(prev.gallery || [])]
+            gallery: [newItem, ...(Array.isArray(prev.gallery) ? prev.gallery : [])]
         }))
         toast.success('Added new image slot')
     }
 
     const removeItem = (id: string) => {
-        onChange((prev: any) => ({
-            ...prev,
-            gallery: (prev.gallery || []).filter((item: any) => item.id !== id)
-        }))
+        console.log(`GalleryConfig: Removing item ${id}`)
+        onChange((prev: any) => {
+            const gallery = Array.isArray(prev.gallery) ? prev.gallery : []
+            return {
+                ...prev,
+                gallery: gallery.filter((item: any) => item.id !== id)
+            }
+        })
         toast.error('Image removed')
     }
 
@@ -86,24 +103,29 @@ export const GalleryConfig = ({ config, onChange }: GalleryConfigProps) => {
             className="space-y-12 pb-20"
         >
             {/* Header & Global Add */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-                <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Gallery Images</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Upload and manage images for the website gallery</p>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Gallery Manager</h2>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase italic">Visual Content Repository</p>
                 </div>
-
-                <button
-                    onClick={addItem}
-                    className="group relative px-8 py-5 bg-primary-900 text-white rounded-[2rem] shadow-2xl shadow-primary-900/20 hover:shadow-primary-900/40 transition-all active:scale-95 overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative flex items-center gap-4">
-                        <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
-                            <Plus className="w-5 h-5 text-accent-500" />
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add New Image</span>
-                    </div>
-                </button>
+                <div className="flex gap-4">
+                    {onSave && (
+                        <button
+                            onClick={onSave}
+                            className="px-6 py-3.5 bg-green-600 text-white rounded-2xl shadow-xl shadow-green-900/20 hover:shadow-green-900/30 active:scale-95 transition-all flex items-center gap-3"
+                        >
+                            <Save className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Save Changes</span>
+                        </button>
+                    )}
+                    <button
+                        onClick={addItem}
+                        className="px-6 py-3.5 bg-primary-900 text-white rounded-2xl shadow-xl shadow-primary-900/20 hover:shadow-primary-900/30 active:scale-95 transition-all flex items-center gap-3"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Add New Image</span>
+                    </button>
+                </div>
             </div>
 
             {/* Auto Media Stats */}

@@ -364,7 +364,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				setConfigState((prev) => {
 					// Double check dirty state inside the functional update
 					if (loadIsDirtyFromLocal()) {
-						console.log('Skipping merge: state became dirty during fetch.')
+						console.log('SiteProvider: Skipping merge because state became dirty during fetch.')
 						return prev
 					}
 
@@ -373,27 +373,34 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 						...defaultSiteConfig,
 						...prev,
 						...remoteConfig,
-						heroSlides: slides.length > 0 ? slides : (remoteConfig.heroSlides || prev.heroSlides)
+						heroSlides: slides.length > 0 ? slides : (remoteConfig.heroSlides || prev.heroSlides || [])
 					}
 
-					// Arrays MUST be completely overwritten by server if they exist there
+					// Arrays MUST be completely overwritten by server if they exist there and are valid
 					const arrayKeys: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services']
 					for (const key of arrayKeys) {
-						if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
+						if (Array.isArray(remoteConfig[key])) {
+							console.log(`SiteProvider: Overwriting ${key} with server data (${(remoteConfig[key] as any[]).length} items)`)
 							;(merged as any)[key] = remoteConfig[key]
-						}
+						} else if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
+                            // If it exists but is not an array, handle it gracefully
+                            console.warn(`SiteProvider: Server returned non-array for ${key}:`, remoteConfig[key])
+                            if (remoteConfig[key] === null || remoteConfig[key] === undefined) {
+                                (merged as any)[key] = []
+                            }
+                        }
 					}
 
 					if (remoteConfig.navigation) {
 						merged.navigation = remoteConfig.navigation
 					}
 
-					console.log('Successfully merged server config into local state.')
+					console.log('SiteProvider: Successfully merged server config into local state.')
 					saveSiteConfigToLocal(merged, false)
 					return merged
 				})
 			} else if (currentlyDirty) {
-				console.log('Merge SKIPPED because of unsaved local changes.')
+				console.log('SiteProvider: Merge SKIPPED because of unsaved local changes (dirty flag is set).')
 			}
 
 			console.log('--- SiteProvider Sync End ---')

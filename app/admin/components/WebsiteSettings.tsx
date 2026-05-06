@@ -24,9 +24,10 @@ import toast from 'react-hot-toast'
 interface WebsiteSettingsProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const WebsiteSettings = ({ config, onChange }: WebsiteSettingsProps) => {
+export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsProps) => {
     const [settings, setSettings] = useState({
         siteName: config.siteName || 'Willsther Professional Services',
         siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',

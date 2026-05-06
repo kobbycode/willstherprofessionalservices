@@ -19,9 +19,10 @@ import {
 interface SEOConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const SEOConfig = ({ config, onChange }: SEOConfigProps) => {
+export const SEOConfig = ({ config, onChange, onSave }: SEOConfigProps) => {
     const seo = config.seo || { defaultTitle: '', defaultDescription: '', keywords: [] }
     const update = (key: string, value: any) => onChange({ ...config, seo: { ...seo, [key]: value } })
     const setKeywords = (value: string) => update('keywords', value.split(',').map((k: string) => k.trim()).filter(Boolean))

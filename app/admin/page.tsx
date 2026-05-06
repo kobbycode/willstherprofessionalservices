@@ -121,8 +121,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     // Only overwrite local ref if we are NOT currently dirty
     if (config && !isDirty) {
-      console.log('AdminPage: Syncing provider config to local ref (not dirty)')
-      configRef.current = config
+      console.log('AdminPage: Syncing provider config to local ref (fresh data received)')
+      configRef.current = { ...config }
     }
   }, [config, isDirty])
 
@@ -130,21 +130,29 @@ const AdminDashboard = () => {
   const handleConfigChange = (next: any) => {
     if (typeof next === 'function') {
       const resolved = next(configRef.current)
+      console.log('AdminPage: Functional update. Keys in resolved:', Object.keys(resolved))
       configRef.current = resolved
       setConfig(next)
     } else {
+      console.log('AdminPage: Direct update. Keys in next:', Object.keys(next))
       configRef.current = next
       setConfig(next)
     }
   }
 
   const handleSaveAll = async () => {
+    if (!configRef.current) {
+        toast.error('Configuration not loaded yet.')
+        return
+    }
+
     try {
       setIsSaving(true)
-      const target = { ...configRef.current }
+      // Work with a deep copy of the gallery to avoid modifying ref in place before save
+      const target = JSON.parse(JSON.stringify(configRef.current))
       
       // Filter out any gallery items that do not have an image URL
-      if (target.gallery) {
+      if (target.gallery && Array.isArray(target.gallery)) {
         const originalCount = target.gallery.length
         target.gallery = target.gallery.filter((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
         const filteredCount = target.gallery.length
@@ -153,7 +161,8 @@ const AdminDashboard = () => {
         }
       }
 
-      console.log('AdminPage: handleSaveAll triggered. Gallery count:', target.gallery?.length || 0)
+      console.log('AdminPage: Final save target gallery count:', target.gallery?.length || 0)
+      console.log('AdminPage: Saving to server...')
       
       const result = await saveConfigFn(target)
       
@@ -330,47 +339,47 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'settings' && (
-              <WebsiteSettings config={config} onChange={handleConfigChange} />
+              <WebsiteSettings config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'hero' && (
-              <HeroConfig config={config} onChange={handleConfigChange} />
+              <HeroConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'services' && (
-              <ServicesConfig config={config} onChange={handleConfigChange} />
+              <ServicesConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'about' && (
-              <AboutConfig config={config} onChange={handleConfigChange} />
+              <AboutConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'navigation' && (
-              <NavigationConfig config={config} onChange={handleConfigChange} />
+              <NavigationConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'footer' && (
-              <FooterConfig config={config} onChange={handleConfigChange} />
+              <FooterConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'seo' && (
-              <SEOConfig config={config} onChange={handleConfigChange} />
+              <SEOConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'map' && (
-              <MapConfig config={config} onChange={handleConfigChange} />
+              <MapConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'testimonials' && (
-              <TestimonialsConfig config={config} onChange={handleConfigChange} />
+              <TestimonialsConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'gallery' && (
-              <GalleryConfig config={config} onChange={handleConfigChange} />
+              <GalleryConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             {activeTab === 'stats' && (
-              <StatsConfig config={config} onChange={handleConfigChange} />
+              <StatsConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">

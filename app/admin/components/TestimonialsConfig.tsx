@@ -21,9 +21,10 @@ import toast from 'react-hot-toast'
 interface TestimonialsConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const TestimonialsConfig = ({ config, onChange }: TestimonialsConfigProps) => {
+export const TestimonialsConfig = ({ config, onChange, onSave }: TestimonialsConfigProps) => {
     const items = config.testimonials || []
     const [isUploading, setIsUploading] = useState<string | null>(null)
     const [testimonialToDelete, setTestimonialToDelete] = useState<string | null>(null)

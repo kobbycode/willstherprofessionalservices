@@ -25,7 +25,7 @@ import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
 import { fetchServiceCategories } from '@/lib/categories'
 
-const ServicesConfig = ({ config, onChange }: any) => {
+const ServicesConfig = ({ config, onChange, onSave }: any) => {
   const [services, setServices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

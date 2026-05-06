@@ -18,9 +18,10 @@ import toast from 'react-hot-toast'
 interface NavigationConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const NavigationConfig = ({ config, onChange }: NavigationConfigProps) => {
+export const NavigationConfig = ({ config, onChange, onSave }: NavigationConfigProps) => {
     const navigation = config.navigation || {
         main: [
             { name: 'Services', href: '/services' },

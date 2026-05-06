@@ -21,6 +21,7 @@ import toast from 'react-hot-toast'
 interface StatsConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
 const iconOptions = ['Users', 'Building', 'Star', 'TrendingUp']
@@ -33,7 +34,7 @@ const colorOptions = [
     { label: 'Rose', value: 'bg-rose-500' }
 ]
 
-export const StatsConfig = ({ config, onChange }: StatsConfigProps) => {
+export const StatsConfig = ({ config, onChange, onSave }: StatsConfigProps) => {
     const stats = config.stats || { title: '', subtitle: '', items: [] }
     const items = stats.items || []
 

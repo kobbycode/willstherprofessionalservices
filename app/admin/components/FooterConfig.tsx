@@ -15,9 +15,10 @@ import {
 interface FooterConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const FooterConfig = ({ config, onChange }: FooterConfigProps) => {
+export const FooterConfig = ({ config, onChange, onSave }: FooterConfigProps) => {
     const footer = config.footer || {}
     const social = footer.social || { facebook: '', instagram: '', twitter: '', linkedin: '' }
 

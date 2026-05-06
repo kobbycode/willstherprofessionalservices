@@ -19,9 +19,10 @@ import {
 interface MapConfigProps {
     config: any
     onChange: (next: any) => void
+    onSave?: () => Promise<void>
 }
 
-export const MapConfig = ({ config, onChange }: MapConfigProps) => {
+export const MapConfig = ({ config, onChange, onSave }: MapConfigProps) => {
     const map = config.map || { embedUrl: '', lat: undefined, lng: undefined, zoom: 14 }
     const update = (key: string, value: any) => onChange({ ...config, map: { ...map, [key]: value } })
 
