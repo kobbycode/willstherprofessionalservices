@@ -10,7 +10,7 @@ import {
     Type,
     FileText,
     ExternalLink,
-    Zap
+    Activity
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
@@ -117,8 +117,8 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                     <div className="bg-primary-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-white/10 transition-all duration-[2s]" />
                         <div className="relative z-10 flex items-start gap-6">
-                            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-accent-500 shadow-inner">
-                                <Zap className="w-6 h-6" />
+                            <div className="w-12 h-1 bg-white/10 rounded-2xl flex items-center justify-center text-accent-500 shadow-inner">
+                                <Activity className="w-6 h-6" />
                             </div>
                             <div className="space-y-2">
                                 <h4 className="text-base font-black uppercase tracking-widest">Automatic Management</h4>

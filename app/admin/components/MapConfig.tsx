@@ -9,7 +9,6 @@ import {
     Navigation2,
     Maximize2,
     Target,
-    Zap,
     ShieldCheck,
     ExternalLink,
     Map as MapIcon,
@@ -122,11 +121,11 @@ export const MapConfig = ({ config, onChange, onSave }: MapConfigProps) => {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-white/10 transition-all duration-[2s]" />
                         <div className="relative z-10 flex items-start gap-6">
                             <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-accent-500">
-                                <Zap className="w-6 h-6" />
+                                <Compass className="w-6 h-6" />
                             </div>
                             <div className="space-y-2">
                                 <h4 className="text-sm font-black uppercase tracking-widest">Projection Setting</h4>
-                                <p className="text-[10px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-xs">Global coordinates are automatically projected through our Auto GIS interface for high-frequency location clarity.</p>
+                                <p className="text-[12px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-xs">Global coordinates are automatically projected through our Auto GIS interface for high-frequency location clarity.</p>
                             </div>
                         </div>
                     </div>

@@ -13,7 +13,6 @@ import {
     ShieldCheck,
     TrendingUp,
     Search,
-    Zap,
     Tag,
     Boxes,
     Download,

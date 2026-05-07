@@ -16,8 +16,7 @@ import {
     Twitter,
     Linkedin,
     Save,
-    RotateCcw,
-    Zap
+    RotateCcw
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -155,32 +154,6 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Support Liaison Email</label>
-                                    <div className="relative group">
-                                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
-                                        <input
-                                            type="email"
-                                            value={settings.contactEmail}
-                                            onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
-                                            className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Emergency Voice Setting</label>
-                                    <div className="relative group">
-                                        <Phone className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
-                                        <input
-                                            type="text"
-                                            value={settings.contactPhone}
-                                            onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
-                                            className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-bold text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">HQ Physical Address</label>
                                 <div className="relative group">
                                     <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within:text-primary-900 transition-colors" />
                                     <input
@@ -265,7 +238,7 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
 
                     <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm space-y-6">
                         <div className="flex items-center gap-3 text-primary-900">
-                            <Zap className="w-5 h-5" />
+                            <Activity className="w-5 h-5" />
                             <h4 className="text-sm font-black uppercase tracking-widest">Environment Intel</h4>
                         </div>
 

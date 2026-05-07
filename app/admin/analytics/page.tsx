@@ -16,8 +16,7 @@ import {
   Settings,
   Clock,
   Star,
-  Target,
-  Zap
+  Target
 } from 'lucide-react'
 import Link from 'next/link'
 import { fetchPosts } from '@/lib/blog'
@@ -685,7 +684,7 @@ export default function AnalyticsPage() {
             className="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
           >
             <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-              <Zap className="w-5 h-5 mr-2" />
+              <Activity className="w-5 h-5 mr-2" />
               Performance Metrics
             </h2>
 

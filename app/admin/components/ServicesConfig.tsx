@@ -11,15 +11,15 @@ import {
   LayoutGrid,
   TrendingUp,
   ShieldCheck,
-  Zap,
-  Camera,
-  Layers,
-  Settings,
-  MoreVertical,
-  CheckCircle2,
-  ExternalLink,
-  Search,
-  Filter
+    Activity,
+    Camera,
+    Layers,
+    Settings,
+    MoreVertical,
+    CheckCircle2,
+    ExternalLink,
+    Search,
+    Filter
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
@@ -386,8 +386,8 @@ const ServicesConfig = ({ config, onChange, onSave }: any) => {
                 {/* Image Management */}
                 <div className="space-y-6 pt-6 border-t border-gray-50">
                   <div className="flex items-center justify-between px-2">
-                    <label className="text-[10px] font-black text-secondary-300 uppercase tracking-[0.2em]">Service Image</label>
-                    <Zap className="w-4 h-4 text-accent-500 animate-pulse" />
+                    <label className="text-[12px] font-black text-secondary-300 uppercase tracking-[0.2em]">Service Image</label>
+                    <Activity className="w-4 h-4 text-accent-500 animate-pulse" />
                   </div>
 
                   <div className="flex flex-col md:flex-row gap-8 items-start">
