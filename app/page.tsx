@@ -6,7 +6,7 @@ import Services from '@/components/Services'
 import Stats from '@/components/Stats'
 import Values from '@/components/Values'
 import Testimonials from '@/components/Testimonials'
-import Gallery from '@/components/Gallery'
+
 import Contact from '@/components/Contact'
 import MaintenanceMode from '@/components/MaintenanceMode'
 import { useSiteConfig } from '@/lib/site-config'
@@ -30,7 +30,6 @@ export default function Home() {
       <Stats />
       <Values />
       <Testimonials />
-      <Gallery />
       <Contact />
     </main>
   )
