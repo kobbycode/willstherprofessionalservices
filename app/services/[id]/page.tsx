@@ -147,7 +147,7 @@ export default function ServiceDetails() {
                         className="inline-flex items-center text-secondary-500 hover:text-primary-600 mb-6 transition-colors group"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-xs font-bold uppercase tracking-widest">Back to Services</span>
+                        <span className="text-sm font-bold uppercase tracking-widest">Back to Services</span>
                     </Link>
 
                     <motion.div
@@ -155,7 +155,7 @@ export default function ServiceDetails() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-100 text-primary-600 text-[10px] font-bold uppercase tracking-widest mb-6 shadow-sm">
+                        <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-100 text-primary-600 text-[12px] font-bold uppercase tracking-widest mb-6 shadow-sm">
                             {service.category}
                         </span>
                         <h1 className="text-3xl md:text-4xl font-semibold mb-6 text-secondary-900 leading-tight tracking-tight">
@@ -205,7 +205,7 @@ export default function ServiceDetails() {
 
                             {/* Display features if we had them in the database, currently placeholders or derived */}
                             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                                <h3 className="text-base font-semibold text-gray-900 mb-6 uppercase tracking-wider">Why Choose Us</h3>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-6 uppercase tracking-wider">Why Choose Us</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {[
                                         "Professional & Experienced Team",
@@ -232,7 +232,7 @@ export default function ServiceDetails() {
                             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
                                 <div className="p-6 bg-white border-b border-gray-100">
                                     <h3 className="text-lg font-semibold mb-2 text-secondary-900">Book This Service</h3>
-                                    <p className="text-secondary-500 text-sm">Get a quote or schedule an appointment today.</p>
+                                    <p className="text-secondary-500 text-base">Get a quote or schedule an appointment today.</p>
                                 </div>
 
                                 <div className="p-6 space-y-6">
@@ -241,7 +241,7 @@ export default function ServiceDetails() {
                                             <Clock className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">Response Time</p>
+                                            <p className="text-base text-gray-500">Response Time</p>
                                             <p className="font-semibold">Within 24 Hours</p>
                                         </div>
                                     </div>
@@ -251,7 +251,7 @@ export default function ServiceDetails() {
                                             <Calendar className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500">Availability</p>
+                                            <p className="text-base text-gray-500">Availability</p>
                                             <p className="font-semibold">Mon - Sat, 8am - 6pm</p>
                                         </div>
                                     </div>
@@ -260,7 +260,7 @@ export default function ServiceDetails() {
 
                                     <Link
                                         href="/#contact"
-                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md shadow-primary-600/10 active:scale-95"
+                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white text-base font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md shadow-primary-600/10 active:scale-95"
                                     >
                                         Contact Us Now
                                     </Link>

@@ -208,7 +208,7 @@ export const BlogManagement = () => {
                             <button
                                 key={f}
                                 onClick={() => setStatusFilter(f)}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${statusFilter === f
+                                className={`px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all ${statusFilter === f
                                         ? 'bg-primary-900 text-white shadow-lg'
                                         : 'text-secondary-400 hover:text-primary-900'
                                     }`}
@@ -219,7 +219,7 @@ export const BlogManagement = () => {
                     </div>
                     <button
                         onClick={openCreate}
-                        className="flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-primary-900 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl shadow-accent-500/20 active:scale-95"
+                        className="flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-primary-900 font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-xl shadow-accent-500/20 active:scale-95"
                     >
                         <Plus className="w-4 h-4" />
                         <span>Create Post</span>
@@ -239,9 +239,9 @@ export const BlogManagement = () => {
                         <div className={`absolute top-0 right-0 w-20 h-20 bg-${stat.color}-500/5 -mr-6 -mt-6 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`}></div>
                         <div className="flex items-center justify-between relative z-10">
                             <div>
-                                <p className="text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                                <p className="text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
                                 <h3 className="text-3xl font-black text-primary-900 leading-none">{stat.value}</h3>
-                                <p className="text-[9px] font-bold text-secondary-500 mt-2 flex items-center gap-1 uppercase tracking-wider">
+                                <p className="text-[11px] font-bold text-secondary-500 mt-2 flex items-center gap-1 uppercase tracking-wider">
                                     <ArrowUpRight className="w-3 h-3 text-emerald-500" />
                                     {stat.trend}
                                 </p>
@@ -260,7 +260,7 @@ export const BlogManagement = () => {
                     <div className="flex items-center justify-between mb-8">
                         <div>
                             <h3 className="text-xl font-black text-primary-900">Article Reach</h3>
-                            <p className="text-xs text-secondary-500 font-bold uppercase tracking-widest mt-1">Engagement per top post</p>
+                            <p className="text-sm text-secondary-500 font-bold uppercase tracking-widest mt-1">Engagement per top post</p>
                         </div>
                         <BarChart2 className="w-5 h-5 text-secondary-300" />
                     </div>
@@ -283,7 +283,7 @@ export const BlogManagement = () => {
                 <div className="bg-white rounded-[2.5rem] shadow-premium p-8 border border-gray-100 flex flex-col h-[400px]">
                     <div className="mb-6">
                         <h3 className="text-xl font-black text-primary-900">Category Mix</h3>
-                        <p className="text-xs text-secondary-500 font-bold uppercase tracking-widest mt-1">Content Distribution</p>
+                        <p className="text-sm text-secondary-500 font-bold uppercase tracking-widest mt-1">Content Distribution</p>
                     </div>
                     <div className="flex-1 relative">
                         <ResponsiveContainer width="100%" height="100%">
@@ -305,14 +305,14 @@ export const BlogManagement = () => {
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-2xl font-black text-primary-900">{categoryData.length}</span>
-                            <span className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest">topics</span>
+                            <span className="text-[12px] font-bold text-secondary-400 uppercase tracking-widest">topics</span>
                         </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
                         {categoryData.slice(0, 4).map((cat, i) => (
                             <div key={i} className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full">
                                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></span>
-                                <span className="text-[10px] font-black text-secondary-500 uppercase">{cat.name}</span>
+                                <span className="text-[12px] font-black text-secondary-500 uppercase">{cat.name}</span>
                             </div>
                         ))}
                     </div>
@@ -329,7 +329,7 @@ export const BlogManagement = () => {
                             placeholder="SEARCH ARTICLES..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-6 py-3 bg-gray-50/50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none text-primary-900"
+                            className="w-full pl-12 pr-6 py-3 bg-gray-50/50 border-none rounded-2xl text-[13px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none text-primary-900"
                         />
                     </div>
                 </div>
@@ -338,12 +338,12 @@ export const BlogManagement = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-50">
-                                <th className="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Post Info</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Category</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Status</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Reach</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Date</th>
-                                <th className="px-8 py-5 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Actions</th>
+                                <th className="px-8 py-5 text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em]">Post Info</th>
+                                <th className="px-6 py-5 text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em]">Category</th>
+                                <th className="px-6 py-5 text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em]">Status</th>
+                                <th className="px-6 py-5 text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em]">Reach</th>
+                                <th className="px-6 py-5 text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em]">Date</th>
+                                <th className="px-8 py-5 text-right text-[12px] font-black text-secondary-400 uppercase tracking-[0.2em]">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -363,23 +363,23 @@ export const BlogManagement = () => {
                                                 ) : <FileText className="w-5 h-5 m-auto text-secondary-300" />}
                                             </div>
                                             <div className="max-w-[180px]">
-                                                <p className="text-sm font-black text-primary-900 truncate tracking-tight">{post.title}</p>
-                                                <p className="text-[10px] font-bold text-secondary-400 uppercase mt-0.5 truncate">{post.excerpt}</p>
+                                                <p className="text-base font-black text-primary-900 truncate tracking-tight">{post.title}</p>
+                                                <p className="text-[12px] font-bold text-secondary-400 uppercase mt-0.5 truncate">{post.excerpt}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-5 whitespace-nowrap">
-                                        <span className="px-4 py-1 bg-primary-100/50 text-primary-900 text-[10px] font-black uppercase tracking-widest rounded-full">{post.category}</span>
+                                        <span className="px-4 py-1 bg-primary-100/50 text-primary-900 text-[12px] font-black uppercase tracking-widest rounded-full">{post.category}</span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${post.status === 'published' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                        <span className={`flex items-center gap-2 text-[12px] font-black uppercase tracking-widest ${post.status === 'published' ? 'text-emerald-500' : 'text-amber-500'}`}>
                                             <div className={`w-1.5 h-1.5 rounded-full ${post.status === 'published' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
                                             {post.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-5 whitespace-nowrap">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-sm font-black text-primary-900">{(post.views || 0).toLocaleString()}</span>
+                                            <span className="text-base font-black text-primary-900">{(post.views || 0).toLocaleString()}</span>
                                             <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-blue-500 rounded-full"
@@ -389,7 +389,7 @@ export const BlogManagement = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-5 whitespace-nowrap">
-                                        <p className="text-[10px] font-black text-secondary-500 uppercase tracking-tighter">{formatDateHuman(post.date)}</p>
+                                        <p className="text-[12px] font-black text-secondary-500 uppercase tracking-tighter">{formatDateHuman(post.date)}</p>
                                     </td>
                                     <td className="px-8 py-5 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
@@ -419,7 +419,7 @@ export const BlogManagement = () => {
                             <div className="p-8 border-b border-gray-100 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-2xl font-black text-primary-900">{editingPost ? 'Edit Article' : 'Draft New Article'}</h3>
-                                    <p className="text-secondary-500 text-xs font-bold uppercase tracking-widest mt-1">Configure your content properties</p>
+                                    <p className="text-secondary-500 text-sm font-bold uppercase tracking-widest mt-1">Configure your content properties</p>
                                 </div>
                                 <button onClick={() => setShowPostModal(false)} className="p-3 hover:bg-gray-100 rounded-2xl transition-colors"><X className="w-6 h-6 text-secondary-400" /></button>
                             </div>
@@ -428,40 +428,40 @@ export const BlogManagement = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                                     <div className="space-y-6 text-left">
                                         <div>
-                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Title</label>
+                                            <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Title</label>
                                             <input
                                                 value={form.title}
                                                 onChange={e => setForm({ ...form, title: e.target.value })}
-                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary-900 outline-none transition-all"
+                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-base font-bold focus:ring-2 focus:ring-primary-900 outline-none transition-all"
                                                 placeholder="ENTER HEADLINE..."
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Excerpt</label>
+                                            <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Excerpt</label>
                                             <textarea
                                                 rows={3}
                                                 value={form.excerpt}
                                                 onChange={e => setForm({ ...form, excerpt: e.target.value })}
-                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-primary-900 outline-none transition-all resize-none"
+                                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-base font-bold focus:ring-2 focus:ring-primary-900 outline-none transition-all resize-none"
                                                 placeholder="BRIEF SUMMARY..."
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Category</label>
+                                                <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Category</label>
                                                 <input
                                                     value={form.category}
                                                     onChange={e => setForm({ ...form, category: e.target.value })}
-                                                    className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[11px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                    className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[13px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
                                                     placeholder="TOPIC..."
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Status</label>
+                                                <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Status</label>
                                                 <select
                                                     value={form.status}
                                                     onChange={e => setForm({ ...form, status: e.target.value as any })}
-                                                    className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[11px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                    className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[13px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
                                                 >
                                                     <option value="draft">DRAFT</option>
                                                     <option value="published">PUBLISHED</option>
@@ -472,18 +472,18 @@ export const BlogManagement = () => {
                                     </div>
                                     <div className="space-y-6">
                                         <div>
-                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Cover Asset</label>
+                                            <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Cover Asset</label>
                                             <div className="relative aspect-video bg-gray-50 rounded-3xl overflow-hidden border-2 border-dashed border-gray-200 group">
                                                 {form.image ? (
                                                     <Image src={form.image} alt="Preview" fill className="object-cover" />
                                                 ) : (
                                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                                                         <BarChart2 className="w-8 h-8 text-secondary-200" />
-                                                        <span className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">No preview available</span>
+                                                        <span className="text-[12px] font-black text-secondary-300 uppercase tracking-widest">No preview available</span>
                                                     </div>
                                                 )}
                                                 <label className="absolute inset-0 flex items-center justify-center bg-primary-900/80 opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
-                                                    <span className="text-white text-xs font-black uppercase tracking-widest">Replace Image</span>
+                                                    <span className="text-white text-sm font-black uppercase tracking-widest">Replace Image</span>
                                                     <input type="file" className="hidden" onChange={e => {
                                                         const file = e.target.files?.[0]
                                                         if (file) {
@@ -494,22 +494,22 @@ export const BlogManagement = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Tags (Comma Separated)</label>
+                                            <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Tags (Comma Separated)</label>
                                             <input
                                                 value={form.tags}
                                                 onChange={e => setForm({ ...form, tags: e.target.value })}
-                                                className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[11px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
+                                                className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[13px] font-black uppercase focus:ring-2 focus:ring-primary-900 outline-none"
                                                 placeholder="NEXTJS, CLEANING, TIPS..."
                                             />
                                         </div>
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Full Article Content</label>
+                                        <label className="block text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-2 ml-1">Full Article Content</label>
                                         <textarea
                                             rows={8}
                                             value={form.content}
                                             onChange={e => setForm({ ...form, content: e.target.value })}
-                                            className="w-full px-6 py-6 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-primary-900 outline-none transition-all leading-relaxed"
+                                            className="w-full px-6 py-6 bg-gray-50 border-none rounded-2xl text-base font-medium focus:ring-2 focus:ring-primary-900 outline-none transition-all leading-relaxed"
                                             placeholder="WRITE SOMETHING OUTSTANDING..."
                                         />
                                     </div>
@@ -517,11 +517,11 @@ export const BlogManagement = () => {
                             </div>
 
                             <div className="p-8 bg-gray-50 flex justify-end gap-4">
-                                <button onClick={() => setShowPostModal(false)} className="px-8 py-3.5 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:text-primary-900 transition-colors">Abort Changes</button>
+                                <button onClick={() => setShowPostModal(false)} className="px-8 py-3.5 text-[12px] font-black text-secondary-500 uppercase tracking-widest hover:text-primary-900 transition-colors">Abort Changes</button>
                                 <button
                                     onClick={savePost}
                                     disabled={savingPost}
-                                    className="px-10 py-3.5 bg-primary-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary-900/20 active:scale-95 disabled:opacity-50 flex items-center gap-3"
+                                    className="px-10 py-3.5 bg-primary-900 text-white text-[12px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary-900/20 active:scale-95 disabled:opacity-50 flex items-center gap-3"
                                 >
                                     {savingPost && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
                                     <span>Deploy Article</span>
@@ -538,9 +538,9 @@ export const BlogManagement = () => {
                                 <Trash2 className="w-8 h-8 text-rose-500" />
                             </div>
                             <h3 className="text-xl font-black text-primary-900 mb-2">Eliminate Content?</h3>
-                            <p className="text-secondary-500 text-sm font-medium mb-8">This action is permanent and will remove the article from all public feeds.</p>
+                            <p className="text-secondary-500 text-base font-medium mb-8">This action is permanent and will remove the article from all public feeds.</p>
                             <div className="grid grid-cols-2 gap-4">
-                                <button onClick={() => setShowDeleteDialog(null)} className="py-4 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-secondary-500 rounded-2xl hover:bg-gray-100 transition-colors">Cancel</button>
+                                <button onClick={() => setShowDeleteDialog(null)} className="py-4 bg-gray-50 text-[12px] font-black uppercase tracking-widest text-secondary-500 rounded-2xl hover:bg-gray-100 transition-colors">Cancel</button>
                                 <button
                                     onClick={async () => {
                                         const { deletePost } = await import('@/lib/blog')
@@ -548,7 +548,7 @@ export const BlogManagement = () => {
                                         setShowDeleteDialog(null)
                                         toast.success('Post eliminated')
                                     }}
-                                    className="py-4 bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/30 active:scale-95"
+                                    className="py-4 bg-rose-500 text-white text-[12px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-rose-500/30 active:scale-95"
                                 >
                                     Confirm
                                 </button>

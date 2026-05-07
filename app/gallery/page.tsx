@@ -22,7 +22,7 @@ export default function GalleryPage() {
                         <h1 className="text-3xl md:text-4xl font-semibold text-secondary-900 mb-4 tracking-tight">
                             Our <span className="text-primary-600 font-bold">Gallery</span>
                         </h1>
-                        <p className="max-w-xl mx-auto text-secondary-500 font-medium text-sm md:text-base leading-relaxed">
+                        <p className="max-w-xl mx-auto text-secondary-500 font-medium text-base md:text-lg leading-relaxed">
                             {config.siteDescription || 'Visual representation of our professional cleaning and maintenance services across Ghana.'}
                         </p>
                         <div className="w-12 h-0.5 bg-primary-500 mx-auto mt-6 rounded-full" />

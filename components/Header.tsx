@@ -143,7 +143,7 @@ const Header = () => {
       {/* Top utility bar - hidden on mobile */}
       <div className="hidden md:block bg-primary-950 text-white/90 py-2 border-b border-white/10">
         <div className="container-custom">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-base">
             <div className="flex items-center space-x-4 lg:space-x-6">
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-primary-200" />
@@ -158,7 +158,7 @@ const Header = () => {
                 </a>
               </div>
             </div>
-            <div className="text-primary-200 text-xs">
+            <div className="text-primary-200 text-sm">
               Mon-Sat: 8:00am - 5:00pm
             </div>
           </div>

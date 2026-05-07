@@ -200,7 +200,7 @@ const AdminDashboard = () => {
             }`}>
             <nav className="p-4 sm:p-6 space-y-8">
               <div>
-                <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Navigation</h2>
+                <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Navigation</h2>
                 <div className="space-y-1.5">
                   {[
                     { id: 'overview', label: 'Dashboard', icon: BarChart3 },
@@ -224,14 +224,14 @@ const AdminDashboard = () => {
                       <div className={`p-2 rounded-lg transition-colors ${activeTab === item.id ? 'bg-primary-900/10' : 'bg-white/5 group-hover:bg-accent-500/10'}`}>
                         <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-primary-900' : 'text-accent-500'}`} />
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                      <span className="font-bold text-base tracking-tight">{item.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Website Content</h2>
+                <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Website Content</h2>
                 <div className="space-y-1.5">
                   {[
                     { id: 'hero', label: 'Hero Section', icon: ImageIcon },
@@ -255,14 +255,14 @@ const AdminDashboard = () => {
                       <div className={`p-2 rounded-lg transition-colors ${activeTab === item.id ? 'bg-primary-900/10' : 'bg-white/5 group-hover:bg-accent-500/10'}`}>
                         <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-primary-900' : 'text-accent-500'}`} />
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                      <span className="font-bold text-base tracking-tight">{item.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Configuration</h2>
+                <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Configuration</h2>
                 <div className="space-y-1.5">
                   {[
                     { id: 'settings', label: 'General', icon: Settings },
@@ -285,14 +285,14 @@ const AdminDashboard = () => {
                       <div className={`p-2 rounded-lg transition-colors ${activeTab === item.id ? 'bg-primary-900/10' : 'bg-white/5 group-hover:bg-accent-500/10'}`}>
                         <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-primary-900' : 'text-accent-500'}`} />
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                      <span className="font-bold text-base tracking-tight">{item.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Analytics</h2>
+                <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Analytics</h2>
                 <div className="space-y-1.5">
                   <Link
                     href="/admin/analytics"
@@ -301,7 +301,7 @@ const AdminDashboard = () => {
                     <div className="p-2 rounded-lg bg-white/5 group-hover:bg-accent-500/10">
                       <TrendingUp className="w-5 h-5 text-accent-500" />
                     </div>
-                    <span className="font-bold text-sm tracking-tight">Analytics Dashboard</span>
+                    <span className="font-bold text-base tracking-tight">Analytics Dashboard</span>
                   </Link>
                 </div>
               </div>
@@ -417,7 +417,7 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-primary-900">Confirm Logout</h3>
-                  <p className="text-sm text-secondary-600">Are you sure you want to log out?</p>
+                  <p className="text-base text-secondary-600">Are you sure you want to log out?</p>
                 </div>
               </div>
 
@@ -428,7 +428,7 @@ const AdminDashboard = () => {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowLogoutDialog(false)}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-primary-900 rounded-xl hover:bg-gray-50 transition-all duration-200 font-bold text-sm uppercase tracking-wider"
+                  className="flex-1 px-4 py-3 border border-gray-200 text-primary-900 rounded-xl hover:bg-gray-50 transition-all duration-200 font-bold text-base uppercase tracking-wider"
                 >
                   Cancel
                 </button>

@@ -88,7 +88,7 @@ const About = () => {
                   </div>
                   <div>
                     <div className="text-sm font-black text-secondary-900 font-outfit uppercase tracking-wider">{item.title}</div>
-                    <div className="text-xs text-secondary-500 font-inter font-medium">{item.label}</div>
+                    <div className="text-sm text-secondary-500 font-inter font-medium">{item.label}</div>
                   </div>
                 </div>
               ))}
@@ -129,7 +129,7 @@ const About = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-secondary-900 font-black text-3xl font-outfit tracking-tighter">100%</div>
-                      <div className="text-secondary-500 text-xs font-bold font-inter uppercase tracking-[0.2em]">Satisfaction Rate</div>
+                      <div className="text-secondary-500 text-sm font-bold font-inter uppercase tracking-[0.2em]">Satisfaction Rate</div>
                     </div>
                     <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center">
                       <Award className="w-6 h-6 text-white" />

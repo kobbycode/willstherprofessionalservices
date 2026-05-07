@@ -151,7 +151,7 @@ const BlogPage = () => {
               <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center space-x-2 text-secondary-500 hover:text-primary-600 transition-colors duration-200 group">
                   <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                  <span className="font-medium text-xs uppercase tracking-widest">Back to Home</span>
+                  <span className="font-medium text-sm uppercase tracking-widest">Back to Home</span>
                 </Link>
               </div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary-900 text-center md:text-left tracking-tight">
@@ -213,7 +213,7 @@ const BlogPage = () => {
                       <button
                         key={index}
                         onClick={() => handleCategoryChange(category)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${category === activeCategory
+                        className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-300 ${category === activeCategory
                           ? 'bg-primary-900 text-accent-500 shadow-premium'
                           : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-900 border border-gray-100'
                           }`}
@@ -228,7 +228,7 @@ const BlogPage = () => {
 
             {/* Results Summary */}
             {!isLoading && blogPosts.length > 0 && (
-              <div className="mt-4 text-sm text-secondary-500">
+              <div className="mt-4 text-base text-secondary-500">
                 Showing {sortedPosts.length} of {blogPosts.length} articles
                 {searchQuery && ` for "${searchQuery}"`}
                 {activeCategory !== 'All' && activeCategory !== '' && ` in ${activeCategory}`}
@@ -265,14 +265,14 @@ const BlogPage = () => {
                       priority
                     />
                     <div className="absolute top-4 left-4 z-10">
-                      <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs font-bold tracking-wider uppercase shadow-lg">
+                      <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-sm font-bold tracking-wider uppercase shadow-lg">
                         Featured
                       </span>
                     </div>
                   </div>
                   <div className="p-6 md:p-8 flex flex-col justify-center">
-                    <div className="flex items-center space-x-4 text-sm text-secondary-500 mb-4">
-                      <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs font-semibold">
+                    <div className="flex items-center space-x-4 text-base text-secondary-500 mb-4">
+                      <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold">
                         {sortedPosts[0].category}
                       </span>
                       <div className="flex items-center space-x-2">
@@ -287,17 +287,17 @@ const BlogPage = () => {
                     <h2 className="text-lg md:text-xl font-semibold text-secondary-900 mb-3 tracking-snug">
                       {sortedPosts[0].title}
                     </h2>
-                    <p className="text-secondary-600 mb-6 text-sm md:text-base leading-relaxed opacity-80">
+                    <p className="text-secondary-600 mb-6 text-base md:text-base leading-relaxed opacity-80">
                       {sortedPosts[0].excerpt || 'No excerpt available'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm text-secondary-500">
+                      <div className="flex items-center space-x-2 text-base text-secondary-500">
                         <User className="w-4 h-4" />
                         <span>{sortedPosts[0].author}</span>
                       </div>
                       <Link
                         href={`/blog/${sortedPosts[0].id}`}
-                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 py-2.5 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                       >
                         Read More
                       </Link>
@@ -311,8 +311,8 @@ const BlogPage = () => {
                   <Search className="w-10 h-10 text-primary-300" />
                 </div>
                 <h3 className="text-xl font-semibold text-secondary-900 mb-3">No published articles yet</h3>
-                <p className="text-secondary-500 mb-3 text-sm">Check back later for our latest cleaning tips and industry insights.</p>
-                <p className="text-[11px] text-secondary-400 uppercase tracking-widest">Admins: Make sure to publish posts in the admin panel.</p>
+                <p className="text-secondary-500 mb-3 text-base">Check back later for our latest cleaning tips and industry insights.</p>
+                <p className="text-[13px] text-secondary-400 uppercase tracking-widest">Admins: Make sure to publish posts in the admin panel.</p>
               </div>
             )}
           </div>
@@ -341,7 +341,7 @@ const BlogPage = () => {
                 <Search className="w-8 h-8 text-primary-300" />
               </div>
               <h3 className="text-lg font-semibold text-secondary-900 mb-2">No more articles</h3>
-              <p className="text-secondary-500 text-sm">This is all we have for now. Check back later for more premium content!</p>
+              <p className="text-secondary-500 text-base">This is all we have for now. Check back later for more premium content!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -358,13 +358,13 @@ const BlogPage = () => {
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute top-3 left-3 z-10">
-                      <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-xs font-bold tracking-wide uppercase shadow-sm">
+                      <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-sm font-bold tracking-wide uppercase shadow-sm">
                         {post.category}
                       </span>
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="flex items-center space-x-4 text-xs text-secondary-500 mb-3">
+                    <div className="flex items-center space-x-4 text-sm text-secondary-500 mb-3">
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDateHuman(post.date, 'en-GB')}</span>
@@ -377,17 +377,17 @@ const BlogPage = () => {
                     <h3 className="text-base md:text-lg font-semibold text-secondary-900 mb-2 line-clamp-2 tracking-snug">
                       {post.title}
                     </h3>
-                    <p className="text-secondary-600 text-[13px] mb-4 line-clamp-2 leading-relaxed opacity-70">
+                    <p className="text-secondary-600 text-[15px] mb-4 line-clamp-2 leading-relaxed opacity-70">
                       {post.excerpt || 'No excerpt available'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-xs text-secondary-500">
+                      <div className="flex items-center space-x-2 text-sm text-secondary-500">
                         <User className="w-3 h-3" />
                         <span>{post.author}</span>
                       </div>
                       <Link
                         href={`/blog/${post.id}`}
-                        className="text-primary-900 hover:text-accent-600 font-bold text-sm transition-colors duration-200 flex items-center group/btn"
+                        className="text-primary-900 hover:text-accent-600 font-bold text-base transition-colors duration-200 flex items-center group/btn"
                       >
                         <span>Read More</span>
                         <ArrowLeft className="w-4 h-4 ml-1 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
@@ -405,7 +405,7 @@ const BlogPage = () => {
               <button
                 onClick={loadMorePosts}
                 disabled={isLoading}
-                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-8 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
+                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-8 py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -437,7 +437,7 @@ const BlogPage = () => {
                   placeholder="Your professional email"
                   className="flex-1 px-6 py-4 rounded-xl bg-white text-secondary-900 placeholder:text-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none shadow-inner transition-all duration-300"
                 />
-                <button className="bg-primary-600 text-white px-8 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
+                <button className="bg-primary-600 text-white px-8 py-3 rounded-xl text-sm font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
                   Subscribe
                 </button>
               </div>

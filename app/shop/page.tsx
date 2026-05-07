@@ -77,7 +77,7 @@ export default function ShopPage() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-[10px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
                     >
                         <ShoppingBag size={12} />
                         <span>Professional Cleaning Supplies</span>
@@ -95,7 +95,7 @@ export default function ShopPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-xs md:text-sm text-secondary-600 max-w-xl mx-auto leading-relaxed"
+                        className="text-sm md:text-base text-secondary-600 max-w-xl mx-auto leading-relaxed"
                     >
                         Equip yourself with the same high-performance products our professionals use.
                         Quality guaranteed for every surface.
@@ -129,7 +129,7 @@ export default function ShopPage() {
                                     key={category}
                                     onClick={() => setSelectedCategory(category)}
                                     className={`
-                                        px-4 py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-[11px] uppercase tracking-wider
+                                        px-4 py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-[13px] uppercase tracking-wider
                                         ${selectedCategory === category
                                             ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
                                             : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'}
@@ -144,7 +144,7 @@ export default function ShopPage() {
 
                 {/* Results Header */}
                 <div className="flex justify-between items-center mb-6 px-2">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.2em]">
+                    <h2 className="text-[12px] font-semibold text-gray-400 uppercase tracking-[0.2em]">
                         Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
                     </h2>
                     <div className="h-px flex-1 bg-gray-100 ml-6 hidden md:block" />
@@ -183,7 +183,7 @@ export default function ShopPage() {
                             <ShoppingBag className="w-6 h-6 text-gray-300" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-                        <p className="text-xs text-gray-500 max-w-xs mx-auto mb-6">
+                        <p className="text-sm text-gray-500 max-w-xs mx-auto mb-6">
                             {searchTerm
                                 ? `We couldn't find any products matching "${searchTerm}"`
                                 : "Check back later for new professional supplies!"}
@@ -191,7 +191,7 @@ export default function ShopPage() {
                         {searchTerm && (
                             <button
                                 onClick={() => setSearchTerm('')}
-                                className="text-purple-600 text-xs font-semibold hover:underline"
+                                className="text-purple-600 text-sm font-semibold hover:underline"
                             >
                                 Clear Search
                             </button>

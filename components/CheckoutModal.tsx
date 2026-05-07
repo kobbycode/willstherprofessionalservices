@@ -116,8 +116,8 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                     >
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50/50">
                             <div>
-                                <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-[0.2em] font-outfit">Checkout</h3>
-                                <p className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-widest">Complete your order</p>
+                                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-[0.2em] font-outfit">Checkout</h3>
+                                <p className="text-[12px] text-gray-400 mt-0.5 uppercase tracking-widest">Complete your order</p>
                             </div>
                             <button onClick={onClose} className="p-2 hover:bg-white rounded-full transition-colors text-gray-500">
                                 <X size={20} />
@@ -127,10 +127,10 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             {/* User Details */}
                             <div className="space-y-4">
-                                <h4 className="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Contact Details</h4>
+                                <h4 className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Contact Details</h4>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="col-span-2">
-                                        <label className="text-[10px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Full Name</label>
+                                        <label className="text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Full Name</label>
                                         <input
                                             required
                                             type="text"
@@ -140,7 +140,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         />
                                     </div>
                                     <div className="col-span-2 sm:col-span-1">
-                                        <label className="text-[10px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Email (Optional)</label>
+                                        <label className="text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Email (Optional)</label>
                                         <input
                                             type="email"
                                             className="w-full mt-1 p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
@@ -149,7 +149,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         />
                                     </div>
                                     <div className="col-span-2 sm:col-span-1">
-                                        <label className="text-[10px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Phone Number</label>
+                                        <label className="text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Phone Number</label>
                                         <input
                                             required
                                             type="tel"
@@ -159,7 +159,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="text-[10px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Delivery Address</label>
+                                        <label className="text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Delivery Address</label>
                                         <textarea
                                             required
                                             rows={2}
@@ -173,7 +173,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
 
                             {/* Payment Method */}
                             <div className="space-y-4">
-                                <h4 className="text-[9px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Payment Method</h4>
+                                <h4 className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Payment Method</h4>
                                 <div className="grid gap-3">
                                     <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-4 transition-all ${paymentMethod === 'paystack' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
@@ -185,11 +185,11 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                             className="w-5 h-5 text-primary-600"
                                         />
                                         <div className="flex-1">
-                                            <div className="text-[11px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
-                                                <CreditCard size={15} />
+                                            <div className="text-[13px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
+                                                <CreditCard size={18} />
                                                 Pay Online
                                             </div>
-                                            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tight">Secure via Paystack</p>
+                                            <p className="text-[12px] text-gray-400 mt-1 uppercase tracking-tight">Secure via Paystack</p>
                                         </div>
                                     </label>
 
@@ -203,11 +203,11 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                             className="w-5 h-5 text-primary-600"
                                         />
                                         <div className="flex-1">
-                                            <div className="text-[11px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
-                                                <Banknote size={15} />
+                                            <div className="text-[13px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
+                                                <Banknote size={18} />
                                                 Pay on Delivery
                                             </div>
-                                            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tight">Cash or Momo</p>
+                                            <p className="text-[12px] text-gray-400 mt-1 uppercase tracking-tight">Cash or Momo</p>
                                         </div>
                                     </label>
 
@@ -221,11 +221,11 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                             className="w-5 h-5 text-primary-600"
                                         />
                                         <div className="flex-1">
-                                            <div className="text-[11px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
-                                                <MessageCircle size={15} />
+                                            <div className="text-[13px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
+                                                <MessageCircle size={18} />
                                                 WhatsApp Order
                                             </div>
-                                            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tight">Chat with support</p>
+                                            <p className="text-[12px] text-gray-400 mt-1 uppercase tracking-tight">Chat with support</p>
                                         </div>
                                     </label>
                                 </div>
@@ -241,7 +241,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-4 bg-gray-900 hover:bg-black text-white font-semibold text-[11px] uppercase tracking-[0.3em] rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
+                                className="w-full py-4 bg-gray-900 hover:bg-black text-white font-semibold text-[13px] uppercase tracking-[0.3em] rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Processing...' : `Place Order • GH₵${cartTotal.toFixed(2)}`}
                             </button>

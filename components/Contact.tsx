@@ -95,7 +95,7 @@ const Contact = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
             Connect With Us
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -117,7 +117,7 @@ const Contact = () => {
               <h3 className="text-base font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest">
                 Information
               </h3>
-              <p className="text-sm text-secondary-600 font-inter leading-relaxed mb-8">
+              <p className="text-base text-secondary-600 font-inter leading-relaxed mb-8">
                 Have a question or ready to book a service? Reach out to us through any of these channels.
               </p>
 
@@ -170,7 +170,7 @@ const Contact = () => {
 
             {/* Social Media */}
             <div className="bg-white border border-secondary-100 rounded-[2rem] p-6 shadow-xl shadow-secondary-200/5">
-              <h4 className="font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest text-[10px] text-center">Follow Our Journey</h4>
+              <h4 className="font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest text-[12px] text-center">Follow Our Journey</h4>
               <div className="flex justify-center gap-4">
                 {socialLinks.map((social, index) => (
                   <motion.a
@@ -210,7 +210,7 @@ const Contact = () => {
               <form className="space-y-8 relative z-10" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="relative group">
-                    <label htmlFor="firstName" className="text-[9px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
+                    <label htmlFor="firstName" className="text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                       First Name
                     </label>
                     <input
@@ -223,7 +223,7 @@ const Contact = () => {
                     />
                   </div>
                   <div className="relative group">
-                    <label htmlFor="lastName" className="text-[9px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
+                    <label htmlFor="lastName" className="text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                       Last Name
                     </label>
                     <input
@@ -239,7 +239,7 @@ const Contact = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="relative group">
-                    <label htmlFor="email" className="text-[9px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
+                    <label htmlFor="email" className="text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                       Email Address
                     </label>
                     <input
@@ -252,7 +252,7 @@ const Contact = () => {
                     />
                   </div>
                   <div className="relative group">
-                    <label htmlFor="phone" className="text-[9px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
+                    <label htmlFor="phone" className="text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                       Phone Number
                     </label>
                     <input
@@ -266,7 +266,7 @@ const Contact = () => {
                 </div>
 
                 <div className="relative group">
-                  <label htmlFor="service" className="text-[9px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
+                  <label htmlFor="service" className="text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                     Service Required
                   </label>
                   <select
@@ -285,7 +285,7 @@ const Contact = () => {
                 </div>
 
                 <div className="relative group">
-                  <label htmlFor="message" className="text-[9px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
+                  <label htmlFor="message" className="text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                     Your Message
                   </label>
                   <textarea
@@ -350,10 +350,10 @@ const Contact = () => {
               </div>
               <div>
                 <h4 className="font-black text-secondary-900 mb-2 font-outfit tracking-tight uppercase">Visit Our Office</h4>
-                <p className="text-secondary-600 font-medium leading-relaxed font-inter text-xs">
+                <p className="text-secondary-600 font-medium leading-relaxed font-inter text-sm">
                   {config.footer.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'}
                 </p>
-                <div className="mt-4 flex items-center gap-3 text-primary-600 font-bold uppercase tracking-[0.2em] text-[10px]">
+                <div className="mt-4 flex items-center gap-3 text-primary-600 font-bold uppercase tracking-[0.2em] text-[12px]">
                   <Clock className="w-4 h-4" />
                   Mon - Sat: 8:00am - 5:00pm
                 </div>

@@ -73,17 +73,17 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-110'
                         }`}
                 >
-                    <Heart size={14} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                    <Heart size={16} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                 </button>
 
                 {/* Stock Badge */}
                 {product.inStock ? (
-                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-green-500 text-white text-[9px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-green-500 text-white text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
                         <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
                         IN STOCK
                     </div>
                 ) : (
-                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-red-600 text-white text-[9px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-red-600 text-white text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
                         <X size={10} strokeWidth={3} />
                         OUT OF STOCK
                     </div>
@@ -119,12 +119,12 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                 {/* Category & Title */}
                 <div className="mb-2">
                     {product.category && (
-                        <p className="text-[9px] font-semibold text-primary-600 uppercase tracking-[0.2em] mb-1">
+                        <p className="text-[11px] font-semibold text-primary-600 uppercase tracking-[0.2em] mb-1">
                             {product.category}
                         </p>
                     )}
                     <Link href={`/shop/${product.id}`} className="block group/title">
-                        <h3 className="text-[12px] font-semibold text-gray-900 line-clamp-2 leading-snug group-hover/title:text-primary-600 transition-colors">
+                        <h3 className="text-[14px] font-semibold text-gray-900 line-clamp-2 leading-snug group-hover/title:text-primary-600 transition-colors">
                             {product.title}
                         </h3>
                     </Link>
@@ -132,7 +132,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
 
                 {/* Price & Actions */}
                 <div className="mt-auto pt-3 flex items-center justify-between border-t border-gray-50">
-                    <span className="text-[14px] font-bold text-gray-900 italic font-outfit">
+                    <span className="text-[16px] font-bold text-gray-900 italic font-outfit">
                         GH₵{product.price.toFixed(2)}
                     </span>
 
@@ -149,7 +149,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                                 }`}
                             title="Add to Cart"
                         >
-                            <ShoppingBag size={14} />
+                            <ShoppingBag size={16} />
                         </button>
                         <a
                             href={product.inStock ? whatsappUrl : '#'}
@@ -162,7 +162,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                                 }`}
                             title="Order via WhatsApp"
                         >
-                            <MessageCircle size={14} />
+                            <MessageCircle size={16} />
                         </a>
                     </div>
                 </div>

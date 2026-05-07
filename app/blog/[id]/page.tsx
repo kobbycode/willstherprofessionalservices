@@ -131,7 +131,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
               <div className="flex items-center space-x-4">
                 <button className="flex items-center space-x-2 text-primary-100 hover:text-accent-500 transition-colors duration-200">
                   <Share2 className="w-4 h-4" />
-                  <span className="text-sm font-medium">Share Article</span>
+                  <span className="text-base font-medium">Share Article</span>
                 </button>
               </div>
             </div>
@@ -150,14 +150,14 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                   priority
                 />
                 <div className="absolute top-6 left-6 z-10">
-                  <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs font-bold tracking-wider uppercase shadow-lg">
+                  <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-sm font-bold tracking-wider uppercase shadow-lg">
                     {post.category}
                   </span>
                 </div>
               </div>
               <div className="p-6 md:p-10">
-                <div className="flex items-center space-x-4 text-sm text-secondary-500 mb-6">
-                  <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                <div className="flex items-center space-x-4 text-base text-secondary-500 mb-6">
+                  <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">
                     {post.category}
                   </span>
                   <div className="flex items-center space-x-2">
@@ -172,20 +172,20 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                 <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-secondary-900 mb-8 leading-tight">
                   {post.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-sm text-secondary-500 mb-8 pb-8 border-b border-gray-100">
+                <div className="flex items-center space-x-4 text-base text-secondary-500 mb-8 pb-8 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
                       {post.author.charAt(0)}
                     </div>
                     <div>
                       <p className="font-bold text-secondary-900">{post.author}</p>
-                      <p className="text-xs">Expert Contributor</p>
+                      <p className="text-sm">Expert Contributor</p>
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {(post.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-secondary-50 text-secondary-600 px-4 py-1.5 rounded-lg text-sm font-medium border border-gray-100">#{tag}</span>
+                    <span key={index} className="bg-secondary-50 text-secondary-600 px-4 py-1.5 rounded-lg text-base font-medium border border-gray-100">#{tag}</span>
                   ))}
                 </div>
               </div>
@@ -222,7 +222,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
             <div className="bg-accent-500 h-full transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" style={{ width: `${readingProgress}%` }}></div>
           </div>
 
-          <div className="flex items-center space-x-2 text-sm text-secondary-500 mb-6">
+          <div className="flex items-center space-x-2 text-base text-secondary-500 mb-6">
             <BookOpen className="w-4 h-4" />
             <span>Estimated reading time: {post.readTime}</span>
           </div>
@@ -234,8 +234,8 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                 <Link key={relatedPost.id} href={`/blog/${relatedPost.id}`} className="group block">
                   <div className="bg-primary-50/30 rounded-2xl p-6 hover:bg-primary-50 transition-all duration-500 border border-transparent hover:border-primary-100 hover:shadow-premium group">
                     <h4 className="text-xl font-bold text-secondary-900 group-hover:text-primary-900 transition-colors duration-200 mb-3 line-clamp-2">{relatedPost.title}</h4>
-                    <p className="text-sm text-secondary-600 line-clamp-3 mb-4">{relatedPost.excerpt}</p>
-                    <div className="flex items-center space-x-4 text-xs text-secondary-500">
+                    <p className="text-base text-secondary-600 line-clamp-3 mb-4">{relatedPost.excerpt}</p>
+                    <div className="flex items-center space-x-4 text-sm text-secondary-500">
                       <div className="flex items-center">
                         <Calendar className="w-3.5 h-3.5 mr-1.5" />
                         <span>{formatDateHuman(relatedPost.date, 'en-GB')}</span>

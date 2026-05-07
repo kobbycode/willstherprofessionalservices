@@ -162,7 +162,7 @@ export default function ProductDetailPage() {
                 <motion.nav
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-[10px] md:text-xs text-gray-500 mb-8"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-[12px] md:text-sm text-gray-500 mb-8"
                 >
                     <Link href="/" className="hover:text-purple-600 transition-colors">Home</Link>
                     <span className="text-gray-300">/</span>
@@ -206,12 +206,12 @@ export default function ProductDetailPage() {
                                 {/* Stock & Category Badges */}
                                 <div className="absolute top-6 left-6 flex flex-col gap-2">
                                     {!product.inStock && (
-                                        <div className="px-4 py-2 bg-red-500 text-white text-xs font-black rounded-xl shadow-lg shadow-red-500/20 backdrop-blur-md">
+                                        <div className="px-4 py-2 bg-red-500 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/20 backdrop-blur-md">
                                             OUT OF STOCK
                                         </div>
                                     )}
                                     {product.category && (
-                                        <div className="px-4 py-2 bg-purple-600 text-white text-xs font-black rounded-xl shadow-lg shadow-purple-500/20">
+                                        <div className="px-4 py-2 bg-purple-600 text-white text-sm font-black rounded-xl shadow-lg shadow-purple-500/20">
                                             {product.category.toUpperCase()}
                                         </div>
                                     )}
@@ -273,7 +273,7 @@ export default function ProductDetailPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
                                     <div className="space-y-6">
                                         <div>
-                                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Select Quantity</label>
+                                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Select Quantity</label>
                                             <div className="inline-flex items-center p-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                                                 <button
                                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -332,7 +332,7 @@ export default function ProductDetailPage() {
                                     {/* Benefits/Specs Section */}
                                     <div className="space-y-6">
                                         <div className="bg-purple-50 rounded-[1.25rem] p-5 border border-purple-100 space-y-3">
-                                            <h3 className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
+                                            <h3 className="text-[12px] font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
                                             <div className="space-y-4">
                                                 <div className="flex gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-purple-600">
@@ -340,7 +340,7 @@ export default function ProductDetailPage() {
                                                     </div>
                                                     <div>
                                                         <h4 className="text-sm font-bold text-gray-900">Swift Delivery</h4>
-                                                        <p className="text-xs text-gray-500">To your doorstep within 24h</p>
+                                                        <p className="text-sm text-gray-500">To your doorstep within 24h</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-4">
@@ -349,7 +349,7 @@ export default function ProductDetailPage() {
                                                     </div>
                                                     <div>
                                                         <h4 className="text-sm font-bold text-gray-900">Service Trusted</h4>
-                                                        <p className="text-xs text-gray-500">Professional grade quality</p>
+                                                        <p className="text-sm text-gray-500">Professional grade quality</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-4">
@@ -358,7 +358,7 @@ export default function ProductDetailPage() {
                                                     </div>
                                                     <div>
                                                         <h4 className="text-sm font-bold text-gray-900">Easy Support</h4>
-                                                        <p className="text-xs text-gray-500">Dedicated customer care</p>
+                                                        <p className="text-sm text-gray-500">Dedicated customer care</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -366,7 +366,7 @@ export default function ProductDetailPage() {
 
                                         {/* Social Share - Minimal */}
                                         <div className="flex items-center justify-between px-2">
-                                            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Share Now</span>
+                                            <span className="text-sm font-black text-gray-400 uppercase tracking-widest">Share Now</span>
                                             <div className="flex gap-4">
                                                 {[
                                                     { icon: Facebook, url: facebookShareUrl, color: 'text-blue-600' },

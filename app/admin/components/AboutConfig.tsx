@@ -51,7 +51,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-1">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Corporate Narrative</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Management of brand history, legacy and strategic vision</p>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[12px] uppercase">Management of brand history, legacy and strategic vision</p>
                 </div>
 
                 <div className="flex items-center gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-premium">
@@ -59,8 +59,8 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                         <History className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Status</p>
-                        <p className="text-xs font-black text-primary-900 mt-1 uppercase">Legacy Authenticated</p>
+                        <p className="text-[12px] font-black text-secondary-300 uppercase tracking-widest leading-none">Status</p>
+                        <p className="text-sm font-black text-primary-900 mt-1 uppercase">Legacy Authenticated</p>
                     </div>
                 </div>
             </div>
@@ -72,7 +72,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                         <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
                             <div className="flex items-center gap-3">
                                 <Type className="w-5 h-5 text-primary-900" />
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Narrative Structure</h3>
+                                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary-900">Narrative Structure</h3>
                             </div>
                             <div className="flex gap-2">
                                 <div className="w-2 h-2 rounded-full bg-gray-200" />
@@ -83,13 +83,13 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
 
                         <div className="p-10 space-y-10">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Hero Name (Title)</label>
+                                <label className="text-[12px] font-black text-secondary-500 uppercase tracking-widest px-2">Hero Name (Title)</label>
                                 <div className="relative group/input">
                                     <Type className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
                                     <input
                                         value={about.title || ''}
                                         onChange={(e) => update('title', e.target.value)}
-                                        className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                                        className="w-full pl-14 pr-8 py-5 bg-gray-50 border-none rounded-2xl text-[14px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                                         placeholder="e.g. A Legacy of Engineering Excellence"
                                     />
                                 </div>
@@ -97,8 +97,8 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between px-2">
-                                    <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest">Chronicle Manuscript (Content)</label>
-                                    <div className="text-[9px] font-bold text-secondary-300 uppercase italic">Rich text enabled</div>
+                                    <label className="text-[12px] font-black text-secondary-500 uppercase tracking-widest">Chronicle Manuscript (Content)</label>
+                                    <div className="text-[11px] font-bold text-secondary-300 uppercase italic">Rich text enabled</div>
                                 </div>
                                 <div className="relative group/input">
                                     <FileText className="absolute left-6 top-6 w-4 h-4 text-secondary-300 group-focus-within/input:text-primary-900 transition-colors" />
@@ -106,7 +106,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                                         value={about.content || ''}
                                         onChange={(e) => update('content', e.target.value)}
                                         rows={12}
-                                        className="w-full pl-14 pr-8 py-6 bg-gray-50 border-none rounded-[2.5rem] text-[12px] font-medium text-secondary-600 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none resize-none leading-relaxed"
+                                        className="w-full pl-14 pr-8 py-6 bg-gray-50 border-none rounded-[2.5rem] text-[14px] font-medium text-secondary-600 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none resize-none leading-relaxed"
                                         placeholder="Articulate the company's journey and strategic mission..."
                                     />
                                 </div>
@@ -121,8 +121,8 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                                 <Zap className="w-6 h-6" />
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-sm font-black uppercase tracking-widest">Automatic Management</h4>
-                                <p className="text-[10px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-md">Our Auto engine automatically parses this narrative to optimize global SEO markers and brand sentiment analysis. Ensure key values are articulated clearly.</p>
+                                <h4 className="text-base font-black uppercase tracking-widest">Automatic Management</h4>
+                                <p className="text-[12px] font-medium leading-relaxed opacity-60 uppercase tracking-tight max-w-md">Our Auto engine automatically parses this narrative to optimize global SEO markers and brand sentiment analysis. Ensure key values are articulated clearly.</p>
                             </div>
                         </div>
                     </div>
@@ -133,7 +133,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                     <div className="bg-white rounded-[2.5rem] shadow-premium border border-gray-100 overflow-hidden sticky top-8">
                         <div className="p-8 border-b border-gray-50 flex items-center gap-3 bg-gray-50/20">
                             <Camera className="w-5 h-5 text-primary-900" />
-                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary-900">Image Identity</h3>
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-primary-900">Image Identity</h3>
                         </div>
 
                         <div className="p-10 space-y-8">
@@ -149,7 +149,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-secondary-200">
                                         <Layers className="w-16 h-16 mb-6 opacity-20" />
-                                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">No Visual Identifier</p>
+                                        <p className="text-[12px] font-black uppercase tracking-[0.3em]">No Visual Identifier</p>
                                     </div>
                                 )}
 
@@ -157,24 +157,24 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                                     <label className="cursor-pointer group/btn">
                                         <div className="bg-white px-8 py-4 rounded-2xl flex items-center gap-3 shadow-2xl group-hover/btn:scale-105 active:scale-95 transition-all">
                                             <Camera className="w-4 h-4 text-primary-900" />
-                                            <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">{isUploading ? 'Synchronizing...' : 'Update Visual'}</span>
+                                            <span className="text-[12px] font-black text-primary-900 uppercase tracking-widest">{isUploading ? 'Synchronizing...' : 'Update Visual'}</span>
                                         </div>
                                         <input type="file" className="hidden" onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0])} disabled={isUploading} />
                                     </label>
-                                    <p className="text-[8px] font-black text-white uppercase tracking-[0.4em] text-center px-10">Auto Asset Automatic Active</p>
+                                    <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] text-center px-10">Auto Asset Automatic Active</p>
                                 </div>
 
                                 {isUploading && (
                                     <div className="absolute inset-0 bg-white/90 backdrop-blur-md flex flex-col items-center justify-center z-30">
                                         <div className="w-12 h-12 border-4 border-primary-900/10 border-t-primary-900 rounded-full animate-spin mb-4" />
-                                        <p className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Master Sync in Progress</p>
+                                        <p className="text-[12px] font-black text-primary-900 uppercase tracking-widest">Master Sync in Progress</p>
                                     </div>
                                 )}
                             </div>
 
                             <div className="space-y-4">
                                 <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                    <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest mb-3 flex items-center justify-between">
+                                    <p className="text-[12px] font-black text-secondary-400 uppercase tracking-widest mb-3 flex items-center justify-between">
                                         Identifier Source
                                         <ExternalLink className="w-3 h-3" />
                                     </p>
@@ -187,7 +187,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                                 </div>
                                 <div className="flex items-center gap-4 px-2">
                                     <Shield className="w-4 h-4 text-green-500" />
-                                    <p className="text-[9px] font-bold text-secondary-300 uppercase tracking-tight leading-relaxed">Secure asset hosting enabled. Recommended resolution: 1400x1000 for maximum clarity.</p>
+                                    <p className="text-[11px] font-bold text-secondary-300 uppercase tracking-tight leading-relaxed">Secure asset hosting enabled. Recommended resolution: 1400x1000 for maximum clarity.</p>
                                 </div>
                             </div>
                         </div>

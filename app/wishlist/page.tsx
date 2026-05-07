@@ -26,7 +26,7 @@ export default function WishlistPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-[10px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
                     >
                         <Heart size={12} fill="currentColor" className="text-primary-500" />
                         <span>My Favorites</span>
@@ -74,7 +74,7 @@ export default function WishlistPage() {
                                 </p>
                                 <Link
                                     href="/shop"
-                                    className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 text-white text-xs font-semibold uppercase tracking-wider rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/10 active:scale-95 group"
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 text-white text-sm font-semibold uppercase tracking-wider rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/10 active:scale-95 group"
                                 >
                                     <ShoppingBag size={16} className="group-hover:animate-bounce" />
                                     <span>Start Shopping</span>
@@ -94,7 +94,7 @@ export default function WishlistPage() {
                                     </h2>
                                     <Link
                                         href="/shop"
-                                        className="text-[11px] font-semibold text-purple-600 uppercase tracking-wider hover:text-purple-700 flex items-center gap-2 group"
+                                        className="text-[13px] font-semibold text-purple-600 uppercase tracking-wider hover:text-purple-700 flex items-center gap-2 group"
                                     >
                                         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
                                         Continue Shopping

@@ -44,7 +44,7 @@ const Values = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
             Our Foundation
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -73,7 +73,7 @@ const Values = () => {
                 {value.title}
               </h3>
               
-              <p className="text-[11px] sm:text-xs text-secondary-600 leading-relaxed font-inter">
+              <p className="text-[13px] sm:text-sm text-secondary-600 leading-relaxed font-inter">
                 {value.description}
               </p>
 
@@ -94,7 +94,7 @@ const Values = () => {
           
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[9px] mb-3 block">
+              <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] mb-3 block">
                 Total Commitment
               </span>
               <h3 className="text-xl md:text-2xl font-bold text-secondary-900 mb-6 font-outfit tracking-tight uppercase">
@@ -128,7 +128,7 @@ const Values = () => {
                     <div className="w-10 h-10 bg-white border border-secondary-100 rounded-xl flex items-center justify-center group-hover:bg-primary-600 transition-colors duration-300 shadow-sm">
                       <Shield className="w-5 h-5 text-primary-600 group-hover:text-white" />
                     </div>
-                    <span className="text-secondary-700 font-medium text-xs uppercase tracking-wider">{item}</span>
+                    <span className="text-secondary-700 font-medium text-sm uppercase tracking-wider">{item}</span>
                   </li>
                 ))}
               </ul>

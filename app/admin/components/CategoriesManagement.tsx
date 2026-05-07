@@ -120,7 +120,7 @@ export const CategoriesManagement = () => {
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">What We Offer</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage "What We Offer" cards and Service Categories</p>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[12px] uppercase">Manage "What We Offer" cards and Service Categories</p>
 
                 </div>
 
@@ -131,7 +131,7 @@ export const CategoriesManagement = () => {
                             value={newTitle}
                             onChange={(e) => setNewTitle(e.target.value)}
                             placeholder="Category Title..."
-                            className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                            className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-[14px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                         />
                     </div>
                     <div className="relative flex-1 sm:w-64">
@@ -140,7 +140,7 @@ export const CategoriesManagement = () => {
                             value={newSubtitle}
                             onChange={(e) => setNewSubtitle(e.target.value)}
                             placeholder="Subtitle (optional)..."
-                            className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
+                            className="w-full pl-14 pr-4 py-4 bg-gray-50 border-none rounded-2xl text-[14px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
                         />
                     </div>
                     <button
@@ -154,7 +154,7 @@ export const CategoriesManagement = () => {
                             ) : (
                                 <Plus className="w-4 h-4 text-accent-500" />
                             )}
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Add Category</span>
+                            <span className="text-[12px] font-black uppercase tracking-[0.2em]">Add Category</span>
                         </div>
                     </button>
                 </div>
@@ -169,7 +169,7 @@ export const CategoriesManagement = () => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search categories..."
-                            className="w-full pl-14 pr-8 py-4 bg-white border border-gray-100 rounded-[2rem] text-[11px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 transition-all outline-none shadow-premium"
+                            className="w-full pl-14 pr-8 py-4 bg-white border border-gray-100 rounded-[2rem] text-[13px] font-black text-primary-900 focus:ring-2 focus:ring-primary-900 transition-all outline-none shadow-premium"
                         />
                     </div>
                 </div>
@@ -178,9 +178,9 @@ export const CategoriesManagement = () => {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50">
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Details</th>
-                                <th className="px-10 py-6 text-left text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Subtitle</th>
-                                <th className="px-10 py-6 text-right text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Actions</th>
+                                <th className="px-10 py-6 text-left text-[12px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Category Details</th>
+                                <th className="px-10 py-6 text-left text-[12px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Subtitle</th>
+                                <th className="px-10 py-6 text-right text-[12px] font-black text-secondary-400 uppercase tracking-[0.3em] border-b border-gray-50">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -197,7 +197,7 @@ export const CategoriesManagement = () => {
                                     <td colSpan={3} className="px-10 py-32 text-center">
                                         <Layers className="w-16 h-16 text-gray-100 mx-auto mb-6 opacity-50" />
                                         <h3 className="text-xl font-black text-primary-900 uppercase tracking-tight">No Categories Found</h3>
-                                        <p className="text-[10px] font-bold text-secondary-300 uppercase tracking-widest mt-2">{searchQuery ? 'No categories match your search' : 'No categories found in the system'}</p>
+                                        <p className="text-[12px] font-bold text-secondary-300 uppercase tracking-widest mt-2">{searchQuery ? 'No categories match your search' : 'No categories found in the system'}</p>
                                     </td>
                                 </tr>
                             ) : filteredItems.map((c) => (
@@ -218,7 +218,7 @@ export const CategoriesManagement = () => {
                                                     <input
                                                         value={editingTitle}
                                                         onChange={(e) => setEditingTitle(e.target.value)}
-                                                        className="w-full max-w-sm px-6 py-3 bg-white border-2 border-primary-900 rounded-xl text-[12px] font-black text-primary-900 outline-none shadow-xl"
+                                                        className="w-full max-w-sm px-6 py-3 bg-white border-2 border-primary-900 rounded-xl text-[14px] font-black text-primary-900 outline-none shadow-xl"
                                                         autoFocus
                                                     />
                                                 </motion.div>
@@ -228,8 +228,8 @@ export const CategoriesManagement = () => {
                                                         <Hash className="w-4 h-4" />
                                                     </div>
                                                     <div>
-                                                        <span className="block text-[13px] font-black text-primary-900 uppercase tracking-tight">{c.title}</span>
-                                                        <span className="text-[10px] font-mono text-secondary-300 uppercase tracking-wider">{c.id.substring(0, 8)}</span>
+                                                        <span className="block text-[15px] font-black text-primary-900 uppercase tracking-tight">{c.title}</span>
+                                                        <span className="text-[12px] font-mono text-secondary-300 uppercase tracking-wider">{c.id.substring(0, 8)}</span>
                                                     </div>
                                                 </div>
                                             )}
@@ -247,11 +247,11 @@ export const CategoriesManagement = () => {
                                                     <input
                                                         value={editingSubtitle}
                                                         onChange={(e) => setEditingSubtitle(e.target.value)}
-                                                        className="w-full max-w-sm px-6 py-3 bg-white border-2 border-primary-900 rounded-xl text-[12px] font-black text-primary-900 outline-none shadow-xl"
+                                                        className="w-full max-w-sm px-6 py-3 bg-white border-2 border-primary-900 rounded-xl text-[14px] font-black text-primary-900 outline-none shadow-xl"
                                                     />
                                                 </motion.div>
                                             ) : (
-                                                <span className="text-[12px] font-medium text-secondary-500">
+                                                <span className="text-[14px] font-medium text-secondary-500">
                                                     {c.subtitle || <span className="text-secondary-300 italic">No subtitle</span>}
                                                 </span>
                                             )}

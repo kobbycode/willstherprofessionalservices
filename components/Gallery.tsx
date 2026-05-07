@@ -54,7 +54,7 @@ const Gallery = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 dark:text-primary-400 font-bold tracking-[0.4em] uppercase text-[9px] sm:text-[10px] mb-3 block">
+          <span className="text-primary-600 dark:text-primary-400 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
             Portfolio
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4 font-outfit tracking-tight uppercase">
@@ -91,7 +91,7 @@ const Gallery = () => {
                   <div className="absolute inset-0 p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
                     {g.caption && (
                       <div className="glass-card p-4 rounded-[1.5rem] backdrop-blur-xl">
-                        <p className="text-white text-[10px] sm:text-[11px] font-bold font-outfit uppercase tracking-widest leading-tight mb-2">
+                        <p className="text-white text-[12px] sm:text-[13px] font-bold font-outfit uppercase tracking-widest leading-tight mb-2">
                           {g.caption}
                         </p>
                         <div className="w-6 h-0.5 bg-primary-500 rounded-full"></div>
