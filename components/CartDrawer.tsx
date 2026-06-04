@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useShop } from '@/context/ShopContext'
-import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
+import { X, Minus, Plus, Trash2, ShoppingBag, AlertCircle } from 'lucide-react'
 
 import dynamic from 'next/dynamic'
 
@@ -59,8 +59,8 @@ export const CartDrawer = () => {
                                     </div>
                                 ) : (
                                     cart.map(({ product, quantity }) => (
-                                        <div key={product.id} className="flex gap-4 p-4 bg-slate-50 rounded-xl">
-                                            <div className="w-20 h-20 bg-white rounded-lg overflow-hidden border border-gray-200">
+                                        <div key={product.id} className={`flex gap-4 p-4 rounded-xl ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
+                                            <div className="relative w-20 h-20 bg-white rounded-lg overflow-hidden border border-gray-200">
                                                 {product.imageUrl && (
                                                     <img
                                                         src={product.imageUrl}
@@ -68,9 +68,20 @@ export const CartDrawer = () => {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 )}
+                                                {!product.inStock && (
+                                                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                                                        <span className="text-[10px] font-black text-red-500 uppercase tracking-wider bg-red-50 px-1.5 py-0.5 rounded border border-red-200">Sold Out</span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 mb-1">{product.title}</h3>
+                                                {!product.inStock && (
+                                                    <div className="flex items-center gap-1 text-red-500 mb-1">
+                                                        <AlertCircle size={12} />
+                                                        <span className="text-[11px] font-bold uppercase tracking-wider">Currently Unavailable</span>
+                                                    </div>
+                                                )}
                                                 <p className="text-[13px] text-primary-600 font-bold mb-3 italic font-outfit">GH₵{product.price.toFixed(2)}</p>
 
                                                 <div className="flex items-center justify-between">

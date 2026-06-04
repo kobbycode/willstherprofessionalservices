@@ -78,6 +78,13 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
+        const outOfStockItems = cart.filter(item => !item.product.inStock)
+        if (outOfStockItems.length > 0) {
+            const names = outOfStockItems.map(i => i.product.title).join(', ')
+            toast.error(`Cannot proceed: ${names} ${outOfStockItems.length === 1 ? 'is' : 'are'} out of stock`)
+            return
+        }
+
         if (paymentMethod === 'whatsapp') {
             const whatsappNumber = config.contactPhone.replace(/\D/g, '')
             const itemsList = cart.map(item => `- ${item.product.title} (${item.quantity}x) @ GH₵${item.product.price}`).join('%0A')

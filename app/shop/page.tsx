@@ -16,6 +16,7 @@ export default function ShopPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('All')
+    const [hideOutOfStock, setHideOutOfStock] = useState(false)
     const { config } = useSiteConfig()
 
     const categories = ['All', ...Array.from(new Set(products.map(p => p.category || 'General')))]
@@ -57,8 +58,12 @@ export default function ShopPage() {
             result = result.filter(p => (p.category || 'General') === selectedCategory)
         }
 
+        if (hideOutOfStock) {
+            result = result.filter(p => p.inStock !== false)
+        }
+
         setFilteredProducts(result)
-    }, [searchTerm, selectedCategory, products])
+    }, [searchTerm, selectedCategory, hideOutOfStock, products])
 
     return (
         <main className="min-h-screen bg-[#fafafa] pt-[56px] md:pt-[118px]">
@@ -138,6 +143,16 @@ export default function ShopPage() {
                                     {category}
                                 </button>
                             ))}
+                            <div className="w-px h-6 bg-gray-200 mx-1" />
+                            <button
+                                onClick={() => setHideOutOfStock(v => !v)}
+                                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-[13px] uppercase tracking-wider flex items-center gap-2 ${hideOutOfStock
+                                    ? 'bg-red-600 text-white shadow-lg shadow-red-200'
+                                    : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'}`}
+                            >
+                                <Filter size={14} />
+                                {hideOutOfStock ? 'In Stock Only' : 'Show All'}
+                            </button>
                         </div>
                     </div>
                 </motion.div>

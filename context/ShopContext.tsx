@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Product } from '@/types/product'
 import { toast } from 'react-hot-toast'
+import { getDb } from '@/lib/firebase'
+import { doc, onSnapshot } from 'firebase/firestore'
 
 export type CartItem = {
     product: Product
@@ -57,7 +59,38 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         }
     }, [wishlist, isLoaded])
 
+    // Sync cart items' inStock from Firestore in real-time
+    useEffect(() => {
+        if (!isLoaded || cart.length === 0) return
+
+        const productIds = Array.from(new Set(cart.map(item => item.product.id)))
+        const db = getDb()
+        if (!db) return
+
+        const unsubscribers = productIds.map((pid) => {
+            return onSnapshot(doc(db, 'products', pid), (snapshot) => {
+                if (!snapshot.exists()) return
+                const fresh = snapshot.data()
+                if (typeof fresh.inStock === 'undefined') return
+
+                setCart(prev =>
+                    prev.map(item =>
+                        item.product.id === pid
+                            ? { ...item, product: { ...item.product, inStock: fresh.inStock } }
+                            : item
+                    )
+                )
+            })
+        })
+
+        return () => unsubscribers.forEach(u => u())
+    }, [isLoaded, cart.length])
+
     const addToCart = (product: Product, quantity = 1) => {
+        if (!product.inStock) {
+            toast.error(`${product.title} is currently out of stock`)
+            return
+        }
         setCart(prev => {
             const existing = prev.find(item => item.product.id === product.id)
             if (existing) {

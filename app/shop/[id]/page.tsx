@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { getDb } from '@/lib/firebase'
-import { doc, getDoc, collection, getDocs, query, where, limit } from 'firebase/firestore'
+import { doc, onSnapshot, collection, getDocs, query, where, limit } from 'firebase/firestore'
 import { Product } from '@/types/product'
 import { useSiteConfig } from '@/lib/site-config'
 import {
@@ -51,19 +51,19 @@ export default function ProductDetailPage() {
     const currentImage = productImages[selectedImageIndex] || ''
 
     useEffect(() => {
-        const fetchProduct = async () => {
-            if (!id) return
+        if (!id) return
 
-            try {
-                const db = getDb()
-                if (!db) throw new Error("Database not initialized")
+        const db = getDb()
+        if (!db) return
 
-                const productDoc = await getDoc(doc(db, 'products', id as string))
-
-                if (productDoc.exists()) {
-                    const productData = { id: productDoc.id, ...productDoc.data() } as Product
+        const unsubscribe = onSnapshot(
+            doc(db, 'products', id as string),
+            (snapshot) => {
+                if (snapshot.exists()) {
+                    const productData = { id: snapshot.id, ...snapshot.data() } as Product
                     setProduct(productData)
 
+                    // Fetch related products (one-time)
                     if (productData.category) {
                         setRelatedLoading(true)
                         const relatedQuery = query(
@@ -71,25 +71,29 @@ export default function ProductDetailPage() {
                             where('category', '==', productData.category),
                             limit(4)
                         )
-                        const relatedSnapshot = await getDocs(relatedQuery)
-                        const related = relatedSnapshot.docs
-                            .map(doc => ({ id: doc.id, ...doc.data() } as Product))
-                            .filter(p => p.id !== id)
-                        setRelatedProducts(related)
-                        setRelatedLoading(false)
+                        getDocs(relatedQuery)
+                            .then((relatedSnapshot) => {
+                                const related = relatedSnapshot.docs
+                                    .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+                                    .filter(p => p.id !== id)
+                                setRelatedProducts(related)
+                                setRelatedLoading(false)
+                            })
+                            .catch(() => setRelatedLoading(false))
                     }
                 } else {
                     setError("Product not found")
                 }
-            } catch (err) {
+                setIsLoading(false)
+            },
+            (err) => {
                 console.error("Error fetching product:", err)
                 setError("Failed to load product")
-            } finally {
                 setIsLoading(false)
             }
-        }
+        )
 
-        fetchProduct()
+        return () => unsubscribe()
     }, [id])
 
     useEffect(() => {
