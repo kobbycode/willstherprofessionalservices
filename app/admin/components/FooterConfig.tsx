@@ -23,20 +23,20 @@ export const FooterConfig = ({ config, onChange, onSave }: FooterConfigProps) =>
     const social = footer.social || { facebook: '', instagram: '', twitter: '', linkedin: '' }
 
     const updateFooter = (key: string, value: any) => {
-        onChange({
-            ...config,
-            footer: { ...footer, [key]: value }
-        })
+        onChange((prev: any) => ({
+            ...prev,
+            footer: { ...(prev.footer || {}), [key]: value }
+        }))
     }
 
     const updateSocial = (platform: string, url: string) => {
-        onChange({
-            ...config,
+        onChange((prev: any) => ({
+            ...prev,
             footer: {
-                ...footer,
-                social: { ...social, [platform]: url }
+                ...(prev.footer || {}),
+                social: { ...(prev.footer?.social || {}), [platform]: url }
             }
-        })
+        }))
     }
 
     return (

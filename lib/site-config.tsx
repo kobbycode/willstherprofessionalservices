@@ -332,19 +332,15 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 		try {
 			if (typeof window === 'undefined') return
 
-			// Check if we have unsaved changes before even starting the fetch
 			const currentlyDirty = loadIsDirtyFromLocal()
-			
+
 			console.log('--- SiteProvider Sync Start ---')
 			if (currentlyDirty) {
 				console.log('UNSAVED CHANGES DETECTED. Background sync will only fetch, not merge to prevent overwrites.')
 			}
-			
+
 			console.log('Fetching fresh configuration...')
-			const [configRes, slidesRes] = await Promise.all([
-				fetch('/api/config/get', { cache: 'no-store' }),
-				fetch('/api/slides', { cache: 'no-store' })
-			])
+			const configRes = await fetch('/api/config/get', { cache: 'no-store' })
 
 			let remoteConfig: Partial<SiteConfig> = {}
 			if (configRes.ok) {
@@ -353,37 +349,25 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				console.log('Remote config received.')
 			}
 
-			let slides: HeroSlide[] = []
-			if (slidesRes.ok) {
-				const data = await slidesRes.json()
-				slides = data.slides || []
-			}
-
-			// ONLY merge if we are not dirty, OR if it's the very first load
-			if (!currentlyDirty && (Object.keys(remoteConfig).length > 0 || slides.length > 0)) {
+			if (!currentlyDirty && Object.keys(remoteConfig).length > 0) {
 				setConfigState((prev) => {
-					// Double check dirty state inside the functional update
 					if (loadIsDirtyFromLocal()) {
 						console.log('SiteProvider: Skipping merge because state became dirty during fetch.')
 						return prev
 					}
 
-					// Merge default, current local (for settings not on server), and remote
 					const merged = {
 						...defaultSiteConfig,
 						...prev,
 						...remoteConfig,
-						heroSlides: slides.length > 0 ? slides : (remoteConfig.heroSlides || prev.heroSlides || [])
 					}
 
-					// Arrays MUST be completely overwritten by server if they exist there and are valid
-					const arrayKeys: (keyof SiteConfig)[] = ['gallery', 'stats', 'testimonials', 'services']
+					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'stats', 'testimonials', 'services']
 					for (const key of arrayKeys) {
 						if (Array.isArray(remoteConfig[key])) {
 							console.log(`SiteProvider: Overwriting ${key} with server data (${(remoteConfig[key] as any[]).length} items)`)
 							;(merged as any)[key] = remoteConfig[key]
 						} else if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
-                            // If it exists but is not an array, handle it gracefully
                             console.warn(`SiteProvider: Server returned non-array for ${key}:`, remoteConfig[key])
                             if (remoteConfig[key] === null || remoteConfig[key] === undefined) {
                                 (merged as any)[key] = []

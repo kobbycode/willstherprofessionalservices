@@ -23,7 +23,7 @@ interface MapConfigProps {
 
 export const MapConfig = ({ config, onChange, onSave }: MapConfigProps) => {
     const map = config.map || { embedUrl: '', lat: undefined, lng: undefined, zoom: 14 }
-    const update = (key: string, value: any) => onChange({ ...config, map: { ...map, [key]: value } })
+    const update = (key: string, value: any) => onChange((prev: any) => ({ ...prev, map: { ...(prev.map || {}), [key]: value } }))
 
     return (
         <motion.div

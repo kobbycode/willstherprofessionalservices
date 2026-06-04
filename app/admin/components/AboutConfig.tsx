@@ -25,7 +25,7 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
     const about = config.about || { title: '', content: '', imageUrl: '' }
     const [isUploading, setIsUploading] = useState(false)
 
-    const update = (key: string, value: string) => onChange({ ...config, about: { ...about, [key]: value } })
+    const update = (key: string, value: string) => onChange((prev: any) => ({ ...prev, about: { ...(prev.about || {}), [key]: value } }))
 
     const handleImageUpload = async (file: File) => {
         if (!file) return

@@ -47,7 +47,7 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
         })
     }, [config])
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         const nextConfig = {
             ...config,
@@ -62,7 +62,10 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
             }
         }
         onChange(nextConfig)
-        toast.success('Core Setting parameters updated successfully')
+        toast.success('Core Setting parameters synchronized')
+        if (onSave) {
+            await onSave()
+        }
     }
 
     const resetSettings = () => {

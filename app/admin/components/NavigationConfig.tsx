@@ -36,7 +36,7 @@ export const NavigationConfig = ({ config, onChange, onSave }: NavigationConfigP
         ]
     }
 
-    const update = (key: string, value: any) => onChange({ ...config, navigation: { ...navigation, [key]: value } })
+    const update = (key: string, value: any) => onChange((prev: any) => ({ ...prev, navigation: { ...(prev.navigation || {}), [key]: value } }))
 
     const updateLink = (section: 'main' | 'legal', index: number, field: string, value: string) => {
         const newLinks = [...navigation[section]]
