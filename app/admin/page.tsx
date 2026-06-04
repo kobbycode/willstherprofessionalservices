@@ -127,12 +127,11 @@ const AdminDashboard = () => {
     }
   }, [config, isDirty])
 
-  // Simple wrapper for onChange - now supports functional updates
   const handleConfigChange = (next: any) => {
     if (typeof next === 'function') {
       const resolved = next(configRef.current)
       configRef.current = resolved
-      setConfig(next)
+      setConfig(resolved)
     } else {
       configRef.current = next
       setConfig(next)
