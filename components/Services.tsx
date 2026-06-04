@@ -1,11 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-  Home, Building, Users, Wrench,
-  Droplets, Shield, Clock, Star,
-  Car, Truck, Zap, Target, Hammer, ShieldCheck
-} from 'lucide-react'
+import { Wrench, Target, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Skeleton from './Skeleton'
@@ -79,16 +75,12 @@ const Services = () => {
     });
 
     if (services && services.length > 0) {
-      const iconPool = [Home, Building, Users, Wrench, Hammer, Shield, Clock, Star, Car, Truck, Zap, Target]
-
-      services.forEach((svc, idx) => {
+      services.forEach((svc) => {
         const rawCat = svc.category || 'General';
         const lowerCat = rawCat.toLowerCase();
 
-        // Find matching category from Admin list (case-insensitive)
         let targetCat = categoryMap.get(lowerCat);
 
-        // If not found in Admin list, use the service's own category
         if (!targetCat) {
           targetCat = rawCat;
         }
@@ -99,7 +91,6 @@ const Services = () => {
 
         grouped[targetCat as string].push({
           ...svc,
-          icon: iconPool[idx % iconPool.length],
           image: svc.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=400&h=300&fit=crop&crop=center'
         })
       })
@@ -107,26 +98,6 @@ const Services = () => {
 
     return grouped
   }, [services, categories])
-
-  // Get icon for category
-  const getCategoryIcon = (category: string) => {
-    const iconMap: Record<string, React.ComponentType<any>> = {
-      'Cleaning': Droplets,
-      'Maintenance': Wrench,
-      'Construction': Building,
-      'Consulting': Users,
-      'Security': Shield,
-      'Transport': Car,
-      'Electrical': Zap,
-      'General': Target,
-    }
-
-    const categoryKey = Object.keys(iconMap).find(key =>
-      category.toLowerCase().includes(key.toLowerCase())
-    )
-
-    return categoryKey ? iconMap[categoryKey] : Wrench
-  }
 
   if (loading) {
     return (
@@ -245,10 +216,6 @@ const Services = () => {
                                   className="object-cover group-hover:scale-110 transition-transform duration-1000"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-700"></div>
-                                
-                                <div className="absolute top-6 right-6 w-12 h-12 bg-white/90 rounded-2xl flex items-center justify-center border border-white/30 backdrop-blur-xl z-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-500 shadow-lg">
-                                  <service.icon className="w-6 h-6 text-primary-600" />
-                                </div>
 
                                 <div className="absolute bottom-8 left-8 right-8 text-center translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
                                   <h4 className="text-xl font-black text-white font-outfit uppercase tracking-wider mb-2 text-shadow">
