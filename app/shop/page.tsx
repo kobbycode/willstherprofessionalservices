@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getDb } from '@/lib/firebase'
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/types/product'
 import { useSiteConfig } from '@/lib/site-config'
@@ -25,7 +25,7 @@ export default function ShopPage() {
         const db = getDb()
         if (!db) return
 
-        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'))
+        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(100))
 
         // Real-time listener for products
         const unsubscribe = onSnapshot(q, (snapshot) => {

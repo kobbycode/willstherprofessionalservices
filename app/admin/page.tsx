@@ -48,23 +48,25 @@ import { uploadImage } from '@/lib/storage'
 import { getDb } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import AdminHeader from '@/components/AdminHeader'
-import { BlogManagement } from './components/BlogManagement'
-import { UserManagement } from './components/UserManagement'
-import { CategoriesManagement } from './components/CategoriesManagement'
-import { OverviewTab } from './components/OverviewTab'
-import { ContactManagement } from './components/ContactManagement'
-import { WebsiteSettings } from './components/WebsiteSettings'
-import HeroConfig from './components/HeroConfig'
-import ServicesConfig from './components/ServicesConfig'
-import ShopManagement from './components/ShopManagement'
-import { NavigationConfig } from './components/NavigationConfig'
-import { FooterConfig } from './components/FooterConfig'
-import { AboutConfig } from './components/AboutConfig'
-import { SEOConfig } from './components/SEOConfig'
-import { MapConfig } from './components/MapConfig'
-import { TestimonialsConfig } from './components/TestimonialsConfig'
-import { GalleryConfig } from './components/GalleryConfig'
-import { StatsConfig } from './components/StatsConfig'
+import dynamic from 'next/dynamic'
+
+const BlogManagement = dynamic(() => import('./components/BlogManagement').then(m => m.BlogManagement))
+const UserManagement = dynamic(() => import('./components/UserManagement').then(m => m.UserManagement))
+const CategoriesManagement = dynamic(() => import('./components/CategoriesManagement').then(m => m.CategoriesManagement))
+const OverviewTab = dynamic(() => import('./components/OverviewTab').then(m => m.OverviewTab))
+const ContactManagement = dynamic(() => import('./components/ContactManagement').then(m => m.ContactManagement))
+const WebsiteSettings = dynamic(() => import('./components/WebsiteSettings').then(m => m.WebsiteSettings))
+const HeroConfig = dynamic(() => import('./components/HeroConfig'))
+const ServicesConfig = dynamic(() => import('./components/ServicesConfig'))
+const ShopManagement = dynamic(() => import('./components/ShopManagement'))
+const NavigationConfig = dynamic(() => import('./components/NavigationConfig').then(m => m.NavigationConfig))
+const FooterConfig = dynamic(() => import('./components/FooterConfig').then(m => m.FooterConfig))
+const AboutConfig = dynamic(() => import('./components/AboutConfig').then(m => m.AboutConfig))
+const SEOConfig = dynamic(() => import('./components/SEOConfig').then(m => m.SEOConfig))
+const MapConfig = dynamic(() => import('./components/MapConfig').then(m => m.MapConfig))
+const TestimonialsConfig = dynamic(() => import('./components/TestimonialsConfig').then(m => m.TestimonialsConfig))
+const GalleryConfig = dynamic(() => import('./components/GalleryConfig').then(m => m.GalleryConfig))
+const StatsConfig = dynamic(() => import('./components/StatsConfig').then(m => m.StatsConfig))
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">

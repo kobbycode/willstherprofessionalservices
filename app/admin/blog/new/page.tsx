@@ -20,6 +20,9 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+
+const MarkdownPreview = dynamic(() => import('./MarkdownPreview'), { ssr: false })
+
 import RichTextEditor from '@/components/RichTextEditor'
 import { createPost } from '@/lib/blog'
 import { uploadImageWithTimeout } from '@/lib/storage'
@@ -256,11 +259,7 @@ const NewBlogPost = () => {
       <div className="prose max-w-none">
         <div className="text-gray-700">
           {/* Render markdown preview */}
-          {(() => {
-            const Markdown = require('react-markdown').default
-            const gfm = require('remark-gfm').default
-            return <Markdown remarkPlugins={[gfm]}>{post.content || 'No content yet...'}</Markdown>
-          })()}
+          <MarkdownPreview content={post.content || 'No content yet...'} />
         </div>
       </div>
       {tags.length > 0 && (

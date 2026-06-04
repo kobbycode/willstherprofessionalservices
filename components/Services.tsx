@@ -5,21 +5,41 @@ import { Wrench, Target, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Skeleton from './Skeleton'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { getDb } from '@/lib/firebase'
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore'
 
 const Services = () => {
   const [services, setServices] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [visible, setVisible] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
 
-  // Load services and categories from Firestore Client SDK
+  // Only subscribe to Firestore when the section becomes visible
   useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!visible) return
+
     const db = getDb()
 
-    // 1. Subscribe to Categories
-    const categoriesQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'))
+    const categoriesQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'), limit(50))
     const unsubscribeCategories = onSnapshot(categoriesQuery, (snapshot) => {
       const categoriesData = snapshot.docs.map(doc => {
         const data = doc.data()
@@ -32,12 +52,9 @@ const Services = () => {
         }
       })
       setCategories(categoriesData)
-    }, (error) => {
-      console.error('Error syncing categories:', error)
     })
 
-    // 2. Subscribe to Services
-    const servicesQuery = query(collection(db, 'services'), orderBy('createdAt', 'desc'))
+    const servicesQuery = query(collection(db, 'services'), orderBy('createdAt', 'desc'), limit(50))
     const unsubscribeServices = onSnapshot(servicesQuery, (snapshot) => {
       const servicesData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -45,16 +62,13 @@ const Services = () => {
       }))
       setServices(servicesData)
       setLoading(false)
-    }, (error) => {
-      console.error('Error syncing services:', error)
-      setLoading(false)
     })
 
     return () => {
       unsubscribeCategories()
       unsubscribeServices()
     }
-  }, [])
+  }, [visible])
 
   // Group services by category
   const categorizedServices = useMemo(() => {
@@ -132,7 +146,7 @@ const Services = () => {
   }
 
   return (
-    <section id="services" className="section-padding relative overflow-hidden bg-white">
+    <section ref={sectionRef} id="services" className="section-padding relative overflow-hidden bg-white">
       {/* Ambient background decorations */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/30 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-[100px] -z-10 -translate-x-1/4 translate-y-1/4" />

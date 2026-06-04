@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from 'react'
 import { getAuth, onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth'
 import { getDb } from './firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
@@ -226,18 +226,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const hasPermission = (permission: string): boolean => {
+  const hasPermission = useCallback((permission: string): boolean => {
     return user?.permissions?.includes(permission) || false
-  }
+  }, [user])
 
-  const hasRole = (role: 'super_admin' | 'admin' | 'editor' | 'user'): boolean => {
+  const hasRole = useCallback((role: 'super_admin' | 'admin' | 'editor' | 'user'): boolean => {
     // super_admin has all roles
     if (user?.role === 'super_admin') return true
     if (user?.role === 'admin' && role !== 'super_admin') return true
     return user?.role === role
-  }
+  }, [user])
 
-  const refreshUser = async (): Promise<AuthUser | null> => {
+  const refreshUser = useCallback(async (): Promise<AuthUser | null> => {
     if (!firebaseReady) {
       return null
     }
@@ -259,16 +259,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null)
       return null
     }
-  }
+  }, [firebaseReady])
 
-  const value: AuthContextType = {
+  const value: AuthContextType = useMemo(() => ({
     user,
     loading: loading || !firebaseReady,
     signOut: authSignOut,
     hasPermission,
     hasRole,
     refreshUser
-  }
+  }), [user, loading, firebaseReady, authSignOut, hasPermission, hasRole, refreshUser])
 
   return (
     <AuthContext.Provider value={value}>

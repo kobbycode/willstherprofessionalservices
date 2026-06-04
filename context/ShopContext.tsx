@@ -1,10 +1,10 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react'
 import { Product } from '@/types/product'
 import { toast } from 'react-hot-toast'
 import { getDb } from '@/lib/firebase'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { collection, query, where, onSnapshot } from 'firebase/firestore'
 
 export type CartItem = {
     product: Product
@@ -67,26 +67,24 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         const db = getDb()
         if (!db) return
 
-        const unsubscribers = productIds.map((pid) => {
-            return onSnapshot(doc(db, 'products', pid), (snapshot) => {
-                if (!snapshot.exists()) return
-                const fresh = snapshot.data()
-                if (typeof fresh.inStock === 'undefined') return
-
-                setCart(prev =>
-                    prev.map(item =>
-                        item.product.id === pid
-                            ? { ...item, product: { ...item.product, inStock: fresh.inStock } }
-                            : item
+        const q = query(collection(db, 'products'), where('__name__', 'in', productIds.slice(0, 10)))
+        return onSnapshot(q, (snapshot) => {
+            snapshot.docs.forEach(doc => {
+                const fresh = doc.data()
+                if (typeof fresh.inStock !== 'undefined') {
+                    setCart(prev =>
+                        prev.map(item =>
+                            item.product.id === doc.id
+                                ? { ...item, product: { ...item.product, inStock: fresh.inStock } }
+                                : item
+                        )
                     )
-                )
+                }
             })
         })
-
-        return () => unsubscribers.forEach(u => u())
     }, [isLoaded, cart.length])
 
-    const addToCart = (product: Product, quantity = 1) => {
+    const addToCart = useCallback((product: Product, quantity = 1) => {
         if (!product.inStock) {
             toast.error(`${product.title} is currently out of stock`)
             return
@@ -104,25 +102,25 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             toast.success(`Added ${product.title} to cart`)
             return [...prev, { product, quantity }]
         })
-    }
+    }, [])
 
-    const removeFromCart = (productId: string) => {
+    const removeFromCart = useCallback((productId: string) => {
         setCart(prev => prev.filter(item => item.product.id !== productId))
         toast.success("Item removed from cart")
-    }
+    }, [])
 
-    const updateQuantity = (productId: string, quantity: number) => {
+    const updateQuantity = useCallback((productId: string, quantity: number) => {
         if (quantity < 1) return
         setCart(prev => prev.map(item =>
             item.product.id === productId ? { ...item, quantity } : item
         ))
-    }
+    }, [])
 
-    const clearCart = () => {
+    const clearCart = useCallback(() => {
         setCart([])
-    }
+    }, [])
 
-    const toggleWishlist = (product: Product) => {
+    const toggleWishlist = useCallback((product: Product) => {
         setWishlist(prev => {
             const exists = prev.find(p => p.id === product.id)
             if (exists) {
@@ -132,32 +130,34 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             toast.success("Added to wishlist")
             return [...prev, product]
         })
-    }
+    }, [])
 
-    const isInWishlist = (productId: string) => {
+    const isInWishlist = useCallback((productId: string) => {
         return wishlist.some(p => p.id === productId)
-    }
+    }, [wishlist])
 
-    const cartTotal = cart.reduce((total, item) => total + (item.product.price * item.quantity), 0)
-    const cartCount = cart.reduce((count, item) => count + item.quantity, 0)
-    const wishlistCount = wishlist.length
+    const cartTotal = useMemo(() => cart.reduce((total, item) => total + (item.product.price * item.quantity), 0), [cart])
+    const cartCount = useMemo(() => cart.reduce((count, item) => count + item.quantity, 0), [cart])
+    const wishlistCount = useMemo(() => wishlist.length, [wishlist])
+
+    const value = useMemo(() => ({
+        cart,
+        wishlist,
+        isCartOpen,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        toggleWishlist,
+        isInWishlist,
+        setIsCartOpen,
+        cartTotal,
+        cartCount,
+        wishlistCount
+    }), [cart, wishlist, isCartOpen, addToCart, removeFromCart, updateQuantity, clearCart, toggleWishlist, isInWishlist, setIsCartOpen, cartTotal, cartCount, wishlistCount])
 
     return (
-        <ShopContext.Provider value={{
-            cart,
-            wishlist,
-            isCartOpen,
-            addToCart,
-            removeFromCart,
-            updateQuantity,
-            clearCart,
-            toggleWishlist,
-            isInWishlist,
-            setIsCartOpen,
-            cartTotal,
-            cartCount,
-            wishlistCount
-        }}>
+        <ShopContext.Provider value={value}>
             {children}
         </ShopContext.Provider>
     )

@@ -36,7 +36,7 @@ import {
     Pie
 } from 'recharts'
 import { getDb } from '@/lib/firebase'
-import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, query, orderBy, limit } from 'firebase/firestore'
 import { uploadImage } from '@/lib/storage'
 import { Product } from '@/types/product'
 import Skeleton from '@/components/Skeleton'
@@ -62,7 +62,7 @@ export default function ShopManagement() {
         const db = getDb()
         if (!db) return
 
-        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'))
+        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(100))
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const productsData = snapshot.docs.map(doc => ({
