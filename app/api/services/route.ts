@@ -6,26 +6,16 @@ export const dynamic = 'force-dynamic'
 // GET all services
 export async function GET() {
   try {
-    console.log('=== SERVICES API: Starting to fetch services ===')
-
     const db = await getAdminDb()
-    console.log('=== SERVICES API: Firebase Admin DB initialized ===')
 
     // Try to fetch services with orderBy, but fallback to without if it fails
     let snapshot;
     try {
-      console.log('=== SERVICES API: Attempting to fetch services with orderBy ===')
-      // Add a limit to prevent loading too much data
       snapshot = await db.collection('services').orderBy('createdAt', 'desc').limit(50).get()
-      console.log('=== SERVICES API: Firestore query with orderBy completed, docs count:', snapshot.size)
     } catch (orderByError) {
       console.warn('=== SERVICES API: orderBy failed, fetching without orderBy ===', orderByError)
-      // Add a limit to prevent loading too much data
       snapshot = await db.collection('services').limit(50).get()
-      console.log('=== SERVICES API: Firestore query without orderBy completed, docs count:', snapshot.size)
     }
-
-    console.log('=== SERVICES API: Processing documents ===')
     const services = []
 
     // Process documents one by one with error handling
@@ -49,13 +39,10 @@ export async function GET() {
       }
     }
 
-    console.log('=== SERVICES API: Services processed, count:', services.length)
-
     // No caching to ensure deleted items are removed immediately
     const response = NextResponse.json({ services })
     response.headers.set('Cache-Control', 'no-store, max-age=0')
 
-    console.log('=== SERVICES API: Response sent successfully ===')
     return response
   } catch (error: any) {
     console.error('=== SERVICES API: Error fetching services ===', error)
@@ -81,8 +68,6 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
   try {
-    console.log('=== SERVICE CREATION START ===', new Date().toISOString())
-
     const db = await getAdminDb()
     const body = await request.json()
     const { title, description, imageUrl, category } = body
@@ -101,7 +86,6 @@ export async function POST(request: NextRequest) {
     }
 
     const docRef = await db.collection('services').add(serviceData)
-    console.log('=== SERVICE CREATED === ID:', docRef.id, 'Time:', Date.now() - startTime, 'ms')
 
     return NextResponse.json({
       id: docRef.id,

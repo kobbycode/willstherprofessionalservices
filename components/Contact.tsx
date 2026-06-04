@@ -66,10 +66,8 @@ const Contact = () => {
 
     try {
       setIsSubmitting(true)
-      console.log('Submitting contact form with:', { firstName, lastName, email, phone, service, message })
       const form = e.currentTarget as HTMLFormElement
       await createContactSubmission({ firstName, lastName, email, phone, service, message })
-      console.log('Contact submission successful')
       form?.reset()
       toast.success('Message sent successfully!')
     } catch (err) {

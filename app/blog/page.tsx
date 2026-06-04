@@ -79,10 +79,6 @@ const BlogPage = () => {
         import('@/lib/categories').then(m => m.fetchCategories())
       ])
 
-      // Log for debugging
-      console.log('Fetched published posts:', posts.length)
-      console.log('Published posts data:', posts)
-
       setBlogPosts(posts)
       setHasMore(posts.length === 12) // If we got 12 posts, there might be more
 

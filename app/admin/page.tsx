@@ -121,7 +121,6 @@ const AdminDashboard = () => {
   useEffect(() => {
     // Only overwrite local ref if we are NOT currently dirty
     if (config && !isDirty) {
-      console.log('AdminPage: Syncing provider config to local ref (fresh data received)')
       configRef.current = { ...config }
     }
   }, [config, isDirty])
@@ -130,11 +129,9 @@ const AdminDashboard = () => {
   const handleConfigChange = (next: any) => {
     if (typeof next === 'function') {
       const resolved = next(configRef.current)
-      console.log('AdminPage: Functional update. Keys in resolved:', Object.keys(resolved))
       configRef.current = resolved
       setConfig(next)
     } else {
-      console.log('AdminPage: Direct update. Keys in next:', Object.keys(next))
       configRef.current = next
       setConfig(next)
     }
@@ -157,12 +154,8 @@ const AdminDashboard = () => {
         target.gallery = target.gallery.filter((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
         const filteredCount = target.gallery.length
         if (originalCount > filteredCount) {
-          console.log(`AdminPage: Filtered out ${originalCount - filteredCount} empty gallery items.`)
         }
       }
-
-      console.log('AdminPage: Final save target gallery count:', target.gallery?.length || 0)
-      console.log('AdminPage: Saving to server...')
       
       const result = await saveConfigFn(target)
       

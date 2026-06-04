@@ -53,21 +53,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
   try {
-    console.log('=== SLIDE CREATION API START ===', new Date().toISOString())
-    
-    const dbStart = Date.now()
     const db = await getAdminDb()
-    console.log('Database connection:', Date.now() - dbStart, 'ms')
-    
-    const bodyStart = Date.now()
     const body = await request.json()
-    console.log('Request body parsed:', Date.now() - bodyStart, 'ms')
     let { imageUrl, title, subtitle, ctaLabel, ctaHref, order } = body
 
     // Validate imageUrl - reject base64/data URLs that are too large
     if (imageUrl) {
       const imageSize = new Blob([imageUrl]).size
-      console.log('Image URL size:', imageSize, 'bytes')
       
       if (imageSize > 1000000) { // 1MB limit
         // Check if it's a base64/data URL
@@ -89,7 +81,6 @@ export async function POST(request: NextRequest) {
       try {
         const countSnapshot = await db.collection('heroSlides').count().get()
         slideOrder = countSnapshot.data().count + 1
-        console.log('Order calculated:', Date.now() - orderStart, 'ms, next order:', slideOrder)
       } catch (orderError) {
         console.warn('Failed to get count, using timestamp-based order:', orderError)
         slideOrder = Date.now() // Use timestamp as order if count fails
@@ -107,26 +98,17 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString()
     }
 
-    console.log('Creating slide with data:', { ...slideData, imageUrl: imageUrl ? `${imageUrl.substring(0, 100)}...` : '' })
     const createStart = Date.now()
     const docRef = await db.collection('heroSlides').add(slideData)
-    console.log('Firestore write:', Date.now() - createStart, 'ms, ID:', docRef.id)
     
     const result = { 
       id: docRef.id, 
       ...slideData 
     }
-    
-    console.log('=== SLIDE CREATION SUCCESS === Total:', Date.now() - startTime, 'ms')
     return NextResponse.json(result)
   } catch (error) {
-    console.error('=== SLIDE CREATION ERROR === Failed after', Date.now() - startTime, 'ms')
     console.error('Error creating slide:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: error instanceof Error ? error.stack : 'No stack trace'
-    })
     
     // Provide more helpful error messages
     if (errorMessage.includes('Firebase Admin not initialized') || errorMessage.includes('UNAUTHENTICATED')) {

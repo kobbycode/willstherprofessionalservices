@@ -53,12 +53,7 @@ export async function createContactSubmission(input: NewContactInput): Promise<s
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }
-    console.log('Creating contact submission with data:', JSON.stringify(docData, (key, value) => {
-      if (key === 'createdAt' || key === 'updatedAt') return 'serverTimestamp()'
-      return value
-    }, 2))
     const ref = await addDoc(col, docData)
-    console.log('Contact submission created with ID:', ref.id)
     return ref.id
   } catch (error) {
     console.error('Error creating contact submission:', error)
@@ -71,9 +66,7 @@ export async function fetchContactSubmissions(take = 100): Promise<ContactSubmis
     const db = getDb()
     const col = collection(db, COLLECTION)
     const q = query(col, orderBy('createdAt', 'desc'))
-    console.log('Fetching contact submissions with query orderBy createdAt desc')
     const snap = await getDocs(q)
-    console.log('Fetched documents count:', snap.size)
     const items: ContactSubmission[] = []
     snap.forEach((d) => {
       const data = d.data() as any
@@ -90,7 +83,6 @@ export async function fetchContactSubmissions(take = 100): Promise<ContactSubmis
         updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || new Date().toISOString()
       })
     })
-    console.log('Returning contact submissions:', items.length)
     return items.slice(0, take)
   } catch (error) {
     console.error('Error fetching contact submissions:', error)
@@ -99,21 +91,36 @@ export async function fetchContactSubmissions(take = 100): Promise<ContactSubmis
 }
 
 export async function updateContactStatus(id: string, status: 'new' | 'in_progress' | 'completed'): Promise<void> {
-  const db = getDb()
-  const ref = doc(db, COLLECTION, id)
-  await updateDoc(ref, { status, updatedAt: serverTimestamp() })
+  try {
+    const db = getDb()
+    const ref = doc(db, COLLECTION, id)
+    await updateDoc(ref, { status, updatedAt: serverTimestamp() })
+  } catch (error) {
+    console.error('Error updating contact status:', error)
+    throw error
+  }
 }
 
 export async function updateContact(id: string, input: Partial<NewContactInput>): Promise<void> {
-  const db = getDb()
-  const ref = doc(db, COLLECTION, id)
-  await setDoc(ref, { ...input, updatedAt: serverTimestamp() }, { merge: true })
+  try {
+    const db = getDb()
+    const ref = doc(db, COLLECTION, id)
+    await setDoc(ref, { ...input, updatedAt: serverTimestamp() }, { merge: true })
+  } catch (error) {
+    console.error('Error updating contact:', error)
+    throw error
+  }
 }
 
 export async function deleteContactSubmission(id: string): Promise<void> {
-  const db = getDb()
-  const ref = doc(db, COLLECTION, id)
-  await deleteDoc(ref)
+  try {
+    const db = getDb()
+    const ref = doc(db, COLLECTION, id)
+    await deleteDoc(ref)
+  } catch (error) {
+    console.error('Error deleting contact submission:', error)
+    throw error
+  }
 }
 
 

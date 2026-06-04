@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
+import Image from 'next/image'
 import { fetchServiceCategories } from '@/lib/categories'
 
 const ServicesConfig = ({ config, onChange, onSave }: any) => {
@@ -399,7 +400,7 @@ const ServicesConfig = ({ config, onChange, onSave }: any) => {
                         </div>
                         <div className="w-40 h-40 bg-gray-100 border-2 border-dashed border-gray-200 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative shadow-inner">
                           {s.imageUrl ? (
-                            <img src={s.imageUrl} className="w-full h-full object-cover transition-all duration-700" alt="" />
+                            <Image src={s.imageUrl} fill className="object-cover transition-all duration-700" alt="" />
                           ) : (
                             <Layers className="w-10 h-10 text-gray-200" />
                           )}
@@ -523,7 +524,7 @@ const ServicesConfig = ({ config, onChange, onSave }: any) => {
 
                       <div className="h-64 bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-center overflow-hidden relative group">
                         {newServiceData.imageUrl ? (
-                          <img src={newServiceData.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s]" alt="" />
+                          <Image src={newServiceData.imageUrl} fill className="object-cover group-hover:scale-110 transition-transform duration-[2s]" alt="" />
                         ) : (
                           <div className="text-center px-6">
                             <Layers className="w-12 h-12 text-white/10 mx-auto mb-4" />

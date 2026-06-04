@@ -31,12 +31,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
     
-    console.log('File received:', {
-      name: file.name,
-      size: file.size,
-      type: file.type
-    })
-    
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
@@ -46,7 +40,6 @@ export async function POST(request: NextRequest) {
     const filename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
     const path = `profile-pictures/${filename}`
     
-    console.log('Uploading to path:', path)
     
     // Upload to Firebase Storage
     const storageRef = ref(storage, path)
@@ -54,12 +47,9 @@ export async function POST(request: NextRequest) {
       contentType: file.type
     })
     
-    console.log('Upload completed, getting download URL...')
     
     // Get download URL
     const downloadURL = await getDownloadURL(snapshot.ref)
-    
-    console.log('Download URL obtained:', downloadURL)
     
     return NextResponse.json({ 
       success: true, 

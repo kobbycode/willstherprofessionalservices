@@ -21,13 +21,6 @@ export async function POST(request: Request) {
     const db = await getAdminDb()
     const input = await request.json()
     
-    console.log('API route: Creating post with data:', {
-      title: input.title,
-      category: input.category,
-      contentLength: input.content?.length,
-      status: input.status
-    })
-    
     // Validate image URL - reject base64/data URLs
     if (input.image && input.image.startsWith('data:')) {
       return NextResponse.json({ 
@@ -51,10 +44,8 @@ export async function POST(request: Request) {
       readTime: estimateReadTime(input.content)
     }
     
-    console.log('API route: Post data prepared with status:', postData.status)
     
     const docRef = await db.collection('posts').add(postData)
-    console.log('API route: Post created with ID:', docRef.id, 'and status:', postData.status)
     
     return NextResponse.json({ id: docRef.id })
   } catch (e) {

@@ -114,7 +114,6 @@ export default function ProfilePage() {
   // Load user profile data from auth context
   useEffect(() => {
     if (user) {
-      console.log('Loading profile data from auth context:', user)
       setOriginalEmail(user.email || 'admin@willsther.com')
       setProfileData(prev => ({
         ...prev,
@@ -140,7 +139,6 @@ export default function ProfilePage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!user) {
-        console.log('Authentication timeout, redirecting to login')
         router.push('/admin/login')
       }
     }, 10000) // 10 second timeout
@@ -245,27 +243,10 @@ export default function ProfilePage() {
       if (pendingAvatarFile) {
         try {
           setImageLoading(true)
-          console.log('=== UPLOAD DEBUG START ===')
-          console.log('Starting upload process...')
-          console.log('File details:', {
-            name: pendingAvatarFile.name,
-            size: pendingAvatarFile.size,
-            type: pendingAvatarFile.type
-          })
-
           const uploadedUrl = await uploadImage(pendingAvatarFile, 'profile-pictures')
           avatarUrlToUse = uploadedUrl
           setProfileData(prev => ({ ...prev, avatar: uploadedUrl }))
-          console.log('Upload successful:', uploadedUrl)
         } catch (uploadError) {
-          console.error('=== UPLOAD ERROR ===')
-          console.error('Upload error details:', uploadError)
-          const err: any = uploadError
-          console.error('Error code:', err?.code)
-          console.error('Error message:', err?.message)
-          console.error('Error stack:', err?.stack)
-          console.error('=== END UPLOAD ERROR ===')
-
           // If upload fails, continue with the current avatar
           toast.error('Image upload failed, but profile can still be updated')
         } finally {
@@ -296,7 +277,6 @@ export default function ProfilePage() {
         try {
           await setDoc(userRef, updateData, { merge: true })
           firestoreSuccess = true
-          console.log('Profile updated in Firestore successfully')
         } catch (firestoreError) {
           retryCount++
           console.error(`Firestore update attempt ${retryCount} failed:`, firestoreError)
@@ -354,8 +334,6 @@ export default function ProfilePage() {
       toast.error('Please select a valid image file')
       return
     }
-
-    console.log('Proceeding without auth; deferring upload until Save')
 
     // Only set a local preview and mark as pending. Upload will happen on Save.
     try {

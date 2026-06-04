@@ -6,6 +6,7 @@ import { useShop } from '@/context/ShopContext'
 import { X, Minus, Plus, Trash2, ShoppingBag, AlertCircle } from 'lucide-react'
 
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 
 const CheckoutModal = dynamic(
     () => import('./CheckoutModal').then((mod) => mod.CheckoutModal),
@@ -62,10 +63,11 @@ export const CartDrawer = () => {
                                         <div key={product.id} className={`flex gap-4 p-4 rounded-xl ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
                                             <div className="relative w-20 h-20 bg-white rounded-lg overflow-hidden border border-gray-200">
                                                 {product.imageUrl && (
-                                                    <img
+                                                    <Image
                                                         src={product.imageUrl}
                                                         alt={product.title}
-                                                        className="w-full h-full object-cover"
+                                                        fill
+                                                        className="object-cover"
                                                     />
                                                 )}
                                                 {!product.inStock && (

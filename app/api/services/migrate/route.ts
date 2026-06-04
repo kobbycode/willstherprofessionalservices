@@ -109,15 +109,12 @@ const hardcodedServices = [
 
 export async function POST() {
   try {
-    console.log('=== MIGRATION START ===', new Date().toISOString())
     const db = await getAdminDb()
     
     // Check if services already exist
     const existingServices = await db.collection('services').limit(1).get()
-    console.log('Existing services check:', existingServices.empty ? 'No services found' : 'Services exist')
     
     if (!existingServices.empty) {
-      console.log('Migration skipped - services already exist')
       return NextResponse.json({ 
         success: true,
         message: 'Services already exist in database. Migration skipped.',
@@ -126,7 +123,6 @@ export async function POST() {
     }
     
     // Migrate services
-    console.log('Starting batch write of', hardcodedServices.length, 'services')
     const batch = db.batch()
     let count = 0
     
@@ -141,7 +137,6 @@ export async function POST() {
     }
     
     await batch.commit()
-    console.log('=== MIGRATION SUCCESS === Migrated', count, 'services')
     
     return NextResponse.json({ 
       success: true,

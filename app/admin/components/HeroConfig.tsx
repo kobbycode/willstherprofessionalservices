@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
+import Image from 'next/image'
 
 const HeroConfig = ({ config, onChange, onSave }: any) => {
   const heroSlides = config.heroSlides || []
@@ -226,9 +227,10 @@ const HeroConfig = ({ config, onChange, onSave }: any) => {
                   {/* Left: Preview */}
                   <div className="lg:w-[450px] relative overflow-hidden bg-gray-900">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-900/60 to-transparent z-10" />
-                    <img
+                    <Image
                       src={slide.imageUrl}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
                       alt="Preview"
                     />
                     <div className="absolute left-10 top-1/2 -translate-y-1/2 z-20 space-y-2 max-w-[80%]">

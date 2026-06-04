@@ -91,22 +91,12 @@ const NewBlogPost = () => {
   }, [post.image, imagePreview])
 
   const handleSave = async () => {
-    console.log('=== HANDLE SAVE START ===')
     if (!post.title || !post.content || !post.category) {
       toast.error('Please fill in Title, Content, and Category')
       return
     }
     setIsSaving(true)
     try {
-      console.log('Creating post with data:', {
-        title: post.title,
-        category: post.category,
-        contentLength: post.content.length,
-        hasImage: !!post.image,
-        tagsCount: tags.length,
-        status: post.status
-      })
-      
       // Create post without waiting for image upload to complete
       const id = await createPost({
         title: post.title,
@@ -118,12 +108,10 @@ const NewBlogPost = () => {
         status: post.status as any,
         author: 'Willsther Team'
       })
-      console.log('Post created successfully with ID:', id)
       toast.success('Post saved successfully')
       // Close the form and redirect to admin
       router.push('/admin')
     } catch (error) {
-      console.error('=== HANDLE SAVE ERROR ===')
       console.error('Failed to save post:', error)
       toast.error('Failed to save post: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
@@ -132,21 +120,12 @@ const NewBlogPost = () => {
   }
 
   const handlePublish = async () => {
-    console.log('=== HANDLE PUBLISH START ===')
     if (!post.title || !post.content || !post.category) {
       toast.error('Please fill in Title, Content, and Category')
       return
     }
     setIsPublishing(true)
     try {
-      console.log('Publishing post with data:', {
-        title: post.title,
-        category: post.category,
-        contentLength: post.content.length,
-        hasImage: !!post.image,
-        tagsCount: tags.length
-      })
-      
       // Create post without waiting for image upload to complete
       await createPost({
         title: post.title,
@@ -158,12 +137,10 @@ const NewBlogPost = () => {
         status: 'published' as any,
         author: 'Willsther Team'
       })
-      console.log('Post published successfully')
       toast.success('Post published successfully')
       // Close the form and redirect to admin
       router.push('/admin')
     } catch (error) {
-      console.error('=== HANDLE PUBLISH ERROR ===')
       console.error('Failed to publish post:', error)
       toast.error('Failed to publish post: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {

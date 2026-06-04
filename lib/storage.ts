@@ -76,16 +76,11 @@ async function compressImage(file: File): Promise<File> {
 }
 
 export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<string> {
-  console.log('=== UPLOAD START ===')
-  console.log('File details:', { name: file.name, size: file.size, type: file.type })
-
   // Compress large images to prevent upload issues
   let processedFile = file;
   try {
     if (file.size > 2 * 1024 * 1024) { // If larger than 2MB
-      console.log('Compressing large image...')
       processedFile = await compressImage(file);
-      console.log('Compressed file size:', processedFile.size)
     }
   } catch (compressError) {
     console.warn('Failed to compress image, using original:', compressError)
@@ -94,9 +89,7 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
 
   // Try Firebase Storage first (preferred method)
   try {
-    console.log('Attempting Firebase Storage upload...')
     const result = await uploadToFirebaseWithTimeout(processedFile, pathPrefix)
-    console.log('Firebase Storage upload successful:', result)
     return result
   } catch (error) {
     console.error('Firebase Storage upload failed:', error)
@@ -159,16 +152,10 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
     const fileName = `${timestamp}_${file.name.replace(/\s+/g, '_')}`
     const storageRef = ref(storage, `${pathPrefix}/${fileName}`)
     
-    console.log('Uploading to Firebase Storage with bucket:', storageRef.bucket);
-    console.log('File path:', `${pathPrefix}/${fileName}`);
-    
     const snapshot = await uploadBytes(storageRef, file)
-    console.log('Upload completed, getting download URL...')
     
     // Get the download URL
     const downloadURL = await getDownloadURL(snapshot.ref)
-    
-    console.log('Firebase Storage file uploaded successfully with public access')
     
     return downloadURL
   } catch (error) {

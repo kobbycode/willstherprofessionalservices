@@ -16,7 +16,6 @@ const Services = () => {
 
   // Load services and categories from Firestore Client SDK
   useEffect(() => {
-    console.log('Services component: Subscribing to services and categories...')
     const db = getDb()
 
     // 1. Subscribe to Categories
@@ -32,7 +31,6 @@ const Services = () => {
           imageUrl: data.imageUrl
         }
       })
-      console.log('Categories synced:', categoriesData.length)
       setCategories(categoriesData)
     }, (error) => {
       console.error('Error syncing categories:', error)
@@ -45,7 +43,6 @@ const Services = () => {
         id: doc.id,
         ...doc.data()
       }))
-      console.log('Services synced:', servicesData.length)
       setServices(servicesData)
       setLoading(false)
     }, (error) => {

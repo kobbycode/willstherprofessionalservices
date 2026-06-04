@@ -352,10 +352,11 @@ export default function ShopManagement() {
                             <div className="relative aspect-square bg-gray-50">
                                 {/* Show first image from images array or fallback to imageUrl */}
                                 {(p.images && p.images.length > 0 ? p.images[0] : p.imageUrl) ? (
-                                    <img
+                                    <Image
                                         src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl}
                                         alt={p.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center"><ImageIcon className="w-10 h-10 text-gray-200" /></div>
@@ -588,7 +589,7 @@ export default function ShopManagement() {
                                             <div className="grid grid-cols-4 gap-3 mb-4">
                                                 {currentProduct.images.map((img, idx) => (
                                                     <div key={idx} className="relative aspect-square bg-gray-50 rounded-xl overflow-hidden border border-gray-100 group">
-                                                        <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        <Image src={img} alt={`Preview ${idx + 1}`} fill className="object-cover" />
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRemoveImage(idx)}

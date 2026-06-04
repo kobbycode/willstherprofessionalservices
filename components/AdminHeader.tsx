@@ -121,12 +121,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                         </Link>
 
                         <div className="flex items-center space-x-2 sm:space-x-3 bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 sm:px-4 sm:py-2 backdrop-blur-md">
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-accent-500 rounded-full flex items-center justify-center shadow-md">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-accent-500 rounded-full flex items-center justify-center shadow-md relative">
                                 {user?.photoURL ? (
-                                    <img
+                                    <Image
                                         src={user.photoURL}
                                         alt="Profile"
-                                        className="w-full h-full rounded-full object-cover"
+                                        fill
+                                        className="rounded-full object-cover"
                                     />
                                 ) : (
                                     <span className="text-primary-900 text-xs sm:text-sm font-bold">

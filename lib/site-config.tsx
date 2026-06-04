@@ -311,17 +311,8 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 	// Local update only - updates state and localStorage immediately
 	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {
-		console.log('SiteProvider: Local update requested.')
-		// Log config updates for debugging
-		console.log('SiteProvider: setConfig triggered', typeof next === 'function' ? 'functional update' : 'direct update')
-		
 		setConfigState((prev) => {
 			const resolvedNext = typeof next === 'function' ? next(prev) : next
-			console.log('SiteProvider: State resolved. Previous keys:', Object.keys(prev || {}), 'New keys:', Object.keys(resolvedNext || {}))
-			if (resolvedNext.gallery) {
-				console.log('SiteProvider: Gallery count:', resolvedNext.gallery.length)
-			}
-			console.log('SiteProvider: Marking state as DIRTY.')
 			saveSiteConfigToLocal(resolvedNext, true)
 			return resolvedNext
 		})
@@ -334,25 +325,19 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 			const currentlyDirty = loadIsDirtyFromLocal()
 
-			console.log('--- SiteProvider Sync Start ---')
-			if (currentlyDirty) {
-				console.log('UNSAVED CHANGES DETECTED. Background sync will only fetch, not merge to prevent overwrites.')
+				if (currentlyDirty) {
 			}
-
-			console.log('Fetching fresh configuration...')
 			const configRes = await fetch('/api/config/get', { cache: 'no-store' })
 
 			let remoteConfig: Partial<SiteConfig> = {}
 			if (configRes.ok) {
 				const data = await configRes.json()
 				remoteConfig = data.config || {}
-				console.log('Remote config received.')
 			}
 
 			if (!currentlyDirty && Object.keys(remoteConfig).length > 0) {
 				setConfigState((prev) => {
 					if (loadIsDirtyFromLocal()) {
-						console.log('SiteProvider: Skipping merge because state became dirty during fetch.')
 						return prev
 					}
 
@@ -365,7 +350,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'stats', 'testimonials', 'services']
 					for (const key of arrayKeys) {
 						if (Array.isArray(remoteConfig[key])) {
-							console.log(`SiteProvider: Overwriting ${key} with server data (${(remoteConfig[key] as any[]).length} items)`)
 							;(merged as any)[key] = remoteConfig[key]
 						} else if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
                             console.warn(`SiteProvider: Server returned non-array for ${key}:`, remoteConfig[key])
@@ -379,18 +363,14 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 						merged.navigation = remoteConfig.navigation
 					}
 
-					console.log('SiteProvider: Successfully merged server config into local state.')
 					saveSiteConfigToLocal(merged, false)
 					return merged
 				})
 			} else if (currentlyDirty) {
-				console.log('SiteProvider: Merge SKIPPED because of unsaved local changes (dirty flag is set).')
 			}
 
-			console.log('--- SiteProvider Sync End ---')
 		} catch (error) {
 			console.error('SiteProvider: Sync failed:', error)
-			console.log('--- SiteProvider Sync Error ---')
 		} finally {
 			setIsLoaded(true)
 		}
@@ -413,7 +393,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 		// Use the provided data or fallback to the current state.
 		// NOTE: If calling this without args, the 'config' value might be stale due to closure.
 		const target = dataToSave || config
-		console.log('SiteProvider: saveConfig triggered. Target gallery items:', target.gallery?.length || 0)
 		
 		try {
 			const response = await fetch('/api/config/save', {
@@ -428,8 +407,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				throw new Error(errorData.error || 'Failed to save configuration')
 			}
 
-			console.log('SiteProvider: Save SUCCESS. Updating local state and clearing dirty flag.')
-			
 			// Update state and persistence
 			setConfigState(target)
 			setIsDirty(false)

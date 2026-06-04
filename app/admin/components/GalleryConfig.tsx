@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { uploadImage } from '@/lib/storage'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 
 interface GalleryConfigProps {
     config: any
@@ -38,7 +39,6 @@ export const GalleryConfig = ({ config, onChange, onSave }: GalleryConfigProps) 
     const [isUploading, setIsUploading] = useState<string | null>(null)
 
     const updateItem = (id: string, key: string, value: any) => {
-        console.log(`GalleryConfig: Updating item ${id}, ${key} = ${value}`)
         onChange((prev: any) => {
             const gallery = Array.isArray(prev.gallery) ? prev.gallery : []
             const nextGallery = gallery.map((item: any) => {
@@ -56,7 +56,7 @@ export const GalleryConfig = ({ config, onChange, onSave }: GalleryConfigProps) 
             imageUrl: '',
             caption: ''
         }
-        console.log('GalleryConfig: Adding new item slot')
+        
         onChange((prev: any) => ({
             ...prev,
             gallery: [newItem, ...(Array.isArray(prev.gallery) ? prev.gallery : [])]
@@ -65,7 +65,6 @@ export const GalleryConfig = ({ config, onChange, onSave }: GalleryConfigProps) 
     }
 
     const removeItem = (id: string) => {
-        console.log(`GalleryConfig: Removing item ${id}`)
         onChange((prev: any) => {
             const gallery = Array.isArray(prev.gallery) ? prev.gallery : []
             return {
@@ -183,7 +182,7 @@ export const GalleryConfig = ({ config, onChange, onSave }: GalleryConfigProps) 
                             {/* Visual Identification Area */}
                             <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center relative overflow-hidden group/camera">
                                 {g.imageUrl ? (
-                                    <img src={g.imageUrl} alt="" className="w-full h-full object-cover group-hover/camera:scale-105 transition-all duration-[1.5s]" />
+                                    <Image src={g.imageUrl} alt="" fill className="object-cover group-hover/camera:scale-105 transition-all duration-[1.5s]" />
                                 ) : (
                                     <div className="text-center">
                                         <Layers className="w-12 h-12 text-gray-100 mx-auto mb-4" />

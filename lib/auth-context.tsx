@@ -63,13 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const auth = getAuth()
           const db = getDb()
 
-          console.log('Firebase initialized successfully in AuthContext')
-          console.log('Current Firebase user on init:', auth.currentUser?.email)
           setFirebaseReady(true)
 
           // Check if user is already authenticated
           if (auth.currentUser) {
-            console.log('User already authenticated, loading user data...')
             const userData = await loadUserData(auth.currentUser)
             setUser(userData)
           }
@@ -87,10 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUserData = async (firebaseUser: FirebaseUser): Promise<AuthUser | null> => {
     try {
-      console.log('Loading user data for UID:', firebaseUser.uid)
       const db = getDb()
       const userRef = doc(db, 'users', firebaseUser.uid)
-      console.log('User document reference:', userRef.path)
 
       // Add timeout for Firestore operations (reduced to 3 seconds to prevent conflicts)
       const timeoutPromise = new Promise((_, reject) => {
@@ -100,11 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocPromise = getDoc(userRef)
       const userDoc = await Promise.race([userDocPromise, timeoutPromise]) as any
 
-      console.log('User document exists:', userDoc.exists())
-
       if (userDoc.exists()) {
         const data = userDoc.data()
-        console.log('User document data:', data)
         return {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
@@ -124,7 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updatedAt: data.updatedAt || new Date().toISOString()
         }
       } else {
-        console.log('User document does not exist, creating new one...')
         // Create user document if it doesn't exist
         const defaultUser: AuthUser = {
           uid: firebaseUser.uid,
@@ -145,7 +136,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updatedAt: new Date().toISOString()
         }
 
-        console.log('Creating user document with data:', defaultUser)
         const setDocPromise = setDoc(userRef, {
           name: defaultUser.displayName,
           email: defaultUser.email,
@@ -165,7 +155,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
 
         await Promise.race([setDocPromise, timeoutPromise])
-        console.log('User document created successfully')
 
         return defaultUser
       }
@@ -179,7 +168,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // If it's a timeout or connection error, return a basic user object
       if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('400'))) {
-        console.log('Firestore connection issue, creating basic user object')
         return {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
@@ -212,13 +200,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          console.log('AuthContext: User authenticated:', firebaseUser.email)
           const userData = await loadUserData(firebaseUser)
-          console.log('AuthContext: User data loaded:', userData)
           setUser(userData)
-          console.log('AuthContext: User state updated to:', userData)
         } else {
-          console.log('AuthContext: User signed out')
           setUser(null)
         }
       } catch (error) {
@@ -255,23 +239,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async (): Promise<AuthUser | null> => {
     if (!firebaseReady) {
-      console.log('Firebase not ready yet, skipping refresh')
       return null
     }
 
     try {
-      console.log('Refreshing user data...')
       const auth = getAuth()
       const currentUser = auth.currentUser
 
       if (currentUser) {
-        console.log('Current Firebase user found:', currentUser.email)
         const userData = await loadUserData(currentUser)
-        console.log('User data loaded:', userData)
         setUser(userData)
         return userData
       } else {
-        console.log('No current Firebase user found')
         setUser(null)
         return null
       }

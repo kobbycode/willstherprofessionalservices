@@ -7,7 +7,6 @@ import { ShopProvider } from '@/context/ShopContext'
 import { SiteProvider } from '@/lib/site-config'
 import { CartDrawer } from '@/components/CartDrawer'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import AmbientBackground from '@/components/AmbientBackground'
 import LayoutWrapper from '@/components/LayoutWrapper'
 import NextTopLoader from 'nextjs-toploader'
 
@@ -207,13 +206,6 @@ export default function RootLayout({
             </SiteProvider>
           </AuthProvider>
         </ThemeProvider>
-        {false && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `/* Service worker disabled */`,
-            }}
-          />
-        )}
       </body>
     </html>
   )

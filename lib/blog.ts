@@ -78,7 +78,6 @@ export async function fetchPosts(publishedOnly = true, take = 12): Promise<BlogP
         q = query(colRef, where('status', '==', 'published'), orderBy('createdAt', 'desc'), fsLimit(take))
         snap = await getDocs(q)
       } catch (orderError) {
-        console.warn('Failed to order posts by createdAt, trying without orderBy:', orderError)
         // Fallback without orderBy if index is missing
         q = query(colRef, where('status', '==', 'published'), fsLimit(take))
         snap = await getDocs(q)
@@ -89,14 +88,12 @@ export async function fetchPosts(publishedOnly = true, take = 12): Promise<BlogP
         q = query(colRef, orderBy('createdAt', 'desc'), fsLimit(take))
         snap = await getDocs(q)
       } catch (orderError) {
-        console.warn('Failed to order all posts by createdAt, trying without orderBy:', orderError)
         // Fallback without orderBy if index is missing
         q = query(colRef, fsLimit(take))
         snap = await getDocs(q)
       }
     }
   } catch (e) {
-    console.error('Failed to fetch posts with query, falling back to basic fetch:', e)
     // Ultimate fallback - fetch all and filter manually
     const allSnap = await getDocs(colRef)
     const allPosts = allSnap.docs.map((d) => {
@@ -176,57 +173,42 @@ export async function fetchPosts(publishedOnly = true, take = 12): Promise<BlogP
 }
 
 export async function fetchPostById(id: string): Promise<BlogPost | null> {
-  const db = getDb()
-  const ref = doc(db, POSTS_COLLECTION, id)
-  const snap = await getDoc(ref)
-  if (!snap.exists()) return null
-  const data = snap.data() as any
-  return {
-    id: snap.id,
-    title: data.title || '',
-    excerpt: data.excerpt || '',
-    content: data.content || '',
-    author: data.author || 'Willsther Team',
-    date: (data.date as string) || new Date().toISOString(),
-    readTime: data.readTime || estimateReadTime(data.content || ''),
-    category: data.category || 'General',
-    image: data.image || '',
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    status: data.status || 'draft',
-    views: data.views || 0,
-    createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt || new Date().toISOString(),
-    updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || new Date().toISOString()
-  } satisfies BlogPost
+  try {
+    const db = getDb()
+    const ref = doc(db, POSTS_COLLECTION, id)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) return null
+    const data = snap.data() as any
+    return {
+      id: snap.id,
+      title: data.title || '',
+      excerpt: data.excerpt || '',
+      content: data.content || '',
+      author: data.author || 'Willsther Team',
+      date: (data.date as string) || new Date().toISOString(),
+      readTime: data.readTime || estimateReadTime(data.content || ''),
+      category: data.category || 'General',
+      image: data.image || '',
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      status: data.status || 'draft',
+      views: data.views || 0,
+      createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || new Date().toISOString()
+    } satisfies BlogPost
+  } catch (error) {
+    console.error('Error fetching post by ID:', error)
+    throw error
+  }
 }
 
 export async function createPost(input: NewPostInput): Promise<string> {
-  console.log('=== CREATE POST START ===')
-  console.log('Input data:', {
-    title: input.title,
-    excerpt: input.excerpt?.substring(0, 50) + '...',
-    contentLength: input.content?.length,
-    category: input.category,
-    image: input.image ? 'present' : 'missing',
-    tags: input.tags,
-    status: input.status,
-    author: input.author
-  })
-  
-  // Validate image URL - reject base64/data URLs
   if (input.image && input.image.startsWith('data:')) {
     throw new Error('Base64/Data URLs are not allowed. Please upload images to Firebase Storage.')
   }
   
-  // Strategy 1: Try direct Firestore access with reduced timeout
   try {
-    console.log('Attempting createPost with direct Firestore access...')
     const db = getDb()
-    console.log('Firestore DB instance obtained')
-    
     const col = collection(db, POSTS_COLLECTION)
-    console.log('Collection reference created:', POSTS_COLLECTION)
-    
-    // Simplified post data
     const postData = {
       title: input.title,
       excerpt: input.excerpt || '',
@@ -242,228 +224,61 @@ export async function createPost(input: NewPostInput): Promise<string> {
       readTime: estimateReadTime(input.content)
     }
     
-    console.log('Post data prepared with status:', postData.status)
-    
-    // Short timeout for initial attempt
-    const result = await Promise.race([
-      addDoc(col, postData),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Direct Firestore attempt timed out after 8 seconds')), 8000)
-      )
-    ])
-    
-    console.log('Document added with ID:', result.id)
+    const result = await addDoc(col, postData)
     return result.id
   } catch (error) {
-    console.error('Direct Firestore attempt failed:', error)
-    
-    // Strategy 2: Try API route as fallback
-    try {
-      console.log('Attempting createPost via API route...')
-      const response = await fetch('/api/posts/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      })
-      
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`)
-      }
-      
-      const data = await response.json()
-      console.log('API route successful, post ID:', data.id)
-      return data.id
-    } catch (apiError) {
-      console.error('API route attempt failed:', apiError)
-      
-      // Strategy 3: Try with even shorter timeout and simplified data
-      try {
-        console.log('Attempting final fallback with minimal data...')
-        const db = getDb()
-        const col = collection(db, POSTS_COLLECTION)
-        
-        // Even more simplified data
-        const minimalData = {
-          title: input.title || 'Untitled Post',
-          content: input.content || 'No content',
-          category: input.category || 'General',
-          status: input.status || 'draft',
-          createdAt: new Date().toISOString()
-        }
-        
-        console.log('Minimal data prepared with status:', minimalData.status)
-        
-        const result = await Promise.race([
-          addDoc(col, minimalData),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Final fallback timed out after 5 seconds')), 5000)
-          )
-        ])
-        
-        console.log('Final fallback successful, document ID:', result.id)
-        return result.id
-      } catch (finalError) {
-        console.error('All attempts failed')
-        // If all attempts fail, rethrow the original error for better context
-        throw error
-      }
-    }
+    console.error('Error creating post:', error)
+    throw error
   }
 }
 
 export async function updatePost(id: string, input: Partial<NewPostInput>): Promise<void> {
-  // Validate image URL - reject base64/data URLs
   if (input.image && input.image.startsWith('data:')) {
     throw new Error('Base64/Data URLs are not allowed. Please upload images to Firebase Storage.')
   }
   
-  // Strategy 1: Try direct Firestore access with reduced timeout
   try {
-    console.log('Attempting updatePost with direct Firestore access...')
     const db = getDb()
     const ref = doc(db, POSTS_COLLECTION, id)
-    
-    const updateData: any = {
-      ...input,
-      updatedAt: serverTimestamp()
-    }
-    
-    // Recalculate read time if content changed
+    const updateData: any = { ...input, updatedAt: serverTimestamp() }
     if (input.content) {
       updateData.readTime = estimateReadTime(input.content)
     }
-    
-    // Short timeout for initial attempt
-    await Promise.race([
-      updateDoc(ref, updateData),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Direct Firestore attempt timed out after 8 seconds')), 8000)
-      )
-    ])
-    
-    console.log('Post updated successfully with ID:', id)
+    await updateDoc(ref, updateData)
   } catch (error) {
-    console.error('Direct Firestore attempt failed:', error)
-    
-    // Strategy 2: Try API route as fallback
-    try {
-      console.log('Attempting updatePost via API route...')
-      const response = await fetch(`/api/posts/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `API request failed with status ${response.status}`)
-      }
-      
-      console.log('API route successful for post update')
-    } catch (apiError) {
-      console.error('API route attempt failed:', apiError)
-      // If API route fails, rethrow the original error for better context
-      throw error
-    }
+    console.error('Error updating post:', error)
+    throw error
   }
 }
 
 export async function updatePostStatus(id: string, status: 'draft' | 'published' | 'scheduled'): Promise<void> {
-  // Strategy 1: Try direct Firestore access
   try {
-    console.log('Attempting updatePostStatus with direct Firestore access...')
     const db = getDb()
     const ref = doc(db, POSTS_COLLECTION, id)
-    
-    await Promise.race([
-      updateDoc(ref, {
-        status,
-        updatedAt: serverTimestamp()
-      }),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Direct Firestore attempt timed out after 8 seconds')), 8000)
-      )
-    ])
-    
-    console.log('Post status updated successfully with ID:', id, 'to status:', status)
+    await updateDoc(ref, { status, updatedAt: serverTimestamp() })
   } catch (error) {
-    console.error('Direct Firestore attempt failed:', error)
-    
-    // Strategy 2: Try API route as fallback
-    try {
-      console.log('Attempting updatePostStatus via API route...')
-      const response = await fetch(`/api/posts/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `API request failed with status ${response.status}`)
-      }
-      
-      console.log('API route successful for post status update')
-    } catch (apiError) {
-      console.error('API route attempt failed:', apiError)
-      // If API route fails, rethrow the original error for better context
-      throw error
-    }
+    console.error('Error updating post status:', error)
+    throw error
   }
 }
 
 export async function deletePost(id: string): Promise<void> {
-  // Strategy 1: Try direct Firestore access
   try {
-    console.log('Attempting deletePost with direct Firestore access...')
     const db = getDb()
     const ref = doc(db, POSTS_COLLECTION, id)
-    
-    await Promise.race([
-      deleteDoc(ref),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Direct Firestore attempt timed out after 8 seconds')), 8000)
-      )
-    ])
-    
-    console.log('Post deleted successfully with ID:', id)
+    await deleteDoc(ref)
   } catch (error) {
-    console.error('Direct Firestore attempt failed:', error)
-    
-    // Strategy 2: Try API route as fallback
-    try {
-      console.log('Attempting deletePost via API route...')
-      const response = await fetch(`/api/posts/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `API request failed with status ${response.status}`)
-      }
-      
-      console.log('API route successful for post deletion')
-    } catch (apiError) {
-      console.error('API route attempt failed:', apiError)
-      // If API route fails, rethrow the original error for better context
-      throw error
-    }
+    console.error('Error deleting post:', error)
+    throw error
   }
 }
 
 export async function incrementViews(id: string): Promise<void> {
-  const db = getDb()
-  const ref = doc(db, POSTS_COLLECTION, id)
-  await updateDoc(ref, {
-    views: increment(1)
-  })
+  try {
+    const db = getDb()
+    const ref = doc(db, POSTS_COLLECTION, id)
+    await updateDoc(ref, { views: increment(1) })
+  } catch (error) {
+    console.error('Error incrementing views:', error)
+  }
 }

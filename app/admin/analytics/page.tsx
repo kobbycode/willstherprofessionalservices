@@ -125,8 +125,6 @@ export default function AnalyticsPage() {
       }, 10000) // 10 second timeout
 
       try {
-        console.log('Loading analytics data...')
-
         // Fetch all data with individual error handling
         let posts: any[] = []
         let categories: string[] = []
@@ -135,7 +133,6 @@ export default function AnalyticsPage() {
 
         try {
           posts = await fetchPosts(false) // Get all posts including drafts
-          console.log('Posts loaded:', posts.length)
         } catch (error) {
           console.error('Error loading posts:', error)
           posts = []
@@ -143,7 +140,6 @@ export default function AnalyticsPage() {
 
         try {
           categories = await fetchCategories()
-          console.log('Categories loaded:', categories.length)
         } catch (error) {
           console.error('Error loading categories:', error)
           categories = []
@@ -151,7 +147,6 @@ export default function AnalyticsPage() {
 
         try {
           users = await fetchUsers()
-          console.log('Users loaded:', users.length)
         } catch (error) {
           console.error('Error loading users:', error)
           users = []
@@ -159,7 +154,6 @@ export default function AnalyticsPage() {
 
         try {
           userStats = await getUserStats()
-          console.log('User stats loaded:', userStats)
         } catch (error) {
           console.error('Error loading user stats:', error)
           userStats = { total: 0, active: 0, inactive: 0, pending: 0, admins: 0, editors: 0, users: 0 }
@@ -251,7 +245,6 @@ export default function AnalyticsPage() {
           }
         }
 
-        console.log('Analytics data created:', analyticsData)
         clearTimeout(timeoutId) // Clear the timeout
         setAnalytics(analyticsData)
       } catch (error) {

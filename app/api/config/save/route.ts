@@ -14,10 +14,7 @@ export async function POST(request: NextRequest) {
 
     const db = await getAdminDb()
 
-    // Save to Firestore in the structure    console.log('=== CONFIG SAVE API START ===')
-    console.log('Received data keys:', Object.keys(data))
-    if (data.gallery) console.log('Gallery items count:', data.gallery.length)
-    if (data.stats) console.log('Stats title:', data.stats.title)
+    // Save to Firestore in the structure
 
     const savePath = db.collection('config').doc('site')
     await savePath.set({
@@ -25,7 +22,6 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString()
     })
 
-    console.log('=== CONFIG SAVE API SUCCESS ===')
     return NextResponse.json({ success: true, savedAt: new Date().toISOString(), data })
   } catch (error) {
     console.error('Error saving site config:', error)

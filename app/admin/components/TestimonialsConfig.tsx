@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { uploadImage } from '@/lib/storage'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 
 interface TestimonialsConfigProps {
     config: any
@@ -171,7 +172,7 @@ export const TestimonialsConfig = ({ config, onChange, onSave }: TestimonialsCon
                                             </div>
                                             <div className="w-48 h-48 bg-gray-50 border-2 border-dashed border-gray-100 rounded-[3rem] flex items-center justify-center overflow-hidden relative shadow-inner">
                                                 {t.avatarUrl ? (
-                                                    <img src={t.avatarUrl} className="w-full h-full object-cover transition-all duration-[1s]" alt="" />
+                                                    <Image src={t.avatarUrl} fill className="object-cover transition-all duration-[1s]" alt="" />
                                                 ) : (
                                                     <div className="text-center">
                                                         <User className="w-16 h-16 text-gray-200 mx-auto mb-4" />

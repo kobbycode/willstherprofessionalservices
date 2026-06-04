@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadImage } from '@/lib/storage'
+import Image from 'next/image'
 
 interface AboutConfigProps {
     config: any
@@ -139,13 +140,18 @@ export const AboutConfig = ({ config, onChange, onSave }: AboutConfigProps) => {
                         <div className="p-10 space-y-8">
                             <div className="relative group/camera aspect-[4/5] rounded-[3rem] overflow-hidden border border-gray-100 bg-gray-50 shadow-inner">
                                 {about.imageUrl ? (
-                                    <motion.img
+                                    <motion.div
                                         initial={{ scale: 1.1 }}
                                         animate={{ scale: 1 }}
-                                        src={about.imageUrl}
-                                        alt="About Narrative"
-                                        className="w-full h-full object-cover group-hover/camera:scale-105 transition-all duration-[1.5s]"
-                                    />
+                                        className="absolute inset-0"
+                                    >
+                                        <Image
+                                            src={about.imageUrl}
+                                            alt="About Narrative"
+                                            fill
+                                            className="object-cover group-hover/camera:scale-105 transition-all duration-[1.5s]"
+                                        />
+                                    </motion.div>
                                 ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-secondary-200">
                                         <Layers className="w-16 h-16 mb-6 opacity-20" />

@@ -44,7 +44,6 @@ export async function GET(request: Request) {
     }
     
     const posts = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-    console.log('API: Fetched', posts.length, 'posts', publishedOnly ? '(published only)' : '(all)')
     return NextResponse.json({ posts })
   } catch (e) {
     console.error('Failed to load posts (admin):', e)
@@ -56,13 +55,6 @@ export async function POST(request: Request) {
   try {
     const db = await getAdminDb()
     const input = await request.json()
-    
-    console.log('API route: Creating post with data:', {
-      title: input.title,
-      category: input.category,
-      contentLength: input.content?.length,
-      status: input.status
-    })
     
     // Validate image URL - reject base64/data URLs
     if (input.image && input.image.startsWith('data:')) {
@@ -87,10 +79,8 @@ export async function POST(request: Request) {
       readTime: estimateReadTime(input.content)
     }
     
-    console.log('API route: Post data prepared with status:', postData.status)
     
     const docRef = await db.collection('posts').add(postData)
-    console.log('API route: Post created with ID:', docRef.id, 'and status:', postData.status)
     
     return NextResponse.json({ id: docRef.id })
   } catch (e) {

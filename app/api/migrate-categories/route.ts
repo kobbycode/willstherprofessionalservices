@@ -29,7 +29,6 @@ export async function GET() {
         const db = await getAdminDb()
 
         // 1. Fetch current 'good' data from 'service_categories' (Admin Panel source)
-        console.log('Fetching service_categories...')
         const sourceSnap = await db.collection('service_categories').get()
         let categories: CategoryData[] = sourceSnap.docs.map(doc => {
             const data = doc.data()
@@ -44,7 +43,6 @@ export async function GET() {
 
         // 2. Fallback: If empty, try to fetch from 'services' distinct categories
         if (categories.length === 0) {
-            console.log('service_categories is empty, checking services...')
             const servicesSnap = await db.collection('services').get()
             const uniqueNames = new Set<string>()
             servicesSnap.docs.forEach(doc => {
@@ -68,7 +66,7 @@ export async function GET() {
         }
 
         // 3. Delete existing 'categories' collection items (Legacy data)
-        console.log('Clearing old categories collection...')
+        
         const targetCollection = db.collection('categories')
         const targetSnap = await targetCollection.get()
 
@@ -77,7 +75,7 @@ export async function GET() {
         await deleteBatch.commit()
 
         // 4. Populate 'categories' with the good data
-        console.log(`Migrating ${categories.length} categories...`)
+        
         const writeBatch = db.batch()
 
         for (const cat of categories) {

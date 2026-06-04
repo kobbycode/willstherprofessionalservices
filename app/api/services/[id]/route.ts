@@ -65,24 +65,20 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE - Remove service
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    console.log('DELETE request received for service ID:', params.id)
     const db = await getAdminDb()
     const { id } = params
-    console.log('Attempting to delete service with ID:', id)
 
     // Check if the document exists before trying to delete
     const docRef = db.collection('services').doc(id)
     const doc = await docRef.get()
 
     if (!doc.exists) {
-      console.log('Service not found with ID:', id)
       return NextResponse.json({
         error: 'Service not found'
       }, { status: 404 })
     }
 
     await docRef.delete()
-    console.log('Service deleted successfully with ID:', id)
 
     return NextResponse.json({ success: true })
   } catch (error) {

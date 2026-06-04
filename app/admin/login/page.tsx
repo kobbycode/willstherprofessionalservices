@@ -22,7 +22,6 @@ const AdminLogin = () => {
   useEffect(() => {
     // Only redirect if user is definitely authenticated and not loading anymore
     if (user && !loading) {
-      console.log('Login page - User authenticated and loaded, redirecting to dashboard')
       router.replace('/admin')
     }
   }, [user, loading, router])
@@ -37,22 +36,14 @@ const AdminLogin = () => {
     try {
       // Sign in with Firebase
       const auth = getAuth()
-      console.log('Attempting to sign in with:', formData.email)
 
       await signInWithEmailAndPassword(auth, formData.email, formData.password)
-      console.log('Firebase sign in successful')
 
       // Wait a bit for the auth state to update
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       // Refresh user data
-      console.log('Refreshing user data...')
-      const userData = await refreshUser()
-      console.log('User data refreshed:', userData)
-
-      // If we reach here, the auth state change listener in AuthContext 
-      // will pick up the user and the useEffect above will handle the redirect.
-      console.log('Waiting for AuthContext to update and redirect...')
+      await refreshUser()
     } catch (err: any) {
       console.error('Login error:', err)
       if (err.code === 'auth/user-not-found') {
