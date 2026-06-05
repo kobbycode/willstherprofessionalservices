@@ -178,8 +178,8 @@ const Header = () => {
                   width={160}
                   height={64}
                   priority
-                  sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
-                  className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 640px) 80px, (max-width: 768px) 128px, 160px"
+                  className="w-20 h-10 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </Link>
             </div>
