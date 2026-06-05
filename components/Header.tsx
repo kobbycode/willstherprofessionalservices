@@ -254,7 +254,7 @@ const Header = () => {
                 href="/wishlist"
                 className="p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
               >
-                <Heart size={24} />
+                <Heart className="w-5 h-5" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600">
                     {wishlistCount}
@@ -266,7 +266,7 @@ const Header = () => {
                 onClick={() => setIsCartOpen(true)}
                 className="p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
               >
-                <ShoppingBag size={24} />
+                <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600">
                     {cartCount}
