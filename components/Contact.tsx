@@ -115,7 +115,7 @@ const Contact = () => {
               <h3 className="text-base font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest">
                 Information
               </h3>
-              <p className="text-base text-secondary-600 font-inter leading-relaxed mb-8">
+              <p className="text-base text-secondary-600 font-inter leading-relaxed mb-8 font-medium">
                 Have a question or ready to book a service? Reach out to us through any of these channels.
               </p>
 
@@ -351,7 +351,7 @@ const Contact = () => {
                 <p className="text-secondary-600 font-medium leading-relaxed font-inter text-sm">
                   {config.footer.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'}
                 </p>
-                <div className="mt-4 flex items-center gap-3 text-primary-600 font-bold uppercase tracking-[0.2em] text-[12px]">
+                <div className="mt-4 flex items-center gap-3 text-primary-600 font-bold uppercase tracking-wider text-[12px]">
                   <Clock className="w-4 h-4" />
                   Mon - Sat: 8:00am - 5:00pm
                 </div>

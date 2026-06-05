@@ -258,7 +258,7 @@ const Hero = memo(() => {
                         >
                           <Link
                             href={slide.ctaLink}
-                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[13px] uppercase tracking-[0.2em] font-outfit overflow-hidden hover:-translate-y-0.5"
+                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-black rounded-xl transition-all duration-300 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[13px] uppercase tracking-wider font-outfit overflow-hidden hover:-translate-y-0.5"
                           >
                             <span className="relative z-10 flex items-center gap-2">
                               {slide.ctaLabel}
@@ -269,7 +269,7 @@ const Hero = memo(() => {
 
                           <Link
                             href="#services"
-                            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-[13px] uppercase tracking-[0.2em] font-outfit"
+                            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-[13px] uppercase tracking-wider font-outfit"
                           >
                             Our Portfolio
                           </Link>

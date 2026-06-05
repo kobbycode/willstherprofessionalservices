@@ -57,7 +57,7 @@ const Gallery = () => {
           <span className="text-primary-600 dark:text-primary-400 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
             Portfolio
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4 font-outfit tracking-tight uppercase">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
             Visual <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Excellence</span>
           </h2>
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />

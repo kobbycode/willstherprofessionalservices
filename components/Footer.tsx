@@ -116,7 +116,7 @@ const Footer = () => {
               />
               <button
                 type="submit"
-                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl transition-all duration-300 text-[12px] sm:text-sm font-bold uppercase tracking-wider"
+                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl transition-all duration-300 text-[12px] sm:text-sm font-black uppercase tracking-wider font-outfit"
               >
                 Join
               </button>

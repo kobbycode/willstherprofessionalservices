@@ -30,7 +30,7 @@ const Clients = () => {
             Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Industry Leaders</span>
           </h2>
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-6 rounded-full" />
-          <p className="text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-normal leading-relaxed">
+          <p className="text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
             We are proud to serve a diverse range of prestigious clients across multiple sectors.
           </p>
         </motion.div>

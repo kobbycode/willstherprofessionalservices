@@ -241,7 +241,7 @@ const Header = () => {
 
               <button
                 onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5"
+                className="bg-primary-600 hover:bg-primary-700 text-white font-black py-3 px-6 rounded-xl shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5 font-outfit uppercase tracking-wider text-sm"
               >
                 Get Quote
               </button>
@@ -315,7 +315,7 @@ const Header = () => {
               <div className="pt-3 sm:pt-4 border-t border-primary-500">
                 <button
                   onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                  className="block w-full text-center bg-white hover:bg-primary-50 text-primary-600 font-semibold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg shadow-lg transition-all duration-300 text-sm sm:text-base"
+                  className="block w-full text-center bg-white hover:bg-primary-50 text-primary-600 font-black py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg shadow-lg transition-all duration-300 text-sm sm:text-base font-outfit uppercase tracking-wider"
                 >
                   Get Quote
                 </button>

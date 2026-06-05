@@ -94,7 +94,7 @@ const Values = () => {
           
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] mb-3 block">
+              <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
                 Total Commitment
               </span>
               <h3 className="text-xl md:text-2xl font-bold text-secondary-900 mb-6 font-outfit tracking-tight uppercase">

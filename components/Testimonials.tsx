@@ -73,7 +73,7 @@ const Testimonials = () => {
       <section className="section-padding bg-white">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 mb-6 opacity-30">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 mb-6 opacity-30 font-outfit tracking-tight uppercase">
               What Our Customers Say
             </h2>
             <div className="w-24 h-1 bg-primary-200 mx-auto" />
@@ -192,7 +192,7 @@ const Testimonials = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <a
                   href="#contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-xs"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-xs font-outfit"
                 >
                   Get Your Quote Today
                   <Quote className="w-4 h-4 rotate-180" />

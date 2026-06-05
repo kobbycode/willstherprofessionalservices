@@ -98,12 +98,12 @@ const Stats = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 font-outfit text-secondary-900 tracking-tight uppercase"
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase"
           >
             {title}
           </motion.h2>
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-6 rounded-full"></div>
-          <p className="text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-normal leading-relaxed">
+          <p className="text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
             {subtitle}
           </p>
         </motion.div>
@@ -174,7 +174,7 @@ const Stats = () => {
                   href="#contact"
                   className="group relative inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-5 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-4 overflow-hidden"
               >
-                <span className="relative z-10 text-lg font-outfit uppercase tracking-widest">Get Started Now</span>
+                <span className="relative z-10 text-base font-outfit uppercase tracking-wider">Get Started Now</span>
                 <TrendingUp className="w-5 h-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 <div className="absolute inset-0 bg-gradient-to-r from-primary-500/0 via-primary-500/20 to-primary-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
               </Link>
