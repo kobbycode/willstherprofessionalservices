@@ -376,11 +376,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 						return prev
 					}
 
-					const merged = {
-						...defaultSiteConfig,
-						...prev,
-						...remoteConfig,
-					}
+					const merged = deepMerge(deepMerge(defaultSiteConfig, prev), remoteConfig)
 
 					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
 					for (const key of arrayKeys) {
@@ -390,7 +386,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 					}
 
 					if (remoteConfig.navigation) {
-						merged.navigation = remoteConfig.navigation
+						merged.navigation = remoteConfig.navigation as any
 					}
 
 					try {
