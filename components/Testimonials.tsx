@@ -19,7 +19,7 @@ const Testimonials = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-5 h-5 ${i < rating ? 'text-accent-500 fill-current' : 'text-gray-200'
+        className={`w-4 h-4 md:w-5 md:h-5 ${i < rating ? 'text-accent-500 fill-current' : 'text-gray-200'
           }`}
       />
     ))
@@ -29,15 +29,15 @@ const Testimonials = () => {
     return (
       <section className="section-padding bg-white">
         <div className="container-custom">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-secondary-900 mb-6 opacity-30 font-outfit tracking-tight uppercase">
               What Our Customers Say
             </h2>
             <div className="w-24 h-1 bg-primary-200 mx-auto" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-8 shadow-premium border border-gray-100">
+              <div key={i} className="bg-white rounded-2xl p-5 md:p-8 shadow-premium border border-gray-100">
                 <div className="flex justify-between mb-6">
                   <div className="flex gap-1">
                     {[...Array(5)].map((_, j) => <Skeleton key={j} className="w-5 h-5 rounded-full" />)}
@@ -76,7 +76,7 @@ const Testimonials = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
           <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Success Stories
@@ -87,7 +87,7 @@ const Testimonials = () => {
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
@@ -95,19 +95,19 @@ const Testimonials = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white border border-secondary-100 rounded-[2.5rem] p-10 hover:shadow-2xl hover:shadow-secondary-200/20 transition-all duration-500 flex flex-col h-full group shadow-xl shadow-secondary-200/5"
+              className="bg-white border border-secondary-100 rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 hover:shadow-2xl hover:shadow-secondary-200/20 transition-all duration-500 flex flex-col h-full group shadow-xl shadow-secondary-200/5"
             >
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center space-x-1.5 p-1 px-3 bg-slate-50 rounded-full">
                   {renderStars(testimonial.rating)}
                 </div>
-                <div className="w-12 h-12 flex items-center justify-center bg-secondary-900 rounded-2xl group-hover:bg-primary-600 transition-colors duration-500 shadow-lg shadow-secondary-900/10">
-                  <Quote className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-secondary-900 rounded-2xl group-hover:bg-primary-600 transition-colors duration-500 shadow-lg shadow-secondary-900/10">
+                  <Quote className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
               </div>
 
               <div className="flex-grow mb-6">
-                <h4 className="text-base font-bold text-secondary-900 mb-3 font-outfit uppercase tracking-widest">
+                <h4 className="text-sm md:text-base font-bold text-secondary-900 mb-3 font-outfit uppercase tracking-widest">
                   {testimonial.title}
                 </h4>
                 <p className="text-sm sm:text-base text-secondary-600 leading-relaxed font-inter italic">
@@ -116,7 +116,7 @@ const Testimonials = () => {
               </div>
 
               <div className="pt-6 border-t border-secondary-100 mt-auto">
-                <p className="font-bold text-secondary-900 text-base font-outfit tracking-tight">
+                <p className="font-bold text-secondary-900 text-sm md:text-base font-outfit tracking-tight">
                   {testimonial.name}
                 </p>
                 <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mt-1">
@@ -132,24 +132,24 @@ const Testimonials = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           viewport={{ once: true }}
-          className="text-center mt-24"
+          className="text-center mt-12 md:mt-24"
         >
-          <div className="bg-white border border-secondary-100 rounded-[3rem] p-12 relative overflow-hidden group shadow-2xl shadow-secondary-200/20">
+          <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] p-6 md:p-12 relative overflow-hidden group shadow-2xl shadow-secondary-200/20">
             {/* Animated background decorative element */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
             
             <div className="relative z-10 max-w-2xl mx-auto text-center">
-              <h3 className="text-3xl md:text-4xl font-black mb-6 text-secondary-900 font-outfit tracking-tight leading-tight uppercase">
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-black mb-4 md:mb-6 text-secondary-900 font-outfit tracking-tight leading-tight uppercase">
                 Ready to Experience <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Premium Care?</span>
               </h3>
-              <p className="text-secondary-600 mb-10 text-lg font-medium leading-relaxed font-inter">
+              <p className="text-secondary-600 mb-6 md:mb-10 text-sm md:text-lg font-medium leading-relaxed font-inter">
                 Experience the same level of excellence that our customers rave about. Let us transform your environment today.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
                 <a
                   href="#contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-sm sm:text-xs font-outfit"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-sm sm:text-xs font-outfit"
                 >
                   Get Your Quote Today
                   <Quote className="w-4 h-4 rotate-180" />

@@ -67,7 +67,7 @@ export default function ServiceDetails() {
         return (
             <main className="min-h-screen flex flex-col bg-gray-50">
                 {/* Skeleton Hero */}
-                <div className="relative py-20 bg-white border-b border-gray-100">
+                <div className="relative py-16 md:py-20 bg-white border-b border-gray-100">
                     <div className="container-custom px-4 relative z-10 space-y-4">
                         <Skeleton className="h-6 w-32 bg-gray-100" />
                         <Skeleton className="h-6 w-24 bg-gray-100 rounded-full" />
@@ -76,11 +76,11 @@ export default function ServiceDetails() {
                 </div>
 
                 {/* Skeleton Content */}
-                <div className="py-16 md:py-24 flex-1">
+                <div className="py-12 md:py-24 flex-1">
                     <div className="container-custom px-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                            <div className="lg:col-span-2 space-y-8">
-                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+                            <div className="lg:col-span-2 space-y-6 md:space-y-8">
+                                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-4 md:space-y-6">
                                     <Skeleton className="h-8 w-48" />
                                     <div className="space-y-3">
                                         <Skeleton className="h-4 w-full" />
@@ -88,12 +88,12 @@ export default function ServiceDetails() {
                                         <Skeleton className="h-4 w-2/3" />
                                     </div>
                                 </div>
-                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-4">
+                                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-4">
                                     <Skeleton className="h-7 w-40" />
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {[...Array(4)].map((_, i) => (
                                             <div key={i} className="flex gap-3">
-                                                <Skeleton className="w-5 h-5 rounded-full" />
+                                                <Skeleton className="w-4 h-4 md:w-5 md:h-5 rounded-full" />
                                                 <Skeleton className="h-5 flex-1" />
                                             </div>
                                         ))}
@@ -101,7 +101,7 @@ export default function ServiceDetails() {
                                 </div>
                             </div>
                             <div className="lg:col-span-1">
-                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden space-y-6 p-6">
+                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden space-y-4 md:space-y-6 p-4 md:p-6">
                                     <Skeleton className="h-8 w-full" />
                                     <Skeleton className="h-12 w-full" />
                                     <Skeleton className="h-12 w-full" />
@@ -118,9 +118,9 @@ export default function ServiceDetails() {
     if (error || !service) {
         return (
             <main className="min-h-screen flex flex-col">
-                <div className="flex-1 container-custom px-4 py-20 text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
-                    <p className="text-gray-600 mb-8">{error || "The service you're looking for doesn't exist."}</p>
+                <div className="flex-1 container-custom px-4 py-16 md:py-20 text-center">
+                    <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
+                    <p className="text-gray-600 mb-6 md:mb-8">{error || "The service you're looking for doesn't exist."}</p>
                     <Link href="/#services" className="btn-primary">
                         Back to Services
                     </Link>
@@ -132,7 +132,7 @@ export default function ServiceDetails() {
     return (
         <main className="min-h-screen flex flex-col bg-white">
             {/* Hero Banner */}
-            <section className="relative py-20 bg-white text-secondary-900 overflow-hidden border-b border-gray-100">
+            <section className="relative py-16 md:py-20 bg-white text-secondary-900 overflow-hidden border-b border-gray-100">
                 <div className="absolute inset-0">
                     <Image
                         src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
@@ -147,10 +147,10 @@ export default function ServiceDetails() {
                 <div className="container-custom px-4 relative z-10">
                     <Link
                         href="/#services"
-                        className="inline-flex items-center text-secondary-500 hover:text-primary-600 mb-6 transition-colors group"
+                        className="inline-flex items-center text-secondary-500 hover:text-primary-600 mb-4 md:mb-6 transition-colors group"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-sm font-bold uppercase tracking-widest">Back to Services</span>
+                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest">Back to Services</span>
                     </Link>
 
                     <motion.div
@@ -158,10 +158,10 @@ export default function ServiceDetails() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-100 text-primary-600 text-[12px] font-bold uppercase tracking-widest mb-6 shadow-sm">
+                        <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-100 text-primary-600 text-[12px] font-bold uppercase tracking-widest mb-4 md:mb-6 shadow-sm">
                             {service.category}
                         </span>
-                        <h1 className="text-3xl md:text-4xl font-semibold mb-6 text-secondary-900 leading-tight tracking-tight">
+                        <h1 className="text-xl md:text-4xl font-semibold mb-4 md:mb-6 text-secondary-900 leading-tight tracking-tight">
                             {service.title}
                         </h1>
                     </motion.div>
@@ -169,13 +169,13 @@ export default function ServiceDetails() {
             </section>
 
             {/* Content */}
-            <section className="py-16 md:py-24">
+            <section className="py-12 md:py-24">
                 <div className="container-custom px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
 
                         {/* Main Content */}
                         <motion.div
-                            className="lg:col-span-2 space-y-8"
+                            className="lg:col-span-2 space-y-6 md:space-y-8"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
@@ -193,8 +193,8 @@ export default function ServiceDetails() {
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-6 uppercase tracking-wider">Service Overview</h2>
+                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+                                <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6 uppercase tracking-wider">Service Overview</h2>
                                 <div className="prose prose-lg max-w-none text-gray-600">
                                     {service.description ? (
                                         service.description.split('\n').map((paragraph, idx) => (
@@ -209,8 +209,8 @@ export default function ServiceDetails() {
                             </div>
 
                             {/* Display features if we had them in the database, currently placeholders or derived */}
-                            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-6 uppercase tracking-wider">Why Choose Us</h3>
+                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6 uppercase tracking-wider">Why Choose Us</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {[
                                         "Professional & Experienced Team",
@@ -219,7 +219,7 @@ export default function ServiceDetails() {
                                         "Competitive Pricing"
                                     ].map((item, i) => (
                                         <div key={i} className="flex items-start">
-                                            <CheckCircle className="w-5 h-5 text-primary-600 mt-1 mr-3 flex-shrink-0" />
+                                            <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-primary-600 mt-1 mr-3 flex-shrink-0" />
                                             <span className="text-gray-700">{item}</span>
                                         </div>
                                     ))}
@@ -235,28 +235,28 @@ export default function ServiceDetails() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                         >
                             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
-                                <div className="p-6 bg-white border-b border-gray-100">
-                                    <h3 className="text-lg font-semibold mb-2 text-secondary-900">Book This Service</h3>
-                                    <p className="text-secondary-500 text-base">Get a quote or schedule an appointment today.</p>
+                                <div className="p-4 md:p-6 bg-white border-b border-gray-100">
+                                    <h3 className="text-base md:text-lg font-semibold mb-2 text-secondary-900">Book This Service</h3>
+                                    <p className="text-secondary-500 text-sm md:text-base">Get a quote or schedule an appointment today.</p>
                                 </div>
 
-                                <div className="p-6 space-y-6">
+                                <div className="p-4 md:p-6 space-y-4 md:space-y-6">
                                     <div className="flex items-center text-gray-700">
-                                        <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mr-4 text-primary-600">
-                                            <Clock className="w-5 h-5" />
+                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-100 flex items-center justify-center mr-3 md:mr-4 text-primary-600">
+                                            <Clock className="w-4 h-4 md:w-5 md:h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-base text-gray-500">Response Time</p>
+                                            <p className="text-sm md:text-base text-gray-500">Response Time</p>
                                             <p className="font-semibold">Within 24 Hours</p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center text-gray-700">
-                                        <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mr-4 text-primary-600">
-                                            <Calendar className="w-5 h-5" />
+                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-100 flex items-center justify-center mr-3 md:mr-4 text-primary-600">
+                                            <Calendar className="w-4 h-4 md:w-5 md:h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-base text-gray-500">Availability</p>
+                                            <p className="text-sm md:text-base text-gray-500">Availability</p>
                                             <p className="font-semibold">Mon - Sat, 8am - 6pm</p>
                                         </div>
                                     </div>
@@ -265,7 +265,7 @@ export default function ServiceDetails() {
 
                                     <Link
                                         href="/#contact"
-                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white text-base font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md shadow-primary-600/10 active:scale-95"
+                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white text-sm md:text-base font-semibold py-3 md:py-3.5 px-5 md:px-6 rounded-xl transition-all shadow-md shadow-primary-600/10 active:scale-95"
                                     >
                                         Contact Us Now
                                     </Link>

@@ -88,12 +88,12 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="pt-20">
-          <div className="container-custom px-4 py-8 md:py-12">
-            <div className="flex flex-col gap-8">
+          <div className="container-custom px-4 py-6 md:py-12">
+            <div className="flex flex-col gap-6 md:gap-8">
               <Skeleton className="h-10 w-48 rounded-xl" />
-              <div className="bg-white rounded-3xl shadow-premium overflow-hidden border border-gray-100">
-                <Skeleton className="h-80 md:h-[500px] w-full" />
-                <div className="p-8 space-y-6">
+                <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium overflow-hidden border border-gray-100">
+                  <Skeleton className="h-48 md:h-[500px] w-full" />
+                  <div className="p-6 md:p-8 space-y-4 md:space-y-6">
                   <div className="flex gap-4">
                     <Skeleton className="h-6 w-24 rounded-full" />
                     <Skeleton className="h-6 w-32 rounded-full" />
@@ -121,27 +121,27 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pt-20">
-        <div className="bg-primary-900 shadow-premium border-b border-white/10 mt-8">
+        <div className="bg-primary-900 shadow-premium border-b border-white/10 mt-6 md:mt-8">
           <div className="container-custom px-4 py-6">
             <div className="flex items-center justify-between">
               <Link href="/blog" className="flex items-center space-x-2 text-primary-100 hover:text-accent-500 transition-colors duration-200 group">
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                <span className="font-medium">Back to Blog</span>
+                <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
+                <span className="font-medium text-sm md:text-base">Back to Blog</span>
               </Link>
               <div className="flex items-center space-x-4">
                 <button className="flex items-center space-x-2 text-primary-100 hover:text-accent-500 transition-colors duration-200">
                   <Share2 className="w-4 h-4" />
-                  <span className="text-base font-medium">Share Article</span>
+                  <span className="text-sm md:text-base font-medium">Share Article</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="container-custom px-4 py-8 md:py-12">
-          <div className="mb-8 md:mb-12">
-            <div className="bg-white rounded-3xl shadow-premium overflow-hidden border border-gray-100">
-              <div className="relative h-80 md:h-96 lg:h-[500px] xl:h-[600px] overflow-hidden">
+        <div className="container-custom px-4 py-6 md:py-12">
+          <div className="mb-6 md:mb-12">
+            <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium overflow-hidden border border-gray-100">
+              <div className="relative h-48 md:h-96 lg:h-[500px] xl:h-[600px] overflow-hidden">
                 <Image
                   src={post.image || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80'}
                   alt={post.title}
@@ -150,14 +150,14 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                   priority
                 />
                 <div className="absolute top-6 left-6 z-10">
-                  <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-sm font-bold tracking-wider uppercase shadow-lg">
+                  <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs md:text-sm font-bold tracking-wider uppercase shadow-lg">
                     {post.category}
                   </span>
                 </div>
               </div>
-              <div className="p-6 md:p-10">
-                <div className="flex items-center space-x-4 text-base text-secondary-500 mb-6">
-                  <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wide">
+              <div className="p-4 md:p-10">
+                <div className="flex flex-wrap items-center gap-3 md:gap-4 text-sm md:text-base text-secondary-500 mb-4 md:mb-6">
+                  <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs md:text-sm font-bold uppercase tracking-wide">
                     {post.category}
                   </span>
                   <div className="flex items-center space-x-2">
@@ -169,40 +169,40 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                     <span>{post.readTime}</span>
                   </div>
                 </div>
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-secondary-900 mb-8 leading-tight">
+                <h1 className="text-xl md:text-5xl lg:text-6xl font-extrabold text-secondary-900 mb-6 md:mb-8 leading-tight">
                   {post.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-base text-secondary-500 mb-8 pb-8 border-b border-gray-100">
+                <div className="flex items-center space-x-3 md:space-x-4 text-sm md:text-base text-secondary-500 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
                       {post.author.charAt(0)}
                     </div>
                     <div>
                       <p className="font-bold text-secondary-900">{post.author}</p>
-                      <p className="text-sm">Expert Contributor</p>
+                      <p className="text-xs md:text-sm">Expert Contributor</p>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
                   {(post.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-secondary-50 text-secondary-600 px-4 py-1.5 rounded-lg text-base font-medium border border-gray-100">#{tag}</span>
+                    <span key={index} className="bg-secondary-50 text-secondary-600 px-4 py-1.5 rounded-lg text-sm md:text-base font-medium border border-gray-100">#{tag}</span>
                   ))}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-premium p-6 md:p-12 mb-8 md:mb-12 border border-gray-100">
-            <div className="mb-10 p-6 bg-primary-50/50 rounded-2xl border border-primary-100 relative overflow-hidden group">
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium p-4 md:p-12 mb-6 md:mb-12 border border-gray-100">
+            <div className="mb-8 md:mb-10 p-4 md:p-6 bg-primary-50/50 rounded-2xl border border-primary-100 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100/50 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover:scale-110"></div>
-              <h3 className="text-xl font-bold text-primary-900 mb-4 flex items-center relative z-10">
-                <BookOpen className="w-6 h-6 mr-3 text-accent-600" />
+              <h3 className="text-base md:text-xl font-bold text-primary-900 mb-3 md:mb-4 flex items-center relative z-10">
+                <BookOpen className="w-5 h-5 md:w-6 md:h-6 mr-3 text-accent-600" />
                 Core Topics in this Article
               </h3>
               <div className="space-y-3 relative z-10">
                 {tableOfContents.map((item, index) => (
                   <div key={index} className="ml-2 group/item">
-                    <a href={`#section-${item?.index || index}`} className="text-secondary-700 hover:text-primary-900 text-base transition-all duration-200 flex items-center">
+                    <a href={`#section-${item?.index || index}`} className="text-secondary-700 hover:text-primary-900 text-sm md:text-base transition-all duration-200 flex items-center">
                       <span className="w-1.5 h-1.5 bg-accent-500 rounded-full mr-3 opacity-0 group-hover/item:opacity-100 transition-opacity"></span>
                       {item?.title || ''}
                     </a>
@@ -222,20 +222,20 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
             <div className="bg-accent-500 h-full transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" style={{ width: `${readingProgress}%` }}></div>
           </div>
 
-          <div className="flex items-center space-x-2 text-base text-secondary-500 mb-6">
+          <div className="flex items-center space-x-2 text-sm md:text-base text-secondary-500 mb-4 md:mb-6">
             <BookOpen className="w-4 h-4" />
             <span>Estimated reading time: {post.readTime}</span>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-premium p-8 md:p-12 mb-12 border border-gray-100">
-            <h3 className="text-3xl font-bold text-secondary-900 mb-8">Related Strategy & Insights</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium p-6 md:p-12 mb-8 md:mb-12 border border-gray-100">
+            <h3 className="text-xl md:text-3xl font-bold text-secondary-900 mb-6 md:mb-8">Related Strategy & Insights</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {related.map((relatedPost) => (
                 <Link key={relatedPost.id} href={`/blog/${relatedPost.id}`} className="group block">
-                  <div className="bg-primary-50/30 rounded-2xl p-6 hover:bg-primary-50 transition-all duration-500 border border-transparent hover:border-primary-100 hover:shadow-premium group">
-                    <h4 className="text-xl font-bold text-secondary-900 group-hover:text-primary-900 transition-colors duration-200 mb-3 line-clamp-2">{relatedPost.title}</h4>
-                    <p className="text-base text-secondary-600 line-clamp-3 mb-4">{relatedPost.excerpt}</p>
-                    <div className="flex items-center space-x-4 text-sm text-secondary-500">
+                  <div className="bg-primary-50/30 rounded-2xl p-4 md:p-6 hover:bg-primary-50 transition-all duration-500 border border-transparent hover:border-primary-100 hover:shadow-premium group">
+                    <h4 className="text-base md:text-xl font-bold text-secondary-900 group-hover:text-primary-900 transition-colors duration-200 mb-2 md:mb-3 line-clamp-2">{relatedPost.title}</h4>
+                    <p className="text-sm md:text-base text-secondary-600 line-clamp-3 mb-3 md:mb-4">{relatedPost.excerpt}</p>
+                    <div className="flex items-center space-x-3 md:space-x-4 text-xs md:text-sm text-secondary-500">
                       <div className="flex items-center">
                         <Calendar className="w-3.5 h-3.5 mr-1.5" />
                         <span>{formatDateHuman(relatedPost.date, 'en-GB')}</span>
@@ -253,10 +253,10 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
 
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 bg-primary-900 text-accent-500 p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
+            className="fixed bottom-6 md:bottom-8 right-6 md:right-8 bg-primary-900 text-accent-500 p-3 md:p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
             aria-label="Back to top"
           >
-            <ArrowLeft className="w-6 h-6 rotate-90" />
+            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 rotate-90" />
           </button>
         </div>
       </div>

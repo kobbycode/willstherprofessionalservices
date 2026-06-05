@@ -21,7 +21,7 @@ const Clients = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-8 md:mb-16"
         >
           <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Our Clients
@@ -29,8 +29,8 @@ const Clients = () => {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
             Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Industry Leaders</span>
           </h2>
-          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-6 rounded-full" />
-          <p className="text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
+          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-4 md:mb-6 rounded-full" />
+          <p className="text-sm md:text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
             We are proud to serve a diverse range of prestigious clients across multiple sectors.
           </p>
         </motion.div>
@@ -43,9 +43,9 @@ const Clients = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.08 }}
               viewport={{ once: true }}
-              className="bg-white border border-secondary-100 rounded-[2.5rem] p-6 md:p-8 text-center group hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 hover:-translate-y-1"
+              className="bg-white border border-secondary-100 rounded-2xl md:rounded-[2.5rem] p-6 md:p-8 text-center group hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 flex items-center justify-center">
                 {client.logoUrl ? (
                   <Image
                     src={client.logoUrl}
@@ -56,8 +56,8 @@ const Clients = () => {
                     className="object-contain max-w-full max-h-full"
                   />
                 ) : (
-                  <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                    <Building2 className="w-7 h-7 text-primary-600" />
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+                    <Building2 className="w-6 h-6 md:w-7 md:h-7 text-primary-600" />
                   </div>
                 )}
               </div>

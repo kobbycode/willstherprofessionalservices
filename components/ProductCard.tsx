@@ -44,7 +44,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-5 rounded-2xl bg-white border border-gray-200/60 relative group transition-all duration-300 hover:shadow-2xl hover:shadow-primary-900/10 hover:-translate-y-1 h-full flex flex-col shadow-sm"
+            className="p-4 md:p-5 rounded-2xl bg-white border border-gray-200/60 relative group transition-all duration-300 hover:shadow-2xl hover:shadow-primary-900/10 hover:-translate-y-1 h-full flex flex-col shadow-sm"
         >
             {/* Image Section */}
             <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-gray-100 cursor-pointer">

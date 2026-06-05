@@ -51,18 +51,18 @@ const About = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
           <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Our Identity
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-3 md:mb-4 font-outfit tracking-tight uppercase">
             Redefining <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Excellence</span>
           </h2>
-          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
+          <div className="w-8 md:w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
         </motion.div>
 
-        <div className="grid lg:grid-cols-12 gap-12 items-center mb-24">
+        <div className="grid lg:grid-cols-12 gap-8 md:gap-12 items-center mb-16 md:mb-24">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -70,25 +70,25 @@ const About = () => {
             viewport={{ once: true }}
             className="lg:col-span-6 space-y-8"
           >
-            <h3 className="text-3xl md:text-5xl font-black text-secondary-900 font-outfit leading-[1.1] tracking-tight">
+            <h3 className="text-2xl md:text-5xl font-black text-secondary-900 font-outfit leading-[1.1] tracking-tight">
               {config.about.title || 'Professional Maintenance & Cleaning Services'}
             </h3>
-            <p className="text-xl text-secondary-600 leading-relaxed font-inter font-medium">
+            <p className="text-sm md:text-xl text-secondary-600 leading-relaxed font-inter font-medium">
               {config.about.content || 'WILLSTHER PROFESSIONAL SERVICES is a fast-growing industrial, commercial, and household maintenance services provider committed to delivering unparalleled quality.'}
             </p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 pt-4">
               {[
                 { title: 'Excellence Guaranteed', label: 'Superior Standards' },
                 { title: 'Expert Precision', label: 'Attentive Care' }
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary-500/20">
-                    <Shield className="w-5 h-5 text-white" />
+                <div key={i} className="flex items-center gap-3 md:gap-4">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-primary-600 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary-500/20">
+                    <Shield className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm font-black text-secondary-900 font-outfit uppercase tracking-wider">{item.title}</div>
-                    <div className="text-sm text-secondary-500 font-inter font-medium">{item.label}</div>
+                    <div className="text-xs md:text-sm font-black text-secondary-900 font-outfit uppercase tracking-wider">{item.title}</div>
+                    <div className="text-xs md:text-sm text-secondary-500 font-inter font-medium">{item.label}</div>
                   </div>
                 </div>
               ))}
@@ -96,13 +96,13 @@ const About = () => {
 
             <motion.div 
               whileHover={{ x: 10 }}
-              className="inline-flex items-center gap-4 pt-6 group cursor-pointer"
+              className="inline-flex items-center gap-3 md:gap-4 pt-4 md:pt-6 group cursor-pointer"
             >
-              <Link href="#contact" className="text-primary-600 font-black font-outfit text-lg tracking-tight uppercase">
+              <Link href="#contact" className="text-primary-600 font-black font-outfit text-sm md:text-lg tracking-tight uppercase">
                 Explore Our Commitment
               </Link>
-              <div className="w-10 h-10 border border-primary-600/20 rounded-full flex items-center justify-center group-hover:bg-primary-600 transition-colors duration-300">
-                <ChevronRight className="w-5 h-5 text-primary-600 group-hover:text-white transition-colors" />
+              <div className="w-8 h-8 md:w-10 md:h-10 border border-primary-600/20 rounded-full flex items-center justify-center group-hover:bg-primary-600 transition-colors duration-300">
+                <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-primary-600 group-hover:text-white transition-colors" />
               </div>
             </motion.div>
           </motion.div>
@@ -114,8 +114,8 @@ const About = () => {
             viewport={{ once: true }}
             className="lg:col-span-6 relative"
           >
-            <div className="relative z-10 bg-white border border-secondary-100 rounded-[3rem] p-2 overflow-hidden shadow-2xl">
-               <div className="aspect-[4/5] relative rounded-[2.8rem] overflow-hidden">
+            <div className="relative z-10 bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] p-2 overflow-hidden shadow-2xl">
+               <div className="aspect-[4/5] relative rounded-2xl md:rounded-[2.8rem] overflow-hidden">
                 <Image
                   src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1473&auto=format&fit=crop"
                   alt="Professional Services"
@@ -126,14 +126,14 @@ const About = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/60 via-transparent to-transparent"></div>
                 
                 {/* Floating stat card */}
-                <div className="absolute bottom-8 left-8 right-8 bg-white/90 rounded-3xl p-6 border border-white/20 backdrop-blur-xl shadow-xl">
+                <div className="absolute bottom-8 left-8 right-8 bg-white/90 rounded-2xl md:rounded-3xl p-4 md:p-6 border border-white/20 backdrop-blur-xl shadow-xl">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-secondary-900 font-black text-3xl font-outfit tracking-tighter">100%</div>
-                      <div className="text-secondary-500 text-sm font-bold font-inter uppercase tracking-[0.2em]">Satisfaction Rate</div>
+                      <div className="text-secondary-900 font-black text-2xl md:text-3xl font-outfit tracking-tighter">100%</div>
+                      <div className="text-secondary-500 text-xs md:text-sm font-bold font-inter uppercase tracking-[0.2em]">Satisfaction Rate</div>
                     </div>
-                    <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center">
-                      <Award className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-primary-600 rounded-2xl flex items-center justify-center">
+                      <Award className="w-5 h-5 md:w-6 md:h-6 text-white" />
                     </div>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ const About = () => {
         </div>
 
         {/* Core Values / Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={index}
@@ -154,25 +154,25 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white border border-secondary-100 group rounded-[2.5rem] p-8 transition-all duration-500 hover:-translate-y-4 flex flex-col items-center text-center h-full relative overflow-hidden shadow-xl shadow-secondary-200/5 hover:shadow-secondary-200/20"
+              className="bg-white border border-secondary-100 group rounded-2xl md:rounded-[2.5rem] p-5 md:p-8 transition-all duration-500 hover:-translate-y-4 flex flex-col items-center text-center h-full relative overflow-hidden shadow-xl shadow-secondary-200/5 hover:shadow-secondary-200/20"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
-              <div className="w-20 h-20 mb-8 relative">
-                <div className="absolute inset-0 bg-primary-600/10 rounded-3xl blur-xl group-hover:bg-primary-600/20 transition-colors" />
-                <div className="relative w-full h-full bg-white rounded-3xl flex items-center justify-center shadow-md border border-secondary-100 transform group-hover:rotate-12 transition-transform duration-500">
-                  <feature.icon className="w-10 h-10 text-primary-600" />
+              <div className="w-14 h-14 md:w-20 md:h-20 mb-6 md:mb-8 relative">
+                <div className="absolute inset-0 bg-primary-600/10 rounded-2xl md:rounded-3xl blur-xl group-hover:bg-primary-600/20 transition-colors" />
+                <div className="relative w-full h-full bg-white rounded-2xl md:rounded-3xl flex items-center justify-center shadow-md border border-secondary-100 transform group-hover:rotate-12 transition-transform duration-500">
+                  <feature.icon className="w-8 h-8 md:w-10 md:h-10 text-primary-600" />
                 </div>
               </div>
 
-              <h4 className="text-2xl font-black text-secondary-900 mb-4 font-outfit tracking-tight">
+              <h4 className="text-xl md:text-2xl font-black text-secondary-900 mb-3 md:mb-4 font-outfit tracking-tight">
                 {feature.title}
               </h4>
-              <p className="text-secondary-600 leading-relaxed font-inter font-medium mb-8">
+              <p className="text-secondary-600 leading-relaxed font-inter font-medium mb-6 md:mb-8">
                 {feature.description}
               </p>
 
-              <div className="mt-auto relative w-full aspect-square rounded-3xl overflow-hidden transition-all duration-700">
+              <div className="mt-auto relative w-full aspect-square rounded-2xl md:rounded-3xl overflow-hidden transition-all duration-700">
                 <Image
                   src={feature.image}
                   alt={feature.title}

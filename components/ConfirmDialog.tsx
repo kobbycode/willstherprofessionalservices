@@ -63,41 +63,41 @@ export const ConfirmDialog = ({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md mx-4 bg-white rounded-3xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md mx-4 bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden"
           >
             <button
               onClick={onClose}
               disabled={loading}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
-              <X className="w-5 h-5 text-gray-400" />
+              <X className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
             </button>
 
-            <div className="p-8">
-              <div className={`w-16 h-16 ${iconBgClass} rounded-full flex items-center justify-center mx-auto mb-6`}>
-                <Icon className="w-8 h-8" />
+            <div className="p-5 md:p-8">
+              <div className={`w-12 h-12 md:w-16 md:h-16 ${iconBgClass} rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6`}>
+                <Icon className="w-6 h-6 md:w-8 md:h-8" />
               </div>
 
-              <h2 className="text-xl font-bold text-gray-900 text-center mb-3">{title}</h2>
-              <p className="text-gray-600 text-center mb-8">{message}</p>
+              <h2 className="text-base md:text-xl font-bold text-gray-900 text-center mb-3">{title}</h2>
+              <p className="text-gray-600 text-center mb-6 md:mb-8">{message}</p>
 
               <div className="flex gap-4">
                 <button
                   onClick={onClose}
                   disabled={loading}
-                  className="flex-1 py-3 px-6 rounded-2xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="flex-1 py-3 px-6 rounded-xl md:rounded-2xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   {cancelText}
                 </button>
                 <button
                   onClick={onConfirm}
                   disabled={loading}
-                  className={`flex-1 py-3 px-6 rounded-2xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${buttonClass}`}
+                  className={`flex-1 py-3 px-6 rounded-xl md:rounded-2xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${buttonClass}`}
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : type === 'danger' ? (
-                    <CheckCircle className="w-5 h-5" />
+                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
                   ) : null}
                   {confirmText}
                 </button>

@@ -199,13 +199,13 @@ const Services = () => {
                       <motion.p 
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
-                        className="text-secondary-500 mb-12 text-center max-w-2xl mx-auto font-medium"
+                        className="text-secondary-500 mb-8 md:mb-12 text-center max-w-2xl mx-auto font-medium"
                       >
                         {categoryObj.subtitle}
                       </motion.p>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                       {categoryServices.map((service, serviceIndex) => (
                         <motion.div
                           key={service.id || serviceIndex}
@@ -215,8 +215,8 @@ const Services = () => {
                           viewport={{ once: true }}
                         >
                           <Link href={`/services/${service.id}`} className="group block">
-                            <div className="bg-white border border-secondary-100 rounded-[2.5rem] p-2 transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl hover:shadow-secondary-200 relative overflow-hidden backdrop-blur-3xl">
-                              <div className="aspect-[4/5] relative rounded-[2rem] overflow-hidden">
+                            <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[2.5rem] p-2 transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl hover:shadow-secondary-200 relative overflow-hidden backdrop-blur-3xl">
+                              <div className="aspect-[4/5] relative rounded-2xl md:rounded-[2rem] overflow-hidden">
                                 <Image
                                   src={service.image}
                                   alt={service.title}
@@ -226,8 +226,8 @@ const Services = () => {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-700"></div>
 
-                                <div className="absolute bottom-8 left-8 right-8 text-center translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-                                  <h4 className="text-xl font-black text-white font-outfit uppercase tracking-wider mb-2 text-shadow">
+                                <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 text-center translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+                                  <h4 className="text-base md:text-xl font-black text-white font-outfit uppercase tracking-wider mb-2 text-shadow">
                                     {service.title}
                                   </h4>
                                   <div className="w-12 h-1 bg-primary-500 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -243,11 +243,11 @@ const Services = () => {
               })}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white border border-secondary-100 rounded-[3rem] shadow-xl">
-            <div className="w-20 h-20 bg-primary-600/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Wrench className="w-10 h-10 text-primary-600" />
+          <div className="text-center py-20 bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] shadow-xl">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-primary-600/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Wrench className="w-8 h-8 md:w-10 md:h-10 text-primary-600" />
             </div>
-            <h3 className="text-2xl font-black text-secondary-900 mb-2 font-outfit uppercase tracking-tight">Services Coming Soon</h3>
+            <h3 className="text-xl md:text-2xl font-black text-secondary-900 mb-2 font-outfit uppercase tracking-tight">Services Coming Soon</h3>
             <p className="text-secondary-500 font-medium max-w-md mx-auto">
               We are currently curating the best professional solutions for you. Stay tuned.
             </p>
@@ -259,24 +259,24 @@ const Services = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
           viewport={{ once: true }}
-          className="mt-32"
+          className="mt-16 md:mt-32"
         >
-          <div className="bg-white border border-secondary-100 rounded-[4rem] p-12 md:p-20 relative overflow-hidden shadow-3xl shadow-secondary-200/20">
+          <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[4rem] p-12 md:p-20 relative overflow-hidden shadow-3xl shadow-secondary-200/20">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary-600/5 blur-[100px] rounded-full -mr-48 -mt-48" />
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600/5 blur-[80px] rounded-full -ml-32 -mb-32" />
             
-            <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative z-10 grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
               <div>
-                <h3 className="text-4xl md:text-6xl font-black text-secondary-900 mb-6 font-outfit tracking-tighter leading-tight">
+                <h3 className="text-2xl md:text-4xl md:text-6xl font-black text-secondary-900 mb-4 md:mb-6 font-outfit tracking-tighter leading-tight">
                   Need a Custom <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500">Service Plan?</span>
                 </h3>
-                <p className="text-secondary-600 text-lg md:text-xl font-medium leading-relaxed mb-10 max-w-xl">
+                <p className="text-secondary-600 text-sm md:text-lg md:text-xl font-medium leading-relaxed mb-6 md:mb-10 max-w-xl">
                   Whether it's industrial maintenance or premium commercial cleaning, we tailor our expertise to match your vision of excellence.
                 </p>
                 <Link
                   href="#contact"
-                  className="inline-flex items-center justify-center px-12 py-5 bg-primary-600 hover:bg-primary-700 text-white font-black font-outfit rounded-2xl transition-all duration-300 transform hover:-translate-y-1 shadow-2xl shadow-primary-500/30 gap-4 uppercase tracking-wider text-sm"
+                  className="inline-flex items-center justify-center px-6 py-3 md:px-12 md:py-5 bg-primary-600 hover:bg-primary-700 text-white font-black font-outfit rounded-2xl transition-all duration-300 transform hover:-translate-y-1 shadow-2xl shadow-primary-500/30 gap-4 uppercase tracking-wider text-xs md:text-sm"
                 >
                   Start a Conversation
                   <Target size={20} />
@@ -284,14 +284,14 @@ const Services = () => {
               </div>
               <div className="hidden lg:block relative">
                 <div className="absolute inset-0 bg-primary-600/10 blur-3xl rounded-full" />
-                <div className="relative bg-white border border-secondary-100 rounded-[3rem] p-8 rotate-3 shadow-xl">
-                  <div className="flex items-center gap-6 mb-6">
-                    <div className="w-16 h-16 bg-primary-600 rounded-3xl flex items-center justify-center shadow-xl">
-                      <ShieldCheck className="w-8 h-8 text-white" />
+                <div className="relative bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] p-5 md:p-8 rotate-3 shadow-xl">
+                  <div className="flex items-center gap-4 mb-4 md:gap-6 md:mb-6">
+                    <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl">
+                      <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-white" />
                     </div>
                     <div>
-                      <div className="text-secondary-900 font-black text-xl font-outfit uppercase">Elite Standards</div>
-                      <div className="text-secondary-500 text-sm font-medium">Beyond expectations. Always.</div>
+                      <div className="text-secondary-900 font-black text-base md:text-xl font-outfit uppercase">Elite Standards</div>
+                      <div className="text-secondary-500 text-xs md:text-sm font-medium">Beyond expectations. Always.</div>
                     </div>
                   </div>
                   <div className="space-y-4">

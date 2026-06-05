@@ -141,13 +141,13 @@ const BlogPage = () => {
       {/* Safe Area Container */}
       <div className="pt-20">
         {/* Blog Header */}
-        <div className="bg-white border-b border-gray-100 mt-8">
-          <div className="container-custom px-4 py-8">
+        <div className="bg-white border-b border-gray-100 mt-6 md:mt-8">
+            <div className="container-custom px-4 py-6 md:py-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <Link href="/" className="flex items-center space-x-2 text-secondary-500 hover:text-primary-600 transition-colors duration-200 group">
-                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                  <span className="font-medium text-sm uppercase tracking-widest">Back to Home</span>
+                  <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
+                  <span className="font-medium text-xs md:text-sm uppercase tracking-widest">Back to Home</span>
                 </Link>
               </div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary-900 text-center md:text-left tracking-tight">
@@ -157,13 +157,13 @@ const BlogPage = () => {
           </div>
         </div>
 
-        <div className="container-custom px-4 py-8 md:py-12">
+        <div className="container-custom px-4 py-6 md:py-12">
           {/* Search and Categories */}
-          <div className="mb-8 md:mb-12">
+          <div className="mb-6 md:mb-12">
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-between">
               {/* Search Bar */}
               <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 md:w-5 md:h-5" />
                 <input
                   type="text"
                   placeholder="Search articles..."
@@ -209,7 +209,7 @@ const BlogPage = () => {
                       <button
                         key={index}
                         onClick={() => handleCategoryChange(category)}
-                        className={`px-4 py-2.5 sm:py-2 rounded-lg text-base font-medium transition-all duration-300 ${category === activeCategory
+                        className={`px-4 py-2.5 sm:py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-300 ${category === activeCategory
                           ? 'bg-primary-900 text-accent-500 shadow-premium'
                           : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-900 border border-gray-100'
                           }`}
@@ -224,7 +224,7 @@ const BlogPage = () => {
 
             {/* Results Summary */}
             {!isLoading && blogPosts.length > 0 && (
-              <div className="mt-4 text-base text-secondary-500">
+              <div className="mt-4 text-sm md:text-base text-secondary-500">
                 Showing {sortedPosts.length} of {blogPosts.length} articles
                 {searchQuery && ` for "${searchQuery}"`}
                 {activeCategory !== 'All' && activeCategory !== '' && ` in ${activeCategory}`}
@@ -233,12 +233,12 @@ const BlogPage = () => {
           </div>
 
           {/* Featured Post */}
-          <div className="mb-12 md:mb-16">
+          <div className="mb-8 md:mb-16">
             {isLoading && blogPosts.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-premium overflow-hidden">
                 <div className="grid lg:grid-cols-2 gap-0">
-                  <Skeleton className="h-64 lg:h-[400px] w-full" />
-                  <div className="p-6 md:p-8 flex flex-col justify-center gap-4">
+                  <Skeleton className="h-44 md:h-64 lg:h-[400px] w-full" />
+                  <div className="p-4 md:p-8 flex flex-col justify-center gap-4">
                     <Skeleton className="h-4 w-32" />
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-20 w-full" />
@@ -252,7 +252,7 @@ const BlogPage = () => {
             ) : sortedPosts.length > 0 ? (
               <div className="bg-white rounded-2xl shadow-premium overflow-hidden group border border-gray-100">
                 <div className="grid lg:grid-cols-2 gap-0">
-                  <div className="relative h-64 lg:h-full overflow-hidden">
+                  <div className="relative h-44 md:h-64 lg:h-full overflow-hidden">
                     <Image
                       src={sortedPosts[0].image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop&crop=center'}
                       alt={sortedPosts[0].title}
@@ -262,14 +262,14 @@ const BlogPage = () => {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-4 left-4 z-10">
-                      <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-sm font-bold tracking-wider uppercase shadow-lg">
+                      <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs md:text-sm font-bold tracking-wider uppercase shadow-lg">
                         Featured
                       </span>
                     </div>
                   </div>
-                  <div className="p-6 md:p-8 flex flex-col justify-center">
-                    <div className="flex items-center space-x-4 text-base text-secondary-500 mb-4">
-                      <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold">
+                  <div className="p-4 md:p-8 flex flex-col justify-center">
+                    <div className="flex items-center space-x-3 md:space-x-4 text-sm md:text-base text-secondary-500 mb-4">
+                      <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
                         {sortedPosts[0].category}
                       </span>
                       <div className="flex items-center space-x-2">
@@ -281,20 +281,20 @@ const BlogPage = () => {
                         <span>{sortedPosts[0].readTime}</span>
                       </div>
                     </div>
-                    <h2 className="text-lg md:text-xl font-semibold text-secondary-900 mb-3 tracking-snug">
+                    <h2 className="text-base md:text-xl font-semibold text-secondary-900 mb-3 tracking-snug">
                       {sortedPosts[0].title}
                     </h2>
-                    <p className="text-secondary-600 mb-6 text-base md:text-base leading-relaxed opacity-80">
+                    <p className="text-secondary-600 mb-4 md:mb-6 text-sm md:text-base leading-relaxed opacity-80">
                       {sortedPosts[0].excerpt || 'No excerpt available'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-base text-secondary-500">
+                      <div className="flex items-center space-x-2 text-sm md:text-base text-secondary-500">
                         <User className="w-4 h-4" />
                         <span>{sortedPosts[0].author}</span>
                       </div>
                       <Link
                         href={`/blog/${sortedPosts[0].id}`}
-                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 py-3 sm:py-2.5 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-5 md:px-6 py-3 sm:py-2.5 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                       >
                         Read More
                       </Link>
@@ -303,12 +303,12 @@ const BlogPage = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-premium p-12 text-center border border-gray-100">
-                <div className="bg-primary-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search className="w-10 h-10 text-primary-300" />
+              <div className="bg-white rounded-2xl shadow-premium p-6 md:p-12 text-center border border-gray-100">
+                <div className="bg-primary-50 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <Search className="w-8 h-8 md:w-10 md:h-10 text-primary-300" />
                 </div>
-                <h3 className="text-xl font-semibold text-secondary-900 mb-3">No published articles yet</h3>
-                <p className="text-secondary-500 mb-3 text-base">Check back later for our latest cleaning tips and industry insights.</p>
+                <h3 className="text-base md:text-xl font-semibold text-secondary-900 mb-2 md:mb-3">No published articles yet</h3>
+                <p className="text-secondary-500 mb-2 md:mb-3 text-sm md:text-base">Check back later for our latest cleaning tips and industry insights.</p>
                 <p className="text-[13px] text-secondary-400 uppercase tracking-widest">Admins: Make sure to publish posts in the admin panel.</p>
               </div>
             )}
@@ -316,11 +316,11 @@ const BlogPage = () => {
 
           {/* Blog Grid - Exclude featured post */}
           {isLoading && blogPosts.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="bg-white rounded-2xl shadow-premium overflow-hidden border border-gray-100">
-                  <Skeleton className="h-56 w-full" />
-                  <div className="p-6 flex flex-col gap-4">
+                  <Skeleton className="h-40 md:h-56 w-full" />
+                  <div className="p-4 md:p-6 flex flex-col gap-4">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-8 w-full" />
                     <Skeleton className="h-16 w-full" />
@@ -333,21 +333,21 @@ const BlogPage = () => {
               ))}
             </div>
           ) : sortedPosts.length <= 1 ? (
-            <div className="bg-white rounded-2xl shadow-premium p-12 text-center border border-gray-100 max-w-2xl mx-auto">
-              <div className="bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-primary-300" />
-              </div>
-              <h3 className="text-lg font-semibold text-secondary-900 mb-2">No more articles</h3>
-              <p className="text-secondary-500 text-base">This is all we have for now. Check back later for more premium content!</p>
+              <div className="bg-white rounded-2xl shadow-premium p-6 md:p-12 text-center border border-gray-100 max-w-2xl mx-auto">
+                <div className="bg-primary-50 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-6 h-6 md:w-8 md:h-8 text-primary-300" />
+                </div>
+                <h3 className="text-base md:text-lg font-semibold text-secondary-900 mb-2">No more articles</h3>
+                <p className="text-secondary-500 text-sm md:text-base">This is all we have for now. Check back later for more premium content!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {sortedPosts.slice(1).map((post, index) => (
                 <article
                   key={post.id}
                   className="bg-white rounded-2xl shadow-premium overflow-hidden hover:shadow-premium-hover transition-all duration-500 hover:-translate-y-2 group border border-gray-100"
                 >
-                  <div className="relative h-56 overflow-hidden">
+                  <div className="relative h-40 md:h-56 overflow-hidden">
                     <Image
                       src={post.image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'}
                       alt={post.title}
@@ -356,13 +356,13 @@ const BlogPage = () => {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-3 left-3 z-10">
-                      <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-sm font-bold tracking-wide uppercase shadow-sm">
+                      <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-xs md:text-sm font-bold tracking-wide uppercase shadow-sm">
                         {post.category}
                       </span>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-center space-x-4 text-sm text-secondary-500 mb-3">
+                  <div className="p-4 md:p-6">
+                    <div className="flex items-center space-x-3 md:space-x-4 text-xs md:text-sm text-secondary-500 mb-2 md:mb-3">
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDateHuman(post.date, 'en-GB')}</span>
@@ -372,20 +372,20 @@ const BlogPage = () => {
                         <span>{post.readTime}</span>
                       </div>
                     </div>
-                    <h3 className="text-base md:text-lg font-semibold text-secondary-900 mb-2 line-clamp-2 tracking-snug">
+                    <h3 className="text-sm md:text-lg font-semibold text-secondary-900 mb-2 line-clamp-2 tracking-snug">
                       {post.title}
                     </h3>
-                    <p className="text-secondary-600 text-[15px] mb-4 line-clamp-2 leading-relaxed opacity-70">
+                    <p className="text-secondary-600 text-sm md:text-[15px] mb-3 md:mb-4 line-clamp-2 leading-relaxed opacity-70">
                       {post.excerpt || 'No excerpt available'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm text-secondary-500">
+                      <div className="flex items-center space-x-2 text-xs md:text-sm text-secondary-500">
                         <User className="w-3 h-3" />
                         <span>{post.author}</span>
                       </div>
                       <Link
                         href={`/blog/${post.id}`}
-                        className="text-primary-900 hover:text-accent-600 font-bold text-base transition-colors duration-200 flex items-center group/btn"
+                        className="text-primary-900 hover:text-accent-600 font-bold text-sm md:text-base transition-colors duration-200 flex items-center group/btn"
                       >
                         <span>Read More</span>
                         <ArrowLeft className="w-4 h-4 ml-1 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
@@ -399,15 +399,15 @@ const BlogPage = () => {
 
           {/* Load More Button */}
           {hasMore && sortedPosts.length > 1 && (
-            <div className="mt-8 text-center">
+            <div className="mt-6 md:mt-8 text-center">
               <button
                 onClick={loadMorePosts}
                 disabled={isLoading}
-                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-8 py-3.5 sm:py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
+                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 md:px-8 py-3 md:py-3.5 sm:py-3 rounded-xl text-xs md:text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
-                    <div className="w-5 h-5 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
+                    <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
                     <span>Loading...</span>
                   </div>
                 ) : 'Load More Articles'}
@@ -416,30 +416,30 @@ const BlogPage = () => {
           )}
 
           {/* Newsletter Signup */}
-          <div className="mt-16 md:mt-24 bg-white rounded-3xl p-8 md:p-16 text-center text-secondary-900 relative overflow-hidden border border-gray-100 shadow-xl shadow-secondary-900/5">
+          <div className="mt-12 md:mt-24 bg-white rounded-2xl md:rounded-3xl p-6 md:p-16 text-center text-secondary-900 relative overflow-hidden border border-gray-100 shadow-xl shadow-secondary-900/5">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-40">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-100/30 via-transparent to-transparent"></div>
             </div>
 
             <div className="relative z-10 max-w-3xl mx-auto">
-              <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-4 tracking-tight">
+              <h3 className="text-xl md:text-3xl lg:text-4xl font-semibold mb-4 tracking-tight">
                 Stay Ahead of the <span className="text-primary-600 font-bold">Curve</span>
               </h3>
-              <p className="text-secondary-600 mb-10 text-base md:text-lg opacity-80 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-secondary-600 mb-8 md:mb-10 text-sm md:text-lg opacity-80 max-w-2xl mx-auto leading-relaxed">
                 Subscribe for premium maintenance tips, exclusive industry insights, and seasonal guides delivered straight to your inbox.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto bg-gray-50 p-2 rounded-2xl border border-gray-100">
                 <input
                   type="email"
                   placeholder="Your professional email"
-                  className="flex-1 px-6 py-4 rounded-xl bg-white text-secondary-900 placeholder:text-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none shadow-inner transition-all duration-300"
+                  className="flex-1 px-5 md:px-6 py-3 md:py-4 rounded-xl bg-white text-secondary-900 placeholder:text-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none shadow-inner transition-all duration-300"
                 />
-                <button className="bg-primary-600 text-white px-8 py-3.5 sm:py-3 rounded-xl text-sm font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
+                <button className="bg-primary-600 text-white px-6 md:px-8 py-3 md:py-3.5 sm:py-3 rounded-xl text-xs md:text-sm font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
                   Subscribe
                 </button>
               </div>
-              <p className="text-xs text-secondary-400 mt-6 uppercase tracking-widest font-semibold">
+              <p className="text-xs text-secondary-400 mt-4 md:mt-6 uppercase tracking-widest font-semibold">
                 Luxury service, zero spam. Unsubscribe at any time.
               </p>
             </div>
@@ -448,10 +448,10 @@ const BlogPage = () => {
           {/* Back to Top */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 bg-primary-900 text-accent-500 p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
+            className="fixed bottom-6 md:bottom-8 right-6 md:right-8 bg-primary-900 text-accent-500 p-3 md:p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
             aria-label="Back to top"
           >
-            <ArrowLeft className="w-6 h-6 rotate-90" />
+            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 rotate-90" />
           </button>
         </div>
       </div>

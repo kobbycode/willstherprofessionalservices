@@ -18,7 +18,7 @@ const Gallery = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-4 opacity-30">Gallery</h2>
             <div className="w-20 h-1 bg-primary-200 mx-auto" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[...Array(6)].map((_, i) => (
               <Skeleton key={i} className="h-64 rounded-2xl" />
             ))}
@@ -63,7 +63,7 @@ const Gallery = () => {
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {items.map((g, i) => (
             <motion.div
               key={g.id || i}
@@ -71,7 +71,7 @@ const Gallery = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="group relative h-[300px] md:h-[400px] overflow-hidden rounded-[2.5rem] bg-slate-200 dark:bg-slate-800 shadow-2xl hover:shadow-primary-500/20 transition-all duration-500"
+              className="group relative h-[300px] md:h-[400px] overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-slate-200 dark:bg-slate-800 shadow-2xl hover:shadow-primary-500/20 transition-all duration-500"
             >
               {g.imageUrl ? (
                 <>
@@ -88,9 +88,9 @@ const Gallery = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
                   
                   {/* Content Overlay */}
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                  <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
                     {g.caption && (
-                      <div className="glass-card p-4 rounded-[1.5rem] backdrop-blur-xl">
+                      <div className="glass-card p-4 rounded-2xl md:rounded-[1.5rem] backdrop-blur-xl">
                         <p className="text-white text-xs sm:text-[12px] sm:text-[13px] font-bold font-outfit uppercase tracking-widest leading-tight mb-2">
                           {g.caption}
                         </p>

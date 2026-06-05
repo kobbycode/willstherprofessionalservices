@@ -279,7 +279,7 @@ const Header = () => {
                 className="p-3 sm:p-2 rounded-lg text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
                 aria-label="Toggle mobile menu"
               >
-                {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+                {isMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
               </button>
             </div>
           </div>
@@ -296,7 +296,7 @@ const Header = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item)}
-                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
                       }`}
                   >
                     {item.name}
@@ -305,7 +305,7 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
                       }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -316,7 +316,7 @@ const Header = () => {
               <div className="pt-3 sm:pt-4 border-t border-primary-500">
                 <button
                   onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                  className="block w-full text-center bg-white hover:bg-primary-50 text-primary-600 font-black py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg shadow-lg transition-all duration-300 text-sm sm:text-base font-outfit uppercase tracking-wider"
+                  className="block w-full text-center bg-white hover:bg-primary-50 text-primary-600 font-black py-3 px-4 md:px-6 rounded-lg shadow-lg transition-all duration-300 text-xs sm:text-sm md:text-base font-outfit uppercase tracking-wider"
                 >
                   Get Quote
                 </button>

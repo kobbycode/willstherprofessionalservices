@@ -69,7 +69,7 @@ export default function ShopPage() {
         <main className="min-h-screen bg-[#fafafa] pt-[56px] md:pt-[118px]">
 
             {/* Hero Section */}
-            <div className="relative bg-white text-secondary-900 pt-20 pb-20 px-4 overflow-hidden border-b border-gray-100">
+            <div             className="relative bg-white text-secondary-900 pt-14 pb-14 md:pt-20 md:pb-20 px-4 overflow-hidden border-b border-gray-100">
                 {/* Dynamic Background Elements */}
                 <div className="absolute inset-0">
                     <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-100/50 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse" />
@@ -82,7 +82,7 @@ export default function ShopPage() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-4 md:mb-6 text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
                     >
                         <ShoppingBag size={12} />
                         <span>Professional Cleaning Supplies</span>
@@ -91,7 +91,7 @@ export default function ShopPage() {
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-6 tracking-tight text-secondary-900"
+                        className="text-xl md:text-3xl lg:text-4xl font-semibold mb-4 md:mb-6 tracking-tight text-secondary-900"
                     >
                         Our Premium <span className="text-primary-600 font-bold">Shop</span>
                     </motion.h1>
@@ -114,9 +114,9 @@ export default function ShopPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-white rounded-2xl shadow-xl shadow-secondary-900/5 border border-gray-100 p-4 md:p-5 mb-10"
+                    className="bg-white rounded-2xl shadow-xl shadow-secondary-900/5 border border-gray-100 p-4 md:p-5 mb-7 md:mb-10"
                 >
-                    <div className="flex flex-col lg:flex-row gap-4 items-center">
+                    <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-center">
                         <div className="relative flex-1 w-full">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors" size={16} />
                             <input
@@ -167,11 +167,11 @@ export default function ShopPage() {
 
                 {/* Product Grid */}
                 {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         {[...Array(8)].map((_, i) => (
                             <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 p-0">
                                 <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                                <div className="p-5 space-y-4">
+                                <div className="p-4 md:p-5 space-y-4">
                                     <Skeleton className="h-4 w-3/4" />
                                     <Skeleton className="h-6 w-1/3" />
                                     <div className="flex gap-2 pt-2">
@@ -183,7 +183,7 @@ export default function ShopPage() {
                         ))}
                     </div>
                 ) : filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         {filteredProducts.map(product => (
                             <ProductCard
                                 key={product.id}
@@ -193,12 +193,12 @@ export default function ShopPage() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm border-dashed">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <ShoppingBag className="w-6 h-6 text-gray-300" />
+                    <div className="text-center py-14 md:py-20 bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm border-dashed">
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-                        <p className="text-sm text-gray-500 max-w-xs mx-auto mb-6">
+                        <h3 className="text-sm md:text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+                        <p className="text-sm text-gray-500 max-w-xs mx-auto mb-4 md:mb-6">
                             {searchTerm
                                 ? `We couldn't find any products matching "${searchTerm}"`
                                 : "Check back later for new professional supplies!"}

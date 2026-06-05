@@ -88,7 +88,7 @@ const Stats = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 md:mb-16"
         >
           <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Our Impact
@@ -98,17 +98,17 @@ const Stats = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase"
+            className="text-xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-3 md:mb-4 font-outfit tracking-tight uppercase"
           >
             {title}
           </motion.h2>
-          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-6 rounded-full"></div>
-          <p className="text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
+          <div className="w-8 md:w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-4 md:mb-6 rounded-full"></div>
+          <p className="text-sm md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
             {subtitle}
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
           {items.map((stat, index) => {
             const Icon = iconMap[stat.icon] || Building
             return (
@@ -118,15 +118,15 @@ const Stats = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="p-5 rounded-[2.5rem] bg-white border border-secondary-100 relative group transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5"
+                className="p-5 rounded-2xl md:rounded-[2.5rem] bg-white border border-secondary-100 relative group transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5"
               >
                 {/* Decorative Elements */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/5 blur-3xl rounded-full group-hover:bg-primary-500/10 transition-colors"></div>
                 <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full group-hover:bg-blue-500/10 transition-colors"></div>
 
-                <div className="relative mb-8">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-500 border border-secondary-100 shadow-sm">
-                    <Icon className="w-8 h-8 text-primary-600" />
+                <div className="relative mb-6 md:mb-8">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-500 border border-secondary-100 shadow-sm">
+                    <Icon className="w-6 h-6 md:w-8 md:h-8 text-primary-600" />
                   </div>
                 </div>
 
@@ -148,13 +148,13 @@ const Stats = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.4 }}
           viewport={{ once: true }}
-          className="text-center mt-32"
+          className="text-center mt-16 md:mt-32"
         >
-          <div className="bg-white border border-secondary-100 rounded-[3rem] p-12 lg:p-16 relative overflow-hidden group max-w-5xl mx-auto shadow-xl shadow-secondary-200/20">
+          <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] p-6 md:p-12 lg:p-16 relative overflow-hidden group max-w-5xl mx-auto shadow-xl shadow-secondary-200/20">
             <div className="absolute inset-0 bg-gradient-to-br from-primary-600/5 via-transparent to-blue-600/5 transition-opacity group-hover:opacity-80"></div>
             
             <div className="relative z-10 flex flex-col items-center">
-              <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-600/10 border border-primary-600/20 text-primary-600 text-xs font-bold tracking-widest uppercase">
+              <div className="mb-6 md:mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-600/10 border border-primary-600/20 text-primary-600 text-xs font-bold tracking-widest uppercase">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
@@ -162,20 +162,20 @@ const Stats = () => {
                 Start Your Project
               </div>
 
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 text-secondary-900 font-outfit tracking-tight max-w-2xl leading-[1.1]">
+              <h3 className="text-2xl sm:text-4xl md:text-5xl font-black mb-4 md:mb-6 text-secondary-900 font-outfit tracking-tight max-w-2xl leading-[1.1]">
                 Ready to Experience <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400 italic">Premium</span> Service?
               </h3>
               
-              <p className="text-secondary-600 mb-10 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+              <p className="text-secondary-600 mb-6 md:mb-10 text-sm md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
                 Join our premium clientele and witness the transformation of your property with our bespoke professional solutions.
               </p>
               
                 <Link
                   href="#contact"
-                  className="group relative inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-5 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-4 overflow-hidden"
+                  className="group relative inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-3 md:py-5 px-6 md:px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 md:gap-4 overflow-hidden"
               >
-                <span className="relative z-10 text-base font-outfit uppercase tracking-wider">Get Started Now</span>
-                <TrendingUp className="w-5 h-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <span className="relative z-10 text-sm md:text-base font-outfit uppercase tracking-wider">Get Started Now</span>
+                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 <div className="absolute inset-0 bg-gradient-to-r from-primary-500/0 via-primary-500/20 to-primary-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
               </Link>
             </div>

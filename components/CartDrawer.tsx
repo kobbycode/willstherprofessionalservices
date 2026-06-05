@@ -33,8 +33,8 @@ export const CartDrawer = () => {
                             transition={{ type: 'spring', damping: 20 }}
                             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-[70] flex flex-col"
                         >
-                            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                                <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2 uppercase tracking-[0.2em] font-outfit">
+                            <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
+                                <h2 className="text-sm md:text-base font-semibold text-gray-900 flex items-center gap-2 uppercase tracking-[0.2em] font-outfit">
                                     <ShoppingBag size={18} />
                                     Your Cart ({cart.length})
                                 </h2>
@@ -46,22 +46,22 @@ export const CartDrawer = () => {
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6">
                                 {cart.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-gray-300">
                                         <ShoppingBag size={48} className="mb-4 opacity-20" />
-                                        <p className="text-base font-medium uppercase tracking-widest">Your cart is empty</p>
+                                        <p className="text-sm md:text-base font-medium uppercase tracking-widest">Your cart is empty</p>
                                         <button
                                             onClick={() => setIsCartOpen(false)}
-                                            className="mt-3 text-sm sm:text-[13px] text-primary-600 font-semibold hover:underline uppercase tracking-widest"
+                                            className="mt-3 text-xs sm:text-[13px] md:text-sm text-primary-600 font-semibold hover:underline uppercase tracking-widest"
                                         >
                                             Start Shopping
                                         </button>
                                     </div>
                                 ) : (
                                     cart.map(({ product, quantity }) => (
-                                        <div key={product.id} className={`flex gap-4 p-4 rounded-xl ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
-                                            <div className="relative w-20 h-20 bg-white rounded-lg overflow-hidden border border-gray-200">
+                                        <div key={product.id} className={`flex gap-3 md:gap-4 p-4 rounded-xl ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
+                                            <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white rounded-lg overflow-hidden border border-gray-200">
                                                 {product.imageUrl && (
                                                     <Image
                                                         src={product.imageUrl}
@@ -78,17 +78,17 @@ export const CartDrawer = () => {
                                                 )}
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 mb-1">{product.title}</h3>
+                                                <h3 className="text-xs md:text-sm font-semibold text-gray-900 line-clamp-1 mb-1">{product.title}</h3>
                                                 {!product.inStock && (
                                                     <div className="flex items-center gap-1 text-red-500 mb-1">
                                                         <AlertCircle size={12} />
                                                         <span className="text-[11px] font-bold uppercase tracking-wider">Currently Unavailable</span>
                                                     </div>
                                                 )}
-                                                <p className="text-xs sm:text-[13px] text-primary-600 font-bold mb-3 italic font-outfit">GH₵{product.price.toFixed(2)}</p>
+                                                <p className="text-xs sm:text-[13px] text-primary-600 font-bold mb-2 md:mb-3 italic font-outfit">GH₵{product.price.toFixed(2)}</p>
 
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2">
+                                                    <div className="flex items-center gap-2 md:gap-3 bg-white border border-gray-200 rounded-lg px-2">
                                                         <button
                                                             onClick={() => updateQuantity(product.id, quantity - 1)}
                                                             className="p-2.5 sm:p-1 hover:text-primary-600 disabled:opacity-50"
@@ -96,7 +96,7 @@ export const CartDrawer = () => {
                                                         >
                                                             <Minus size={16} />
                                                         </button>
-                                                        <span className="text-base font-medium w-4 text-center">{quantity}</span>
+                                                        <span className="text-sm md:text-base font-medium w-4 text-center">{quantity}</span>
                                                         <button
                                                             onClick={() => updateQuantity(product.id, quantity + 1)}
                                                             className="p-2.5 sm:p-1 hover:text-primary-600"
@@ -118,14 +118,14 @@ export const CartDrawer = () => {
                             </div>
 
                             {cart.length > 0 && (
-                                <div className="p-6 border-t border-gray-100 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
+                                <div className="p-4 md:p-6 border-t border-gray-100 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
                                     <div className="flex justify-between items-center mb-6">
                                         <span className="text-xs sm:text-[12px] uppercase tracking-widest text-gray-400 font-semibold">Subtotal</span>
-                                        <span className="text-lg font-bold text-gray-900 italic font-outfit">GH₵{cartTotal.toFixed(2)}</span>
+                                        <span className="text-sm md:text-lg font-bold text-gray-900 italic font-outfit">GH₵{cartTotal.toFixed(2)}</span>
                                     </div>
                                     <button
                                         onClick={() => setIsCheckoutOpen(true)}
-                                        className="w-full py-4 sm:py-3.5 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] uppercase tracking-[0.3em] rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                                        className="w-full py-3 sm:py-3.5 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] uppercase tracking-[0.3em] rounded-xl shadow-lg transition-all active:scale-[0.98]"
                                     >
                                         Proceed to Checkout
                                     </button>

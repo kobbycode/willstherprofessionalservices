@@ -145,11 +145,11 @@ const Hero = memo(() => {
   }
 
   return (
-    <section id="home" className="relative h-screen bg-secondary-950 overflow-hidden pt-14 sm:pt-16">
+    <section id="home" className="relative h-screen bg-secondary-950 overflow-hidden pt-10 sm:pt-16">
       {/* Loading State */}
       {isLoading && (
         <div className="absolute inset-0 bg-white flex items-center justify-center z-[100]">
-          <div className="w-20 h-20 border-2 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
+          <div className="w-14 h-14 md:w-20 md:h-20 border-2 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
         </div>
       )}
 
@@ -222,7 +222,7 @@ const Hero = memo(() => {
                           transition={{ delay: 0.3, duration: 0.8 }}
                           className="flex items-center gap-4 mb-3"
                         >
-                          <div className="w-6 h-[1px] bg-primary-400"></div>
+                          <div className="w-4 h-[1px] md:w-6 bg-primary-400"></div>
                           <span className="text-white font-bold tracking-[0.5em] uppercase text-xs sm:text-[11px]">
                             Premier Property Solutions
                           </span>
@@ -232,7 +232,7 @@ const Hero = memo(() => {
                           initial={{ y: 40, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                          className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-4 leading-tight tracking-[0.15em] font-outfit text-secondary-900 uppercase italic"
+                          className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-3 md:mb-4 leading-tight tracking-[0.15em] font-outfit text-secondary-900 uppercase italic"
                         >
                           {slide.title.split(' ').map((word, i) => (
                             <span key={i} className={i === 1 ? 'text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-200 inline-block' : 'inline-block mr-2 text-white'}>
@@ -245,7 +245,7 @@ const Hero = memo(() => {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.7, duration: 0.8 }}
-                          className="text-xs sm:text-[12px] lg:text-sm mb-8 max-w-sm text-white/70 font-medium leading-relaxed text-balance tracking-widest uppercase"
+                          className="text-xs sm:text-[12px] lg:text-sm mb-6 md:mb-8 max-w-sm text-white/70 font-medium leading-relaxed text-balance tracking-widest uppercase"
                         >
                           {slide.description}
                         </motion.p>
@@ -254,7 +254,7 @@ const Hero = memo(() => {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.9, duration: 0.8 }}
-                          className="flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+                          className="flex flex-col sm:flex-row gap-3 md:gap-4 items-start sm:items-center"
                         >
                           <Link
                             href={slide.ctaLink}
@@ -285,21 +285,21 @@ const Hero = memo(() => {
 
         {/* Navigation Controls */}
         {slides.length > 1 && (
-          <div className="absolute bottom-10 right-10 flex items-center gap-2 z-20">
+          <div className="absolute bottom-8 right-8 md:bottom-10 md:right-10 flex items-center gap-2 z-20">
             <button
               onClick={prevSlide}
-              className="w-11 h-11 sm:w-10 sm:h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
+              className="w-10 h-10 md:w-11 md:h-11 sm:w-10 sm:h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
               aria-label="Previous slide"
             >
-              <ChevronLeft className="w-5 h-5 transform group-hover:-translate-x-0.5 transition-transform" />
+              <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 transform group-hover:-translate-x-0.5 transition-transform" />
             </button>
             <div className="h-6 w-[1px] bg-white/10 mx-1"></div>
             <button
               onClick={nextSlide}
-              className="w-11 h-11 sm:w-10 sm:h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
+              className="w-10 h-10 md:w-11 md:h-11 sm:w-10 sm:h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
               aria-label="Next slide"
             >
-              <ChevronRight className="w-5 h-5 transform group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4 md:w-5 md:h-5 transform group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         )}
@@ -310,7 +310,7 @@ const Hero = memo(() => {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`h-1 rounded-full transition-all duration-500 ${index === currentSlide ? 'w-10 bg-primary-500' : 'w-3 bg-secondary-200 hover:bg-secondary-300'}`}
+              className={`h-1 rounded-full transition-all duration-500 ${index === currentSlide ? 'w-8 md:w-10 bg-primary-500' : 'w-2 md:w-3 bg-secondary-200 hover:bg-secondary-300'}`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -320,9 +320,9 @@ const Hero = memo(() => {
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-white/40"
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 md:gap-4 text-white/40"
         >
-          <div className="w-[1px] h-20 bg-gradient-to-b from-secondary-200 to-transparent"></div>
+          <div className="w-[1px] h-14 md:h-20 bg-gradient-to-b from-secondary-200 to-transparent"></div>
         </motion.div>
       </motion.div>
     </section>

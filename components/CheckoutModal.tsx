@@ -121,23 +121,23 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                         exit={{ opacity: 0, scale: 0.95 }}
                         className="bg-white rounded-none md:rounded-2xl w-full max-w-lg shadow-2xl max-h-screen md:max-h-[90vh] overflow-y-auto m-0 md:m-4"
                     >
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50/50">
+                        <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50/50">
                             <div>
-                                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-[0.2em] font-outfit">Checkout</h3>
-                                <p className="text-sm sm:text-[12px] text-gray-400 mt-0.5 uppercase tracking-widest">Complete your order</p>
+                                <h3 className="text-xs md:text-sm font-semibold text-gray-900 uppercase tracking-[0.2em] font-outfit">Checkout</h3>
+                                <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-0.5 uppercase tracking-widest">Complete your order</p>
                             </div>
                             <button onClick={onClose} className="p-3 sm:p-2 hover:bg-white rounded-full transition-colors text-gray-500">
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-6">
                             {/* User Details */}
                             <div className="space-y-4">
                                 <h4 className="text-xs sm:text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Contact Details</h4>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-3 md:gap-4">
                                     <div className="col-span-2">
-                                        <label className="text-sm sm:text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Full Name</label>
+                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Full Name</label>
                                         <input
                                             required
                                             type="text"
@@ -147,7 +147,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         />
                                     </div>
                                     <div className="col-span-2 sm:col-span-1">
-                                        <label className="text-sm sm:text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Email (Optional)</label>
+                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Email (Optional)</label>
                                         <input
                                             type="email"
                                             className="w-full mt-1 p-3 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
@@ -156,7 +156,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         />
                                     </div>
                                     <div className="col-span-2 sm:col-span-1">
-                                        <label className="text-sm sm:text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Phone Number</label>
+                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Phone Number</label>
                                         <input
                                             required
                                             type="tel"
@@ -166,7 +166,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="text-sm sm:text-[12px] uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Delivery Address</label>
+                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Delivery Address</label>
                                         <textarea
                                             required
                                             rows={2}
@@ -182,64 +182,64 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                             <div className="space-y-4">
                                 <h4 className="text-xs sm:text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Payment Method</h4>
                                 <div className="grid gap-3">
-                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-4 transition-all ${paymentMethod === 'paystack' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
+                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'paystack' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
                                             type="radio"
                                             name="payment"
                                             value="paystack"
                                             checked={paymentMethod === 'paystack'}
                                             onChange={() => setPaymentMethod('paystack')}
-                                            className="w-5 h-5 text-primary-600"
+                                            className="w-4 h-4 md:w-5 md:h-5 text-primary-600"
                                         />
                                         <div className="flex-1">
-                                            <div className="text-sm sm:text-[13px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
+                                            <div className="text-xs sm:text-[13px] md:text-sm uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
                                                 <CreditCard size={18} />
                                                 Pay Online
                                             </div>
-                                            <p className="text-sm sm:text-[12px] text-gray-400 mt-1 uppercase tracking-tight">Secure via Paystack</p>
+                                            <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-1 uppercase tracking-tight">Secure via Paystack</p>
                                         </div>
                                     </label>
 
-                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-4 transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
+                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
                                             type="radio"
                                             name="payment"
                                             value="cod"
                                             checked={paymentMethod === 'cod'}
                                             onChange={() => setPaymentMethod('cod')}
-                                            className="w-5 h-5 text-primary-600"
+                                            className="w-4 h-4 md:w-5 md:h-5 text-primary-600"
                                         />
                                         <div className="flex-1">
-                                            <div className="text-sm sm:text-[13px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
+                                            <div className="text-xs sm:text-[13px] md:text-sm uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
                                                 <Banknote size={18} />
                                                 Pay on Delivery
                                             </div>
-                                            <p className="text-sm sm:text-[12px] text-gray-400 mt-1 uppercase tracking-tight">Cash or Momo</p>
+                                            <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-1 uppercase tracking-tight">Cash or Momo</p>
                                         </div>
                                     </label>
 
-                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-4 transition-all ${paymentMethod === 'whatsapp' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
+                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'whatsapp' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
                                             type="radio"
                                             name="payment"
                                             value="whatsapp"
                                             checked={paymentMethod === 'whatsapp'}
                                             onChange={() => setPaymentMethod('whatsapp')}
-                                            className="w-5 h-5 text-primary-600"
+                                            className="w-4 h-4 md:w-5 md:h-5 text-primary-600"
                                         />
                                         <div className="flex-1">
-                                            <div className="text-sm sm:text-[13px] uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
+                                            <div className="text-xs sm:text-[13px] md:text-sm uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
                                                 <MessageCircle size={18} />
                                                 WhatsApp Order
                                             </div>
-                                            <p className="text-sm sm:text-[12px] text-gray-400 mt-1 uppercase tracking-tight">Chat with support</p>
+                                            <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-1 uppercase tracking-tight">Chat with support</p>
                                         </div>
                                     </label>
                                 </div>
                             </div>
 
                             {!paystackConfig.publicKey && paymentMethod === 'paystack' && (
-                                <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg flex items-center gap-2">
+                                <div className="text-xs md:text-sm text-amber-600 bg-amber-50 p-3 rounded-lg flex items-center gap-2">
                                     <AlertCircle size={16} />
                                     <span>Paystack setup incomplete (Missing Public Key)</span>
                                 </div>
@@ -248,7 +248,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-4 bg-gray-900 hover:bg-black text-white font-semibold text-sm sm:text-[13px] uppercase tracking-[0.3em] rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
+                                className="w-full py-3 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] md:text-sm uppercase tracking-[0.3em] rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Processing...' : `Place Order • GH₵${cartTotal.toFixed(2)}`}
                             </button>

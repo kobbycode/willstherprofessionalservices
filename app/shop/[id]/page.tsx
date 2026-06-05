@@ -107,7 +107,7 @@ export default function ProductDetailPage() {
                 <div className="container mx-auto px-4 py-6">
                     <Skeleton className="h-5 w-40 mb-6" />
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 p-4 md:p-6">
                             <Skeleton className="aspect-square rounded-lg" />
                             <div className="space-y-4">
                                 <Skeleton className="h-4 w-20" />
@@ -125,12 +125,12 @@ export default function ProductDetailPage() {
     if (error || !product) {
         return (
             <main className="min-h-screen bg-gray-50">
-                <div className="container mx-auto px-4 py-20 text-center">
-                    <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-8 border border-gray-200">
+                <div className="container mx-auto px-4 py-14 md:py-20 text-center">
+                    <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-4 md:p-8 border border-gray-200">
                         <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" />
-                        <h1 className="text-xl font-bold text-gray-900 mb-2">Product Not Found</h1>
-                        <p className="text-gray-500 mb-6">The product you are looking for might have been removed.</p>
-                        <Link href="/shop" className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
+                        <h1 className="text-base md:text-xl font-bold text-gray-900 mb-2">Product Not Found</h1>
+                        <p className="text-gray-500 mb-4 md:mb-6">The product you are looking for might have been removed.</p>
+                        <Link href="/shop" className="inline-flex items-center gap-2 px-5 py-2.5 md:px-6 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
                             <ArrowLeft size={18} />
                             Back to Shop
                         </Link>
@@ -159,14 +159,14 @@ export default function ProductDetailPage() {
     }
 
     return (
-        <main className="min-h-screen bg-gray-50/50 pb-20">
+        <main className="min-h-screen bg-gray-50/50 pb-14 md:pb-20">
 
-            <div className="container mx-auto px-4 pt-28 pb-12">
+            <div className="container mx-auto px-4 pt-20 md:pt-28 pb-8 md:pb-12">
                 {/* Breadcrumb - Glassmorphism */}
                 <motion.nav
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-xs sm:text-[12px] md:text-sm text-gray-500 mb-8"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-xs sm:text-[12px] md:text-sm text-gray-500 mb-6 md:mb-8"
                 >
                     <Link href="/" className="hover:text-purple-600 transition-colors">Home</Link>
                     <span className="text-gray-300">/</span>
@@ -182,7 +182,7 @@ export default function ProductDetailPage() {
                 </motion.nav>
 
                 {/* Main Product Section - Premium Integrated Design */}
-                <div className="bg-white rounded-[1.5rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
+                <div className="bg-white rounded-2xl md:rounded-[1.5rem] shadow-2xl shadow-purple-900/5 border border-purple-50 overflow-hidden">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
 
                         {/* Image Gallery - Focused & Modern */}
@@ -190,14 +190,14 @@ export default function ProductDetailPage() {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="relative aspect-square bg-white rounded-3xl overflow-hidden mb-6 shadow-xl shadow-gray-200/50 border border-white group"
+                                className="relative aspect-square bg-white rounded-2xl md:rounded-3xl overflow-hidden mb-6 shadow-xl shadow-gray-200/50 border border-white group"
                             >
                                 {currentImage ? (
                                     <Image
                                         src={currentImage}
                                         alt={product.title}
                                         fill
-                                        className="object-contain p-8 group-hover:scale-105 transition-transform duration-700"
+                                        className="object-contain p-4 md:p-8 group-hover:scale-105 transition-transform duration-700"
                                         sizes="(max-width: 1024px) 100vw, 40vw"
                                         priority
                                     />
@@ -208,7 +208,7 @@ export default function ProductDetailPage() {
                                 )}
 
                                 {/* Stock & Category Badges */}
-                                <div className="absolute top-6 left-6 flex flex-col gap-2">
+                                <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2">
                                     {!product.inStock && (
                                         <div className="px-4 py-2 bg-red-500 text-white text-sm font-black rounded-xl shadow-lg shadow-red-500/20 backdrop-blur-md">
                                             OUT OF STOCK
@@ -229,7 +229,7 @@ export default function ProductDetailPage() {
                                         <button
                                             key={idx}
                                             onClick={() => setSelectedImageIndex(idx)}
-                                            className={`relative w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${idx === selectedImageIndex
+                                            className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 ${idx === selectedImageIndex
                                                 ? 'border-purple-600 ring-4 ring-purple-100 scale-105'
                                                 : 'border-white hover:border-purple-200'
                                                 }`}
@@ -249,11 +249,11 @@ export default function ProductDetailPage() {
                                 className="space-y-8"
                             >
                                 <div>
-                                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 mb-4 tracking-tight leading-[1.1]">
+                                    <h1 className="text-xl md:text-3xl lg:text-4xl font-black text-gray-900 mb-3 md:mb-4 tracking-tight leading-[1.1]">
                                         {product.title}
                                     </h1>
                                     <div className="flex flex-wrap items-center gap-6">
-                                        <span className="text-xl md:text-2xl font-black text-purple-600">
+                                        <span className="text-base md:text-2xl font-black text-purple-600">
                                             GH₵{product.price.toFixed(2)}
                                         </span>
                                         <div className="h-2 w-2 rounded-full bg-gray-200" />
@@ -269,15 +269,15 @@ export default function ProductDetailPage() {
                                     </div>
                                 </div>
 
-                                <div className="prose prose-base text-gray-600 max-w-none border-l-4 border-purple-100 pl-6 py-2 leading-relaxed">
+                                <div className="prose prose-base text-gray-600 max-w-none border-l-4 border-purple-100 pl-4 md:pl-6 py-2 leading-relaxed">
                                     <p className="whitespace-pre-line">{product.description}</p>
                                 </div>
 
                                 {/* Modernized Buy Box Section */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-6 border-t border-gray-100">
                                     <div className="space-y-6">
                                         <div>
-                                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Select Quantity</label>
+                                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-3 md:mb-4">Select Quantity</label>
                                             <div className="inline-flex items-center p-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                                                 <button
                                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -286,7 +286,7 @@ export default function ProductDetailPage() {
                                                 >
                                                     <Minus size={18} />
                                                 </button>
-                                                <span className="w-16 text-center font-black text-xl text-gray-900">{quantity}</span>
+                                                <span className="w-16 text-center font-black text-base md:text-xl text-gray-900">{quantity}</span>
                                                 <button
                                                     onClick={() => setQuantity(Math.min(20, quantity + 1))}
                                                     className="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95"
@@ -296,11 +296,11 @@ export default function ProductDetailPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-4">
+                                        <div className="flex gap-3 md:gap-4">
                                             <button
                                                 onClick={handleAddToCart}
                                                 disabled={!product.inStock}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-3.5 px-8 rounded-2xl font-black text-base transition-all duration-300 transform ${product.inStock
+                                                className={`flex-1 flex items-center justify-center gap-3 py-3 px-6 md:py-3.5 md:px-8 rounded-2xl font-black text-sm md:text-base transition-all duration-300 transform ${product.inStock
                                                     ? 'bg-purple-600 text-white shadow-xl shadow-purple-200 hover:bg-purple-700 hover:-translate-y-1'
                                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                     }`}
@@ -310,7 +310,7 @@ export default function ProductDetailPage() {
                                             </button>
                                             <button
                                                 onClick={() => toggleWishlist(product)}
-                                                className={`w-18 h-18 flex items-center justify-center rounded-2xl border-4 transition-all duration-300 ${isInWishlist(product.id)
+                                                className={`w-14 h-14 md:w-18 md:h-18 flex items-center justify-center rounded-2xl border-4 transition-all duration-300 ${isInWishlist(product.id)
                                                     ? 'border-red-500 text-red-500 bg-red-50 shadow-lg shadow-red-200'
                                                     : 'border-gray-100 text-gray-300 hover:border-purple-600 hover:text-purple-600 hover:shadow-lg hover:shadow-purple-100'
                                                     }`}
@@ -323,7 +323,7 @@ export default function ProductDetailPage() {
                                             href={product.inStock ? whatsappUrl : '#'}
                                             target={product.inStock ? '_blank' : undefined}
                                             rel={product.inStock ? "noopener noreferrer" : undefined}
-                                            className={`w-full flex items-center justify-center gap-3 py-4 px-8 rounded-2xl font-bold transition-all ${product.inStock
+                                            className={`w-full flex items-center justify-center gap-3 py-3 px-6 md:py-4 md:px-8 rounded-2xl font-bold transition-all ${product.inStock
                                                 ? 'bg-green-500/10 text-green-600 border-2 border-green-500/20 hover:bg-green-500 hover:text-white hover:shadow-xl hover:shadow-green-100'
                                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                 }`}
@@ -335,10 +335,10 @@ export default function ProductDetailPage() {
 
                                     {/* Benefits/Specs Section */}
                                     <div className="space-y-6">
-                                        <div className="bg-purple-50 rounded-[1.25rem] p-5 border border-purple-100 space-y-3">
+                                        <div className="bg-purple-50 rounded-2xl md:rounded-[1.25rem] p-4 md:p-5 border border-purple-100 space-y-3">
                                             <h3 className="text-xs sm:text-[12px] font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
-                                            <div className="space-y-4">
-                                                <div className="flex gap-4">
+                                            <div className="space-y-3 md:space-y-4">
+                                                <div className="flex gap-3 md:gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-purple-600">
                                                         <Truck size={20} />
                                                     </div>
@@ -347,7 +347,7 @@ export default function ProductDetailPage() {
                                                         <p className="text-sm text-gray-500">To your doorstep within 24h</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-4">
+                                                <div className="flex gap-3 md:gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-purple-600">
                                                         <Shield size={20} />
                                                     </div>
@@ -356,7 +356,7 @@ export default function ProductDetailPage() {
                                                         <p className="text-sm text-gray-500">Professional grade quality</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-4">
+                                                <div className="flex gap-3 md:gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-purple-600">
                                                         <RotateCcw size={20} />
                                                     </div>
@@ -371,7 +371,7 @@ export default function ProductDetailPage() {
                                         {/* Social Share - Minimal */}
                                         <div className="flex items-center justify-between px-2">
                                             <span className="text-sm font-black text-gray-400 uppercase tracking-widest">Share Now</span>
-                                            <div className="flex gap-4">
+                                            <div className="flex gap-3 md:gap-4">
                                                 {[
                                                     { icon: Facebook, url: facebookShareUrl, color: 'text-blue-600' },
                                                     { icon: Twitter, url: twitterShareUrl, color: 'text-sky-400' },
@@ -398,19 +398,19 @@ export default function ProductDetailPage() {
 
                 {/* Related Products - Using the new ProductCard for consistency */}
                 {(relatedProducts.length > 0 || relatedLoading) && (
-                    <div className="mt-24 space-y-12">
+                    <div className="mt-16 md:mt-24 space-y-8 md:space-y-12">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-3xl font-black text-gray-900 tracking-tight">You May Also Like</h2>
+                            <h2 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight">You May Also Like</h2>
                             <div className="h-px flex-1 bg-gray-100 mx-10 hidden md:block" />
                             <Link href="/shop" className="text-purple-600 font-black hover:underline px-4 py-2 bg-purple-50 rounded-xl">View All</Link>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                             {relatedLoading ? (
                                 Array.from({ length: 4 }).map((_, i) => (
-                                    <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 p-0 animate-pulse">
+                                    <div key={i} className="bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-100 p-0 animate-pulse">
                                         <div className="aspect-[4/3] bg-gray-100" />
-                                        <div className="p-6 space-y-4">
+                                        <div className="p-4 md:p-6 space-y-3 md:space-y-4">
                                             <div className="h-4 bg-gray-100 rounded-full w-3/4" />
                                             <div className="h-4 bg-gray-100 rounded-full w-1/2" />
                                         </div>

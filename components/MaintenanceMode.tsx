@@ -18,27 +18,27 @@ const MaintenanceMode = memo(() => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center"
+        className="max-w-md w-full bg-white rounded-xl md:rounded-2xl shadow-xl p-6 md:p-8 text-center"
       >
-        <div className="mb-6">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Wrench className="w-8 h-8 text-blue-600" />
+        <div className="mb-4 md:mb-6">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Wrench className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Under Maintenance</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Under Maintenance</h1>
           <p className="text-gray-600">
             We're currently performing some maintenance on our site. We'll be back shortly!
           </p>
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center justify-center space-x-2 text-xs md:text-sm text-gray-500">
             <Clock className="w-4 h-4" />
             <span>Expected completion: Soon</span>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-medium text-gray-900 mb-2">Need immediate assistance?</h3>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-xs md:text-sm text-gray-600 mb-3">
               Contact us directly for urgent matters
             </p>
             <a
