@@ -37,7 +37,7 @@ import Link from 'next/link'
 import { formatDateHuman } from '@/lib/date'
 import { useRouter } from 'next/navigation'
 import AdminAuth from '@/components/AdminAuth'
-import { useSiteConfig } from '@/lib/site-config'
+import { useSiteConfig, saveSiteConfigToLocal } from '@/lib/site-config'
 import toast from 'react-hot-toast'
 import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, type ContactSubmission } from '@/lib/contacts'
 import { BlogPost } from '@/lib/blog'
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
-  const { config, setConfig } = useSiteConfig()
+  const { config, setConfig, refresh } = useSiteConfig()
   const { user, signOut: authSignOut } = useAuth()
 
   const handleLogout = async () => {
@@ -156,7 +156,9 @@ const AdminDashboard = () => {
       if (!res.ok) {
         throw new Error((await res.json().catch(() => ({}))).error || `Failed to save ${section}`)
       }
+      saveSiteConfigToLocal(configRef.current, false)
       toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} saved successfully! ✓`)
+      refresh()
     } catch (error: any) {
       console.error(`AdminPage: ${section} save failed:`, error)
       toast.error(error.message || `Failed to save ${section}`)
