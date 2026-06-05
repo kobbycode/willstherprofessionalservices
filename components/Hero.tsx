@@ -223,7 +223,7 @@ const Hero = memo(() => {
                           className="flex items-center gap-4 mb-3"
                         >
                           <div className="w-6 h-[1px] bg-primary-400"></div>
-                          <span className="text-white font-bold tracking-[0.5em] uppercase text-[11px] sm:text-[12px]">
+                          <span className="text-white font-bold tracking-[0.5em] uppercase text-xs sm:text-[11px]">
                             Premier Property Solutions
                           </span>
                         </motion.div>
@@ -245,7 +245,7 @@ const Hero = memo(() => {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.7, duration: 0.8 }}
-                          className="text-[12px] sm:text-[13px] lg:text-sm mb-8 max-w-sm text-white/70 font-medium leading-relaxed text-balance tracking-widest uppercase"
+                          className="text-xs sm:text-[12px] lg:text-sm mb-8 max-w-sm text-white/70 font-medium leading-relaxed text-balance tracking-widest uppercase"
                         >
                           {slide.description}
                         </motion.p>
@@ -258,7 +258,7 @@ const Hero = memo(() => {
                         >
                           <Link
                             href={slide.ctaLink}
-                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-black rounded-xl transition-all duration-300 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[13px] uppercase tracking-wider font-outfit overflow-hidden hover:-translate-y-0.5"
+                            className="group relative px-6 py-3 sm:py-2.5 bg-primary-600 text-white font-black rounded-xl transition-all duration-300 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-xs sm:text-[13px] uppercase tracking-wider font-outfit overflow-hidden hover:-translate-y-0.5"
                           >
                             <span className="relative z-10 flex items-center gap-2">
                               {slide.ctaLabel}
@@ -269,7 +269,7 @@ const Hero = memo(() => {
 
                           <Link
                             href="#services"
-                            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-[13px] uppercase tracking-wider font-outfit"
+                            className="px-6 py-3 sm:py-2.5 text-white font-semibold rounded-lg transition-all duration-500 border border-white/20 hover:bg-white/10 text-xs sm:text-[13px] uppercase tracking-wider font-outfit"
                           >
                             Our Portfolio
                           </Link>
@@ -288,7 +288,7 @@ const Hero = memo(() => {
           <div className="absolute bottom-10 right-10 flex items-center gap-2 z-20">
             <button
               onClick={prevSlide}
-              className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
+              className="w-11 h-11 sm:w-10 sm:h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-5 h-5 transform group-hover:-translate-x-0.5 transition-transform" />
@@ -296,7 +296,7 @@ const Hero = memo(() => {
             <div className="h-6 w-[1px] bg-white/10 mx-1"></div>
             <button
               onClick={nextSlide}
-              className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
+              className="w-11 h-11 sm:w-10 sm:h-10 glass-card rounded-xl flex items-center justify-center text-white/70 border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-300 group shadow-sm bg-black/20 backdrop-blur-md"
               aria-label="Next slide"
             >
               <ChevronRight className="w-5 h-5 transform group-hover:translate-x-0.5 transition-transform" />

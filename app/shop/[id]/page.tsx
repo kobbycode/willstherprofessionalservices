@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
                 <motion.nav
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-[12px] md:text-sm text-gray-500 mb-8"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-md border border-white shadow-sm text-xs sm:text-[12px] md:text-sm text-gray-500 mb-8"
                 >
                     <Link href="/" className="hover:text-purple-600 transition-colors">Home</Link>
                     <span className="text-gray-300">/</span>
@@ -281,7 +281,7 @@ export default function ProductDetailPage() {
                                             <div className="inline-flex items-center p-2 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                                                 <button
                                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95 disabled:opacity-50"
+                                                    className="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95 disabled:opacity-50"
                                                     disabled={quantity <= 1}
                                                 >
                                                     <Minus size={18} />
@@ -289,7 +289,7 @@ export default function ProductDetailPage() {
                                                 <span className="w-16 text-center font-black text-xl text-gray-900">{quantity}</span>
                                                 <button
                                                     onClick={() => setQuantity(Math.min(20, quantity + 1))}
-                                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95"
+                                                    className="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-purple-600 hover:border-purple-200 hover:shadow-md transition-all active:scale-95"
                                                 >
                                                     <Plus size={18} />
                                                 </button>
@@ -336,7 +336,7 @@ export default function ProductDetailPage() {
                                     {/* Benefits/Specs Section */}
                                     <div className="space-y-6">
                                         <div className="bg-purple-50 rounded-[1.25rem] p-5 border border-purple-100 space-y-3">
-                                            <h3 className="text-[12px] font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
+                                            <h3 className="text-xs sm:text-[12px] font-black text-purple-600 uppercase tracking-widest">Why Choose WILLSTHER?</h3>
                                             <div className="space-y-4">
                                                 <div className="flex gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-purple-600">
@@ -377,13 +377,13 @@ export default function ProductDetailPage() {
                                                     { icon: Twitter, url: twitterShareUrl, color: 'text-sky-400' },
                                                     { icon: Linkedin, url: linkedinShareUrl, color: 'text-blue-700' }
                                                 ].map((social, i) => (
-                                                    <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className={`hover:scale-125 transition-transform ${social.color}`}>
+                                                    <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className={`hover:scale-125 transition-transform ${social.color} p-2`}>
                                                         <social.icon size={20} />
                                                     </a>
                                                 ))}
                                                 <button
                                                     onClick={() => navigator.clipboard.writeText(productUrl)}
-                                                    className="hover:scale-125 transition-transform text-gray-400 hover:text-purple-600"
+                                                    className="hover:scale-125 transition-transform text-gray-400 hover:text-purple-600 p-2"
                                                 >
                                                     <Share2 size={20} />
                                                 </button>

@@ -44,7 +44,7 @@ const Values = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Our Foundation
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -73,7 +73,7 @@ const Values = () => {
                 {value.title}
               </h3>
               
-              <p className="text-[13px] sm:text-sm text-secondary-600 leading-relaxed font-inter">
+              <p className="text-sm sm:text-[13px] text-secondary-600 leading-relaxed font-inter">
                 {value.description}
               </p>
 
@@ -94,7 +94,7 @@ const Values = () => {
           
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+              <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
                 Total Commitment
               </span>
               <h3 className="text-xl md:text-2xl font-bold text-secondary-900 mb-6 font-outfit tracking-tight uppercase">

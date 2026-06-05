@@ -68,7 +68,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         e.preventDefault()
                         toggleWishlist(product)
                     }}
-                    className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(product.id)
+                    className={`absolute top-2 right-2 p-2.5 sm:p-1.5 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(product.id)
                         ? 'bg-red-500 text-white shadow-lg'
                         : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-110'
                         }`}
@@ -78,12 +78,12 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
 
                 {/* Stock Badge */}
                 {product.inStock ? (
-                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-green-500 text-white text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-green-500 text-white text-xs sm:text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
                         <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
                         IN STOCK
                     </div>
                 ) : (
-                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-red-600 text-white text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-red-600 text-white text-xs sm:text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
                         <X size={10} strokeWidth={3} />
                         OUT OF STOCK
                     </div>
@@ -97,7 +97,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         <button
                             key={idx}
                             onClick={() => setSelectedImageIndex(idx)}
-                            className={`relative w-8 h-8 flex-shrink-0 rounded-md overflow-hidden border transition-all ${idx === selectedImageIndex
+                            className={`relative w-11 h-11 sm:w-8 sm:h-8 flex-shrink-0 rounded-md overflow-hidden border transition-all ${idx === selectedImageIndex
                                 ? 'border-primary-500 shadow-sm'
                                 : 'border-transparent opacity-60 hover:opacity-100'
                                 }`}
@@ -119,7 +119,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                 {/* Category & Title */}
                 <div className="mb-2">
                     {product.category && (
-                        <p className="text-[11px] font-semibold text-primary-600 uppercase tracking-[0.2em] mb-1">
+                        <p className="text-xs sm:text-[11px] font-semibold text-primary-600 uppercase tracking-[0.2em] mb-1">
                             {product.category}
                         </p>
                     )}
@@ -143,7 +143,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                                 setIsCartOpen(true)
                             }}
                             disabled={!product.inStock}
-                            className={`p-2 rounded-lg transition-all duration-300 ${product.inStock
+                            className={`p-3 sm:p-2 rounded-lg transition-all duration-300 ${product.inStock
                                 ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-md active:scale-95'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
@@ -156,7 +156,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                             target={product.inStock ? '_blank' : undefined}
                             rel={product.inStock ? "noopener noreferrer" : undefined}
                             onClick={(e) => !product.inStock && e.preventDefault()}
-                            className={`p-2 rounded-lg transition-all duration-300 ${product.inStock
+                            className={`p-3 sm:p-2 rounded-lg transition-all duration-300 ${product.inStock
                                 ? 'bg-green-500 hover:bg-green-600 text-white shadow-md active:scale-95'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}

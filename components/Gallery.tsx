@@ -54,7 +54,7 @@ const Gallery = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 dark:text-primary-400 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+          <span className="text-primary-600 dark:text-primary-400 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] sm:text-[12px] mb-3 block">
             Portfolio
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -71,7 +71,7 @@ const Gallery = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="group relative h-[400px] overflow-hidden rounded-[2.5rem] bg-slate-200 dark:bg-slate-800 shadow-2xl hover:shadow-primary-500/20 transition-all duration-500"
+              className="group relative h-[300px] md:h-[400px] overflow-hidden rounded-[2.5rem] bg-slate-200 dark:bg-slate-800 shadow-2xl hover:shadow-primary-500/20 transition-all duration-500"
             >
               {g.imageUrl ? (
                 <>
@@ -91,7 +91,7 @@ const Gallery = () => {
                   <div className="absolute inset-0 p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
                     {g.caption && (
                       <div className="glass-card p-4 rounded-[1.5rem] backdrop-blur-xl">
-                        <p className="text-white text-[12px] sm:text-[13px] font-bold font-outfit uppercase tracking-widest leading-tight mb-2">
+                        <p className="text-white text-xs sm:text-[12px] sm:text-[13px] font-bold font-outfit uppercase tracking-widest leading-tight mb-2">
                           {g.caption}
                         </p>
                         <div className="w-6 h-0.5 bg-primary-500 rounded-full"></div>

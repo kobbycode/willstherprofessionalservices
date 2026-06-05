@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import MaintenanceMode from '@/components/MaintenanceMode'
 import { useSiteConfig } from '@/lib/site-config'
 import { motion } from 'framer-motion'
@@ -133,10 +134,12 @@ export default function ServiceDetails() {
             {/* Hero Banner */}
             <section className="relative py-20 bg-white text-secondary-900 overflow-hidden border-b border-gray-100">
                 <div className="absolute inset-0">
-                    <img
+                    <Image
                         src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
                         alt={service.title}
-                        className="w-full h-full object-cover opacity-[0.03]"
+                        fill
+                        className="object-cover opacity-[0.03]"
+                        sizes="100vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-white/95 to-white/80"></div>
                 </div>
@@ -180,10 +183,12 @@ export default function ServiceDetails() {
                             {/* Service Image */}
                             <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 overflow-hidden">
                                 <div className="aspect-video relative rounded-xl overflow-hidden bg-gray-100">
-                                    <img
+                                    <Image
                                         src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
                                         alt={service.title}
-                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                                        fill
+                                        className="object-cover hover:scale-105 transition-transform duration-700"
+                                        sizes="100vw"
                                     />
                                 </div>
                             </div>

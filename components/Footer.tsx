@@ -42,7 +42,7 @@ const Footer = () => {
                 <a
                   key={index}
                   href={social.href}
-                  className={`w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/40 transition-all duration-300 ${social.color} hover:-translate-y-1 hover:bg-white/10`}
+                  className={`w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/40 transition-all duration-300 ${social.color} hover:-translate-y-1 hover:bg-white/10`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -116,7 +116,7 @@ const Footer = () => {
               />
               <button
                 type="submit"
-                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl transition-all duration-300 text-[12px] sm:text-sm font-black uppercase tracking-wider font-outfit"
+                className="absolute right-2 top-2 px-4 py-3 sm:py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl transition-all duration-300 text-sm sm:text-[12px] font-black uppercase tracking-wider font-outfit"
               >
                 Join
               </button>
@@ -142,7 +142,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-[12px] sm:text-sm text-white/40 font-medium order-2 md:order-1">
+          <p className="text-sm sm:text-[12px] text-white/40 font-medium order-2 md:order-1">
             {config.footer.copyright || `© ${currentYear} WILLSTHER. All rights reserved.`}
           </p>
         </div>

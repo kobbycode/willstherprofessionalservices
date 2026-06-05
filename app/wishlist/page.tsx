@@ -26,7 +26,7 @@ export default function WishlistPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
                     >
                         <Heart size={12} fill="currentColor" className="text-primary-500" />
                         <span>My Favorites</span>
@@ -94,7 +94,7 @@ export default function WishlistPage() {
                                     </h2>
                                     <Link
                                         href="/shop"
-                                        className="text-[13px] font-semibold text-purple-600 uppercase tracking-wider hover:text-purple-700 flex items-center gap-2 group"
+                                        className="text-[13px] font-semibold text-purple-600 uppercase tracking-wider hover:text-purple-700 inline-flex py-2.5 items-center gap-2 group"
                                     >
                                         <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
                                         Continue Shopping

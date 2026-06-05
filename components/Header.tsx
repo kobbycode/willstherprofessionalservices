@@ -178,6 +178,7 @@ const Header = () => {
                   width={160}
                   height={64}
                   priority
+                  sizes="(max-width: 640px) 96px, (max-width: 768px) 128px, 160px"
                   className="w-24 h-12 sm:w-32 sm:h-14 md:w-40 md:h-16 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </Link>
@@ -215,7 +216,7 @@ const Header = () => {
             <div className="hidden lg:flex items-center gap-4">
               <Link
                 href="/wishlist"
-                className="relative p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
+                className="relative p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
                 aria-label="Wishlist"
               >
                 <Heart size={24} />
@@ -228,7 +229,7 @@ const Header = () => {
 
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
+                className="relative p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
                 aria-label="Open cart"
               >
                 <ShoppingBag size={24} />
@@ -241,7 +242,7 @@ const Header = () => {
 
               <button
                 onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-black py-3 px-6 rounded-xl shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5 font-outfit uppercase tracking-wider text-sm"
+                className="bg-primary-600 hover:bg-primary-700 text-white font-black py-3.5 sm:py-3 px-6 rounded-xl shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5 font-outfit uppercase tracking-wider text-sm"
               >
                 Get Quote
               </button>
@@ -251,7 +252,7 @@ const Header = () => {
             <div className="flex items-center gap-2 lg:hidden">
               <Link
                 href="/wishlist"
-                className="p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
+                className="p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
               >
                 <Heart size={24} />
                 {wishlistCount > 0 && (
@@ -263,7 +264,7 @@ const Header = () => {
 
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
+                className="p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
               >
                 <ShoppingBag size={24} />
                 {cartCount > 0 && (
@@ -275,7 +276,7 @@ const Header = () => {
 
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-2 rounded-lg text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
+                className="p-3 sm:p-2 rounded-lg text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
                 aria-label="Toggle mobile menu"
               >
                 {isMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}

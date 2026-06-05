@@ -78,7 +78,7 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Success Stories
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -149,7 +149,7 @@ const Testimonials = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <a
                   href="#contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-xs font-outfit"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-sm sm:text-xs font-outfit"
                 >
                   Get Your Quote Today
                   <Quote className="w-4 h-4 rotate-180" />

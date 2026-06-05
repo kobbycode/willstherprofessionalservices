@@ -209,7 +209,7 @@ const BlogPage = () => {
                       <button
                         key={index}
                         onClick={() => handleCategoryChange(category)}
-                        className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-300 ${category === activeCategory
+                        className={`px-4 py-2.5 sm:py-2 rounded-lg text-base font-medium transition-all duration-300 ${category === activeCategory
                           ? 'bg-primary-900 text-accent-500 shadow-premium'
                           : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-900 border border-gray-100'
                           }`}
@@ -259,6 +259,7 @@ const BlogPage = () => {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                       priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-4 left-4 z-10">
                       <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-sm font-bold tracking-wider uppercase shadow-lg">
@@ -293,7 +294,7 @@ const BlogPage = () => {
                       </div>
                       <Link
                         href={`/blog/${sortedPosts[0].id}`}
-                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 py-2.5 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 py-3 sm:py-2.5 rounded-lg text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                       >
                         Read More
                       </Link>
@@ -352,6 +353,7 @@ const BlogPage = () => {
                       alt={post.title}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-3 left-3 z-10">
                       <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-sm font-bold tracking-wide uppercase shadow-sm">
@@ -401,7 +403,7 @@ const BlogPage = () => {
               <button
                 onClick={loadMorePosts}
                 disabled={isLoading}
-                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-8 py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
+                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-8 py-3.5 sm:py-3 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -433,11 +435,11 @@ const BlogPage = () => {
                   placeholder="Your professional email"
                   className="flex-1 px-6 py-4 rounded-xl bg-white text-secondary-900 placeholder:text-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none shadow-inner transition-all duration-300"
                 />
-                <button className="bg-primary-600 text-white px-8 py-3 rounded-xl text-sm font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
+                <button className="bg-primary-600 text-white px-8 py-3.5 sm:py-3 rounded-xl text-sm font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
                   Subscribe
                 </button>
               </div>
-              <p className="text-[10px] text-secondary-400 mt-6 uppercase tracking-widest font-semibold">
+              <p className="text-xs text-secondary-400 mt-6 uppercase tracking-widest font-semibold">
                 Luxury service, zero spam. Unsubscribe at any time.
               </p>
             </div>

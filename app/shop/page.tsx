@@ -82,7 +82,7 @@ export default function ShopPage() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-6 text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
                     >
                         <ShoppingBag size={12} />
                         <span>Professional Cleaning Supplies</span>
@@ -134,7 +134,7 @@ export default function ShopPage() {
                                     key={category}
                                     onClick={() => setSelectedCategory(category)}
                                     className={`
-                                        px-4 py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-[13px] uppercase tracking-wider
+                                        px-4 py-2.5 sm:py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-sm sm:text-[13px] uppercase tracking-wider
                                         ${selectedCategory === category
                                             ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
                                             : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'}
@@ -146,7 +146,7 @@ export default function ShopPage() {
                             <div className="w-px h-6 bg-gray-200 mx-1" />
                             <button
                                 onClick={() => setHideOutOfStock(v => !v)}
-                                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-[13px] uppercase tracking-wider flex items-center gap-2 ${hideOutOfStock
+                                className={`px-4 py-2.5 sm:py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-sm sm:text-[13px] uppercase tracking-wider flex items-center gap-2 ${hideOutOfStock
                                     ? 'bg-red-600 text-white shadow-lg shadow-red-200'
                                     : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'}`}
                             >
@@ -159,7 +159,7 @@ export default function ShopPage() {
 
                 {/* Results Header */}
                 <div className="flex justify-between items-center mb-6 px-2">
-                    <h2 className="text-[12px] font-semibold text-gray-400 uppercase tracking-[0.2em]">
+                    <h2 className="text-xs sm:text-[12px] font-semibold text-gray-400 uppercase tracking-[0.2em]">
                         Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
                     </h2>
                     <div className="h-px flex-1 bg-gray-100 ml-6 hidden md:block" />
@@ -206,7 +206,7 @@ export default function ShopPage() {
                         {searchTerm && (
                             <button
                                 onClick={() => setSearchTerm('')}
-                                className="text-purple-600 text-sm font-semibold hover:underline"
+                                className="text-purple-600 text-sm font-semibold hover:underline py-2.5"
                             >
                                 Clear Search
                             </button>

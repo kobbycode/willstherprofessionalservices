@@ -23,7 +23,7 @@ const Clients = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Our Clients
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
@@ -52,6 +52,7 @@ const Clients = () => {
                     alt={client.name || 'Client logo'}
                     width={80}
                     height={80}
+                    sizes="80px"
                     className="object-contain max-w-full max-h-full"
                   />
                 ) : (
@@ -60,7 +61,7 @@ const Clients = () => {
                   </div>
                 )}
               </div>
-              <p className="text-[12px] md:text-sm font-bold text-secondary-900 uppercase tracking-wider leading-tight">
+              <p className="text-xs sm:text-[12px] font-bold text-secondary-900 uppercase tracking-wider leading-tight">
                 {client.name}
               </p>
             </motion.div>

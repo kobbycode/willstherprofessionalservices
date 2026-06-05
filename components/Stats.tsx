@@ -90,7 +90,7 @@ const Stats = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
             Our Impact
           </span>
           <motion.h2
@@ -134,7 +134,7 @@ const Stats = () => {
                   <div className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-1 font-outfit">
                     <Counter value={stat.number} />
                   </div>
-                  <p className="text-[12px] sm:text-[13px] font-bold text-primary-600 uppercase tracking-[0.3em] break-words leading-tight">
+                  <p className="text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-[0.3em] break-words leading-tight">
                     {stat.label}
                   </p>
                 </div>
