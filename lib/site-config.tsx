@@ -279,13 +279,32 @@ export const defaultSiteConfig: SiteConfig = {
 const STORAGE_KEY = 'siteConfig'
 const DIRTY_KEY = 'siteConfig_isDirty'
 
+function deepMerge(defaults: any, override: any): any {
+	const result = { ...defaults }
+	for (const key of Object.keys(override)) {
+		if (
+			override[key] !== null &&
+			typeof override[key] === 'object' &&
+			!Array.isArray(override[key]) &&
+			defaults[key] !== null &&
+			typeof defaults[key] === 'object' &&
+			!Array.isArray(defaults[key])
+		) {
+			result[key] = deepMerge(defaults[key], override[key])
+		} else {
+			result[key] = override[key]
+		}
+	}
+	return result
+}
+
 export function loadSiteConfigFromLocal(): SiteConfig {
 	if (typeof window === 'undefined') return defaultSiteConfig
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY)
 		if (!raw) return defaultSiteConfig
 		const parsed = JSON.parse(raw) as SiteConfig
-		return { ...defaultSiteConfig, ...parsed }
+		return deepMerge(defaultSiteConfig, parsed)
 	} catch {
 		return defaultSiteConfig
 	}
@@ -352,13 +371,8 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 			}
 
 			if (Object.keys(remoteConfig).length > 0) {
-				console.log(`[Debug loadFromServer] remoteConfig keys:`, Object.keys(remoteConfig))
-				if ((remoteConfig as any).footer) {
-					console.log(`[Debug loadFromServer] remoteConfig.footer.copyright:`, (remoteConfig as any).footer?.copyright)
-				}
 				setConfigState((prev) => {
 					if (loadIsDirtyFromLocal()) {
-						console.log(`[Debug loadFromServer] SKIPPED merge (dirty)`)
 						return prev
 					}
 
@@ -366,13 +380,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 						...defaultSiteConfig,
 						...prev,
 						...remoteConfig,
-					}
-
-					if ((remoteConfig as any).footer) {
-						console.log(`[Debug loadFromServer] merged.footer.copyright:`, (merged as any).footer?.copyright)
-					}
-					if ((merged as any).navigation) {
-						console.log(`[Debug loadFromServer] merged.navigation type:`, typeof (merged as any).navigation, Array.isArray((merged as any).navigation) ? 'array' : 'object')
 					}
 
 					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']

@@ -180,7 +180,6 @@ const AdminDashboard = () => {
         const sectionKey = section === 'hero' ? 'heroSlides' : section
         payload[sectionKey] = configRef.current[sectionKey as keyof typeof configRef.current]
       }
-      console.log(`[Debug] handleSectionSave('${section}') payload:`, JSON.stringify(payload))
       const res = await fetch('/api/config/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -190,10 +189,8 @@ const AdminDashboard = () => {
         throw new Error((await res.json().catch(() => ({}))).error || `Failed to save ${section}`)
       }
       const result = await res.json()
-      console.log(`[Debug] Save response:`, result)
       saveSiteConfigToLocal(configRef.current, false)
       toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} saved successfully! ✓`)
-      console.log(`[Debug] After save, localStorage STORAGE_KEY:`, JSON.parse(localStorage.getItem('siteConfig') || '{}'))
       refresh()
     } catch (error: any) {
       console.error(`AdminPage: ${section} save failed:`, error)
