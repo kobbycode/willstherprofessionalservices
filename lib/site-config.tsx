@@ -323,10 +323,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 		try {
 			if (typeof window === 'undefined') return
 
-			const currentlyDirty = loadIsDirtyFromLocal()
-
-				if (currentlyDirty) {
-			}
 			const configRes = await fetch('/api/config/get', { cache: 'no-store' })
 
 			let remoteConfig: Partial<SiteConfig> = {}
@@ -335,7 +331,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				remoteConfig = data.config || {}
 			}
 
-			if (!currentlyDirty && Object.keys(remoteConfig).length > 0) {
+			if (Object.keys(remoteConfig).length > 0) {
 				setConfigState((prev) => {
 					if (loadIsDirtyFromLocal()) {
 						return prev
@@ -347,16 +343,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 						...remoteConfig,
 					}
 
-					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'stats', 'testimonials', 'services']
+					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
 					for (const key of arrayKeys) {
 						if (Array.isArray(remoteConfig[key])) {
 							;(merged as any)[key] = remoteConfig[key]
-						} else if (Object.prototype.hasOwnProperty.call(remoteConfig, key)) {
-                            console.warn(`SiteProvider: Server returned non-array for ${key}:`, remoteConfig[key])
-                            if (remoteConfig[key] === null || remoteConfig[key] === undefined) {
-                                (merged as any)[key] = []
-                            }
-                        }
+						}
 					}
 
 					if (remoteConfig.navigation) {
@@ -366,7 +357,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 					saveSiteConfigToLocal(merged, false)
 					return merged
 				})
-			} else if (currentlyDirty) {
 			}
 
 		} catch (error) {

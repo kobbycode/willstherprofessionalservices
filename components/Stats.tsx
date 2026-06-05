@@ -66,11 +66,12 @@ const Counter = ({ value, duration = 2000 }: { value: string, duration?: number 
 
 const Stats = () => {
   const { config } = useSiteConfig()
-  const { title, subtitle, items } = config.stats || {
-    title: 'Our Services in Numbers',
-    subtitle: 'Delivering exceptional results through dedicated expertise and proven track record',
-    items: []
-  }
+  const stats = config.stats && typeof config.stats === 'object' && !Array.isArray(config.stats)
+    ? config.stats
+    : { title: '', subtitle: '', items: [] }
+  const title = stats.title || 'Our Services in Numbers'
+  const subtitle = stats.subtitle || 'Delivering exceptional results through dedicated expertise and proven track record'
+  const items = Array.isArray(stats.items) ? stats.items : []
 
   return (
     <section className="relative py-12 bg-white border-b border-secondary-100 overflow-hidden" id="stats">
