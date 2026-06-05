@@ -131,7 +131,7 @@ const Stats = () => {
                   <div className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-1 font-outfit">
                     <Counter value={stat.number} />
                   </div>
-                  <p className="text-[12px] sm:text-[13px] font-bold text-primary-600 uppercase tracking-[0.3em]">
+                  <p className="text-[12px] sm:text-[13px] font-bold text-primary-600 uppercase tracking-[0.3em] break-words leading-tight">
                     {stat.label}
                   </p>
                 </div>
