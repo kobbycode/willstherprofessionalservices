@@ -14,15 +14,23 @@ export async function POST(request: NextRequest) {
 
     const db = await getAdminDb()
 
-    // Save to Firestore in the structure
-
     const savePath = db.collection('config').doc('site')
-    await savePath.set({
-      ...data,
-      updatedAt: new Date().toISOString()
-    })
 
-    return NextResponse.json({ success: true, savedAt: new Date().toISOString(), data })
+    const { _merge, ...configData } = data
+
+    if (_merge) {
+      await savePath.set(
+        { ...configData, updatedAt: new Date().toISOString() },
+        { merge: true }
+      )
+    } else {
+      await savePath.set({
+        ...configData,
+        updatedAt: new Date().toISOString()
+      })
+    }
+
+    return NextResponse.json({ success: true, savedAt: new Date().toISOString(), data: configData })
   } catch (error) {
     console.error('Error saving site config:', error)
     return NextResponse.json(

@@ -35,6 +35,7 @@ const colorOptions = [
 ]
 
 export const StatsConfig = ({ config, onChange, onSave }: StatsConfigProps) => {
+    const [isSaving, setIsSaving] = React.useState(false)
     const stats = config.stats || { title: '', subtitle: '', items: [] }
     const items = stats.items || []
 
@@ -261,6 +262,23 @@ export const StatsConfig = ({ config, onChange, onSave }: StatsConfigProps) => {
                     <div className="space-y-1">
                         <span className="font-black text-[10px] uppercase tracking-[0.3em]">Sync New Metric</span>
                     </div>
+                </button>
+            </div>
+
+            <div className="flex justify-end pt-4">
+                <button
+                    onClick={async () => {
+                        setIsSaving(true)
+                        try {
+                            await onSave?.()
+                        } finally {
+                            setIsSaving(false)
+                        }
+                    }}
+                    disabled={isSaving}
+                    className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isSaving ? 'Saving...' : 'Save Stats'}
                 </button>
             </div>
         </motion.div>

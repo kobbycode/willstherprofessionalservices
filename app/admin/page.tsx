@@ -154,7 +154,7 @@ const AdminDashboard = () => {
         const originalCount = target.gallery.length
         target.gallery = target.gallery.filter((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
         const filteredCount = target.gallery.length
-        if (originalCount > filteredCount) {
+      if (originalCount > filteredCount) { 
         }
       }
       
@@ -173,6 +173,35 @@ const AdminDashboard = () => {
       setIsSaving(false)
     }
   }
+
+  const handleSaveStats = async () => {
+    if (!configRef.current) {
+      toast.error('Configuration not loaded yet.')
+      return
+    }
+    try {
+      setIsSaving(true)
+      const body = JSON.stringify({
+        _merge: true,
+        stats: configRef.current.stats
+      })
+      const res = await fetch('/api/config/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body
+      })
+      if (!res.ok) {
+        throw new Error((await res.json().catch(() => ({}))).error || 'Failed to save stats')
+      }
+      toast.success('Stats saved successfully! ✓')
+    } catch (error: any) {
+      console.error('AdminPage: Stats save failed:', error)
+      toast.error(error.message || 'Failed to save stats')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const resetConfig = () => setConfig(defaultSiteConfig)
 
   return (
@@ -373,7 +402,7 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'stats' && (
-              <StatsConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <StatsConfig config={config} onChange={handleConfigChange} onSave={handleSaveStats} />
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">
