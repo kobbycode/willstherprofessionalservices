@@ -8,6 +8,7 @@ import { useSiteConfig } from '@/lib/site-config'
 
 const Services = dynamic(() => import('@/components/Services'))
 const Stats = dynamic(() => import('@/components/Stats'))
+const Clients = dynamic(() => import('@/components/Clients'))
 const Values = dynamic(() => import('@/components/Values'))
 const Testimonials = dynamic(() => import('@/components/Testimonials'))
 const Contact = dynamic(() => import('@/components/Contact'))
@@ -29,6 +30,7 @@ export default function Home() {
       <About />
       <Services />
       <Stats />
+      <Clients />
       <Values />
       <Testimonials />
       <Contact />
