@@ -191,7 +191,6 @@ const AdminDashboard = () => {
       const result = await res.json()
       saveSiteConfigToLocal(configRef.current, false)
       toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} saved successfully! ✓`)
-      refresh()
     } catch (error: any) {
       console.error(`AdminPage: ${section} save failed:`, error)
       toast.error(error.message || `Failed to save ${section}`)
