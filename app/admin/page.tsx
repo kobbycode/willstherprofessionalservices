@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
-import Skeleton from '@/components/Skeleton'
+import { motion } from 'framer-motion'
 import {
   Users,
   FileText,
@@ -39,7 +37,7 @@ import Link from 'next/link'
 import { formatDateHuman } from '@/lib/date'
 import { useRouter } from 'next/navigation'
 import AdminAuth from '@/components/AdminAuth'
-import { useSiteConfig, defaultSiteConfig } from '@/lib/site-config'
+import { useSiteConfig } from '@/lib/site-config'
 import toast from 'react-hot-toast'
 import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, type ContactSubmission } from '@/lib/contacts'
 import { BlogPost } from '@/lib/blog'
@@ -83,7 +81,7 @@ const AdminDashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
-  const { config, setConfig, saveConfig: saveConfigFn, isDirty } = useSiteConfig()
+  const { config, setConfig } = useSiteConfig()
   const { user, signOut: authSignOut } = useAuth()
 
   const handleLogout = async () => {
@@ -118,16 +116,11 @@ const AdminDashboard = () => {
     }
   }
 
-  // Store the latest config in a ref so handleSaveAll can access it
   const configRef = useRef(config)
   
-  // Sync state to ref on initial load or from provider
   useEffect(() => {
-    // Only overwrite local ref if we are NOT currently dirty
-    if (config && !isDirty) {
-      configRef.current = { ...config }
-    }
-  }, [config, isDirty])
+    configRef.current = { ...config }
+  }, [config])
 
   const handleConfigChange = (next: any) => {
     if (typeof next === 'function') {
@@ -140,71 +133,37 @@ const AdminDashboard = () => {
     }
   }
 
-  const handleSaveAll = async () => {
-    if (!configRef.current) {
-        toast.error('Configuration not loaded yet.')
-        return
-    }
-
-    try {
-      setIsSaving(true)
-      // Work with a deep copy of the gallery to avoid modifying ref in place before save
-      const target = JSON.parse(JSON.stringify(configRef.current))
-      
-      // Filter out any gallery items that do not have an image URL
-      if (target.gallery && Array.isArray(target.gallery)) {
-        const originalCount = target.gallery.length
-        target.gallery = target.gallery.filter((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
-        const filteredCount = target.gallery.length
-      if (originalCount > filteredCount) { 
-        }
-      }
-      
-      const result = await saveConfigFn(target)
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to save to server')
-      }
-      
-      toast.success('All website settings saved successfully! 🎉')
-      // Provider will clear isDirty, which will trigger our useEffect above to sync the returned config
-    } catch (error: any) {
-      console.error('AdminPage: Save failed:', error)
-      toast.error(error.message || 'Failed to save settings')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleSaveStats = async () => {
+  const handleSectionSave = useCallback(async (section: string) => {
     if (!configRef.current) {
       toast.error('Configuration not loaded yet.')
       return
     }
     try {
       setIsSaving(true)
-      const body = JSON.stringify({
-        _merge: true,
-        stats: configRef.current.stats
-      })
+      const payload: Record<string, any> = { _merge: true }
+      if (section === 'settings') {
+        const { siteName, siteDescription, contactEmail, contactPhone, maintenanceMode, footer } = configRef.current
+        Object.assign(payload, { siteName, siteDescription, contactEmail, contactPhone, maintenanceMode, footer })
+      } else {
+        const sectionKey = section === 'hero' ? 'heroSlides' : section
+        payload[sectionKey] = configRef.current[sectionKey as keyof typeof configRef.current]
+      }
       const res = await fetch('/api/config/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body
+        body: JSON.stringify(payload)
       })
       if (!res.ok) {
-        throw new Error((await res.json().catch(() => ({}))).error || 'Failed to save stats')
+        throw new Error((await res.json().catch(() => ({}))).error || `Failed to save ${section}`)
       }
-      toast.success('Stats saved successfully! ✓')
+      toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} saved successfully! ✓`)
     } catch (error: any) {
-      console.error('AdminPage: Stats save failed:', error)
-      toast.error(error.message || 'Failed to save stats')
+      console.error(`AdminPage: ${section} save failed:`, error)
+      toast.error(error.message || `Failed to save ${section}`)
     } finally {
       setIsSaving(false)
     }
-  }
-
-  const resetConfig = () => setConfig(defaultSiteConfig)
+  }, [])
 
   return (
     <AdminAuth>
@@ -365,68 +324,82 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'settings' && (
-              <WebsiteSettings config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <WebsiteSettings config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('settings')} />
             )}
 
             {activeTab === 'hero' && (
-              <HeroConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <HeroConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('hero')} />
             )}
 
             {activeTab === 'services' && (
-              <ServicesConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <ServicesConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('services')} />
             )}
 
             {activeTab === 'about' && (
-              <AboutConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <>
+                <AboutConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('about')} />
+                <div className="flex justify-end pt-6">
+                  <button onClick={() => handleSectionSave('about')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              </>
             )}
 
             {activeTab === 'navigation' && (
-              <NavigationConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <>
+                <NavigationConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('navigation')} />
+                <div className="flex justify-end pt-6">
+                  <button onClick={() => handleSectionSave('navigation')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              </>
             )}
 
             {activeTab === 'footer' && (
-              <FooterConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <>
+                <FooterConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('footer')} />
+                <div className="flex justify-end pt-6">
+                  <button onClick={() => handleSectionSave('footer')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              </>
             )}
 
             {activeTab === 'seo' && (
-              <SEOConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <>
+                <SEOConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('seo')} />
+                <div className="flex justify-end pt-6">
+                  <button onClick={() => handleSectionSave('seo')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              </>
             )}
 
             {activeTab === 'map' && (
-              <MapConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <>
+                <MapConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('map')} />
+                <div className="flex justify-end pt-6">
+                  <button onClick={() => handleSectionSave('map')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              </>
             )}
 
             {activeTab === 'testimonials' && (
-              <TestimonialsConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <>
+                <TestimonialsConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('testimonials')} />
+                <div className="flex justify-end pt-6">
+                  <button onClick={() => handleSectionSave('testimonials')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                </div>
+              </>
             )}
 
             {activeTab === 'gallery' && (
-              <GalleryConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <GalleryConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('gallery')} />
             )}
 
             {activeTab === 'stats' && (
-              <StatsConfig config={config} onChange={handleConfigChange} onSave={handleSaveStats} />
+              <StatsConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('stats')} />
             )}
 
             {activeTab === 'clients' && (
-              <ClientsConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
+              <ClientsConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('clients')} />
             )}
-
-            <div className="mt-8 flex items-center justify-end space-x-4">
-              <button
-                onClick={resetConfig}
-                className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold"
-              >
-                🔄 Reset to Default
-              </button>
-              <button
-                onClick={handleSaveAll}
-                disabled={isSaving}
-                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-200 hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSaving ? '⏳ Saving...' : '💾 Save All Changes'}
-              </button>
-            </div>
           </div>
         </div>
       </div>
