@@ -91,7 +91,7 @@ const Contact = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
         >
           <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] sm:text-[12px] mb-3 block">
             Connect With Us
@@ -102,14 +102,14 @@ const Contact = () => {
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
         </motion.div>
 
-        <div className="grid lg:grid-cols-12 gap-12 mb-20">
+        <div className="grid lg:grid-cols-12 gap-8 md:gap-12 mb-20">
           {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="lg:col-span-5 space-y-12"
+            className="lg:col-span-5 space-y-8 md:space-y-12"
           >
             <div>
               <h3 className="text-base font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest">
@@ -127,9 +127,9 @@ const Contact = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    className="bg-white border border-secondary-100 rounded-3xl p-6 flex items-start space-x-6 group hover:shadow-xl hover:shadow-secondary-200/20 transition-all duration-500 shadow-lg shadow-secondary-200/5"
+                    className="bg-white border border-secondary-100 rounded-2xl md:rounded-3xl p-4 md:p-6 flex items-start space-x-4 md:space-x-6 group hover:shadow-xl hover:shadow-secondary-200/20 transition-all duration-500 shadow-lg shadow-secondary-200/5"
                   >
-                    <div className={`w-12 h-12 ${info.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg transform group-hover:scale-110 transition-transform duration-500`}>
+                    <div className={`w-10 h-10 md:w-12 md:h-12 ${info.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg transform group-hover:scale-110 transition-transform duration-500`}>
                       <info.icon className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -167,9 +167,9 @@ const Contact = () => {
             </div>
 
             {/* Social Media */}
-            <div className="bg-white border border-secondary-100 rounded-[2rem] p-6 shadow-xl shadow-secondary-200/5">
+                    <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[2rem] p-4 md:p-6 shadow-xl shadow-secondary-200/5">
               <h4 className="font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest text-[12px] text-center">Follow Our Journey</h4>
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center gap-3 md:gap-4">
                 {socialLinks.map((social, index) => (
                   <motion.a
                     key={index}
@@ -180,7 +180,7 @@ const Contact = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    className="w-14 h-14 bg-primary-600 hover:bg-primary-700 rounded-2xl flex items-center justify-center text-white transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-primary-600/20"
+                    className="w-12 h-12 md:w-14 md:h-14 bg-primary-600 hover:bg-primary-700 rounded-xl md:rounded-2xl flex items-center justify-center text-white transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-primary-600/20"
                     aria-label={social.label}
                   >
                     <social.icon className="w-6 h-6" />
@@ -198,15 +198,15 @@ const Contact = () => {
             viewport={{ once: true }}
             className="lg:col-span-7"
           >
-            <div className="bg-white border border-secondary-100 rounded-[3rem] p-8 md:p-12 shadow-2xl shadow-secondary-200/20 relative overflow-hidden">
+            <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-secondary-200/20 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary-100 rounded-full blur-[100px] -mr-32 -mt-32" />
 
               <h3 className="text-base font-bold text-secondary-900 mb-8 font-outfit uppercase tracking-widest relative z-10 text-center lg:text-left">
                 Send Us a <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Message</span>
               </h3>
 
-              <form className="space-y-8 relative z-10" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <form className="space-y-6 md:space-y-8 relative z-10" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                   <div className="relative group">
                     <label htmlFor="firstName" className="text-xs sm:text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                       First Name
@@ -235,7 +235,7 @@ const Contact = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                   <div className="relative group">
                     <label htmlFor="email" className="text-xs sm:text-[11px] font-bold text-secondary-500 uppercase tracking-[0.3em] mb-2 block transform group-focus-within:text-primary-600 transition-colors">
                       Email Address
@@ -341,7 +341,7 @@ const Contact = () => {
           </div>
 
           {/* Address Overlay */}
-          <div className="absolute bottom-8 left-8 right-8 lg:left-auto lg:right-8 lg:w-96 bg-white border border-secondary-100 rounded-3xl p-8 backdrop-blur-xl shadow-2xl shadow-secondary-200/20">
+          <div className="absolute bottom-4 left-4 right-4 lg:left-auto lg:right-8 lg:w-96 bg-white border border-secondary-100 rounded-2xl md:rounded-3xl p-4 md:p-8 backdrop-blur-xl shadow-2xl shadow-secondary-200/20">
             <div className="flex items-start space-x-6">
               <div className="w-12 h-12 bg-secondary-900 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-secondary-900/10">
                 <MapPin className="w-6 h-6 text-white" />
