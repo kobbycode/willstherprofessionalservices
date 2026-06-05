@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Plus,
@@ -38,6 +38,19 @@ export const StatsConfig = ({ config, onChange, onSave }: StatsConfigProps) => {
     const stats = config.stats || { title: '', subtitle: '', items: [] }
     const items = stats.items || []
 
+    // Hydrate Firestore default items with unique IDs on first load
+    useEffect(() => {
+        const needsId = items.some((item: any) => !item.id)
+        if (!needsId) return
+        onChange((prev: any) => {
+            const hydrated = (prev.stats?.items || []).map((item: any, idx: number) => ({
+                ...item,
+                id: item.id || `stat-default-${idx}`
+            }))
+            return { ...prev, stats: { ...(prev.stats || {}), items: hydrated } }
+        })
+    }, [])
+
     const updateStats = (key: string, value: any) => {
         onChange((prev: any) => ({
             ...prev,
@@ -50,16 +63,16 @@ export const StatsConfig = ({ config, onChange, onSave }: StatsConfigProps) => {
 
     const updateItem = (id: string, key: string, value: any) => {
         onChange((prev: any) => {
-            const next = { ...prev }
-            const stats = prev.stats || {}
-            const items = stats.items || []
-            next.stats = {
-                ...stats,
-                items: items.map((item: any) => 
-                    item.id === id ? { ...item, [key]: value } : item
-                )
+            const items = prev.stats?.items || []
+            return {
+                ...prev,
+                stats: {
+                    ...(prev.stats || {}),
+                    items: items.map((item: any) =>
+                        item.id === id ? { ...item, [key]: value } : item
+                    )
+                }
             }
-            return next
         })
     }
 
@@ -160,9 +173,9 @@ export const StatsConfig = ({ config, onChange, onSave }: StatsConfigProps) => {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <AnimatePresence mode='popLayout'>
-                    {items.map((item: any) => (
+                    {items.map((item: any, index: number) => (
                         <motion.div
-                            key={item.id}
+                            key={item.id || `stat-index-${index}`}
                             layout
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
