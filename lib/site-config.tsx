@@ -117,7 +117,11 @@ export type SiteConfig = {
 			color: string
 		}[]
 	}
-	clients: string[]
+	clients: {
+		id: string
+		name: string
+		logoUrl: string
+	}[]
 }
 
 export const defaultSiteConfig: SiteConfig = {
@@ -260,15 +264,15 @@ export const defaultSiteConfig: SiteConfig = {
 		]
 	},
 	clients: [
-		'Century Premier Suites',
-		'Century Niit Consult',
-		'Cocolicious and grill pub',
-		'Concord Hotel and Apartment',
-		'Elim Springs Academy',
-		'NNF Esquire',
-		'Smart SG Ltd',
-		'Sporty bet',
-		'Sporty fm',
+		{ id: 'client-1', name: 'Century Premier Suites', logoUrl: '' },
+		{ id: 'client-2', name: 'Century Niit Consult', logoUrl: '' },
+		{ id: 'client-3', name: 'Cocolicious and grill pub', logoUrl: '' },
+		{ id: 'client-4', name: 'Concord Hotel and Apartment', logoUrl: '' },
+		{ id: 'client-5', name: 'Elim Springs Academy', logoUrl: '' },
+		{ id: 'client-6', name: 'NNF Esquire', logoUrl: '' },
+		{ id: 'client-7', name: 'Smart SG Ltd', logoUrl: '' },
+		{ id: 'client-8', name: 'Sporty bet', logoUrl: '' },
+		{ id: 'client-9', name: 'Sporty fm', logoUrl: '' },
 	]
 }
 

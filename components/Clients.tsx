@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Building2 } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site-config'
+import Image from 'next/image'
 
 const Clients = () => {
   const { config } = useSiteConfig()
@@ -35,20 +36,32 @@ const Clients = () => {
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
-          {clients.map((name, index) => (
+          {clients.map((client, index) => (
             <motion.div
-              key={name}
+              key={client.id || index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.08 }}
               viewport={{ once: true }}
               className="bg-white border border-secondary-100 rounded-[2.5rem] p-6 md:p-8 text-center group hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-100 transition-colors">
-                <Building2 className="w-7 h-7 text-primary-600" />
+              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                {client.logoUrl ? (
+                  <Image
+                    src={client.logoUrl}
+                    alt={client.name || 'Client logo'}
+                    width={80}
+                    height={80}
+                    className="object-contain max-w-full max-h-full"
+                  />
+                ) : (
+                  <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+                    <Building2 className="w-7 h-7 text-primary-600" />
+                  </div>
+                )}
               </div>
               <p className="text-[12px] md:text-sm font-bold text-secondary-900 uppercase tracking-wider leading-tight">
-                {name}
+                {client.name}
               </p>
             </motion.div>
           ))}

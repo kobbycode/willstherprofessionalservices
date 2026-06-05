@@ -9,9 +9,12 @@ import {
     Building,
     Pencil,
     X,
-    Check
+    Check,
+    Upload
 } from 'lucide-react'
+import { uploadImage } from '@/lib/storage'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 
 interface ClientsConfigProps {
     config: any
@@ -20,22 +23,34 @@ interface ClientsConfigProps {
 }
 
 export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) => {
-    const clients: string[] = config.clients || []
+    const clients: { id: string; name: string; logoUrl: string }[] = config.clients || []
     const [editingIndex, setEditingIndex] = React.useState<number | null>(null)
     const [editValue, setEditValue] = React.useState('')
+    const [isUploading, setIsUploading] = React.useState<string | null>(null)
 
     const addClient = () => {
+        const id = `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         onChange((prev: any) => ({
             ...prev,
-            clients: [...(prev.clients || []), '']
+            clients: [...(prev.clients || []), { id, name: '', logoUrl: '' }]
         }))
-        setEditingIndex(clients.length)
+        const newIndex = clients.length
+        setEditingIndex(newIndex)
         setEditValue('')
+    }
+
+    const updateClient = (id: string, key: string, value: any) => {
+        onChange((prev: any) => ({
+            ...prev,
+            clients: (prev.clients || []).map((c: any) =>
+                c.id === id ? { ...c, [key]: value } : c
+            )
+        }))
     }
 
     const startEdit = (index: number) => {
         setEditingIndex(index)
-        setEditValue(clients[index] || '')
+        setEditValue(clients[index]?.name || '')
     }
 
     const confirmEdit = (index: number) => {
@@ -44,21 +59,40 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
             toast.error('Client name cannot be empty')
             return
         }
-        onChange((prev: any) => {
-            const updated = [...(prev.clients || [])]
-            updated[index] = trimmed
-            return { ...prev, clients: updated }
-        })
+        const client = clients[index]
+        if (client) {
+            updateClient(client.id, 'name', trimmed)
+        }
         setEditingIndex(null)
         setEditValue('')
     }
 
-    const removeClient = (index: number) => {
+    const removeClient = (id: string) => {
         onChange((prev: any) => ({
             ...prev,
-            clients: (prev.clients || []).filter((_: any, i: number) => i !== index)
+            clients: (prev.clients || []).filter((c: any) => c.id !== id)
         }))
         toast.success('Client removed')
+    }
+
+    const handleUpload = async (id: string, file: File) => {
+        if (!file || isUploading) return
+        setIsUploading(id)
+        const toastId = toast.loading('Uploading logo...')
+        try {
+            const url = await uploadImage(file, `clients/logo-${id}`)
+            if (url) {
+                updateClient(id, 'logoUrl', url)
+                toast.success('Logo uploaded successfully', { id: toastId })
+            } else {
+                throw new Error('Upload returned empty URL')
+            }
+        } catch (error) {
+            console.error('Upload error:', error)
+            toast.error('Upload failed. Please try again.', { id: toastId })
+        } finally {
+            setIsUploading(null)
+        }
     }
 
     return (
@@ -70,7 +104,7 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <div className="space-y-2">
                     <h2 className="text-3xl font-black text-primary-900 tracking-tight uppercase">Our Clients</h2>
-                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage your featured client list</p>
+                    <p className="text-secondary-500 font-medium tracking-widest text-[10px] uppercase">Manage your featured client list with logos</p>
                 </div>
                 <button
                     onClick={addClient}
@@ -88,9 +122,9 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
 
             <div className="space-y-3">
                 <AnimatePresence mode="popLayout">
-                    {clients.map((name, index) => (
+                    {clients.map((client, index) => (
                         <motion.div
-                            key={`${index}-${name}`}
+                            key={client.id || index}
                             layout
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -98,8 +132,18 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
                             className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden group hover:border-primary-900/10 transition-all"
                         >
                             <div className="flex items-center gap-4 p-5">
-                                <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center shrink-0">
-                                    <Building2 className="w-6 h-6 text-primary-600" />
+                                <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                                    {client.logoUrl ? (
+                                        <Image
+                                            src={client.logoUrl}
+                                            alt={client.name || 'Client logo'}
+                                            width={56}
+                                            height={56}
+                                            className="object-contain w-full h-full"
+                                        />
+                                    ) : (
+                                        <Building2 className="w-7 h-7 text-primary-600" />
+                                    )}
                                 </div>
 
                                 {editingIndex === index ? (
@@ -130,10 +174,35 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="flex-1 text-sm font-bold text-primary-900 uppercase tracking-wider">
-                                            {name}
-                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-primary-900 uppercase tracking-wider truncate">
+                                                {client.name || 'Untitled'}
+                                            </p>
+                                            {client.logoUrl && (
+                                                <p className="text-[10px] text-secondary-400 mt-0.5 font-medium tracking-wider">
+                                                    Logo uploaded
+                                                </p>
+                                            )}
+                                        </div>
                                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <label className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors">
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0]
+                                                        if (file) handleUpload(client.id, file)
+                                                        e.target.value = ''
+                                                    }}
+                                                    disabled={isUploading !== null}
+                                                />
+                                                {isUploading === client.id ? (
+                                                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                                                ) : (
+                                                    <Upload className="w-4 h-4" />
+                                                )}
+                                            </label>
                                             <button
                                                 onClick={() => startEdit(index)}
                                                 className="w-10 h-10 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center hover:bg-primary-100 hover:text-primary-600 transition-colors"
@@ -141,7 +210,7 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
                                                 <Pencil className="w-4 h-4" />
                                             </button>
                                             <button
-                                                onClick={() => removeClient(index)}
+                                                onClick={() => removeClient(client.id)}
                                                 className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />
