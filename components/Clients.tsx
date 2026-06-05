@@ -2,20 +2,11 @@
 
 import { motion } from 'framer-motion'
 import { Building2 } from 'lucide-react'
-
-const clients = [
-  'Century Premier Suites',
-  'Century Niit Consult',
-  'Cocolicious and grill pub',
-  'Concord Hotel and Apartment',
-  'Elim Springs Academy',
-  'NNF Esquire',
-  'Smart SG Ltd',
-  'Sporty bet',
-  'Sporty fm',
-]
+import { useSiteConfig } from '@/lib/site-config'
 
 const Clients = () => {
+  const { config } = useSiteConfig()
+  const clients = Array.isArray(config.clients) ? config.clients : []
   return (
     <section className="section-padding relative overflow-hidden bg-white">
       <div className="absolute inset-0 z-0">

@@ -117,6 +117,7 @@ export type SiteConfig = {
 			color: string
 		}[]
 	}
+	clients: string[]
 }
 
 export const defaultSiteConfig: SiteConfig = {
@@ -257,7 +258,18 @@ export const defaultSiteConfig: SiteConfig = {
 				color: 'bg-purple-500'
 			}
 		]
-	}
+	},
+	clients: [
+		'Century Premier Suites',
+		'Century Niit Consult',
+		'Cocolicious and grill pub',
+		'Concord Hotel and Apartment',
+		'Elim Springs Academy',
+		'NNF Esquire',
+		'Smart SG Ltd',
+		'Sporty bet',
+		'Sporty fm',
+	]
 }
 
 const STORAGE_KEY = 'siteConfig'

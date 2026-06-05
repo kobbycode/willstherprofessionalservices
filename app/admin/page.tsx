@@ -32,7 +32,8 @@ import {
   Phone,
   X,
   User as UserIcon,
-  ShoppingBag
+  ShoppingBag,
+  Building2
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDateHuman } from '@/lib/date'
@@ -67,6 +68,7 @@ const MapConfig = dynamic(() => import('./components/MapConfig').then(m => m.Map
 const TestimonialsConfig = dynamic(() => import('./components/TestimonialsConfig').then(m => m.TestimonialsConfig))
 const GalleryConfig = dynamic(() => import('./components/GalleryConfig').then(m => m.GalleryConfig))
 const StatsConfig = dynamic(() => import('./components/StatsConfig').then(m => m.StatsConfig))
+const ClientsConfig = dynamic(() => import('./components/ClientsConfig').then(m => m.ClientsConfig))
 
 const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="mb-6">
@@ -263,6 +265,7 @@ const AdminDashboard = () => {
                     { id: 'testimonials', label: 'Testimonials', icon: Quote },
                     { id: 'gallery', label: 'Gallery', icon: ImageIcon },
                     { id: 'stats', label: 'Stats', icon: BarChart3 },
+                    { id: 'clients', label: 'Clients', icon: Building2 },
                   ].map((item) => (
                     <button
                       key={item.id}
@@ -403,6 +406,10 @@ const AdminDashboard = () => {
 
             {activeTab === 'stats' && (
               <StatsConfig config={config} onChange={handleConfigChange} onSave={handleSaveStats} />
+            )}
+
+            {activeTab === 'clients' && (
+              <ClientsConfig config={config} onChange={handleConfigChange} onSave={handleSaveAll} />
             )}
 
             <div className="mt-8 flex items-center justify-end space-x-4">
