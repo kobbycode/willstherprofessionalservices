@@ -17,7 +17,7 @@ const Footer = () => {
         <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="container-custom relative z-10 py-16 sm:py-20 px-4">
+      <div className="container-custom relative z-10 py-16 sm:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
           {/* Brand Section */}
           <div className="lg:col-span-4">
@@ -116,7 +116,7 @@ const Footer = () => {
               />
               <button
                 type="submit"
-                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-all duration-300 text-[12px] sm:text-sm font-bold uppercase tracking-wider"
+                className="absolute right-2 top-2 px-4 py-1.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl transition-all duration-300 text-[12px] sm:text-sm font-bold uppercase tracking-wider"
               >
                 Join
               </button>

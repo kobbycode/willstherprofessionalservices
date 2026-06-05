@@ -241,7 +241,7 @@ const Header = () => {
 
               <button
                 onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                className="bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-6 rounded-lg shadow-premium hover:shadow-premium-hover transition-all duration-300 transform hover:-translate-y-0.5"
+                className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5"
               >
                 Get Quote
               </button>

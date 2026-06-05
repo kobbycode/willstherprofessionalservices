@@ -85,7 +85,7 @@ const Contact = () => {
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100 dark:bg-primary-900/10 rounded-full blur-[140px] -z-10 translate-x-1/3 -translate-y-1/3" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100 dark:bg-blue-900/10 rounded-full blur-[120px] -z-10 -translate-x-1/3 translate-y-1/3" />
 
-      <div className="container-custom px-4 relative z-10">
+      <div className="container-custom relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -180,7 +180,7 @@ const Contact = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    className="w-14 h-14 bg-secondary-900 hover:bg-primary-600 rounded-2xl flex items-center justify-center text-white transition-all duration-500 hover:-translate-y-2 shadow-xl shadow-secondary-900/10"
+                    className="w-14 h-14 bg-primary-600 hover:bg-primary-700 rounded-2xl flex items-center justify-center text-white transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-primary-600/20"
                     aria-label={social.label}
                   >
                     <social.icon className="w-6 h-6" />
@@ -299,7 +299,7 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full bg-secondary-900 hover:bg-primary-600 text-white font-black py-5 px-8 rounded-2xl shadow-2xl hover:shadow-primary-600/20 transition-all duration-500 transform ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1 active:scale-95'} text-lg font-outfit uppercase tracking-wider flex items-center justify-center gap-4`}
+                  className={`w-full bg-primary-600 hover:bg-primary-700 text-white font-black py-5 px-8 rounded-2xl shadow-2xl hover:shadow-primary-600/20 transition-all duration-300 transform ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1 active:scale-95'} text-lg font-outfit uppercase tracking-wider flex items-center justify-center gap-4`}
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-3">

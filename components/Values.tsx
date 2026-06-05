@@ -32,7 +32,7 @@ const Values = () => {
   ]
 
   return (
-    <section className="section-padding relative overflow-hidden bg-white">
+    <section className="section-padding relative overflow-hidden bg-white" id="values">
       {/* Background Decor */}
       <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-primary-100 dark:bg-primary-900/10 rounded-full blur-[140px] -z-10 -translate-x-1/2" />
       

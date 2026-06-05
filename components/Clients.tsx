@@ -42,7 +42,7 @@ const Clients = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.08 }}
               viewport={{ once: true }}
-              className="bg-white border border-secondary-100 rounded-2xl p-6 md:p-8 text-center group hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 hover:-translate-y-1"
+              className="bg-white border border-secondary-100 rounded-[2.5rem] p-6 md:p-8 text-center group hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-100 transition-colors">
                 <Building2 className="w-7 h-7 text-primary-600" />

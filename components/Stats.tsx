@@ -74,7 +74,7 @@ const Stats = () => {
   const items = Array.isArray(stats.items) ? stats.items : []
 
   return (
-    <section className="relative py-12 bg-white border-b border-secondary-100 overflow-hidden" id="stats">
+    <section className="section-padding relative overflow-hidden bg-white" id="stats">
       {/* Background patterns */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(14,165,233,0.1),transparent_70%)]"></div>
@@ -90,6 +90,9 @@ const Stats = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
+          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-[11px] sm:text-[12px] mb-3 block">
+            Our Impact
+          </span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -115,7 +118,7 @@ const Stats = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="p-5 rounded-2xl bg-white border border-secondary-100 relative group transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5"
+                className="p-5 rounded-[2.5rem] bg-white border border-secondary-100 relative group transition-all duration-300 hover:shadow-lg hover:shadow-primary-500/5"
               >
                 {/* Decorative Elements */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/5 blur-3xl rounded-full group-hover:bg-primary-500/10 transition-colors"></div>
@@ -167,9 +170,9 @@ const Stats = () => {
                 Join our premium clientele and witness the transformation of your property with our bespoke professional solutions.
               </p>
               
-              <Link
-                href="#contact"
-                className="group relative inline-flex items-center justify-center bg-secondary-900 text-white font-black py-5 px-12 rounded-2xl transition-all duration-500 hover:scale-105 shadow-xl hover:shadow-secondary-900/20 gap-4 overflow-hidden"
+                <Link
+                  href="#contact"
+                  className="group relative inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-5 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-4 overflow-hidden"
               >
                 <span className="relative z-10 text-lg font-outfit uppercase tracking-widest">Get Started Now</span>
                 <TrendingUp className="w-5 h-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

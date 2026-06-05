@@ -258,7 +258,7 @@ const Hero = memo(() => {
                         >
                           <Link
                             href={slide.ctaLink}
-                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-semibold rounded-lg transition-all duration-500 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[13px] uppercase tracking-[0.2em] font-outfit overflow-hidden"
+                            className="group relative px-6 py-2.5 bg-primary-600 text-white font-bold rounded-xl transition-all duration-300 hover:bg-primary-700 shadow-lg hover:shadow-primary-500/20 text-[13px] uppercase tracking-[0.2em] font-outfit overflow-hidden hover:-translate-y-0.5"
                           >
                             <span className="relative z-10 flex items-center gap-2">
                               {slide.ctaLabel}

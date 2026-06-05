@@ -192,7 +192,7 @@ const Testimonials = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <a
                   href="#contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-secondary-900 hover:bg-primary-600 text-white font-black py-4 px-12 rounded-2xl transition-all duration-500 transform hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-xs"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-black py-4 px-12 rounded-2xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-primary-600/20 gap-3 uppercase tracking-wider text-xs"
                 >
                   Get Your Quote Today
                   <Quote className="w-4 h-4 rotate-180" />

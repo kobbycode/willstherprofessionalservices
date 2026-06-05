@@ -13,7 +13,7 @@ const Gallery = () => {
   if (!isLoaded && items.length === 0) {
     return (
       <section className="section-padding bg-white" id="gallery">
-        <div className="container-custom px-4">
+        <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary-900 mb-4 opacity-30">Gallery</h2>
             <div className="w-20 h-1 bg-primary-200 mx-auto" />
@@ -31,7 +31,7 @@ const Gallery = () => {
   if (items.length === 0) {
     return (
       <section className="section-padding bg-white" id="gallery">
-        <div className="container-custom px-4 text-center">
+        <div className="container-custom text-center">
             <div className="py-20 text-secondary-400 font-medium">
                 No images available in the gallery yet. Stay tuned!
             </div>
@@ -41,15 +41,15 @@ const Gallery = () => {
   }
 
   return (
-    <section className="section-padding relative overflow-hidden bg-transparent" id="gallery">
+    <section className="section-padding relative overflow-hidden bg-white" id="gallery">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-100 dark:bg-primary-900/20 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100 dark:bg-blue-900/20 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/2" />
 
-      <div className="container-custom px-4 relative z-10">
+      <div className="container-custom relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 0.8, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
           className="text-center mb-12"
