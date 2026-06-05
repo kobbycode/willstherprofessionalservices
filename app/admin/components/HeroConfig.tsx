@@ -227,12 +227,16 @@ const HeroConfig = ({ config, onChange, onSave }: any) => {
                   {/* Left: Preview */}
                   <div className="lg:w-[450px] relative overflow-hidden bg-gray-900">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-900/60 to-transparent z-10" />
+                    {slide.imageUrl ? (
                     <Image
                       src={slide.imageUrl}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                       alt="Preview"
                     />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-white/40 text-[10px] font-black uppercase tracking-widest bg-gray-800">No Image</div>
+                    )}
                     <div className="absolute left-10 top-1/2 -translate-y-1/2 z-20 space-y-2 max-w-[80%]">
                       <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg inline-flex items-center gap-2 border border-white/20">
                         <Eye className="w-3 h-3 text-white" />

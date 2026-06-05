@@ -329,7 +329,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {
 		setConfigState((prev) => {
 			const resolvedNext = typeof next === 'function' ? next(prev) : next
-			saveSiteConfigToLocal(resolvedNext, true)
+			try {
+				saveSiteConfigToLocal(resolvedNext, true)
+			} catch {
+				// localStorage write failure is non-fatal
+			}
 			return resolvedNext
 		})
 		setIsDirty(true)
@@ -353,25 +357,29 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 						return prev
 					}
 
-					const merged = {
-						...defaultSiteConfig,
-						...prev,
-						...remoteConfig,
-					}
+				const merged = {
+					...defaultSiteConfig,
+					...prev,
+					...remoteConfig,
+				}
 
-					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
-					for (const key of arrayKeys) {
-						if (Array.isArray(remoteConfig[key])) {
-							;(merged as any)[key] = remoteConfig[key]
-						}
+				const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
+				for (const key of arrayKeys) {
+					if (Array.isArray(remoteConfig[key])) {
+						;(merged as any)[key] = remoteConfig[key]
 					}
+				}
 
-					if (remoteConfig.navigation) {
-						merged.navigation = remoteConfig.navigation
-					}
+				if (remoteConfig.navigation) {
+					merged.navigation = remoteConfig.navigation
+				}
 
+				try {
 					saveSiteConfigToLocal(merged, false)
-					return merged
+				} catch {
+					// localStorage write failure is non-fatal
+				}
+				return merged
 				})
 			}
 

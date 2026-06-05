@@ -330,7 +330,7 @@ const ServicesConfig = ({ config, onChange, onSave }: any) => {
                   <div className="flex items-center gap-4">
                     <div className="px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
                       <p className="text-[9px] font-black text-secondary-300 uppercase tracking-widest">ID</p>
-                      <p className="text-xs font-black text-primary-900 uppercase">{s.id.substring(0, 8)}</p>
+                      <p className="text-xs font-black text-primary-900 uppercase">{(s.id || '').substring(0, 8)}</p>
                     </div>
                     <div className="h-6 w-px bg-gray-100" />
                     <div className="flex items-center gap-2">

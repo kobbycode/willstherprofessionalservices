@@ -22,36 +22,34 @@ interface NavigationConfigProps {
 }
 
 export const NavigationConfig = ({ config, onChange, onSave }: NavigationConfigProps) => {
-    const navigation = config.navigation || {
-        main: [
-            { name: 'Services', href: '/services' },
-            { name: 'About', href: '/about' },
-            { name: 'Contact', href: '/contact' },
-            { name: 'Gallery', href: '/gallery' },
-            { name: 'Blog', href: '/blog' }
-        ],
-        legal: [
-            { name: 'Privacy Policy', href: '/privacy-policy' },
-            { name: 'Terms of Service', href: '/terms-of-service' }
-        ]
-    }
+    const rawNav = config.navigation
+    const navigation = Array.isArray(rawNav)
+        ? { main: rawNav, legal: [] }
+        : (rawNav || { main: [], legal: [] })
+    const mainLinks = navigation.main || []
+    const legalLinks = navigation.legal || []
 
     const update = (key: string, value: any) => onChange((prev: any) => ({ ...prev, navigation: { ...(prev.navigation || {}), [key]: value } }))
 
+    const getLinks = (section: 'main' | 'legal') => section === 'main' ? mainLinks : legalLinks
+
     const updateLink = (section: 'main' | 'legal', index: number, field: string, value: string) => {
-        const newLinks = [...navigation[section]]
+        const links = getLinks(section)
+        const newLinks = [...links]
         newLinks[index] = { ...newLinks[index], [field]: value }
         update(section, newLinks)
     }
 
     const addLink = (section: 'main' | 'legal') => {
+        const links = getLinks(section)
         const defaultName = section === 'main' ? 'New Navigation Link' : 'New Legal Setting'
-        update(section, [...navigation[section], { name: defaultName, href: '#' }])
+        update(section, [...links, { name: defaultName, href: '#' }])
         toast.success(`${section === 'main' ? 'Interface' : 'Legal'} endpoint established`)
     }
 
     const removeLink = (section: 'main' | 'legal', index: number) => {
-        update(section, navigation[section].filter((_: any, i: number) => i !== index))
+        const links = getLinks(section)
+        update(section, links.filter((_: any, i: number) => i !== index))
         toast.error('Endpoint deleted')
     }
 
@@ -92,7 +90,7 @@ export const NavigationConfig = ({ config, onChange, onSave }: NavigationConfigP
 
                     <div className="space-y-4">
                         <AnimatePresence mode='popLayout'>
-                            {navigation.main.map((link: any, index: number) => (
+                            {mainLinks.map((link: any, index: number) => (
                                 <motion.div
                                     key={`main-${index}`}
                                     layout
@@ -155,7 +153,7 @@ export const NavigationConfig = ({ config, onChange, onSave }: NavigationConfigP
 
                     <div className="space-y-4">
                         <AnimatePresence mode='popLayout'>
-                            {navigation.legal.map((link: any, index: number) => (
+                            {legalLinks.map((link: any, index: number) => (
                                 <motion.div
                                     key={`legal-${index}`}
                                     layout

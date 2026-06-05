@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, Component, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -74,6 +74,38 @@ const ConfigHeader = ({ title, subtitle }: { title: string; subtitle?: string })
     {subtitle && <p className="text-gray-600 mt-1">{subtitle}</p>}
   </div>
 )
+
+class AdminErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
+    constructor(props: { children: ReactNode }) {
+        super(props)
+        this.state = { hasError: false, error: null }
+    }
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, error }
+    }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="flex items-center justify-center min-h-screen bg-gray-50 p-8">
+                    <div className="bg-white rounded-3xl shadow-premium max-w-lg w-full p-10 text-center space-y-6">
+                        <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto">
+                            <span className="text-2xl">!</span>
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Something went wrong</h2>
+                        <p className="text-gray-600 text-sm">{this.state.error?.message || 'An unexpected error occurred'}</p>
+                        <button
+                            onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }}
+                            className="px-8 py-3 bg-primary-900 text-white rounded-2xl font-bold text-sm hover:bg-primary-800 transition-all"
+                        >
+                            Reload Page
+                        </button>
+                    </div>
+                </div>
+            )
+        }
+        return this.props.children
+    }
+}
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -169,6 +201,7 @@ const AdminDashboard = () => {
 
   return (
     <AdminAuth>
+      <AdminErrorBoundary>
       <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         <AdminHeader
           title="Admin Dashboard"
@@ -448,6 +481,7 @@ const AdminDashboard = () => {
           </motion.div>
         </div>
       )}
+      </AdminErrorBoundary>
     </AdminAuth>
   )
 }
