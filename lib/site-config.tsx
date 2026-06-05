@@ -365,20 +365,56 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const db = getDb()
+		let seeded = false
 		const unsub = onSnapshot(doc(db, 'config', 'site'), (snap) => {
 			if (snap.exists()) {
-				setConfigState((prev) => {
-					if (dirtyRef.current) return prev
-					const remoteData = snap.data() as Partial<SiteConfig>
-					const merged = deepMerge(deepMerge(defaultSiteConfig, prev), remoteData)
-					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
+				const remoteData = snap.data() as Partial<SiteConfig>
+				const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
+
+				// Seed empty arrays from defaults on first load only
+				if (!seeded) {
+					seeded = true
+					let needsSeed = false
+					const seedPayload: Record<string, any> = {}
 					for (const key of arrayKeys) {
-						if (Array.isArray(remoteData[key])) {
-							;(merged as any)[key] = remoteData[key]
+						if (
+							Array.isArray(remoteData[key]) &&
+							remoteData[key]!.length === 0 &&
+							Array.isArray(defaultSiteConfig[key]) &&
+							(defaultSiteConfig[key] as any[]).length > 0
+						) {
+							seedPayload[key] = defaultSiteConfig[key]
+							needsSeed = true
 						}
 					}
-					if (remoteData.navigation) {
-						merged.navigation = remoteData.navigation as any
+					if (needsSeed) {
+						fetch('/api/config/save', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ _merge: true, ...seedPayload }),
+						}).catch(() => {})
+					}
+				}
+
+				setConfigState((prev) => {
+					if (dirtyRef.current) return prev
+
+					// Strip empty arrays from remote so deepMerge doesn't override defaults
+					const cleanRemote = { ...remoteData }
+					for (const key of arrayKeys) {
+						if (Array.isArray(cleanRemote[key]) && cleanRemote[key]!.length === 0) {
+							delete cleanRemote[key]
+						}
+					}
+
+					const merged = deepMerge(deepMerge(defaultSiteConfig, prev), cleanRemote)
+					for (const key of arrayKeys) {
+						if (Array.isArray(cleanRemote[key]) && cleanRemote[key]!.length > 0) {
+							;(merged as any)[key] = cleanRemote[key]
+						}
+					}
+					if (cleanRemote.navigation) {
+						merged.navigation = cleanRemote.navigation as any
 					}
 					return merged
 				})
