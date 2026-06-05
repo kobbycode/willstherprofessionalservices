@@ -12,9 +12,11 @@ import {
     Linkedin
 } from 'lucide-react'
 
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
+
 interface FooterConfigProps {
-    config: any
-    onChange: (next: any) => void
+    config: SiteConfig
+    onChange: ConfigOnChange
     onSave?: () => Promise<void>
 }
 

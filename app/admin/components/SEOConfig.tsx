@@ -16,9 +16,11 @@ import {
     Activity
 } from 'lucide-react'
 
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
+
 interface SEOConfigProps {
-    config: any
-    onChange: (next: any) => void
+    config: SiteConfig
+    onChange: ConfigOnChange
     onSave?: () => Promise<void>
 }
 

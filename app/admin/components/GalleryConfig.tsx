@@ -20,9 +20,11 @@ import { uploadImage } from '@/lib/storage'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
 
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
+
 interface GalleryConfigProps {
-    config: any
-    onChange: (next: any) => void
+    config: SiteConfig
+    onChange: ConfigOnChange
     onSave?: () => Promise<void>
 }
 

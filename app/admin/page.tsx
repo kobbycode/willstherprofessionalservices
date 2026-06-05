@@ -37,7 +37,8 @@ import Link from 'next/link'
 import { formatDateHuman } from '@/lib/date'
 import { useRouter } from 'next/navigation'
 import AdminAuth from '@/components/AdminAuth'
-import { useSiteConfig } from '@/lib/site-config'
+import { useSiteConfig, type ConfigUpdate } from '@/lib/site-config'
+import { SaveButton } from '@/components/SaveButton'
 import toast from 'react-hot-toast'
 import { fetchContactSubmissions, updateContactStatus, deleteContactSubmission, type ContactSubmission } from '@/lib/contacts'
 import { BlogPost } from '@/lib/blog'
@@ -113,8 +114,41 @@ const AdminDashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const router = useRouter()
-  const { config, setConfig, clearDirty } = useSiteConfig()
+  const { config, setConfig, clearDirty, isDirty } = useSiteConfig()
   const { user, signOut: authSignOut } = useAuth()
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+
+  // Track updatedAt from config
+  useEffect(() => {
+    if (config.updatedAt) {
+      setLastUpdated(config.updatedAt)
+    }
+  }, [config.updatedAt])
+
+  // Unsaved-changes guard
+  useEffect(() => {
+    if (isDirty) {
+      window.onbeforeunload = () => true
+    } else {
+      window.onbeforeunload = null
+    }
+    return () => { window.onbeforeunload = null }
+  }, [isDirty])
+
+  // URL-based tab routing
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab)
+    }
+  }, [])
+
+  const navigateToTab = useCallback((id: string) => {
+    if (isDirty && !window.confirm('You have unsaved changes. Are you sure you want to leave this page?')) return
+    setActiveTab(id)
+    router.replace(`/admin?tab=${id}`, { scroll: false })
+  }, [isDirty, router])
 
   const handleLogout = async () => {
     await authSignOut()
@@ -154,7 +188,7 @@ const AdminDashboard = () => {
     configRef.current = { ...config }
   }, [config])
 
-  const handleConfigChange = (next: any) => {
+  const handleConfigChange = (next: ConfigUpdate) => {
     if (typeof next === 'function') {
       const resolved = next(configRef.current)
       configRef.current = resolved
@@ -228,11 +262,11 @@ const AdminDashboard = () => {
                     { id: 'categories', label: 'Categories', icon: Filter },
                     { id: 'users', label: 'Users', icon: Users, restricted: true },
                     { id: 'contact', label: 'Inquiries', icon: MessageSquare },
-                  ].filter(item => !item.restricted || (user?.role === 'super_admin')).map((item) => (
+                    ].filter(item => !item.restricted || (user?.role === 'super_admin')).map((item) => (
                     <button
                       key={item.id}
                       onClick={() => {
-                        setActiveTab(item.id)
+                        navigateToTab(item.id)
                         setIsMobileMenuOpen(false)
                       }}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${activeTab === item.id
@@ -264,7 +298,7 @@ const AdminDashboard = () => {
                     <button
                       key={item.id}
                       onClick={() => {
-                        setActiveTab(item.id)
+                        navigateToTab(item.id)
                         setIsMobileMenuOpen(false)
                       }}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${activeTab === item.id
@@ -294,7 +328,7 @@ const AdminDashboard = () => {
                     <button
                       key={item.id}
                       onClick={() => {
-                        setActiveTab(item.id)
+                        navigateToTab(item.id)
                         setIsMobileMenuOpen(false)
                       }}
                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 group ${activeTab === item.id
@@ -374,7 +408,7 @@ const AdminDashboard = () => {
               <>
                 <AboutConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('about')} />
                 <div className="flex justify-end pt-6">
-                  <button onClick={() => handleSectionSave('about')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <SaveButton onSave={() => handleSectionSave('about')} isSaving={isSaving} />
                 </div>
               </>
             )}
@@ -383,7 +417,7 @@ const AdminDashboard = () => {
               <>
                 <NavigationConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('navigation')} />
                 <div className="flex justify-end pt-6">
-                  <button onClick={() => handleSectionSave('navigation')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <SaveButton onSave={() => handleSectionSave('navigation')} isSaving={isSaving} />
                 </div>
               </>
             )}
@@ -392,7 +426,7 @@ const AdminDashboard = () => {
               <>
                 <FooterConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('footer')} />
                 <div className="flex justify-end pt-6">
-                  <button onClick={() => handleSectionSave('footer')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <SaveButton onSave={() => handleSectionSave('footer')} isSaving={isSaving} />
                 </div>
               </>
             )}
@@ -401,7 +435,7 @@ const AdminDashboard = () => {
               <>
                 <SEOConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('seo')} />
                 <div className="flex justify-end pt-6">
-                  <button onClick={() => handleSectionSave('seo')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <SaveButton onSave={() => handleSectionSave('seo')} isSaving={isSaving} />
                 </div>
               </>
             )}
@@ -410,7 +444,7 @@ const AdminDashboard = () => {
               <>
                 <MapConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('map')} />
                 <div className="flex justify-end pt-6">
-                  <button onClick={() => handleSectionSave('map')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <SaveButton onSave={() => handleSectionSave('map')} isSaving={isSaving} />
                 </div>
               </>
             )}
@@ -419,7 +453,7 @@ const AdminDashboard = () => {
               <>
                 <TestimonialsConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('testimonials')} />
                 <div className="flex justify-end pt-6">
-                  <button onClick={() => handleSectionSave('testimonials')} disabled={isSaving} className="px-8 py-4 bg-primary-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-800 transition-all shadow-xl hover:shadow-primary-900/20 disabled:opacity-50">{isSaving ? 'Saving...' : 'Save Changes'}</button>
+                  <SaveButton onSave={() => handleSectionSave('testimonials')} isSaving={isSaving} />
                 </div>
               </>
             )}
@@ -436,6 +470,9 @@ const AdminDashboard = () => {
               <ClientsConfig config={config} onChange={handleConfigChange} onSave={() => handleSectionSave('clients')} />
             )}
           </div>
+        </div>
+        <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-200 bg-white/50 text-right">
+          {lastUpdated ? `Last saved: ${formatDateHuman(lastUpdated)}` : 'Not saved yet'}
         </div>
       </div>
 

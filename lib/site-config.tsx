@@ -122,7 +122,11 @@ export type SiteConfig = {
 		name: string
 		logoUrl: string
 	}[]
+	updatedAt?: string
 }
+
+export type ConfigUpdate = SiteConfig | ((prev: SiteConfig) => SiteConfig)
+export type ConfigOnChange = (next: ConfigUpdate) => void
 
 export const defaultSiteConfig: SiteConfig = {
 	siteName: 'Willsther Professional Services',

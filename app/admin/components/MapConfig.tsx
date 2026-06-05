@@ -15,9 +15,11 @@ import {
     Crosshair
 } from 'lucide-react'
 
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
+
 interface MapConfigProps {
-    config: any
-    onChange: (next: any) => void
+    config: SiteConfig
+    onChange: ConfigOnChange
     onSave?: () => Promise<void>
 }
 

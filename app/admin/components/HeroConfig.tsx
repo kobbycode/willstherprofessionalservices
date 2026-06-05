@@ -18,10 +18,17 @@ import {
   ArrowRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
 import { uploadImage } from '@/lib/storage'
 import Image from 'next/image'
 
-const HeroConfig = ({ config, onChange, onSave }: any) => {
+interface HeroConfigProps {
+    config: SiteConfig
+    onChange: ConfigOnChange
+    onSave?: () => Promise<void>
+}
+
+const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
   const heroSlides = config.heroSlides || []
   const [isAddSlideModalOpen, setIsAddSlideModalOpen] = useState(false)
   const [newSlideData, setNewSlideData] = useState({

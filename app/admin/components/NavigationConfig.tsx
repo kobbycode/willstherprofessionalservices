@@ -15,9 +15,11 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
+
 interface NavigationConfigProps {
-    config: any
-    onChange: (next: any) => void
+    config: SiteConfig
+    onChange: ConfigOnChange
     onSave?: () => Promise<void>
 }
 

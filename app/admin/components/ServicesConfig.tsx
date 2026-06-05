@@ -22,11 +22,18 @@ import {
     Filter
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
 import { uploadImage } from '@/lib/storage'
 import Image from 'next/image'
 import { fetchServiceCategories } from '@/lib/categories'
 
-const ServicesConfig = ({ config, onChange, onSave }: any) => {
+interface ServicesConfigProps {
+    config: SiteConfig
+    onChange: ConfigOnChange
+    onSave?: () => Promise<void>
+}
+
+const ServicesConfig = ({ config, onChange, onSave }: ServicesConfigProps) => {
   const [services, setServices] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
