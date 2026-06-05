@@ -276,9 +276,6 @@ export const defaultSiteConfig: SiteConfig = {
 	]
 }
 
-const STORAGE_KEY = 'siteConfig'
-const DIRTY_KEY = 'siteConfig_isDirty'
-
 function deepMerge(defaults: any, override: any): any {
 	const result = { ...defaults }
 	for (const key of Object.keys(override)) {
@@ -298,43 +295,17 @@ function deepMerge(defaults: any, override: any): any {
 	return result
 }
 
-export function loadSiteConfigFromLocal(): SiteConfig {
-	if (typeof window === 'undefined') return defaultSiteConfig
-	try {
-		const raw = localStorage.getItem(STORAGE_KEY)
-		if (!raw) return defaultSiteConfig
-		const parsed = JSON.parse(raw) as SiteConfig
-		return deepMerge(defaultSiteConfig, parsed)
-	} catch {
-		return defaultSiteConfig
-	}
-}
-
-export function saveSiteConfigToLocal(config: SiteConfig, isDirty?: boolean) {
-	if (typeof window === 'undefined') return
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
-	if (isDirty !== undefined) {
-		localStorage.setItem(DIRTY_KEY, isDirty ? 'true' : 'false')
-	}
-}
-
-export function loadIsDirtyFromLocal(): boolean {
-	if (typeof window === 'undefined') return false
-	return localStorage.getItem(DIRTY_KEY) === 'true'
-}
-
 import { useEffect, useState, useCallback, useMemo, createContext, useContext, useRef } from 'react'
 import { getDb } from './firebase'
-import { doc, setDoc, onSnapshot, collection, query, orderBy } from 'firebase/firestore'
+import { doc, onSnapshot } from 'firebase/firestore'
 
-// Context for global site configuration
 interface SiteContextType {
 	config: SiteConfig
 	setConfig: (next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => void
 	saveConfig: (next: SiteConfig) => Promise<{ success: boolean; error?: string }>
 	isLoaded: boolean
 	isDirty: boolean
-	refresh: () => void
+	clearDirty: () => void
 }
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
@@ -343,110 +314,65 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 	const [config, setConfigState] = useState<SiteConfig>(defaultSiteConfig)
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [isDirty, setIsDirty] = useState(false)
+	const dirtyRef = useRef(false)
 
-	// Local update only - updates state and localStorage immediately
-	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {
-		setConfigState((prev) => {
-			const resolvedNext = typeof next === 'function' ? next(prev) : next
-			try {
-				saveSiteConfigToLocal(resolvedNext, true)
-			} catch {
-				// localStorage write failure is non-fatal
-			}
-			return resolvedNext
-		})
-		setIsDirty(true)
-	}, [])
-
-	const loadFromServer = useCallback(async () => {
-		try {
-			if (typeof window === 'undefined') return
-
-			const configRes = await fetch('/api/config/get', { cache: 'no-store' })
-
-			let remoteConfig: Partial<SiteConfig> = {}
-			if (configRes.ok) {
-				const data = await configRes.json()
-				remoteConfig = data.config || {}
-			}
-
-			if (Object.keys(remoteConfig).length > 0) {
+	useEffect(() => {
+		const db = getDb()
+		const unsub = onSnapshot(doc(db, 'config', 'site'), (snap) => {
+			if (snap.exists()) {
 				setConfigState((prev) => {
-					if (loadIsDirtyFromLocal()) {
-						return prev
-					}
-
-					const merged = deepMerge(deepMerge(defaultSiteConfig, prev), remoteConfig)
-
+					if (dirtyRef.current) return prev
+					const remoteData = snap.data() as Partial<SiteConfig>
+					const merged = deepMerge(deepMerge(defaultSiteConfig, prev), remoteData)
 					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
 					for (const key of arrayKeys) {
-						if (Array.isArray(remoteConfig[key])) {
-							;(merged as any)[key] = remoteConfig[key]
+						if (Array.isArray(remoteData[key])) {
+							;(merged as any)[key] = remoteData[key]
 						}
 					}
-
-					if (remoteConfig.navigation) {
-						merged.navigation = remoteConfig.navigation as any
-					}
-
-					try {
-						saveSiteConfigToLocal(merged, false)
-					} catch {
-						// localStorage write failure is non-fatal
+					if (remoteData.navigation) {
+						merged.navigation = remoteData.navigation as any
 					}
 					return merged
 				})
 			}
-
-		} catch (error) {
-			console.error('SiteProvider: Sync failed:', error)
-		} finally {
 			setIsLoaded(true)
-		}
+		})
+		return () => unsub()
 	}, [])
 
-	useEffect(() => {
-		const cached = loadSiteConfigFromLocal()
-		const cachedDirty = loadIsDirtyFromLocal()
-		
-		if (cached) setConfigState(cached)
-		if (cachedDirty) setIsDirty(true)
-		
-		loadFromServer()
+	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {
+		setConfigState((prev) => {
+			const resolvedNext = typeof next === 'function' ? next(prev) : next
+			return resolvedNext
+		})
+		dirtyRef.current = true
+		setIsDirty(true)
+	}, [])
 
-		const interval = setInterval(loadFromServer, 600000)
-		return () => clearInterval(interval)
-	}, [loadFromServer])
+	const clearDirty = useCallback(() => {
+		dirtyRef.current = false
+		setIsDirty(false)
+	}, [])
 
 	const saveConfig = useCallback(async (dataToSave?: SiteConfig): Promise<{ success: boolean; error?: string }> => {
-		// Use the provided data or fallback to the current state.
-		// NOTE: If calling this without args, the 'config' value might be stale due to closure.
 		const target = dataToSave || config
-		
 		try {
 			const response = await fetch('/api/config/save', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(target),
 			})
-
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}))
-				console.error('SiteProvider: Save FAILED on server:', errorData)
 				throw new Error(errorData.error || 'Failed to save configuration')
 			}
-
-			// Update state and persistence
-			setConfigState(target)
-			setIsDirty(false)
-			saveSiteConfigToLocal(target, false)
-			
+			clearDirty()
 			return { success: true }
 		} catch (error: any) {
-			console.error('SiteProvider: Save network/server error:', error.message)
 			return { success: false, error: error.message || 'Network error' }
 		}
-	}, [config]) // Added config to dependencies to avoid stale target
+	}, [config, clearDirty])
 
 	const value = useMemo(() => ({
 		config,
@@ -454,8 +380,8 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 		saveConfig,
 		isLoaded,
 		isDirty,
-		refresh: loadFromServer
-	}), [config, setConfig, saveConfig, isLoaded, isDirty, loadFromServer])
+		clearDirty,
+	}), [config, setConfig, saveConfig, isLoaded, isDirty, clearDirty])
 
 	return (
 		<SiteContext.Provider value={value}>
@@ -467,17 +393,14 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 export function useSiteConfig() {
 	const context = useContext(SiteContext)
 	if (context === undefined) {
-		// Fallback for components used outside Provider (though rare in this app)
 		return {
 			config: defaultSiteConfig,
 			setConfig: () => { },
 			saveConfig: async () => ({ success: false, error: 'SiteConfig not initialized' }),
 			isLoaded: false,
 			isDirty: false,
-			refresh: () => { }
+			clearDirty: () => { }
 		}
 	}
 	return context
 }
-
-

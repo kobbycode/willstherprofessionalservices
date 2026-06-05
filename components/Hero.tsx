@@ -11,7 +11,7 @@ import { getFallbackImageUrl } from '@/lib/storage'
 const Hero = memo(() => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isLoading, setIsLoading] = useState(false) // Start as false, only show loading if explicitly needed
-  const { config, isLoaded, refresh } = useSiteConfig()
+  const { config, isLoaded } = useSiteConfig()
 
   const slides = useMemo(() => {
     // Always provide default slides even if config is not loaded
