@@ -7,56 +7,13 @@ import Skeleton from '@/components/Skeleton'
 
 const Testimonials = () => {
   const { config, isLoaded } = useSiteConfig()
-  const testimonials = config.testimonials && config.testimonials.length > 0 ? config.testimonials.map((t) => ({
+  const testimonials = (config.testimonials || []).map((t) => ({
     name: t.name,
     rating: t.rating || 5,
     title: t.role || 'Customer',
     comment: t.content,
     highlight: t.role || 'Customer'
-  })) : [
-    {
-      name: 'Edwin, Tse Addo',
-      rating: 5,
-      title: 'Excellent Service',
-      comment: 'Good work done. i am impressed, will definately recommend and refer.',
-      highlight: 'Excellent Service'
-    },
-    {
-      name: 'Kafui, Adjeiman',
-      rating: 5,
-      title: 'Super Support',
-      comment: 'Charlie, thanks so much for today Boss, really appreciate the support and excellent delivery, you guys are super.',
-      highlight: 'Super Support'
-    },
-    {
-      name: 'Nii My Wekuevents, Ashaley Bowta School Junction',
-      rating: 5,
-      title: 'Love the flexibility',
-      comment: 'Thanks for these Willsther. Good job.',
-      highlight: 'Love the flexibility'
-    },
-    {
-      name: 'Joshua, North Kaneshie',
-      rating: 5,
-      title: 'Grateful for commitment',
-      comment: 'Thank you so much once again. I am very grateful for the commitment. Good job.',
-      highlight: 'Grateful for commitment'
-    },
-    {
-      name: 'Frankly, NNF Esquire ltd, Tema Community 22',
-      rating: 4,
-      title: 'Fantastic quality',
-      comment: 'Thanks Willsther Professional Services for restoring that shine back to our office building, especially the glass good work done.',
-      highlight: 'Fantastic quality'
-    },
-    {
-      name: 'Priscilla, Domi Pillar',
-      rating: 5,
-      title: 'Spotless and Smelled great',
-      comment: 'Good Professional Services, The place was Spotless and Smelled great. Thank you for helping me with the heavy lifting. Would recommend Willsther Professional Services any day because you guys really came through for me.',
-      highlight: 'Spotless and Smelled great'
-    }
-  ]
+  }))
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (

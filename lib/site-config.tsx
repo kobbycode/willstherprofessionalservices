@@ -235,7 +235,50 @@ export const defaultSiteConfig: SiteConfig = {
 		lng: undefined,
 		zoom: 14
 	},
-	testimonials: [],
+	testimonials: [
+		{
+			id: 'testimonial-default-1',
+			name: 'Edwin, Tse Addo',
+			role: 'Excellent Service',
+			content: 'Good work done. i am impressed, will definately recommend and refer.',
+			rating: 5,
+		},
+		{
+			id: 'testimonial-default-2',
+			name: 'Kafui, Adjeiman',
+			role: 'Super Support',
+			content: 'Charlie, thanks so much for today Boss, really appreciate the support and excellent delivery, you guys are super.',
+			rating: 5,
+		},
+		{
+			id: 'testimonial-default-3',
+			name: 'Nii My Wekuevents, Ashaley Bowta School Junction',
+			role: 'Love the flexibility',
+			content: 'Thanks for these Willsther. Good job.',
+			rating: 5,
+		},
+		{
+			id: 'testimonial-default-4',
+			name: 'Joshua, North Kaneshie',
+			role: 'Grateful for commitment',
+			content: 'Thank you so much once again. I am very grateful for the commitment. Good job.',
+			rating: 5,
+		},
+		{
+			id: 'testimonial-default-5',
+			name: 'Frankly, NNF Esquire ltd, Tema Community 22',
+			role: 'Fantastic quality',
+			content: 'Thanks Willsther Professional Services for restoring that shine back to our office building, especially the glass good work done.',
+			rating: 4,
+		},
+		{
+			id: 'testimonial-default-6',
+			name: 'Priscilla, Domi Pillar',
+			role: 'Spotless and Smelled great',
+			content: 'Good Professional Services, The place was Spotless and Smelled great. Thank you for helping me with the heavy lifting. Would recommend Willsther Professional Services any day because you guys really came through for me.',
+			rating: 5,
+		},
+	],
 	gallery: [],
 	stats: {
 		title: 'Our Services in Numbers',
