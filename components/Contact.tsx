@@ -96,7 +96,7 @@ const Contact = () => {
           <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] sm:text-[12px] mb-3 block">
             Connect With Us
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
+          <h2 className="text-xl sm:text-2xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
             Let's Start a <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Conversation</span>
           </h2>
           <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto rounded-full" />
@@ -112,10 +112,10 @@ const Contact = () => {
             className="lg:col-span-5 space-y-8 md:space-y-12"
           >
             <div>
-              <h3 className="text-base font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest">
+              <h3 className="text-sm md:text-base font-bold text-secondary-900 mb-6 font-outfit uppercase tracking-widest">
                 Information
               </h3>
-              <p className="text-base text-secondary-600 font-inter leading-relaxed mb-8 font-medium">
+              <p className="text-sm md:text-base text-secondary-600 font-inter leading-relaxed mb-8 font-medium">
                 Have a question or ready to book a service? Reach out to us through any of these channels.
               </p>
 
@@ -130,10 +130,10 @@ const Contact = () => {
                     className="bg-white border border-secondary-100 rounded-2xl md:rounded-3xl p-4 md:p-6 flex items-start space-x-4 md:space-x-6 group hover:shadow-xl hover:shadow-secondary-200/20 transition-all duration-500 shadow-lg shadow-secondary-200/5"
                   >
                     <div className={`w-10 h-10 md:w-12 md:h-12 ${info.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg transform group-hover:scale-110 transition-transform duration-500`}>
-                      <info.icon className="w-6 h-6 text-white" />
+                      <info.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-secondary-900 mb-1 font-outfit uppercase tracking-[0.2em] text-sm">
+                      <h4 className="font-bold text-secondary-900 mb-1 font-outfit uppercase tracking-[0.2em] text-[11px] md:text-sm">
                         {info.title}
                       </h4>
                       {info.details.map((detail, detailIndex) => {
@@ -142,20 +142,20 @@ const Contact = () => {
 
                         if (isPhone) {
                           return (
-                            <a key={detailIndex} href={`tel:${detail.split(' / ')[0]}`} className="text-secondary-600 text-base font-medium font-inter hover:text-primary-500 transition-colors inline-block py-2 block">
+                            <a key={detailIndex} href={`tel:${detail.split(' / ')[0]}`} className="text-secondary-600 text-sm md:text-base font-medium font-inter hover:text-primary-500 transition-colors inline-block py-2 block">
                               {detail}
                             </a>
                           );
                         }
                         if (isEmail) {
                           return (
-                            <a key={detailIndex} href={`mailto:${detail}`} className="text-secondary-600 text-base font-medium font-inter hover:text-primary-500 transition-colors inline-block py-2 block">
+                            <a key={detailIndex} href={`mailto:${detail}`} className="text-secondary-600 text-sm md:text-base font-medium font-inter hover:text-primary-500 transition-colors inline-block py-2 block">
                               {detail}
                             </a>
                           );
                         }
                         return (
-                          <p key={detailIndex} className="text-secondary-600 text-base font-medium font-inter">
+                          <p key={detailIndex} className="text-secondary-600 text-sm md:text-base font-medium font-inter">
                             {detail}
                           </p>
                         );
@@ -183,7 +183,7 @@ const Contact = () => {
                     className="w-12 h-12 md:w-14 md:h-14 bg-primary-600 hover:bg-primary-700 rounded-xl md:rounded-2xl flex items-center justify-center text-white transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-primary-600/20"
                     aria-label={social.label}
                   >
-                    <social.icon className="w-6 h-6" />
+                    <social.icon className="w-5 h-5 md:w-6 md:h-6" />
                   </motion.a>
                 ))}
               </div>
@@ -201,7 +201,7 @@ const Contact = () => {
             <div className="bg-white border border-secondary-100 rounded-2xl md:rounded-[3rem] p-5 md:p-12 shadow-2xl shadow-secondary-200/20 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary-100 rounded-full blur-[100px] -mr-32 -mt-32" />
 
-              <h3 className="text-base font-bold text-secondary-900 mb-8 font-outfit uppercase tracking-widest relative z-10 text-center lg:text-left">
+              <h3 className="text-sm md:text-base font-bold text-secondary-900 mb-8 font-outfit uppercase tracking-widest relative z-10 text-center lg:text-left">
                 Send Us a <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Message</span>
               </h3>
 
@@ -215,7 +215,7 @@ const Contact = () => {
                       type="text"
                       id="firstName"
                       name="firstName"
-                      className="w-full px-6 py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 font-medium font-inter"
+                      className="w-full px-5 md:px-6 py-3 md:py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 text-sm md:text-base font-inter"
                       placeholder="Kofi"
                       required
                     />
@@ -228,7 +228,7 @@ const Contact = () => {
                       type="text"
                       id="lastName"
                       name="lastName"
-                      className="w-full px-6 py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 font-medium font-inter"
+                      className="w-full px-5 md:px-6 py-3 md:py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 text-sm md:text-base font-inter"
                       placeholder="Mensah"
                       required
                     />
@@ -244,7 +244,7 @@ const Contact = () => {
                       type="email"
                       id="email"
                       name="email"
-                      className="w-full px-6 py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 font-medium font-inter"
+                      className="w-full px-5 md:px-6 py-3 md:py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 text-sm md:text-base font-inter"
                       placeholder="john@example.com"
                       required
                     />
@@ -257,7 +257,7 @@ const Contact = () => {
                       type="tel"
                       id="phone"
                       name="phone"
-                      className="w-full px-6 py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 font-medium font-inter"
+                      className="w-full px-5 md:px-6 py-3 md:py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 text-sm md:text-base font-inter"
                       placeholder="+233 20 826 7704"
                     />
                   </div>
@@ -270,7 +270,7 @@ const Contact = () => {
                   <select
                     id="service"
                     name="service"
-                    className="w-full px-6 py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 font-medium font-inter appearance-none"
+                    className="w-full px-5 md:px-6 py-3 md:py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 text-sm md:text-base font-inter appearance-none"
                     required
                   >
                     <option value="" className="bg-white text-secondary-900">Select a service</option>
@@ -290,7 +290,7 @@ const Contact = () => {
                     id="message"
                     name="message"
                     rows={4}
-                    className="w-full px-6 py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 font-medium font-inter resize-none"
+                    className="w-full px-5 md:px-6 py-3 md:py-4 bg-white border border-secondary-100 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-300 outline-none text-secondary-900 text-sm md:text-base font-inter resize-none"
                     placeholder="Describe your requirements..."
                     required
                   ></textarea>
@@ -299,17 +299,17 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full bg-primary-600 hover:bg-primary-700 text-white font-black py-5 px-8 rounded-2xl shadow-2xl hover:shadow-primary-600/20 transition-all duration-300 transform ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1 active:scale-95'} text-lg font-outfit uppercase tracking-wider flex items-center justify-center gap-4`}
+                  className={`w-full bg-primary-600 hover:bg-primary-700 text-white font-black py-4 md:py-5 px-6 md:px-8 rounded-2xl shadow-2xl hover:shadow-primary-600/20 transition-all duration-300 transform ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1 active:scale-95'} text-base md:text-lg font-outfit uppercase tracking-wider flex items-center justify-center gap-3 md:gap-4`}
                 >
                   {isSubmitting ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Sending Inquiry...
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="text-sm md:text-base">Sending Inquiry...</span>
                     </div>
                   ) : (
                     <>
                       Send Your Inquiry
-                      <Mail className="w-6 h-6 transform group-hover:translate-x-1 transition-transform" />
+                      <Mail className="w-5 h-5 md:w-6 md:h-6 transform group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
                 </button>
@@ -324,7 +324,7 @@ const Contact = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="relative rounded-[3rem] overflow-hidden shadow-3xl"
+          className="relative rounded-2xl md:rounded-[3rem] overflow-hidden shadow-3xl"
         >
           <div className="h-[400px] md:h-[500px] w-full contrast-125 opacity-80 transition-all duration-1000">
             <iframe
@@ -342,12 +342,12 @@ const Contact = () => {
 
           {/* Address Overlay */}
           <div className="absolute bottom-4 left-4 right-4 lg:left-auto lg:right-8 lg:w-96 bg-white border border-secondary-100 rounded-2xl md:rounded-3xl p-4 md:p-8 backdrop-blur-xl shadow-2xl shadow-secondary-200/20">
-            <div className="flex items-start space-x-6">
-              <div className="w-12 h-12 bg-secondary-900 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-secondary-900/10">
-                <MapPin className="w-6 h-6 text-white" />
+            <div className="flex items-start space-x-4 md:space-x-6">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-secondary-900 rounded-xl md:rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-secondary-900/10">
+                <MapPin className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h4 className="font-black text-secondary-900 mb-2 font-outfit tracking-tight uppercase">Visit Our Office</h4>
+                <h4 className="font-black text-secondary-900 mb-2 font-outfit tracking-tight uppercase text-sm md:text-base">Visit Our Office</h4>
                 <p className="text-secondary-600 font-medium leading-relaxed font-inter text-sm">
                   {config.footer.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'}
                 </p>
