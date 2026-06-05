@@ -352,34 +352,46 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 			}
 
 			if (Object.keys(remoteConfig).length > 0) {
+				console.log(`[Debug loadFromServer] remoteConfig keys:`, Object.keys(remoteConfig))
+				if ((remoteConfig as any).footer) {
+					console.log(`[Debug loadFromServer] remoteConfig.footer.copyright:`, (remoteConfig as any).footer?.copyright)
+				}
 				setConfigState((prev) => {
 					if (loadIsDirtyFromLocal()) {
+						console.log(`[Debug loadFromServer] SKIPPED merge (dirty)`)
 						return prev
 					}
 
-				const merged = {
-					...defaultSiteConfig,
-					...prev,
-					...remoteConfig,
-				}
-
-				const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
-				for (const key of arrayKeys) {
-					if (Array.isArray(remoteConfig[key])) {
-						;(merged as any)[key] = remoteConfig[key]
+					const merged = {
+						...defaultSiteConfig,
+						...prev,
+						...remoteConfig,
 					}
-				}
 
-				if (remoteConfig.navigation) {
-					merged.navigation = remoteConfig.navigation
-				}
+					if ((remoteConfig as any).footer) {
+						console.log(`[Debug loadFromServer] merged.footer.copyright:`, (merged as any).footer?.copyright)
+					}
+					if ((merged as any).navigation) {
+						console.log(`[Debug loadFromServer] merged.navigation type:`, typeof (merged as any).navigation, Array.isArray((merged as any).navigation) ? 'array' : 'object')
+					}
 
-				try {
-					saveSiteConfigToLocal(merged, false)
-				} catch {
-					// localStorage write failure is non-fatal
-				}
-				return merged
+					const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
+					for (const key of arrayKeys) {
+						if (Array.isArray(remoteConfig[key])) {
+							;(merged as any)[key] = remoteConfig[key]
+						}
+					}
+
+					if (remoteConfig.navigation) {
+						merged.navigation = remoteConfig.navigation
+					}
+
+					try {
+						saveSiteConfigToLocal(merged, false)
+					} catch {
+						// localStorage write failure is non-fatal
+					}
+					return merged
 				})
 			}
 
