@@ -143,7 +143,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-[12px] sm:text-sm text-white/40 font-medium order-2 md:order-1">
-            © {currentYear} WILLSTHER. All rights reserved.
+            {config.footer.copyright || `© ${currentYear} WILLSTHER. All rights reserved.`}
           </p>
         </div>
       </div>

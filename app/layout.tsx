@@ -9,6 +9,7 @@ import { CartDrawer } from '@/components/CartDrawer'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import LayoutWrapper from '@/components/LayoutWrapper'
 import NextTopLoader from 'nextjs-toploader'
+import { getAdminDb } from '@/lib/firebase-admin'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,83 +27,91 @@ const outfit = Outfit({
   variable: '--font-outfit',
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL('https://willstherprofessionalservices.com'),
-  title: {
-    default: 'Willsther Professional Services - Industrial, Commercial & Household Maintenance',
-    template: '%s | Willsther Professional Services'
-  },
-  description: 'Fast growing industrial, commercial and household maintenance services provider in Accra, Ghana. We offer maintenance, refurbishment, servicing, fumigation, alterations and cleaning services.',
-  keywords: [
-    'maintenance services Ghana',
-    'cleaning services Accra',
-    'electrical installation',
-    'AC servicing',
-    'plumbing services',
-    'carpentry services',
-    'fumigation services',
-    'industrial maintenance',
-    'commercial cleaning',
-    'household maintenance',
-    'professional services Ghana'
-  ].join(', '),
-  authors: [{ name: 'Willsther Professional Services' }],
-  creator: 'Willsther Professional Services',
-  publisher: 'Willsther Professional Services',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+async function getSEOData() {
+  try {
+    const db = await getAdminDb()
+    const doc = await db.collection('config').doc('site').get()
+    const data = doc.data() || {}
+    return { siteName: data.siteName || 'Willsther Professional Services', seo: data.seo || {} }
+  } catch {
+    return { siteName: 'Willsther Professional Services', seo: {} }
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { siteName, seo } = await getSEOData()
+  const defaultTitle = seo.defaultTitle || `${siteName} - Industrial, Commercial & Household Maintenance`
+  const defaultDescription = seo.defaultDescription || 'Fast growing industrial, commercial and household maintenance services provider in Accra, Ghana.'
+  const keywords = Array.isArray(seo.keywords) && seo.keywords.length > 0
+    ? seo.keywords.join(', ')
+    : 'maintenance services Ghana, cleaning services Accra, electrical installation, AC servicing, plumbing services, carpentry services, fumigation services, industrial maintenance, commercial cleaning, household maintenance, professional services Ghana'
+
+  return {
+    metadataBase: new URL('https://willstherprofessionalservices.com'),
+    title: {
+      default: defaultTitle,
+      template: `%s | ${siteName}`
+    },
+    description: defaultDescription,
+    keywords,
+    authors: [{ name: siteName }],
+    creator: siteName,
+    publisher: siteName,
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    robots: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  verification: {
-    google: 'your-google-verification-code',
-  },
-  icons: {
-    icon: [
-      { url: '/logo-v2.jpg', sizes: 'any', type: 'image/jpeg' },
-      { url: '/favicon.ico', sizes: 'any' },
-    ],
-    shortcut: '/logo-v2.jpg',
-    apple: [
-      { url: '/logo-v2.jpg', sizes: '180x180', type: 'image/jpeg' },
-    ],
-  },
-  openGraph: {
-    title: 'Willsther Professional Services',
-    description: 'Professional maintenance and cleaning services in Accra, Ghana. Industrial, commercial and household maintenance solutions.',
-    url: 'https://willstherprofessionalservices.com',
-    siteName: 'Willsther Professional Services',
-    locale: 'en_US',
-    type: 'website',
-    images: [
-      {
-        url: '/logo-v2.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Willsther Professional Services Logo',
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
       },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Willsther Professional Services',
-    description: 'Professional maintenance and cleaning services in Accra, Ghana',
-    images: ['/logo-v2.jpg'],
-  },
-  alternates: {
-    canonical: 'https://willstherprofessionalservices.com',
-  },
+    },
+    verification: {
+      google: 'your-google-verification-code',
+    },
+    icons: {
+      icon: [
+        { url: '/logo-v2.jpg', sizes: 'any', type: 'image/jpeg' },
+        { url: '/favicon.ico', sizes: 'any' },
+      ],
+      shortcut: '/logo-v2.jpg',
+      apple: [
+        { url: '/logo-v2.jpg', sizes: '180x180', type: 'image/jpeg' },
+      ],
+    },
+    openGraph: {
+      title: defaultTitle,
+      description: defaultDescription,
+      url: 'https://willstherprofessionalservices.com',
+      siteName,
+      locale: 'en_US',
+      type: 'website',
+      images: [
+        {
+          url: '/logo-v2.jpg',
+          width: 1200,
+          height: 630,
+          alt: `${siteName} Logo`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: defaultTitle,
+      description: defaultDescription,
+      images: ['/logo-v2.jpg'],
+    },
+    alternates: {
+      canonical: 'https://willstherprofessionalservices.com',
+    },
+  }
 }
 
 export default function RootLayout({
