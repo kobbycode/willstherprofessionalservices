@@ -110,49 +110,46 @@ const Services = () => {
     return grouped
   }, [services, categories])
 
-  if (loading) {
-    return (
-      <section id="services" className="section-padding bg-white">
-        <div className="container-custom px-4">
-          <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <Skeleton className="h-10 w-48 mx-auto mb-4" />
-            <Skeleton className="w-24 h-1 mx-auto" />
-          </div>
+  return (
+    <section ref={sectionRef} id="services" className="section-padding relative overflow-hidden bg-white">
+      {loading ? (
+        <>
+          <div className="container-custom px-4">
+            <div className="text-center mb-8 sm:mb-12 md:mb-16">
+              <Skeleton className="h-10 w-48 mx-auto mb-4" />
+              <Skeleton className="w-24 h-1 mx-auto" />
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12 md:mb-16">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
-            ))}
-          </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12 md:mb-16">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-xl" />
+              ))}
+            </div>
 
-          <div className="space-y-16">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="space-y-8">
-                <Skeleton className="h-12 w-64 mx-auto" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {[...Array(4)].map((_, j) => (
-                    <div key={j} className="bg-white rounded-xl p-4 space-y-4 shadow-sm">
-                      <Skeleton className="aspect-video w-full" />
-                      <Skeleton className="h-6 w-3/4 mx-auto" />
+            <div className="space-y-16">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="space-y-8">
+                  <Skeleton className="h-12 w-64 mx-auto" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="bg-white rounded-xl p-4 space-y-4 shadow-sm">
+                        <Skeleton className="aspect-video w-full" />
+                        <Skeleton className="h-6 w-3/4 mx-auto" />
                     </div>
                   ))}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-    )
-  }
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/30 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-[100px] -z-10 -translate-x-1/4 translate-y-1/4" />
 
-  return (
-    <section ref={sectionRef} id="services" className="section-padding relative overflow-hidden bg-white">
-      {/* Ambient background decorations */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-100/30 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-[100px] -z-10 -translate-x-1/4 translate-y-1/4" />
-
-      <div className="container-custom px-4 relative z-10">
-        <div className="text-center mb-16">
+          <div className="container-custom px-4 relative z-10">
+            <div className="text-center mb-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -309,7 +306,9 @@ const Services = () => {
             </div>
           </div>
         </motion.div>
-      </div>
+          </div>
+        </>
+      )}
     </section>
   )
 }
