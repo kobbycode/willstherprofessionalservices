@@ -11,11 +11,10 @@ import {
   ChevronDown,
   Edit3,
   ExternalLink,
-  Layers,
   Eye,
   Camera,
-  MousePointer2,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { SiteConfig, ConfigOnChange } from '@/lib/site-config'
@@ -40,6 +39,7 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
   })
   const [editingSlideId, setEditingSlideId] = useState<string | null>(null)
   const [isUploadingNewSlideImage, setIsUploadingNewSlideImage] = useState(false)
+  const [isSavingSlide, setIsSavingSlide] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     slideId: '',
@@ -72,7 +72,7 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
     setIsAddSlideModalOpen(true)
   }
 
-  const createNewSlide = () => {
+  const createNewSlide = async () => {
     if (!newSlideData.imageUrl.trim()) {
       toast.error('Image asset required')
       return
@@ -89,8 +89,17 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
         }
       ]
     }))
-    setIsAddSlideModalOpen(false)
-    toast.success('New slide added')
+
+    setIsSavingSlide(true)
+    try {
+      await onSave?.()
+      setIsAddSlideModalOpen(false)
+      toast.success('Slide added — live on website ✓')
+    } catch {
+      toast.error('Failed to publish slide. Please try again.')
+    } finally {
+      setIsSavingSlide(false)
+    }
   }
 
   const editSlide = (slide: any) => {
@@ -105,7 +114,7 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
     setIsAddSlideModalOpen(true)
   }
 
-  const saveEditedSlide = () => {
+  const saveEditedSlide = async () => {
     if (!editingSlideId) return
     if (!newSlideData.imageUrl.trim()) {
       toast.error('Image asset required')
@@ -123,9 +132,18 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
       }
       return next
     })
-    setIsAddSlideModalOpen(false)
-    setEditingSlideId(null)
-    toast.success('Slide updated')
+
+    setIsSavingSlide(true)
+    try {
+      await onSave?.()
+      setIsAddSlideModalOpen(false)
+      setEditingSlideId(null)
+      toast.success('Changes saved — live on website ✓')
+    } catch {
+      toast.error('Failed to save changes. Please try again.')
+    } finally {
+      setIsSavingSlide(false)
+    }
   }
 
   const updateSlideOrder = (id: string, direction: 'up' | 'down') => {
@@ -147,6 +165,7 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
       }
       return next
     })
+    onSave?.()
   }
 
   const handleSlideImageUpload = async (file: File) => {
@@ -172,6 +191,7 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
     }))
     setDeleteDialog({ isOpen: false, slideId: '', slideTitle: '' })
     toast.success('Slide deleted')
+    onSave?.()
   }
 
   return (
@@ -305,143 +325,207 @@ const HeroConfig = ({ config, onChange, onSave }: HeroConfigProps) => {
       {/* Slide Portal - Modal */}
       <AnimatePresence>
         {isAddSlideModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-primary-900/60 backdrop-blur-md">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-primary-900/60 backdrop-blur-md">
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row max-h-[90vh]"
+              className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row max-h-[92vh]"
             >
-              {/* Modal Left: Composition Preview */}
-              <div className="lg:w-80 bg-gray-50 border-r border-gray-100 p-10 flex flex-col gap-8 flex-shrink-0">
+              {/* ── LEFT PANEL: Composition ── */}
+              <div className="lg:w-[300px] bg-[#f7f8fa] border-r border-gray-100 p-8 flex flex-col gap-6 flex-shrink-0 overflow-y-auto">
+                {/* Header */}
                 <div>
-                  <h3 className="text-xl font-black text-primary-900">Composition</h3>
-                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest mt-1">Asset configuration portal</p>
+                  <h3 className="text-2xl font-black text-primary-900 tracking-tight">Composition</h3>
+                  <p className="text-[10px] font-bold text-secondary-400 uppercase tracking-widest mt-0.5">Asset Configuration Portal</p>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-4">
-                    <div className="w-10 h-10 bg-primary-900/5 rounded-2xl flex items-center justify-center text-primary-900"><Camera className="w-5 h-5" /></div>
-                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest leading-none">Primary Visual</p>
-                    <div className="relative aspect-[4/5] bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
-                      <AnimatePresence mode='wait'>
-                        {newSlideData.imageUrl ? (
-                          <motion.img
-                            key={newSlideData.imageUrl}
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                            src={newSlideData.imageUrl}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-                            <ImageIcon className="w-6 h-6 text-gray-300" />
-                            <span className="text-[8px] font-black text-secondary-300 uppercase tracking-[0.2em]">Pending Asset</span>
-                          </div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                {/* PRIMARY VISUAL card */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-start gap-3 shadow-sm">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Camera className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black text-primary-900 uppercase tracking-widest leading-tight">Primary Visual</p>
+                    <p className="text-[10px] text-secondary-400 mt-0.5 leading-snug">This is the main visual shown on the slide.</p>
                   </div>
                 </div>
+
+                {/* Image Preview */}
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm aspect-[4/3] relative">
+                  <AnimatePresence mode='wait'>
+                    {newSlideData.imageUrl ? (
+                      <motion.img
+                        key={newSlideData.imageUrl}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        src={newSlideData.imageUrl}
+                        className="w-full h-full object-contain"
+                        alt="Slide preview"
+                      />
+                    ) : (
+                      <motion.div
+                        key="placeholder"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-50"
+                      >
+                        <ImageIcon className="w-8 h-8 text-gray-300" />
+                        <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">No image yet</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Size hint */}
+                <div className="bg-white rounded-xl border border-gray-200 p-3 flex items-start gap-2.5 shadow-sm">
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[8px] font-black text-gray-400">i</span>
+                  </div>
+                  <p className="text-[10px] text-secondary-400 leading-snug">
+                    Recommended size: <span className="font-bold text-secondary-600">1280×720px</span><br />
+                    PNG, JPG or SVG up to 10MB
+                  </p>
+                </div>
+
+                {/* Upload button */}
+                <label className="group relative flex flex-col items-center justify-center p-5 border-2 border-dashed border-gray-200 rounded-2xl hover:border-primary-900/30 hover:bg-gray-50 transition-all cursor-pointer">
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleSlideImageUpload(e.target.files[0])} />
+                  {isUploadingNewSlideImage ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-6 h-6 border-2 border-primary-900/20 border-t-primary-900 rounded-full animate-spin" />
+                      <span className="text-[9px] font-black text-primary-900 uppercase tracking-widest">Uploading…</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-center">
+                      <Camera className="w-4 h-4 text-gray-400 group-hover:text-primary-900 transition-colors" />
+                      <span className="text-[10px] font-bold text-gray-500 group-hover:text-primary-900 uppercase tracking-widest transition-colors">Upload Image</span>
+                    </div>
+                  )}
+                </label>
               </div>
 
-              {/* Modal Right: Management Configuration */}
+              {/* ── RIGHT PANEL: Form ── */}
               <div className="flex-1 flex flex-col overflow-hidden bg-white">
-                <div className="p-10 border-b border-gray-100 flex items-center justify-between bg-white relative z-10">
-                  <h3 className="text-2xl font-black text-primary-900 tracking-tight">{editingSlideId ? 'Edit Slide' : 'Add New Slide'}</h3>
-                  <button onClick={() => setIsAddSlideModalOpen(false)} className="p-4 hover:bg-gray-100 rounded-2xl transition-all active:scale-95"><X className="w-6 h-6 text-secondary-400" /></button>
+
+                {/* Modal Header */}
+                <div className="px-10 py-7 flex items-center justify-between border-b border-gray-100">
+                  <h3 className="text-3xl font-black text-primary-900 tracking-tight">
+                    {editingSlideId ? 'Edit Slide' : 'Add New Slide'}
+                  </h3>
+                  <button
+                    onClick={() => setIsAddSlideModalOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
+                  >
+                    <X className="w-6 h-6 text-gray-500" />
+                  </button>
                 </div>
 
-                <div className="p-10 flex-1 overflow-y-auto space-y-10 custom-scrollbar">
-                  {/* Asset Upload Segment */}
-                  <div className="space-y-6">
-                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">01. Slide Image</p>
-                    <div className="flex flex-col md:flex-row gap-4">
-                      <div className="flex-1">
-                        <label className="group relative flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 rounded-[2rem] hover:border-primary-900/30 hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden">
-                          <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && handleSlideImageUpload(e.target.files[0])} />
-                          {isUploadingNewSlideImage ? (
-                            <div className="flex flex-col items-center gap-3">
-                              <div className="w-8 h-8 border-2 border-primary-900/10 border-t-primary-900 rounded-full animate-spin" />
-                              <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Uploading...</span>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center text-center gap-2">
-                              <Camera className="w-6 h-6 text-secondary-300 group-hover:scale-110 transition-transform" />
-                              <span className="text-[10px] font-black text-primary-900 uppercase tracking-widest">Upload Image</span>
-                            </div>
-                          )}
-                        </label>
-                      </div>
-                      <div className="flex-[2]">
-                        <input
-                          value={newSlideData.imageUrl}
-                          onChange={(e) => setNewSlideData({ ...newSlideData, imageUrl: e.target.value })}
-                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[11px] font-black tracking-widest uppercase focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                          placeholder="Or enter image URL..."
-                        />
-                        <p className="text-[9px] font-bold text-secondary-400 mt-2 lowercase italic ml-2">Recommended size: 1920x1080px</p>
-                      </div>
-                    </div>
+                {/* Form body */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <div className="px-10 pt-8 pb-4 border-b border-gray-100">
+                    <p className="text-[11px] font-black text-primary-900 uppercase tracking-widest">02. Slide Text</p>
+                    <p className="text-sm text-secondary-400 mt-1">Update the text content that will be displayed on this slide.</p>
                   </div>
 
-                  {/* Narrative Segment */}
-                  <div className="space-y-6">
-                    <p className="text-[10px] font-black text-secondary-300 uppercase tracking-widest">02. Slide Text</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Title</label>
-                        <input
-                          value={newSlideData.title}
-                          onChange={(e) => setNewSlideData({ ...newSlideData, title: e.target.value })}
-                          placeholder="e.g. Elevate Your Lifestyle"
-                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Subtitle</label>
-                        <input
-                          value={newSlideData.subtitle}
-                          onChange={(e) => setNewSlideData({ ...newSlideData, subtitle: e.target.value })}
-                          placeholder="e.g. Premium maintenance for elite assets"
-                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Button Label</label>
-                        <input
-                          value={newSlideData.ctaLabel}
-                          onChange={(e) => setNewSlideData({ ...newSlideData, ctaLabel: e.target.value })}
-                          placeholder="e.g. Inquire Management"
-                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-2">Button Link</label>
-                        <input
-                          value={newSlideData.ctaHref}
-                          onChange={(e) => setNewSlideData({ ...newSlideData, ctaHref: e.target.value })}
-                          placeholder="e.g. /services"
-                          className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl text-[12px] font-bold tracking-tight focus:ring-2 focus:ring-primary-900 focus:bg-white transition-all outline-none"
-                        />
-                      </div>
+                  <div className="px-10 py-8 space-y-6">
+                    {/* Title */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest block">Title</label>
+                      <input
+                        value={newSlideData.title}
+                        onChange={(e) => setNewSlideData({ ...newSlideData, title: e.target.value })}
+                        placeholder="e.g. The best name in facility support services"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-primary-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900/40 transition-all"
+                      />
+                    </div>
+
+                    {/* Subtitle */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest block">Subtitle</label>
+                      <input
+                        value={newSlideData.subtitle}
+                        onChange={(e) => setNewSlideData({ ...newSlideData, subtitle: e.target.value })}
+                        placeholder="e.g. We are results oriented..."
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-primary-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900/40 transition-all"
+                      />
+                    </div>
+
+                    {/* Button Label */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest block">Button Label</label>
+                      <input
+                        value={newSlideData.ctaLabel}
+                        onChange={(e) => setNewSlideData({ ...newSlideData, ctaLabel: e.target.value })}
+                        placeholder="e.g. Get Started Today"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-primary-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900/40 transition-all"
+                      />
+                    </div>
+
+                    {/* Button Link */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest block">Button Link</label>
+                      <input
+                        value={newSlideData.ctaHref}
+                        onChange={(e) => setNewSlideData({ ...newSlideData, ctaHref: e.target.value })}
+                        placeholder="e.g. #contact"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-primary-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900/40 transition-all"
+                      />
+                    </div>
+
+                    {/* Also-enter-URL option for image */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest block">Or paste image URL</label>
+                      <input
+                        value={newSlideData.imageUrl}
+                        onChange={(e) => setNewSlideData({ ...newSlideData, imageUrl: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-primary-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900/40 transition-all"
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="p-10 border-t border-gray-100 flex items-center justify-between bg-gray-50/30 relative z-10">
+                {/* ── Footer ── */}
+                <div className="px-10 py-5 border-t border-gray-100 flex items-center justify-between bg-white">
                   <div className="flex items-center gap-3">
-                    <MousePointer2 className="w-5 h-5 text-secondary-300" />
-                    <p className="text-[10px] font-black text-secondary-400 uppercase tracking-widest">Verification required before saving</p>
+                    {/* Shield icon */}
+                    <svg className="w-8 h-8 text-gray-300 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    <div>
+                      <p className="text-[11px] font-black text-primary-900 uppercase tracking-widest leading-tight">Verification Required</p>
+                      <p className="text-[10px] text-secondary-400 leading-tight">Before saving changes</p>
+                    </div>
                   </div>
-                  <div className="flex gap-4">
-                    <button onClick={() => setIsAddSlideModalOpen(false)} className="px-8 py-4 text-[10px] font-black text-secondary-500 uppercase tracking-widest hover:text-primary-900 transition-all">Cancel</button>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setIsAddSlideModalOpen(false)}
+                      disabled={isSavingSlide}
+                      className="text-sm font-medium text-gray-500 hover:text-primary-900 transition-colors px-2 disabled:opacity-40"
+                    >
+                      Cancel
+                    </button>
                     <button
                       onClick={editingSlideId ? saveEditedSlide : createNewSlide}
-                      disabled={!newSlideData.imageUrl.trim() || isUploadingNewSlideImage}
-                      className="px-10 py-4 bg-primary-900 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary-900/20 active:scale-95 transition-all disabled:opacity-30 flex items-center gap-3"
+                      disabled={!newSlideData.imageUrl.trim() || isUploadingNewSlideImage || isSavingSlide}
+                      className="flex items-center gap-2 px-6 py-3 bg-primary-900 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-900/20 hover:bg-primary-800 active:scale-95 transition-all disabled:opacity-40 min-w-[140px] justify-center"
                     >
-                      <Layers className="w-4 h-4" />
-                      <span>{editingSlideId ? 'Save Changes' : 'Add Slide'}</span>
+                      {isSavingSlide ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Publishing…</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                            <polyline points="17 21 17 13 7 13 7 21" />
+                            <polyline points="7 3 7 8 15 8" />
+                          </svg>
+                          <span>{editingSlideId ? 'Save Changes' : 'Add Slide'}</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
