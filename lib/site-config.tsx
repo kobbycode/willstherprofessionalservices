@@ -396,10 +396,8 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 					}
 				}
 
-				setConfigState((prev) => {
-					if (dirtyRef.current) return prev
-
-					// Strip empty arrays from remote so deepMerge doesn't override defaults
+			setConfigState((prev) => {
+				// Strip empty arrays from remote so deepMerge doesn't override defaults
 					const cleanRemote = { ...remoteData }
 					for (const key of arrayKeys) {
 						if (Array.isArray(cleanRemote[key]) && cleanRemote[key]!.length === 0) {
