@@ -124,7 +124,7 @@ export const CartDrawer = () => {
                                         <span className="text-sm md:text-lg font-bold text-gray-900 italic font-outfit">GH₵{cartTotal.toFixed(2)}</span>
                                     </div>
                                     <button
-                                        onClick={() => setIsCheckoutOpen(true)}
+                                        onClick={() => { setIsCartOpen(false); setTimeout(() => setIsCheckoutOpen(true), 300) }}
                                         className="w-full py-3 sm:py-3.5 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] uppercase tracking-[0.3em] shadow-lg transition-all active:scale-[0.98]"
                                     >
                                         Proceed to Checkout

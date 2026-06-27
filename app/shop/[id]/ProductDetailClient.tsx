@@ -411,7 +411,8 @@ export default function ProductDetailClient() {
                                     {[
                                         { icon: Facebook, url: facebookShareUrl, color: 'text-blue-600' },
                                         { icon: Twitter, url: twitterShareUrl, color: 'text-sky-400' },
-                                        { icon: Linkedin, url: linkedinShareUrl, color: 'text-blue-700' }
+                                        { icon: Linkedin, url: linkedinShareUrl, color: 'text-blue-700' },
+                                        { icon: MessageCircle, url: `https://wa.me/?text=${encodeURIComponent(`${product?.title} - GH₵${product?.price}\n${productUrl}`)}`, color: 'text-green-500' }
                                     ].map((social, i) => (
                                         <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className={`p-2  hover:bg-[#F1F5F9] transition-colors ${social.color}`}>
                                             <social.icon size={16} />
