@@ -47,6 +47,7 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-[#F1F5F9] cursor-pointer">
                 {currentImage ? (
                     <Image
+                        key={currentImage}
                         src={currentImage}
                         alt={product.title}
                         fill

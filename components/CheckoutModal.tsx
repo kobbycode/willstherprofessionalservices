@@ -1,14 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useShop } from '@/context/ShopContext'
-import { X, CreditCard, Banknote, MessageCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, CreditCard, Banknote, MessageCircle, AlertCircle, ShoppingBag } from 'lucide-react'
 import { usePaystackPayment } from 'react-paystack'
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { getDb } from '@/lib/firebase'
 import { toast } from 'react-hot-toast'
 import { useSiteConfig } from '@/lib/site-config'
+import Link from 'next/link'
 
 type PaymentMethod = 'paystack' | 'cod' | 'whatsapp'
 
@@ -29,11 +30,10 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Paystack Configuration
     const paystackConfig = {
         reference: (new Date()).getTime().toString(),
         email: details.email,
-        amount: Math.round(cartTotal * 100), // Amount in kobo/pesewas
+        amount: Math.round(cartTotal * 100),
         publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
         currency: 'GHS',
         metadata: {
@@ -52,7 +52,6 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
             const db = getDb()
             if (!db) throw new Error("Database not initialized")
 
-            // Create Order
             await addDoc(collection(db, 'orders'), {
                 items: cart,
                 total: cartTotal,
@@ -89,7 +88,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
             const itemsList = cart.map(item => `- ${item.product.title} (${item.quantity}x) @ GH₵${item.product.price}`).join('%0A')
             const message = `*New Order Request*%0A%0A*Name:* ${details.name}%0A*Phone:* ${details.phone}%0A*Address:* ${details.address}%0A%0A*Items:*%0A${itemsList}%0A%0A*Total:* GH₵${cartTotal.toFixed(2)}`
             window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank')
-            handleSuccess() // Log order even for WhatsApp
+            handleSuccess()
             return
         }
 
@@ -110,151 +109,211 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
         }
     }
 
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-white rounded-none md:w-full max-w-lg shadow-2xl max-h-screen md:max-h-[90vh] overflow-y-auto m-0 md:m-4"
-                    >
-                        <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50/50">
-                            <div>
-                                <h3 className="text-xs md:text-sm font-semibold text-gray-900 uppercase tracking-[0.2em] font-outfit">Checkout</h3>
-                                <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-0.5 uppercase tracking-widest">Complete your order</p>
-                            </div>
-                            <button onClick={onClose} className="p-3 sm:p-2 hover:bg-white transition-colors text-gray-500">
-                                <X size={20} />
-                            </button>
-                        </div>
+    if (!isOpen) return null
 
-                        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-6">
-                            {/* User Details */}
-                            <div className="space-y-4">
-                                <h4 className="text-xs sm:text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Contact Details</h4>
-                                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                    <div className="col-span-2">
-                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Full Name</label>
-                                        <input
-                                            required
-                                            type="text"
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
-                                            value={details.name}
-                                            onChange={e => setDetails(prev => ({ ...prev, name: e.target.value }))}
-                                        />
-                                    </div>
-                                    <div className="col-span-2 sm:col-span-1">
-                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Email (Optional)</label>
+    if (cart.length === 0) {
+        return (
+            <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
+                <div className="container-custom py-16 md:py-24 text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-md mx-auto"
+                    >
+                        <div className="w-14 h-14 bg-[#F1F5F9] flex items-center justify-center mx-auto mb-4">
+                            <ShoppingBag size={28} className="text-[#64748B]" />
+                        </div>
+                        <h1 className="text-lg md:text-xl font-bold text-[#0F172A] mb-2">Your cart is empty</h1>
+                        <p className="text-[#64748B] text-sm mb-6 leading-relaxed">
+                            Add some products before checking out.
+                        </p>
+                        <Link href="/shop" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2563EB] text-white font-semibold text-sm hover:bg-[#1d4ed8] transition-colors">
+                            <ArrowLeft size={16} />
+                            Back to Shop
+                        </Link>
+                    </motion.div>
+                </div>
+            </main>
+        )
+    }
+
+    return (
+        <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px] pb-12">
+            <div className="container-custom py-4 md:py-6">
+                {/* Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 mb-6"
+                >
+                    <button
+                        onClick={onClose}
+                        className="flex items-center gap-1.5 text-[#64748B] hover:text-[#2563EB] transition-colors text-sm font-medium"
+                    >
+                        <ArrowLeft size={16} />
+                        Back
+                    </button>
+                    <span className="text-[#E2E8F0]">/</span>
+                    <span className="text-xs md:text-sm font-semibold text-[#0F172A] uppercase tracking-[0.2em]">Checkout</span>
+                </motion.div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+                    {/* Checkout Form */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="lg:col-span-7"
+                    >
+                        <div className="bg-white shadow-sm border border-[#E2E8F0] p-4 md:p-6">
+                            <h2 className="text-sm md:text-base font-bold text-[#0F172A] uppercase tracking-[0.2em] mb-1">Contact Details</h2>
+                            <p className="text-xs text-[#64748B] mb-5">Fill in your information to complete the order</p>
+
+                            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+                                <div>
+                                    <label className="text-xs font-semibold text-[#64748B] uppercase tracking-widest block mb-1">Full Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white text-gray-900 border border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB] outline-none text-sm"
+                                        value={details.name}
+                                        onChange={e => setDetails(prev => ({ ...prev, name: e.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-semibold text-[#64748B] uppercase tracking-widest block mb-1">Email (Optional)</label>
                                         <input
                                             type="email"
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                                            className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white text-gray-900 border border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB] outline-none text-sm"
                                             value={details.email}
                                             onChange={e => setDetails(prev => ({ ...prev, email: e.target.value }))}
                                         />
                                     </div>
-                                    <div className="col-span-2 sm:col-span-1">
-                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Phone Number</label>
+                                    <div>
+                                        <label className="text-xs font-semibold text-[#64748B] uppercase tracking-widest block mb-1">Phone Number</label>
                                         <input
                                             required
                                             type="tel"
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                                            className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white text-gray-900 border border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB] outline-none text-sm"
                                             value={details.phone}
                                             onChange={e => setDetails(prev => ({ ...prev, phone: e.target.value }))}
                                         />
                                     </div>
-                                    <div className="col-span-2">
-                                        <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Delivery Address</label>
-                                        <textarea
-                                            required
-                                            rows={2}
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
-                                            value={details.address}
-                                            onChange={e => setDetails(prev => ({ ...prev, address: e.target.value }))}
-                                        />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-[#64748B] uppercase tracking-widest block mb-1">Delivery Address</label>
+                                    <textarea
+                                        required
+                                        rows={2}
+                                        className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white text-gray-900 border border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB] outline-none text-sm"
+                                        value={details.address}
+                                        onChange={e => setDetails(prev => ({ ...prev, address: e.target.value }))}
+                                    />
+                                </div>
+
+                                {/* Payment Method */}
+                                <div className="pt-2">
+                                    <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-widest mb-3">Payment Method</h3>
+                                    <div className="grid gap-3">
+                                        {([
+                                            { value: 'paystack' as PaymentMethod, icon: CreditCard, title: 'Pay Online', desc: 'Secure via Paystack' },
+                                            { value: 'cod' as PaymentMethod, icon: Banknote, title: 'Pay on Delivery', desc: 'Cash or Momo' },
+                                            { value: 'whatsapp' as PaymentMethod, icon: MessageCircle, title: 'WhatsApp Order', desc: 'Chat with support' },
+                                        ]).map((method) => (
+                                            <label
+                                                key={method.value}
+                                                className={`cursor-pointer border p-3 md:p-4 flex items-center gap-3 md:gap-4 transition-all ${
+                                                    paymentMethod === method.value
+                                                        ? 'border-[#2563EB] bg-blue-50'
+                                                        : 'border-[#E2E8F0] hover:border-[#2563EB]/40'
+                                                }`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="payment"
+                                                    value={method.value}
+                                                    checked={paymentMethod === method.value}
+                                                    onChange={() => setPaymentMethod(method.value)}
+                                                    className="w-4 h-4 text-[#2563EB]"
+                                                />
+                                                <div className="flex-1">
+                                                    <div className="text-xs md:text-sm font-semibold text-[#0F172A] flex items-center gap-2">
+                                                        <method.icon size={18} className="text-[#2563EB]" />
+                                                        {method.title}
+                                                    </div>
+                                                    <p className="text-xs text-[#64748B] mt-0.5">{method.desc}</p>
+                                                </div>
+                                            </label>
+                                        ))}
                                     </div>
                                 </div>
+
+                                {!paystackConfig.publicKey && paymentMethod === 'paystack' && (
+                                    <div className="text-xs text-amber-600 bg-amber-50 p-3 flex items-center gap-2 border border-amber-200">
+                                        <AlertCircle size={16} />
+                                        <span>Paystack setup incomplete (Missing Public Key)</span>
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full py-3 md:py-3.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-semibold text-sm uppercase tracking-[0.2em] transition-all active:scale-[0.98] disabled:opacity-50"
+                                >
+                                    {isSubmitting ? 'Processing...' : `Place Order • GH₵${cartTotal.toFixed(2)}`}
+                                </button>
+                            </form>
+                        </div>
+                    </motion.div>
+
+                    {/* Order Summary */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="lg:col-span-5"
+                    >
+                        <div className="bg-white shadow-sm border border-[#E2E8F0] p-4 md:p-6 sticky top-[130px]">
+                            <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-[0.2em] mb-4">Order Summary</h3>
+
+                            <div className="space-y-3 mb-4 max-h-[40vh] overflow-y-auto">
+                                {cart.map((item) => (
+                                    <div key={item.product.id} className="flex gap-3">
+                                        <div className="w-14 h-14 bg-[#F1F5F9] flex-shrink-0 overflow-hidden">
+                                            <img
+                                                src={item.product.images?.[0] || item.product.imageUrl || ''}
+                                                alt={item.product.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-semibold text-[#0F172A] truncate">{item.product.title}</p>
+                                            <p className="text-xs text-[#64748B]">Qty: {item.quantity}</p>
+                                            <p className="text-xs font-bold text-[#2563EB]">GH₵{(item.product.price * item.quantity).toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Payment Method */}
-                            <div className="space-y-4">
-                                <h4 className="text-xs sm:text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Payment Method</h4>
-                                <div className="grid gap-3">
-                                    <label className={`cursor-pointer border p-4 flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'paystack' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            value="paystack"
-                                            checked={paymentMethod === 'paystack'}
-                                            onChange={() => setPaymentMethod('paystack')}
-                                            className="w-4 h-4 md:w-5 md:h-5 text-primary-600"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="text-xs sm:text-[13px] md:text-sm uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
-                                                <CreditCard size={18} />
-                                                Pay Online
-                                            </div>
-                                            <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-1 uppercase tracking-tight">Secure via Paystack</p>
-                                        </div>
-                                    </label>
-
-                                    <label className={`cursor-pointer border p-4 flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            value="cod"
-                                            checked={paymentMethod === 'cod'}
-                                            onChange={() => setPaymentMethod('cod')}
-                                            className="w-4 h-4 md:w-5 md:h-5 text-primary-600"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="text-xs sm:text-[13px] md:text-sm uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
-                                                <Banknote size={18} />
-                                                Pay on Delivery
-                                            </div>
-                                            <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-1 uppercase tracking-tight">Cash or Momo</p>
-                                        </div>
-                                    </label>
-
-                                    <label className={`cursor-pointer border p-4 flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'whatsapp' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            value="whatsapp"
-                                            checked={paymentMethod === 'whatsapp'}
-                                            onChange={() => setPaymentMethod('whatsapp')}
-                                            className="w-4 h-4 md:w-5 md:h-5 text-primary-600"
-                                        />
-                                        <div className="flex-1">
-                                            <div className="text-xs sm:text-[13px] md:text-sm uppercase tracking-widest font-semibold text-gray-900 flex items-center gap-2">
-                                                <MessageCircle size={18} />
-                                                WhatsApp Order
-                                            </div>
-                                            <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-1 uppercase tracking-tight">Chat with support</p>
-                                        </div>
-                                    </label>
+                            <div className="border-t border-[#E2E8F0] pt-3 space-y-2">
+                                <div className="flex justify-between text-xs text-[#64748B]">
+                                    <span>Subtotal</span>
+                                    <span>GH₵{cartTotal.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-[#64748B]">
+                                    <span>Delivery</span>
+                                    <span>To be confirmed</span>
+                                </div>
+                                <div className="flex justify-between text-sm font-bold text-[#0F172A] border-t border-[#E2E8F0] pt-2">
+                                    <span>Total</span>
+                                    <span>GH₵{cartTotal.toFixed(2)}</span>
                                 </div>
                             </div>
-
-                            {!paystackConfig.publicKey && paymentMethod === 'paystack' && (
-                                <div className="text-xs md:text-sm text-amber-600 bg-amber-50 p-3 flex items-center gap-2">
-                                    <AlertCircle size={16} />
-                                    <span>Paystack setup incomplete (Missing Public Key)</span>
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full py-3 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] md:text-sm uppercase tracking-[0.3em] transition-all active:scale-[0.98] disabled:opacity-50"
-                            >
-                                {isSubmitting ? 'Processing...' : `Place Order • GH₵${cartTotal.toFixed(2)}`}
-                            </button>
-                        </form>
+                        </div>
                     </motion.div>
                 </div>
-            )}
-        </AnimatePresence>
+            </div>
+        </main>
     )
 }
