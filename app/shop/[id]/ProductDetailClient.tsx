@@ -31,6 +31,7 @@ import Skeleton from '@/components/Skeleton'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import ProductCard from '@/components/ProductCard'
+import { toast } from 'react-hot-toast'
 
 export default function ProductDetailClient() {
     const { id } = useParams()
@@ -110,6 +111,22 @@ export default function ProductDetailClient() {
     const handleAddToCart = () => {
         if (!product) return
         addToCart(product, quantity)
+    }
+
+    const handleMobileShare = async () => {
+        const shareData = {
+            title: product?.title || '',
+            text: `Check out ${product?.title} - GH₵${product?.price}`,
+            url: productUrl,
+        }
+        if (typeof navigator !== 'undefined' && navigator.share) {
+            try {
+                await navigator.share(shareData)
+            } catch {}
+        } else {
+            await navigator.clipboard.writeText(productUrl)
+            toast.success('Link copied to clipboard')
+        }
     }
 
     if (isLoading) {
@@ -550,6 +567,12 @@ export default function ProductDetailClient() {
                         >
                             <MessageCircle size={16} />
                         </a>
+                        <button
+                            onClick={handleMobileShare}
+                            className="w-10 h-10 flex items-center justify-center border border-[#E2E8F0] text-[#64748B] hover:text-[#2563EB] hover:border-[#2563EB] transition-all"
+                        >
+                            <Share2 size={16} />
+                        </button>
                     </div>
                 </div>
             </div>
