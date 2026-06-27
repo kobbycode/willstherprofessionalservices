@@ -274,7 +274,7 @@ export default function ProductDetailClient() {
                                                 : 'border-[#E2E8F0] hover:border-[#2563EB]/40'
                                         }`}
                                     >
-                                        <Image src={img} alt={`${product.title} ${idx + 1}`} fill className="object-cover" sizes="80px" />
+                                        <img src={img} alt={`${product.title} ${idx + 1}`} className="w-full h-full object-cover" />
                                     </button>
                                 ))}
                             </div>
