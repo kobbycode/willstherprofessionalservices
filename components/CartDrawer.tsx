@@ -56,12 +56,10 @@ export const CartDrawer = () => {
                                         <div key={product.id} className={`flex gap-3 md:gap-4 p-4 ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
                                             <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden border border-gray-200">
                                                 {product.imageUrl && (
-                                                    <Image
+                                                    <img
                                                         src={product.imageUrl}
                                                         alt={product.title}
-                                                        fill
-                                                        sizes="80px"
-                                                        className="object-cover"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                 )}
                                                 {!product.inStock && (
