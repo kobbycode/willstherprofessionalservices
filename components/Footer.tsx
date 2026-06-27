@@ -121,7 +121,7 @@ const Footer = () => {
                 <Mail className="w-4 h-4" />
               </a>
               <a
-                href={`tel:${config.contactPhone?.split(' / ')[0] || '0594850005'}`}
+                href={`tel:${config.contactPhone?.split(' / ')[0] || '0208267704'}`}
                 className="w-10 h-10 bg-white/5 border border-white/10 flex items-center justify-center text-[#94A3B8] hover:bg-[#2563EB] hover:text-white hover:border-[#2563EB] transition-all duration-300"
                 title="Call us"
               >
