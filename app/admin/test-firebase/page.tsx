@@ -13,21 +13,12 @@ export default function TestFirebasePage() {
       try {
         setStatus('Getting Firestore instance...')
         const db = getDb()
-        console.log('Firestore instance:', db)
-        
-        setStatus('Accessing posts collection...')
-        const postsRef = collection(db, 'posts')
-        console.log('Posts collection reference:', postsRef)
-        
-        setStatus('Reading posts...')
-        const snapshot = await getDocs(postsRef)
-        console.log('Posts snapshot:', snapshot)
-        
-        const posts = snapshot.docs.map(doc => ({
+        const q = collection(db, 'posts')
+        const postsSnapshot = await getDocs(q)
+        const posts = postsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }))
-        console.log('Posts data:', posts)
         
         setResults(posts)
         setStatus('Firebase connection test successful!')
@@ -38,11 +29,9 @@ export default function TestFirebasePage() {
           test: 'Firebase test',
           timestamp: serverTimestamp()
         })
-        console.log('Test document created:', testDoc.id)
         setStatus('All tests passed!')
         
       } catch (error) {
-        console.error('Firebase test failed:', error)
         setStatus('Firebase test failed: ' + (error as Error).message)
       }
     }

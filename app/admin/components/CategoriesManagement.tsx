@@ -42,7 +42,6 @@ export const CategoriesManagement = () => {
             const list = await fetchServiceCategories()
             setItems(list)
         } catch (e) {
-            console.error('Failed to load categories:', e)
             toast.error('Settings access failure')
             setItems([])
         } finally {

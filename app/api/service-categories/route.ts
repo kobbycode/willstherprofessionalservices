@@ -19,7 +19,6 @@ export async function GET() {
     
     return response
   } catch (error) {
-    console.error('Error fetching service categories:', error)
     return NextResponse.json({ error: 'Failed to fetch service categories' }, { status: 500 })
   }
 }
@@ -50,7 +49,6 @@ export async function POST(request: NextRequest) {
       ...categoryData 
     })
   } catch (error) {
-    console.error('Error creating service category:', error)
     return NextResponse.json({ 
       error: `Failed to create service category: ${error instanceof Error ? error.message : 'Unknown error'}` 
     }, { status: 500 })

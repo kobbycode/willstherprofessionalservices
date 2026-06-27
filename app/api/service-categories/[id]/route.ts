@@ -29,7 +29,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       ...updatedDoc.data()
     })
   } catch (error) {
-    console.error('Error updating service category:', error)
     return NextResponse.json({ 
       error: `Failed to update service category: ${error instanceof Error ? error.message : 'Unknown error'}` 
     }, { status: 500 })
@@ -44,7 +43,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting service category:', error)
     return NextResponse.json({ 
       error: `Failed to delete service category: ${error instanceof Error ? error.message : 'Unknown error'}` 
     }, { status: 500 })

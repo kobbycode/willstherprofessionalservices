@@ -24,10 +24,7 @@ export async function GET() {
     response.headers.set('Cache-Control', 'no-store, max-age=0')
     return response
   } catch (error) {
-    console.error('Error loading site config:', error)
-    // If Firebase Admin is not initialized or authentication fails, return default config
     if (error instanceof Error && (error.message.includes('Firebase Admin not initialized') || error.message.includes('UNAUTHENTICATED'))) {
-      console.warn('Firebase Admin not initialized or authentication failed, returning null config')
       const response = NextResponse.json({ config: null })
       response.headers.set('Cache-Control', 'no-store, max-age=0')
       return response

@@ -33,7 +33,6 @@ export async function fetchServiceCategories(): Promise<ServiceCategory[]> {
       }
     })
   } catch (error) {
-    console.error('Error fetching service categories:', error)
     throw error
   }
 }
@@ -49,7 +48,6 @@ export async function addServiceCategory(category: Omit<ServiceCategory, 'id' | 
       updatedAt: now
     })
   } catch (error) {
-    console.error('Error adding service category:', error)
     throw error
   }
 }
@@ -61,7 +59,6 @@ export async function updateServiceCategory(id: string, updates: Partial<Omit<Se
     const now = new Date().toISOString()
     return await setDoc(ref, { ...updates, updatedAt: now }, { merge: true })
   } catch (error) {
-    console.error('Error updating service category:', error)
     throw error
   }
 }
@@ -72,7 +69,6 @@ export async function deleteServiceCategory(id: string) {
     const ref = doc(db, COLLECTION, id)
     return await deleteDoc(ref)
   } catch (error) {
-    console.error('Error deleting service category:', error)
     throw error
   }
 }
@@ -91,7 +87,6 @@ export async function fetchCategories(): Promise<string[]> {
     })
     return names
   } catch (error) {
-    console.error('Error fetching categories:', error)
     throw error
   }
 }
@@ -102,7 +97,6 @@ export async function addCategory(name: string) {
     const col = collection(db, 'categories')
     await addDoc(col, { name })
   } catch (error) {
-    console.error('Error adding category:', error)
     throw error
   }
 }
@@ -116,7 +110,6 @@ export async function fetchCategoriesWithIds(): Promise<CategoryDoc[]> {
     const snap = await getDocs(q)
     return snap.docs.map((d) => ({ id: d.id, name: (d.data() as any).name || '' }))
   } catch (error) {
-    console.error('Error fetching categories with IDs:', error)
     throw error
   }
 }
@@ -127,7 +120,6 @@ export async function updateCategory(id: string, name: string) {
     const ref = doc(db, 'categories', id)
     await setDoc(ref, { name }, { merge: true })
   } catch (error) {
-    console.error('Error updating category:', error)
     throw error
   }
 }
@@ -138,7 +130,6 @@ export async function deleteCategory(id: string) {
     const ref = doc(db, 'categories', id)
     await deleteDoc(ref)
   } catch (error) {
-    console.error('Error deleting category:', error)
     throw error
   }
 }

@@ -90,7 +90,6 @@ export const ClientsConfig = ({ config, onChange, onSave }: ClientsConfigProps) 
                 throw new Error('Upload returned empty URL')
             }
         } catch (error) {
-            console.error('Upload error:', error)
             toast.error('Upload failed. Please try again.', { id: toastId })
         } finally {
             setIsUploading(null)

@@ -13,10 +13,8 @@ export default function TestBlogPage() {
       try {
         setLoading(true)
         const allPosts = await fetchPosts(false, 100) // Fetch all posts, not just published
-        console.log('All posts:', allPosts)
         setPosts(allPosts)
       } catch (err) {
-        console.error('Failed to fetch posts:', err)
         setError('Failed to fetch posts')
       } finally {
         setLoading(false)

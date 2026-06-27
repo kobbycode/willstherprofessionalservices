@@ -13,7 +13,6 @@ export async function GET() {
     try {
       snapshot = await db.collection('services').orderBy('createdAt', 'desc').limit(50).get()
     } catch (orderByError) {
-      console.warn('=== SERVICES API: orderBy failed, fetching without orderBy ===', orderByError)
       snapshot = await db.collection('services').limit(50).get()
     }
     const services = []
@@ -34,7 +33,6 @@ export async function GET() {
           createdAt: data.createdAt || null
         })
       } catch (docError) {
-        console.error(`=== SERVICES API: Error processing document ${doc.id} ===`, docError)
         // Continue with other documents even if one fails
       }
     }
@@ -45,9 +43,6 @@ export async function GET() {
 
     return response
   } catch (error: any) {
-    console.error('=== SERVICES API: Error fetching services ===', error)
-
-    // Provide more specific error messages
     let errorMessage = 'Failed to fetch services'
     let errorDetails = error.message || 'Unknown error'
 
@@ -92,9 +87,6 @@ export async function POST(request: NextRequest) {
       ...serviceData
     })
   } catch (error: any) {
-    console.error('=== SERVICE CREATION ERROR ===', error)
-
-    // Provide more specific error messages
     let errorMessage = 'Failed to create service'
     let errorDetails = error.message || 'Unknown error'
 

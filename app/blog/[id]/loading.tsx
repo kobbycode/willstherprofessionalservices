@@ -4,7 +4,7 @@ export default function Loading() {
     return (
         <main className="min-h-screen bg-white pb-20">
             <div className="pt-20">
-                <div className="container-custom px-4 py-8">
+                <div className="container-custom py-8">
                     <div className="flex items-center space-x-4 mb-8">
                         <Skeleton className="h-5 w-32" />
                     </div>

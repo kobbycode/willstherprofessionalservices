@@ -144,7 +144,6 @@ export async function POST() {
       count 
     })
   } catch (error) {
-    console.error('=== MIGRATION ERROR ===', error)
     return NextResponse.json({ 
       success: false,
       error: `Failed to migrate services: ${error instanceof Error ? error.message : 'Unknown error'}` 

@@ -83,7 +83,6 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
       processedFile = await compressImage(file);
     }
   } catch (compressError) {
-    console.warn('Failed to compress image, using original:', compressError)
     processedFile = file;
   }
 
@@ -92,7 +91,6 @@ export async function uploadImage(file: File, pathPrefix = 'uploads'): Promise<s
     const result = await uploadToFirebaseWithTimeout(processedFile, pathPrefix)
     return result
   } catch (error) {
-    console.error('Firebase Storage upload failed:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     // If it's a configuration issue, provide a more helpful error
@@ -159,8 +157,6 @@ async function uploadToFirebase(file: File, pathPrefix: string): Promise<string>
     
     return downloadURL
   } catch (error) {
-    console.error('Firebase Storage upload error:', error)
-    
     // Provide more specific error messages based on the type of error
     if (error instanceof Error) {
       if (error.message.includes('Firebase Storage: User does not have permission')) {

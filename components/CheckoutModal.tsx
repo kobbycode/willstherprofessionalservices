@@ -68,7 +68,6 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
             setIsCartOpen(false)
             onClose()
         } catch (error) {
-            console.error("Order error:", error)
             toast.error("Failed to place order. Please contact support.")
         } finally {
             setIsSubmitting(false)
@@ -119,14 +118,14 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-white rounded-none md:rounded-2xl w-full max-w-lg shadow-2xl max-h-screen md:max-h-[90vh] overflow-y-auto m-0 md:m-4"
+                        className="bg-white rounded-none md:w-full max-w-lg shadow-2xl max-h-screen md:max-h-[90vh] overflow-y-auto m-0 md:m-4"
                     >
                         <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50/50">
                             <div>
                                 <h3 className="text-xs md:text-sm font-semibold text-gray-900 uppercase tracking-[0.2em] font-outfit">Checkout</h3>
                                 <p className="text-xs sm:text-[12px] md:text-sm text-gray-400 mt-0.5 uppercase tracking-widest">Complete your order</p>
                             </div>
-                            <button onClick={onClose} className="p-3 sm:p-2 hover:bg-white rounded-full transition-colors text-gray-500">
+                            <button onClick={onClose} className="p-3 sm:p-2 hover:bg-white transition-colors text-gray-500">
                                 <X size={20} />
                             </button>
                         </div>
@@ -141,7 +140,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         <input
                                             required
                                             type="text"
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
                                             value={details.name}
                                             onChange={e => setDetails(prev => ({ ...prev, name: e.target.value }))}
                                         />
@@ -150,7 +149,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         <label className="text-xs sm:text-[12px] md:text-sm uppercase tracking-widest font-semibold text-gray-500 mb-1.5 block">Email (Optional)</label>
                                         <input
                                             type="email"
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
                                             value={details.email}
                                             onChange={e => setDetails(prev => ({ ...prev, email: e.target.value }))}
                                         />
@@ -160,7 +159,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         <input
                                             required
                                             type="tel"
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
                                             value={details.phone}
                                             onChange={e => setDetails(prev => ({ ...prev, phone: e.target.value }))}
                                         />
@@ -170,7 +169,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         <textarea
                                             required
                                             rows={2}
-                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                                            className="w-full mt-1 p-3 sm:p-2 border border-gray-200 focus:ring-2 focus:ring-primary-500 outline-none"
                                             value={details.address}
                                             onChange={e => setDetails(prev => ({ ...prev, address: e.target.value }))}
                                         />
@@ -182,7 +181,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                             <div className="space-y-4">
                                 <h4 className="text-xs sm:text-[11px] font-semibold text-gray-400 uppercase tracking-[0.3em] border-b border-gray-50 pb-2">Payment Method</h4>
                                 <div className="grid gap-3">
-                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'paystack' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
+                                    <label className={`cursor-pointer border p-4 flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'paystack' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
                                             type="radio"
                                             name="payment"
@@ -200,7 +199,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         </div>
                                     </label>
 
-                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
+                                    <label className={`cursor-pointer border p-4 flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'cod' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
                                             type="radio"
                                             name="payment"
@@ -218,7 +217,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                                         </div>
                                     </label>
 
-                                    <label className={`cursor-pointer border p-4 rounded-xl flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'whatsapp' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
+                                    <label className={`cursor-pointer border p-4 flex items-center gap-3 md:gap-4 transition-all ${paymentMethod === 'whatsapp' ? 'border-primary-600 bg-primary-50 ring-1 ring-primary-600' : 'border-gray-200 hover:border-primary-300'}`}>
                                         <input
                                             type="radio"
                                             name="payment"
@@ -239,7 +238,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                             </div>
 
                             {!paystackConfig.publicKey && paymentMethod === 'paystack' && (
-                                <div className="text-xs md:text-sm text-amber-600 bg-amber-50 p-3 rounded-lg flex items-center gap-2">
+                                <div className="text-xs md:text-sm text-amber-600 bg-amber-50 p-3 flex items-center gap-2">
                                     <AlertCircle size={16} />
                                     <span>Paystack setup incomplete (Missing Public Key)</span>
                                 </div>
@@ -248,7 +247,7 @@ export const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-3 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] md:text-sm uppercase tracking-[0.3em] rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
+                                className="w-full py-3 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] md:text-sm uppercase tracking-[0.3em] transition-all active:scale-[0.98] disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Processing...' : `Place Order • GH₵${cartTotal.toFixed(2)}`}
                             </button>

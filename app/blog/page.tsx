@@ -1,462 +1,210 @@
 'use client'
 
-import { Calendar, Clock, User, ArrowLeft, Search, Tag, Filter, TrendingUp } from 'lucide-react'
-import Link from 'next/link'
-import Skeleton from '@/components/Skeleton'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { fetchPosts, type BlogPost } from '@/lib/blog'
-import { formatDateHuman } from '@/lib/date'
-import Image from 'next/image'
+import { fetchCategories } from '@/lib/categories'
+import BlogHero from '@/components/blog/BlogHero'
+import FeaturedPost from '@/components/blog/FeaturedPost'
+import BlogCard from '@/components/blog/BlogCard'
+import PopularPosts from '@/components/blog/PopularPosts'
+import NewsletterCard from '@/components/blog/NewsletterCard'
+import Pagination from '@/components/blog/Pagination'
+import Skeleton from '@/components/Skeleton'
 
-const BlogPage = () => {
-  const [activeCategory, setActiveCategory] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [sortBy, setSortBy] = useState('date') // date, readTime, title
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+const POSTS_PER_PAGE = 9
 
-  const [categories, setCategories] = useState<string[]>([])
+export default function BlogPage() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Memoize filtered and sorted posts for better performance
-  const { filteredPosts, sortedPosts } = useMemo(() => {
-    const filtered = blogPosts.filter(post => {
-      const matchesCategory = activeCategory === 'All' || activeCategory === '' || post.category === activeCategory
-      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (post.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
-
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'date':
-          return new Date(b.date).getTime() - new Date(a.date).getTime()
-        case 'readTime':
-          return parseInt(a.readTime) - parseInt(b.readTime)
-        case 'title':
-          return a.title.localeCompare(b.title)
-        default:
-          return 0
-      }
-    })
-
-    return { filteredPosts: filtered, sortedPosts: sorted }
-  }, [blogPosts, activeCategory, searchQuery, sortBy])
-
-  // Load more posts
-  const loadMorePosts = useCallback(async () => {
-    if (isLoading || !hasMore) return
-
-    setIsLoading(true)
-    try {
-      const newPosts = await fetchPosts(true, 12) // Fetch only 12 posts at a time
-      if (newPosts.length < 12) {
-        setHasMore(false)
-      }
-
-      // Avoid duplicates
-      const existingIds = new Set(blogPosts.map(p => p.id))
-      const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id))
-
-      setBlogPosts(prev => [...prev, ...uniqueNewPosts])
-    } catch (error) {
-      console.error('Failed to load more blog posts:', error)
-      setHasMore(false)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [blogPosts, isLoading, hasMore])
-
-  // Memoize the load function to prevent unnecessary re-renders
   const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
-      // Fetch posts and categories in parallel
-      const [posts, categoriesData] = await Promise.all([
-        fetchPosts(true, 12), // Fetch only 12 posts initially instead of 100
-        import('@/lib/categories').then(m => m.fetchCategories())
+      const [posts, cats] = await Promise.all([
+        fetchPosts(true, 100),
+        fetchCategories()
       ])
-
       setBlogPosts(posts)
-      setHasMore(posts.length === 12) // If we got 12 posts, there might be more
-
-      // Set categories with 'All' as first option
-      setCategories(['All', ...categoriesData])
-
-      // Set initial active category to 'All' if not already set
-      if (activeCategory === '') {
-        setActiveCategory('All')
-      }
-    } catch (error) {
-      console.error('Failed to load blog data:', error)
-      // Fallback to default categories if fetch fails
-      setCategories(['All', 'Residential Cleaning', 'Commercial Cleaning', 'Industrial Cleaning', 'Green Cleaning', 'Post-Construction', 'Fabric Care'])
+      setCategories(['All', ...cats])
+    } catch (err) {
+      setCategories(['All', 'Cleaning', 'Maintenance', 'Pest Control', 'Fumigation', 'Laundry'])
     } finally {
       setIsLoading(false)
     }
-  }, [activeCategory])
+  }, [])
 
   useEffect(() => {
-    let isMounted = true
-
-    const load = async () => {
-      await loadData()
-      if (!isMounted) return
-    }
-
-    load()
-
-    return () => {
-      isMounted = false
-    }
+    loadData()
   }, [loadData])
 
-  // Reset pagination when filters change
   useEffect(() => {
     setPage(1)
-    setHasMore(true)
-    setBlogPosts([])
-  }, [activeCategory, searchQuery, sortBy])
+  }, [activeCategory, searchQuery])
 
-  // Memoize search handler
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }, [])
+  const filteredPosts = useMemo(() => {
+    return blogPosts.filter((post) => {
+      const matchCategory = activeCategory === 'All' || post.category === activeCategory
+      const q = searchQuery.toLowerCase()
+      const matchSearch = !q ||
+        post.title.toLowerCase().includes(q) ||
+        (post.excerpt || '').toLowerCase().includes(q) ||
+        post.content.toLowerCase().includes(q)
+      return matchCategory && matchSearch
+    })
+  }, [blogPosts, activeCategory, searchQuery])
 
-  // Memoize category change handler
-  const handleCategoryChange = useCallback((category: string) => {
-    setActiveCategory(category)
-  }, [])
+  const sortedPosts = useMemo(() => {
+    return [...filteredPosts].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+  }, [filteredPosts])
 
-  // Memoize sort change handler
-  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value)
-  }, [])
+  const featuredPost = sortedPosts.length > 0 ? sortedPosts[0] : null
+  const gridPosts = sortedPosts.slice(1)
+  const totalPages = Math.max(1, Math.ceil(gridPosts.length / POSTS_PER_PAGE))
+  const paginatedPosts = gridPosts.slice(
+    (page - 1) * POSTS_PER_PAGE,
+    page * POSTS_PER_PAGE
+  )
+
+  const popularPosts = useMemo(() => {
+    const byViews = [...blogPosts]
+      .filter((p) => p.views !== undefined && p.views > 0)
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+    if (byViews.length >= 4) return byViews
+    return [...blogPosts].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    ).slice(0, 4)
+  }, [blogPosts])
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
 
-      {/* Safe Area Container */}
-      <div className="pt-20">
-        {/* Blog Header */}
-        <div className="bg-white border-b border-gray-100 mt-6 md:mt-8">
-            <div className="container-custom px-4 py-6 md:py-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center space-x-4">
-                <Link href="/" className="flex items-center space-x-2 text-secondary-500 hover:text-primary-600 transition-colors duration-200 group">
-                  <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
-                  <span className="font-medium text-xs md:text-sm uppercase tracking-widest">Back to Home</span>
-                </Link>
-              </div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-secondary-900 text-center md:text-left tracking-tight">
-                Insightful <span className="text-primary-600 font-bold">Articles</span>
-              </h1>
-            </div>
-          </div>
-        </div>
+      <BlogHero
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        categories={categories}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+      />
 
-        <div className="container-custom px-4 py-6 md:py-12">
-          {/* Search and Categories */}
-          <div className="mb-6 md:mb-12">
-            <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-between">
-              {/* Search Bar */}
-              <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 md:w-5 md:h-5" />
-                <input
-                  type="text"
-                  placeholder="Search articles..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
+      <div className="container-custom pb-10 md:pb-16">
 
-              {/* Sort and Filter Options */}
-              <div className="flex flex-col sm:flex-row gap-3 items-center">
-                {/* Sort Dropdown */}
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={handleSortChange}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 pr-10 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
-                  >
-                    <option value="date">Sort by Date</option>
-                    <option value="readTime">Sort by Read Time</option>
-                    <option value="title">Sort by Title</option>
-                  </select>
-                  <TrendingUp className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                </div>
-
-                {/* Category Filter */}
-                <div className="flex flex-wrap gap-2">
-                  {isLoading && blogPosts.length === 0 ? (
-                    // Loading skeleton for categories
-                    [...Array(6)].map((_, index) => (
-                      <Skeleton key={index} className="h-10 w-24 rounded-lg" />
-                    ))
-                  ) : (
-                    categories.map((category, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleCategoryChange(category)}
-                        className={`px-4 py-2.5 sm:py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-300 ${category === activeCategory
-                          ? 'bg-primary-900 text-accent-500 shadow-premium'
-                          : 'bg-white text-secondary-600 hover:bg-primary-50 hover:text-primary-900 border border-gray-100'
-                          }`}
-                      >
-                        {category}
-                      </button>
-                    ))
-                  )}
+        {/* Loading */}
+        {isLoading && (
+          <div className="space-y-8 mt-6">
+            <div className="bg-white shadow-sm border border-[#E2E8F0] overflow-hidden md:flex">
+              <Skeleton className="h-56 md:h-80 w-full md:w-3/5" />
+              <div className="p-5 md:p-6 lg:p-8 space-y-3 flex-1">
+                <Skeleton className="h-3 w-40" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex justify-between items-center pt-4">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-8 w-28" />
                 </div>
               </div>
             </div>
-
-            {/* Results Summary */}
-            {!isLoading && blogPosts.length > 0 && (
-              <div className="mt-4 text-sm md:text-base text-secondary-500">
-                Showing {sortedPosts.length} of {blogPosts.length} articles
-                {searchQuery && ` for "${searchQuery}"`}
-                {activeCategory !== 'All' && activeCategory !== '' && ` in ${activeCategory}`}
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white shadow-sm border border-[#E2E8F0] overflow-hidden">
+                  <Skeleton className="h-44 sm:h-48 w-full" />
+                  <div className="p-4 md:p-5 space-y-2.5">
+                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-full" />
+                    <div className="flex justify-between items-center pt-3">
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-3 w-10" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+        )}
 
-          {/* Featured Post */}
-          <div className="mb-8 md:mb-16">
-            {isLoading && blogPosts.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-premium overflow-hidden">
-                <div className="grid lg:grid-cols-2 gap-0">
-                  <Skeleton className="h-44 md:h-64 lg:h-[400px] w-full" />
-                  <div className="p-4 md:p-8 flex flex-col justify-center gap-4">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-20 w-full" />
-                    <div className="flex justify-between items-center mt-4">
-                      <Skeleton className="h-6 w-24" />
-                      <Skeleton className="h-10 w-32" />
-                    </div>
-                  </div>
+        {/* Content */}
+        {!isLoading && (
+          <>
+            {sortedPosts.length === 0 ? (
+              <div className="bg-white shadow-sm border border-[#E2E8F0] p-8 md:p-12 text-center mt-6">
+                <div className="w-14 h-14 bg-[#F1F5F9] flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-[#64748B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
                 </div>
-              </div>
-            ) : sortedPosts.length > 0 ? (
-              <div className="bg-white rounded-2xl shadow-premium overflow-hidden group border border-gray-100">
-                <div className="grid lg:grid-cols-2 gap-0">
-                  <div className="relative h-44 md:h-64 lg:h-full overflow-hidden">
-                    <Image
-                      src={sortedPosts[0].image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=400&fit=crop&crop=center'}
-                      alt={sortedPosts[0].title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      priority
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                    <div className="absolute top-4 left-4 z-10">
-                      <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs md:text-sm font-bold tracking-wider uppercase shadow-lg">
-                        Featured
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4 md:p-8 flex flex-col justify-center">
-                    <div className="flex items-center space-x-3 md:space-x-4 text-sm md:text-base text-secondary-500 mb-4">
-                      <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
-                        {sortedPosts[0].category}
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDateHuman(sortedPosts[0].date, 'en-GB')}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4" />
-                        <span>{sortedPosts[0].readTime}</span>
-                      </div>
-                    </div>
-                    <h2 className="text-base md:text-xl font-semibold text-secondary-900 mb-3 tracking-snug">
-                      {sortedPosts[0].title}
-                    </h2>
-                    <p className="text-secondary-600 mb-4 md:mb-6 text-sm md:text-base leading-relaxed opacity-80">
-                      {sortedPosts[0].excerpt || 'No excerpt available'}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm md:text-base text-secondary-500">
-                        <User className="w-4 h-4" />
-                        <span>{sortedPosts[0].author}</span>
-                      </div>
-                      <Link
-                        href={`/blog/${sortedPosts[0].id}`}
-                        className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-5 md:px-6 py-3 sm:py-2.5 rounded-lg text-xs md:text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-                      >
-                        Read More
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <h3 className="text-base font-bold text-[#0F172A] mb-1">No articles found</h3>
+                <p className="text-sm text-[#64748B] mb-1">
+                  {searchQuery
+                    ? `No results for "${searchQuery}"`
+                    : activeCategory !== 'All'
+                    ? `No articles in "${activeCategory}"`
+                    : 'No published articles yet.'}
+                </p>
+                <p className="text-[11px] text-[#94A3B8]">
+                  {searchQuery || activeCategory !== 'All'
+                    ? 'Try adjusting your search or filter.'
+                    : 'Check back later for new content.'}
+                </p>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-premium p-6 md:p-12 text-center border border-gray-100">
-                <div className="bg-primary-50 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-                  <Search className="w-8 h-8 md:w-10 md:h-10 text-primary-300" />
+              <>
+                {/* Featured Post + Popular Posts (side by side on desktop) */}
+                <div className="mt-6 md:mt-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 lg:gap-8">
+                    <div>
+                      {featuredPost && <FeaturedPost post={featuredPost} />}
+                    </div>
+                    <div className="hidden lg:block">
+                      <div className="sticky top-[130px]">
+                        <PopularPosts posts={popularPosts} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-base md:text-xl font-semibold text-secondary-900 mb-2 md:mb-3">No published articles yet</h3>
-                <p className="text-secondary-500 mb-2 md:mb-3 text-sm md:text-base">Check back later for our latest cleaning tips and industry insights.</p>
-                <p className="text-[13px] text-secondary-400 uppercase tracking-widest">Admins: Make sure to publish posts in the admin panel.</p>
-              </div>
+
+                {/* Blog Grid */}
+                {paginatedPosts.length > 0 && (
+                  <div className="mt-8 md:mt-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                      {paginatedPosts.map((post, idx) => (
+                        <BlogCard key={post.id} post={post} index={idx} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pagination */}
+                <div className="mt-8">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
+                </div>
+
+                {/* Popular Posts on Mobile */}
+                <div className="mt-6 lg:hidden">
+                  <PopularPosts posts={popularPosts} />
+                </div>
+              </>
             )}
-          </div>
 
-          {/* Blog Grid - Exclude featured post */}
-          {isLoading && blogPosts.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {[...Array(6)].map((_, index) => (
-                <div key={index} className="bg-white rounded-2xl shadow-premium overflow-hidden border border-gray-100">
-                  <Skeleton className="h-40 md:h-56 w-full" />
-                  <div className="p-4 md:p-6 flex flex-col gap-4">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                      <Skeleton className="h-4 w-20" />
-                      <Skeleton className="h-4 w-16" />
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {/* Newsletter */}
+            <div className="mt-6 max-w-2xl mx-auto">
+              <NewsletterCard />
             </div>
-          ) : sortedPosts.length <= 1 ? (
-              <div className="bg-white rounded-2xl shadow-premium p-6 md:p-12 text-center border border-gray-100 max-w-2xl mx-auto">
-                <div className="bg-primary-50 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-6 h-6 md:w-8 md:h-8 text-primary-300" />
-                </div>
-                <h3 className="text-base md:text-lg font-semibold text-secondary-900 mb-2">No more articles</h3>
-                <p className="text-secondary-500 text-sm md:text-base">This is all we have for now. Check back later for more premium content!</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {sortedPosts.slice(1).map((post, index) => (
-                <article
-                  key={post.id}
-                  className="bg-white rounded-2xl shadow-premium overflow-hidden hover:shadow-premium-hover transition-all duration-500 hover:-translate-y-2 group border border-gray-100"
-                >
-                  <div className="relative h-40 md:h-56 overflow-hidden">
-                    <Image
-                      src={post.image || 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&h=400&fit=crop&crop=center'}
-                      alt={post.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-700"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                    <div className="absolute top-3 left-3 z-10">
-                      <span className="bg-white/90 backdrop-blur-md text-primary-900 px-3 py-1 rounded text-xs md:text-sm font-bold tracking-wide uppercase shadow-sm">
-                        {post.category}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4 md:p-6">
-                    <div className="flex items-center space-x-3 md:space-x-4 text-xs md:text-sm text-secondary-500 mb-2 md:mb-3">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>{formatDateHuman(post.date, 'en-GB')}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{post.readTime}</span>
-                      </div>
-                    </div>
-                    <h3 className="text-sm md:text-lg font-semibold text-secondary-900 mb-2 line-clamp-2 tracking-snug">
-                      {post.title}
-                    </h3>
-                    <p className="text-secondary-600 text-sm md:text-[15px] mb-3 md:mb-4 line-clamp-2 leading-relaxed opacity-70">
-                      {post.excerpt || 'No excerpt available'}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-xs md:text-sm text-secondary-500">
-                        <User className="w-3 h-3" />
-                        <span>{post.author}</span>
-                      </div>
-                      <Link
-                        href={`/blog/${post.id}`}
-                        className="text-primary-900 hover:text-accent-600 font-bold text-sm md:text-base transition-colors duration-200 flex items-center group/btn"
-                      >
-                        <span>Read More</span>
-                        <ArrowLeft className="w-4 h-4 ml-1 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+          </>
+        )}
 
-          {/* Load More Button */}
-          {hasMore && sortedPosts.length > 1 && (
-            <div className="mt-6 md:mt-8 text-center">
-              <button
-                onClick={loadMorePosts}
-                disabled={isLoading}
-                className="bg-primary-900 hover:bg-primary-950 text-accent-500 px-6 md:px-8 py-3 md:py-3.5 sm:py-3 rounded-xl text-xs md:text-sm font-semibold uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
-              >
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
-                    <span>Loading...</span>
-                  </div>
-                ) : 'Load More Articles'}
-              </button>
-            </div>
-          )}
-
-          {/* Newsletter Signup */}
-          <div className="mt-12 md:mt-24 bg-white rounded-2xl md:rounded-3xl p-6 md:p-16 text-center text-secondary-900 relative overflow-hidden border border-gray-100 shadow-xl shadow-secondary-900/5">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-40">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-100/30 via-transparent to-transparent"></div>
-            </div>
-
-            <div className="relative z-10 max-w-3xl mx-auto">
-              <h3 className="text-xl md:text-3xl lg:text-4xl font-semibold mb-4 tracking-tight">
-                Stay Ahead of the <span className="text-primary-600 font-bold">Curve</span>
-              </h3>
-              <p className="text-secondary-600 mb-8 md:mb-10 text-sm md:text-lg opacity-80 max-w-2xl mx-auto leading-relaxed">
-                Subscribe for premium maintenance tips, exclusive industry insights, and seasonal guides delivered straight to your inbox.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto bg-gray-50 p-2 rounded-2xl border border-gray-100">
-                <input
-                  type="email"
-                  placeholder="Your professional email"
-                  className="flex-1 px-5 md:px-6 py-3 md:py-4 rounded-xl bg-white text-secondary-900 placeholder:text-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none shadow-inner transition-all duration-300"
-                />
-                <button className="bg-primary-600 text-white px-6 md:px-8 py-3 md:py-3.5 sm:py-3 rounded-xl text-xs md:text-sm font-semibold uppercase tracking-wider hover:bg-primary-700 transition-all duration-300 hover:scale-105 shadow-md active:scale-95">
-                  Subscribe
-                </button>
-              </div>
-              <p className="text-xs text-secondary-400 mt-4 md:mt-6 uppercase tracking-widest font-semibold">
-                Luxury service, zero spam. Unsubscribe at any time.
-              </p>
-            </div>
-          </div>
-
-          {/* Back to Top */}
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-6 md:bottom-8 right-6 md:right-8 bg-primary-900 text-accent-500 p-3 md:p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
-            aria-label="Back to top"
-          >
-            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 rotate-90" />
-          </button>
-        </div>
       </div>
-    </div >
+
+    </main>
   )
 }
-
-export default BlogPage

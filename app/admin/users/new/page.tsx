@@ -131,7 +131,6 @@ export default function AddUserPage() {
         toast.error('Failed to create user')
       }
     } catch (error) {
-      console.error('Error creating user:', error)
       toast.error('Failed to create user')
     } finally {
       setIsLoading(false)

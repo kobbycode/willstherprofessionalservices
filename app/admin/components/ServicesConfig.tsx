@@ -101,7 +101,6 @@ const ServicesConfig = ({ config, onChange, onSave }: ServicesConfigProps) => {
         let data = JSON.parse(text)
         setServices(data.services || [])
       } catch (error) {
-        console.error('Error loading services:', error)
         setError((error as Error).message)
       } finally {
         setLoading(false)
@@ -152,7 +151,6 @@ const ServicesConfig = ({ config, onChange, onSave }: ServicesConfigProps) => {
         setServices(data.services || [])
 
       } catch (error) {
-        console.error('Error loading data:', error)
         setError((error as Error).message)
         toast.error('Failed to load data')
       } finally {

@@ -56,7 +56,6 @@ export default function RichTextEditor({ value, onChange, placeholder, className
         const inst = quillRef.current && (quillRef.current.getEditor ? quillRef.current.getEditor() : quillRef.current)
         inst && inst.focus && inst.focus()
       } catch (error) {
-        console.warn('Failed to focus Quill editor:', error)
       }
     }, 100)
     return () => clearTimeout(t)

@@ -20,7 +20,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       }
     })
   } catch (error) {
-    console.error('Error fetching service:', error)
     return NextResponse.json({
       error: `Failed to fetch service: ${error instanceof Error ? error.message : 'Unknown error'}`
     }, { status: 500 })
@@ -55,7 +54,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       success: true
     })
   } catch (error) {
-    console.error('Error updating service:', error)
     return NextResponse.json({
       error: `Failed to update service: ${error instanceof Error ? error.message : 'Unknown error'}`
     }, { status: 500 })
@@ -82,7 +80,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting service:', error)
     return NextResponse.json({
       error: `Failed to delete service: ${error instanceof Error ? error.message : 'Unknown error'}`
     }, { status: 500 })

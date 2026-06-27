@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import MaintenanceMode from '@/components/MaintenanceMode'
@@ -10,7 +10,6 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, CheckCircle, Clock } from 'lucide-react'
 import Skeleton from '@/components/Skeleton'
 
-// Define interface for Service
 interface Service {
     id: string
     title: string
@@ -25,7 +24,6 @@ export const dynamic = 'force-dynamic'
 export default function ServiceDetails() {
     const { config } = useSiteConfig()
     const params = useParams()
-    const router = useRouter()
     const [service, setService] = useState<Service | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -33,25 +31,20 @@ export default function ServiceDetails() {
     useEffect(() => {
         const fetchService = async () => {
             if (!params || !params.id) return
-
             try {
                 const res = await fetch(`/api/services/${params.id}`)
-
                 if (!res.ok) {
                     if (res.status === 404) throw new Error('Service not found')
                     throw new Error('Failed to fetch service details')
                 }
-
                 const data = await res.json()
                 setService(data.service)
             } catch (err) {
-                console.error(err)
                 setError(err instanceof Error ? err.message : 'An error occurred')
             } finally {
                 setLoading(false)
             }
         }
-
         fetchService()
     }, [params])
 
@@ -65,49 +58,21 @@ export default function ServiceDetails() {
 
     if (loading) {
         return (
-            <main className="min-h-screen flex flex-col bg-gray-50">
-                {/* Skeleton Hero */}
-                <div className="relative py-16 md:py-20 bg-white border-b border-gray-100">
-                    <div className="container-custom px-4 relative z-10 space-y-4">
-                        <Skeleton className="h-6 w-32 bg-gray-100" />
-                        <Skeleton className="h-6 w-24 bg-gray-100 rounded-full" />
-                        <Skeleton className="h-12 w-3/4 bg-gray-100" />
+            <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
+                <div className="container-custom py-8 md:py-12">
+                    <div className="space-y-4">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-10 w-2/3" />
                     </div>
-                </div>
-
-                {/* Skeleton Content */}
-                <div className="py-12 md:py-24 flex-1">
-                    <div className="container-custom px-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-                            <div className="lg:col-span-2 space-y-6 md:space-y-8">
-                                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-4 md:space-y-6">
-                                    <Skeleton className="h-8 w-48" />
-                                    <div className="space-y-3">
-                                        <Skeleton className="h-4 w-full" />
-                                        <Skeleton className="h-4 w-full" />
-                                        <Skeleton className="h-4 w-2/3" />
-                                    </div>
-                                </div>
-                                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-4">
-                                    <Skeleton className="h-7 w-40" />
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {[...Array(4)].map((_, i) => (
-                                            <div key={i} className="flex gap-3">
-                                                <Skeleton className="w-4 h-4 md:w-5 md:h-5 rounded-full" />
-                                                <Skeleton className="h-5 flex-1" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="lg:col-span-1">
-                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden space-y-4 md:space-y-6 p-4 md:p-6">
-                                    <Skeleton className="h-8 w-full" />
-                                    <Skeleton className="h-12 w-full" />
-                                    <Skeleton className="h-12 w-full" />
-                                    <Skeleton className="h-12 w-full rounded-xl" />
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+                        <div className="lg:col-span-2 space-y-5">
+                            <Skeleton className="h-64 w-full" />
+                            <Skeleton className="h-32 w-full" />
+                            <Skeleton className="h-28 w-full" />
+                        </div>
+                        <div className="lg:col-span-1">
+                            <Skeleton className="h-64 w-full" />
                         </div>
                     </div>
                 </div>
@@ -117,11 +82,11 @@ export default function ServiceDetails() {
 
     if (error || !service) {
         return (
-            <main className="min-h-screen flex flex-col">
-                <div className="flex-1 container-custom px-4 py-16 md:py-20 text-center">
-                    <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-4">Service Not Found</h1>
-                    <p className="text-gray-600 mb-6 md:mb-8">{error || "The service you're looking for doesn't exist."}</p>
-                    <Link href="/#services" className="btn-primary">
+            <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
+                <div className="container-custom px-4 py-16 text-center">
+                    <h1 className="text-xl font-bold text-[#0F172A] mb-3">Service Not Found</h1>
+                    <p className="text-[#64748B] text-sm mb-6">{error || "The service you're looking for doesn't exist."}</p>
+                    <Link href="/#services" className="inline-block bg-[#2563EB] hover:bg-[#1d4ed8] text-white px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all">
                         Back to Services
                     </Link>
                 </div>
@@ -130,27 +95,17 @@ export default function ServiceDetails() {
     }
 
     return (
-        <main className="min-h-screen flex flex-col bg-white">
-            {/* Hero Banner */}
-            <section className="relative py-16 md:py-20 bg-white text-secondary-900 overflow-hidden border-b border-gray-100">
-                <div className="absolute inset-0">
-                    <Image
-                        src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
-                        alt={service.title}
-                        fill
-                        className="object-cover opacity-[0.03]"
-                        sizes="100vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/95 to-white/80"></div>
-                </div>
+        <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
 
-                <div className="container-custom px-4 relative z-10">
+            {/* Hero */}
+            <section className="bg-white border-b border-[#E2E8F0] py-10 md:py-14">
+                <div className="container-custom px-4">
                     <Link
                         href="/#services"
-                        className="inline-flex items-center text-secondary-500 hover:text-primary-600 mb-4 md:mb-6 transition-colors group"
+                        className="inline-flex items-center text-[#64748B] hover:text-[#2563EB] mb-4 text-xs font-semibold uppercase tracking-widest transition-colors group"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest">Back to Services</span>
+                        <ArrowLeft className="w-3.5 h-3.5 mr-1 group-hover:-translate-x-0.5 transition-transform" />
+                        Back to Services
                     </Link>
 
                     <motion.div
@@ -158,10 +113,10 @@ export default function ServiceDetails() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <span className="inline-block py-1.5 px-4 rounded-full bg-primary-50 border border-primary-100 text-primary-600 text-[12px] font-bold uppercase tracking-widest mb-4 md:mb-6 shadow-sm">
+                        <span className="text-[#2563EB] font-semibold tracking-[0.2em] text-xs mb-2 block">
                             {service.category}
                         </span>
-                        <h1 className="text-xl md:text-4xl font-semibold mb-4 md:mb-6 text-secondary-900 leading-tight tracking-tight">
+                        <h1 className="text-xl md:text-3xl font-bold text-[#0F172A] leading-tight tracking-tight">
                             {service.title}
                         </h1>
                     </motion.div>
@@ -169,58 +124,57 @@ export default function ServiceDetails() {
             </section>
 
             {/* Content */}
-            <section className="py-12 md:py-24">
+            <section className="py-8 md:py-12">
                 <div className="container-custom px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
 
                         {/* Main Content */}
                         <motion.div
-                            className="lg:col-span-2 space-y-6 md:space-y-8"
+                            className="lg:col-span-2 space-y-5"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
                         >
                             {/* Service Image */}
-                            <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 overflow-hidden">
-                                <div className="aspect-video relative rounded-xl overflow-hidden bg-gray-100">
+                            <div className="bg-white shadow-sm border border-[#E2E8F0] overflow-hidden">
+                                <div className="aspect-video relative overflow-hidden bg-[#F1F5F9]">
                                     <Image
                                         src={service.imageUrl || 'https://images.unsplash.com/photo-1581578731548-c13940b8c309?w=1200&h=600&fit=crop&crop=center'}
                                         alt={service.title}
                                         fill
                                         className="object-cover hover:scale-105 transition-transform duration-700"
-                                        sizes="100vw"
+                                        sizes="(max-width: 1024px) 100vw, 66vw"
                                     />
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-                                <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6 uppercase tracking-wider">Service Overview</h2>
-                                <div className="prose prose-lg max-w-none text-gray-600">
+                            {/* Overview */}
+                            <div className="bg-white shadow-sm border border-[#E2E8F0] p-5 md:p-6">
+                                <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-4">Service Overview</h2>
+                                <div className="text-[#475569] text-sm leading-relaxed space-y-3">
                                     {service.description ? (
                                         service.description.split('\n').map((paragraph, idx) => (
-                                            <p key={idx} className="mb-4 last:mb-0">
-                                                {paragraph}
-                                            </p>
+                                            <p key={idx}>{paragraph}</p>
                                         ))
                                     ) : (
-                                        <p>No description available.</p>
+                                        <p className="text-[#64748B]">No description available.</p>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Display features if we had them in the database, currently placeholders or derived */}
-                            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-4 md:mb-6 uppercase tracking-wider">Why Choose Us</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Why Choose Us */}
+                            <div className="bg-white shadow-sm border border-[#E2E8F0] p-5 md:p-6">
+                                <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-4">Why Choose Us</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {[
                                         "Professional & Experienced Team",
                                         "Quality Service Guarantee",
                                         "Timely Execution",
                                         "Competitive Pricing"
                                     ].map((item, i) => (
-                                        <div key={i} className="flex items-start">
-                                            <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-primary-600 mt-1 mr-3 flex-shrink-0" />
-                                            <span className="text-gray-700">{item}</span>
+                                        <div key={i} className="flex items-start gap-2.5">
+                                            <CheckCircle className="w-4 h-4 text-[#2563EB] mt-0.5 flex-shrink-0" />
+                                            <span className="text-[#475569] text-sm">{item}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -232,40 +186,40 @@ export default function ServiceDetails() {
                             className="lg:col-span-1"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.4 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
                         >
-                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
-                                <div className="p-4 md:p-6 bg-white border-b border-gray-100">
-                                    <h3 className="text-base md:text-lg font-semibold mb-2 text-secondary-900">Book This Service</h3>
-                                    <p className="text-secondary-500 text-sm md:text-base">Get a quote or schedule an appointment today.</p>
+                            <div className="bg-white shadow-sm border border-[#E2E8F0] sticky top-[130px]">
+                                <div className="p-4 md:p-5 bg-white border-b border-[#E2E8F0]">
+                                    <h3 className="text-sm font-bold text-[#0F172A] mb-1">Book This Service</h3>
+                                    <p className="text-[#64748B] text-xs">Get a quote or schedule an appointment today.</p>
                                 </div>
 
-                                <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-                                    <div className="flex items-center text-gray-700">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-100 flex items-center justify-center mr-3 md:mr-4 text-primary-600">
-                                            <Clock className="w-4 h-4 md:w-5 md:h-5" />
+                                <div className="p-4 md:p-5 space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB] flex-shrink-0">
+                                            <Clock className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-sm md:text-base text-gray-500">Response Time</p>
-                                            <p className="font-semibold">Within 24 Hours</p>
+                                            <p className="text-[#64748B] text-[11px]">Response Time</p>
+                                            <p className="font-semibold text-[#0F172A] text-sm">Within 24 Hours</p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center text-gray-700">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-100 flex items-center justify-center mr-3 md:mr-4 text-primary-600">
-                                            <Calendar className="w-4 h-4 md:w-5 md:h-5" />
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB] flex-shrink-0">
+                                            <Calendar className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <p className="text-sm md:text-base text-gray-500">Availability</p>
-                                            <p className="font-semibold">Mon - Sat, 8am - 6pm</p>
+                                            <p className="text-[#64748B] text-[11px]">Availability</p>
+                                            <p className="font-semibold text-[#0F172A] text-sm">Mon - Sat, 8am - 6pm</p>
                                         </div>
                                     </div>
 
-                                    <hr className="border-gray-100" />
+                                    <hr className="border-[#E2E8F0]" />
 
                                     <Link
                                         href="/#contact"
-                                        className="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white text-sm md:text-base font-semibold py-3 md:py-3.5 px-5 md:px-6 rounded-xl transition-all shadow-md shadow-primary-600/10 active:scale-95"
+                                        className="block w-full text-center bg-[#2563EB] hover:bg-[#1d4ed8] text-white text-sm font-semibold py-2.5 px-5 transition-all"
                                     >
                                         Contact Us Now
                                     </Link>

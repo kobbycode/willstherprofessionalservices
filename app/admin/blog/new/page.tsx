@@ -115,7 +115,6 @@ const NewBlogPost = () => {
       // Close the form and redirect to admin
       router.push('/admin')
     } catch (error) {
-      console.error('Failed to save post:', error)
       toast.error('Failed to save post: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setIsSaving(false)
@@ -144,7 +143,6 @@ const NewBlogPost = () => {
       // Close the form and redirect to admin
       router.push('/admin')
     } catch (error) {
-      console.error('Failed to publish post:', error)
       toast.error('Failed to publish post: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setIsPublishing(false)
@@ -219,7 +217,6 @@ const NewBlogPost = () => {
       setImagePreview(url)
       toast.success('Image uploaded successfully')
     } catch (error) {
-      console.error('Upload failed:', error)
       toast.error('Image upload timed out or failed. You can still save your post.')
     } finally {
       setIsUploading(false)

@@ -16,14 +16,12 @@ interface ProductCardProps {
 export default function ProductCard({ product, contactPhone }: ProductCardProps) {
     const { addToCart, toggleWishlist, isInWishlist, setIsCartOpen } = useShop()
     let whatsappNumber = contactPhone.replace(/\D/g, '')
-    // If it starts with 0 and is likely a Ghana number (10 digits), prepend 233 and remove 0
     if (whatsappNumber.startsWith('0') && whatsappNumber.length === 10) {
         whatsappNumber = '233' + whatsappNumber.substring(1)
     }
     const message = encodeURIComponent(`Hi, I am interested in buying *${product.title}* listed for GH₵${product.price}`)
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`
 
-    // Get images array - use images array if available, fallback to single imageUrl
     const productImages = product.images && product.images.length > 0
         ? product.images
         : product.imageUrl
@@ -32,7 +30,6 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
 
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
-    // Reset selected image when product changes
     useEffect(() => {
         setSelectedImageIndex(0)
     }, [product.id])
@@ -44,10 +41,10 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-4 md:p-5 rounded-2xl bg-white border border-gray-200/60 relative group transition-all duration-300 hover:shadow-2xl hover:shadow-primary-900/10 hover:-translate-y-1 h-full flex flex-col shadow-sm"
+            className="bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 h-full flex flex-col border border-[#E2E8F0]"
         >
             {/* Image Section */}
-            <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-gray-100 cursor-pointer">
+            <Link href={`/shop/${product.id}`} className="block relative aspect-square overflow-hidden bg-[#F1F5F9] cursor-pointer">
                 {currentImage ? (
                     <Image
                         src={currentImage}
@@ -57,8 +54,8 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                        <ShoppingBag size={32} className="opacity-30" />
+                    <div className="w-full h-full flex items-center justify-center text-[#64748B] bg-[#F1F5F9]">
+                        <ShoppingBag size={24} className="opacity-30" />
                     </div>
                 )}
 
@@ -68,37 +65,37 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                         e.preventDefault()
                         toggleWishlist(product)
                     }}
-                    className={`absolute top-2 right-2 p-2.5 sm:p-1.5 rounded-full backdrop-blur-sm transition-all duration-300 ${isInWishlist(product.id)
-                        ? 'bg-red-500 text-white shadow-lg'
-                        : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-110'
+                    className={`absolute top-1.5 right-1.5 p-1.5 transition-all duration-300 ${isInWishlist(product.id)
+                        ? 'bg-red-500 text-white'
+                        : 'bg-white/80 text-[#64748B] hover:bg-white hover:scale-110'
                         }`}
                 >
-                    <Heart size={16} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
+                    <Heart size={12} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                 </button>
 
                 {/* Stock Badge */}
                 {product.inStock ? (
-                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-green-500 text-white text-xs sm:text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
-                        <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-green-500 text-white text-[10px] font-semibold tracking-wider flex items-center gap-1">
+                        <div className="w-1 h-1 bg-white" />
                         IN STOCK
                     </div>
                 ) : (
-                    <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 bg-red-600 text-white text-xs sm:text-[11px] font-semibold tracking-wider rounded-full shadow-md backdrop-blur-sm flex items-center gap-1.5 border border-white/20">
-                        <X size={10} strokeWidth={3} />
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-red-600 text-white text-[10px] font-semibold tracking-wider flex items-center gap-1">
+                        <X size={8} strokeWidth={3} />
                         OUT OF STOCK
                     </div>
                 )}
             </Link>
 
-            {/* Thumbnail Gallery - only show if multiple images */}
+            {/* Thumbnail Gallery */}
             {productImages.length > 1 && (
-                <div className="flex gap-1 px-1.5 py-1 bg-white overflow-x-auto">
+                <div className="flex gap-1 px-1 py-0.5 bg-white overflow-x-auto border-b border-[#E2E8F0]">
                     {productImages.map((img, idx) => (
                         <button
                             key={idx}
                             onClick={() => setSelectedImageIndex(idx)}
-                            className={`relative w-11 h-11 sm:w-8 sm:h-8 flex-shrink-0 rounded-md overflow-hidden border transition-all ${idx === selectedImageIndex
-                                ? 'border-primary-500 shadow-sm'
+                            className={`relative w-8 h-8 flex-shrink-0 overflow-hidden border transition-all ${idx === selectedImageIndex
+                                ? 'border-[#2563EB]'
                                 : 'border-transparent opacity-60 hover:opacity-100'
                                 }`}
                         >
@@ -114,55 +111,54 @@ export default function ProductCard({ product, contactPhone }: ProductCardProps)
                 </div>
             )}
 
-            {/* Content Section - More compact */}
-            <div className="p-3.5 flex flex-col flex-grow">
-                {/* Category & Title */}
-                <div className="mb-2">
+            {/* Content Section */}
+            <div className="p-2.5 flex flex-col flex-grow">
+                <div className="mb-1.5">
                     {product.category && (
-                        <p className="text-xs sm:text-[11px] font-semibold text-primary-600 uppercase tracking-[0.2em] mb-1">
+                        <p className="text-[10px] font-semibold text-[#2563EB] uppercase tracking-[0.2em] mb-0.5">
                             {product.category}
                         </p>
                     )}
                     <Link href={`/shop/${product.id}`} className="block group/title">
-                        <h3 className="text-[14px] font-semibold text-gray-900 line-clamp-2 leading-snug group-hover/title:text-primary-600 transition-colors">
+                        <h3 className="text-[13px] font-semibold text-[#0F172A] line-clamp-2 leading-snug group-hover/title:text-[#2563EB] transition-colors">
                             {product.title}
                         </h3>
                     </Link>
                 </div>
 
                 {/* Price & Actions */}
-                <div className="mt-auto pt-3 flex items-center justify-between border-t border-gray-50">
-                    <span className="text-[16px] font-bold text-gray-900 italic font-outfit">
+                <div className="mt-auto pt-2 flex items-center justify-between border-t border-[#E2E8F0]">
+                    <span className="text-[14px] font-bold text-[#0F172A] font-outfit">
                         GH₵{product.price.toFixed(2)}
                     </span>
 
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1">
                         <button
                             onClick={() => {
                                 addToCart(product)
                                 setIsCartOpen(true)
                             }}
                             disabled={!product.inStock}
-                            className={`p-3 sm:p-2 rounded-lg transition-all duration-300 ${product.inStock
-                                ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-md active:scale-95'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            className={`p-1.5 transition-all duration-300 ${product.inStock
+                                ? 'bg-[#2563EB] hover:bg-[#1d4ed8] text-white active:scale-95'
+                                : 'bg-[#F1F5F9] text-[#64748B] cursor-not-allowed'
                                 }`}
                             title="Add to Cart"
                         >
-                            <ShoppingBag size={16} />
+                            <ShoppingBag size={13} />
                         </button>
                         <a
                             href={product.inStock ? whatsappUrl : '#'}
                             target={product.inStock ? '_blank' : undefined}
                             rel={product.inStock ? "noopener noreferrer" : undefined}
                             onClick={(e) => !product.inStock && e.preventDefault()}
-                            className={`p-3 sm:p-2 rounded-lg transition-all duration-300 ${product.inStock
-                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md active:scale-95'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            className={`p-1.5 transition-all duration-300 ${product.inStock
+                                ? 'bg-green-500 hover:bg-green-600 text-white active:scale-95'
+                                : 'bg-[#F1F5F9] text-[#64748B] cursor-not-allowed'
                                 }`}
                             title="Order via WhatsApp"
                         >
-                            <MessageCircle size={16} />
+                            <MessageCircle size={13} />
                         </a>
                     </div>
                 </div>

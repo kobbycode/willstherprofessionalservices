@@ -196,7 +196,6 @@ export async function fetchPostById(id: string): Promise<BlogPost | null> {
       updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || new Date().toISOString()
     } satisfies BlogPost
   } catch (error) {
-    console.error('Error fetching post by ID:', error)
     throw error
   }
 }
@@ -227,7 +226,6 @@ export async function createPost(input: NewPostInput): Promise<string> {
     const result = await addDoc(col, postData)
     return result.id
   } catch (error) {
-    console.error('Error creating post:', error)
     throw error
   }
 }
@@ -246,7 +244,6 @@ export async function updatePost(id: string, input: Partial<NewPostInput>): Prom
     }
     await updateDoc(ref, updateData)
   } catch (error) {
-    console.error('Error updating post:', error)
     throw error
   }
 }
@@ -257,7 +254,6 @@ export async function updatePostStatus(id: string, status: 'draft' | 'published'
     const ref = doc(db, POSTS_COLLECTION, id)
     await updateDoc(ref, { status, updatedAt: serverTimestamp() })
   } catch (error) {
-    console.error('Error updating post status:', error)
     throw error
   }
 }
@@ -268,7 +264,6 @@ export async function deletePost(id: string): Promise<void> {
     const ref = doc(db, POSTS_COLLECTION, id)
     await deleteDoc(ref)
   } catch (error) {
-    console.error('Error deleting post:', error)
     throw error
   }
 }
@@ -279,6 +274,5 @@ export async function incrementViews(id: string): Promise<void> {
     const ref = doc(db, POSTS_COLLECTION, id)
     await updateDoc(ref, { views: increment(1) })
   } catch (error) {
-    console.error('Error incrementing views:', error)
   }
 }

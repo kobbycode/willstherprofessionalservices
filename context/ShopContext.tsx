@@ -89,19 +89,20 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             toast.error(`${product.title} is currently out of stock`)
             return
         }
+        let isUpdate = false
         setCart(prev => {
             const existing = prev.find(item => item.product.id === product.id)
             if (existing) {
-                toast.success(`Updated ${product.title} quantity`)
+                isUpdate = true
                 return prev.map(item =>
                     item.product.id === product.id
                         ? { ...item, quantity: item.quantity + quantity }
                         : item
                 )
             }
-            toast.success(`Added ${product.title} to cart`)
             return [...prev, { product, quantity }]
         })
+        toast.success(isUpdate ? `Updated ${product.title} quantity` : `Added ${product.title} to cart`)
     }, [])
 
     const removeFromCart = useCallback((productId: string) => {
@@ -121,15 +122,16 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const toggleWishlist = useCallback((product: Product) => {
+        let wasRemoved = false
         setWishlist(prev => {
             const exists = prev.find(p => p.id === product.id)
             if (exists) {
-                toast.success("Removed from wishlist")
+                wasRemoved = true
                 return prev.filter(p => p.id !== product.id)
             }
-            toast.success("Added to wishlist")
             return [...prev, product]
         })
+        toast.success(wasRemoved ? "Removed from wishlist" : "Added to wishlist")
     }, [])
 
     const isInWishlist = useCallback((productId: string) => {

@@ -16,12 +16,6 @@ function initializeAdmin() {
   if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
     // Don't throw error immediately - allow app to start
     // Error will be thrown when admin functions are actually called
-    console.warn('⚠️ Firebase Admin environment variables not set. Admin features will not work.')
-    console.warn('Missing variables:', {
-      FIREBASE_PROJECT_ID: FIREBASE_PROJECT_ID ? 'SET' : 'MISSING',
-      FIREBASE_CLIENT_EMAIL: FIREBASE_CLIENT_EMAIL ? 'SET' : 'MISSING',
-      FIREBASE_PRIVATE_KEY: FIREBASE_PRIVATE_KEY ? 'SET' : 'MISSING'
-    })
     return
   }
 
@@ -35,8 +29,6 @@ function initializeAdmin() {
     })
     adminInitialized = true
   } catch (error) {
-    console.error('❌ Failed to initialize Firebase Admin:', error)
-    console.error('Check your Firebase Admin credentials in .env.local')
     throw error
   }
 }
@@ -45,7 +37,6 @@ export async function getAdminDb() {
   initializeAdmin()
   if (!getApps().length) {
     const error = new Error('Firebase Admin not initialized. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.')
-    console.error('❌ Firebase Admin DB access failed:', error.message)
     throw error
   }
   return getFirestore()
@@ -55,7 +46,6 @@ export async function verifyIdToken(idToken: string) {
   initializeAdmin()
   if (!getApps().length) {
     const error = new Error('Firebase Admin not initialized. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.')
-    console.error('❌ Firebase Auth verification failed:', error.message)
     throw error
   }
   return getAuth().verifyIdToken(idToken)

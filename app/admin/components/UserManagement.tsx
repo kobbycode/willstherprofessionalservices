@@ -59,7 +59,6 @@ export const UserManagement = () => {
             const list = await fetchUsers()
             setUsers(list)
         } catch (e) {
-            console.error('Failed to load users:', e)
             toast.error('Failed to load users')
             setUsers([])
         } finally {

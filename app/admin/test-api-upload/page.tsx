@@ -42,7 +42,6 @@ export default function TestApiUploadPage() {
 
       setResult(data)
     } catch (err) {
-      console.error('API upload failed:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setUploading(false)

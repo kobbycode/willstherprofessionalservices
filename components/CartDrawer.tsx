@@ -40,7 +40,7 @@ export const CartDrawer = () => {
                                 </h2>
                                 <button
                                     onClick={() => setIsCartOpen(false)}
-                                    className="p-3 sm:p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="p-3 sm:p-1.5 hover:bg-gray-100 transition-colors"
                                 >
                                     <X size={18} className="text-gray-500" />
                                 </button>
@@ -60,8 +60,8 @@ export const CartDrawer = () => {
                                     </div>
                                 ) : (
                                     cart.map(({ product, quantity }) => (
-                                        <div key={product.id} className={`flex gap-3 md:gap-4 p-4 rounded-xl ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
-                                            <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white rounded-lg overflow-hidden border border-gray-200">
+                                        <div key={product.id} className={`flex gap-3 md:gap-4 p-4 ${!product.inStock ? 'bg-red-50 border border-red-200' : 'bg-slate-50'}`}>
+                                            <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden border border-gray-200">
                                                 {product.imageUrl && (
                                                     <Image
                                                         src={product.imageUrl}
@@ -88,7 +88,7 @@ export const CartDrawer = () => {
                                                 <p className="text-xs sm:text-[13px] text-primary-600 font-bold mb-2 md:mb-3 italic font-outfit">GH₵{product.price.toFixed(2)}</p>
 
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2 md:gap-3 bg-white border border-gray-200 rounded-lg px-2">
+                                                    <div className="flex items-center gap-2 md:gap-3 bg-white border border-gray-200 px-2">
                                                         <button
                                                             onClick={() => updateQuantity(product.id, quantity - 1)}
                                                             className="p-2.5 sm:p-1 hover:text-primary-600 disabled:opacity-50"
@@ -125,7 +125,7 @@ export const CartDrawer = () => {
                                     </div>
                                     <button
                                         onClick={() => setIsCheckoutOpen(true)}
-                                        className="w-full py-3 sm:py-3.5 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] uppercase tracking-[0.3em] rounded-xl shadow-lg transition-all active:scale-[0.98]"
+                                        className="w-full py-3 sm:py-3.5 md:py-4 bg-gray-900 hover:bg-black text-white font-semibold text-xs sm:text-[13px] uppercase tracking-[0.3em] shadow-lg transition-all active:scale-[0.98]"
                                     >
                                         Proceed to Checkout
                                     </button>

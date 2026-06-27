@@ -45,7 +45,6 @@ const AdminLogin = () => {
       // Refresh user data
       await refreshUser()
     } catch (err: any) {
-      console.error('Login error:', err)
       if (err.code === 'auth/user-not-found') {
         setError('No account found with this email')
       } else if (err.code === 'auth/wrong-password') {

@@ -22,7 +22,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error updating slide:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     
     if (errorMessage.includes('Firebase Admin not initialized')) {
@@ -44,7 +43,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     await db.collection('heroSlides').doc(id).delete()
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting slide:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     
     if (errorMessage.includes('Firebase Admin not initialized')) {

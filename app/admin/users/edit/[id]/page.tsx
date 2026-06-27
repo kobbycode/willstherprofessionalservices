@@ -83,7 +83,6 @@ export default function EditUserPage() {
           router.push('/admin')
         }
       } catch (error) {
-        console.error('Error loading user:', error)
         toast.error('Failed to load user')
         router.push('/admin')
       } finally {
@@ -160,7 +159,6 @@ export default function EditUserPage() {
         toast.error('Failed to update user')
       }
     } catch (error) {
-      console.error('Error updating user:', error)
       toast.error('Failed to update user')
     } finally {
       setIsSaving(false)

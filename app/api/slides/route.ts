@@ -17,11 +17,7 @@ export async function GET() {
     
     return response
   } catch (error) {
-    console.error('Error fetching slides:', error)
-    // If Firebase Admin is not initialized or authentication fails, return default slides
-    // This allows the site to work even without admin credentials
     if (error instanceof Error && (error.message.includes('Firebase Admin not initialized') || error.message.includes('UNAUTHENTICATED'))) {
-      console.warn('Firebase Admin not initialized or authentication failed, returning default slides')
       const defaultSlides = [
         {
           id: 'default-1',
@@ -82,7 +78,6 @@ export async function POST(request: NextRequest) {
         const countSnapshot = await db.collection('heroSlides').count().get()
         slideOrder = countSnapshot.data().count + 1
       } catch (orderError) {
-        console.warn('Failed to get count, using timestamp-based order:', orderError)
         slideOrder = Date.now() // Use timestamp as order if count fails
       }
     }
@@ -107,7 +102,6 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error creating slide:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     
     // Provide more helpful error messages

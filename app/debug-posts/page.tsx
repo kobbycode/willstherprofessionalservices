@@ -33,13 +33,8 @@ export default function DebugPostsPage() {
         const publishedPosts = await fetchPosts(true, 100)
         const allPostsViaFunction = await fetchPosts(false, 100)
         
-        console.log('All posts from DB:', allPostsData)
-        console.log('Published posts via function:', publishedPosts)
-        console.log('All posts via function:', allPostsViaFunction)
-        
         setPosts(publishedPosts)
       } catch (err) {
-        console.error('Failed to fetch posts:', err)
         setError('Failed to fetch posts: ' + (err as Error).message)
       } finally {
         setLoading(false)

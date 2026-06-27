@@ -9,6 +9,7 @@ import { CartDrawer } from '@/components/CartDrawer'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import LayoutWrapper from '@/components/LayoutWrapper'
 import NextTopLoader from 'nextjs-toploader'
+import ScrollToTop from '@/components/ScrollToTop'
 import { getAdminDb } from '@/lib/firebase-admin'
 
 const inter = Inter({
@@ -185,6 +186,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${outfit.variable} font-sans`}>
+        <ScrollToTop />
         <NextTopLoader
           color="#36669e"
           initialPosition={0.08}

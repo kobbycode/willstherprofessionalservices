@@ -33,7 +33,6 @@ export async function GET(request: Request) {
       
       snap = await query.get()
     } catch (orderError) {
-      console.warn('Failed to order posts, trying without orderBy:', orderError)
       let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('posts')
       if (publishedOnly) {
         query = query.where('status', '==', 'published')
@@ -46,7 +45,6 @@ export async function GET(request: Request) {
     const posts = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
     return NextResponse.json({ posts })
   } catch (e) {
-    console.error('Failed to load posts (admin):', e)
     return NextResponse.json({ error: 'Failed to load posts' }, { status: 500 })
   }
 }
@@ -84,7 +82,6 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ id: docRef.id })
   } catch (e) {
-    console.error('API route: Failed to create post:', e)
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 }

@@ -107,7 +107,6 @@ export default function AdminRegister() {
         try {
           await updateProfile(firebaseUser, { displayName: formData.name })
         } catch (profileErr) {
-          console.warn('Failed to set display name:', profileErr)
         }
       }
 
@@ -118,7 +117,7 @@ export default function AdminRegister() {
       router.push('/admin')
 
     } catch (err: any) {
-      console.error('Registration error:', err)
+      
       if (err.code === 'auth/email-already-in-use') {
         setError('An account with this email already exists')
       } else if (err.code === 'auth/weak-password') {

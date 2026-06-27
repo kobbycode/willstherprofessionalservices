@@ -25,9 +25,7 @@ export default function SimpleTestPage() {
       
       setStatus('Post created successfully!')
       setPostId(docRef.id)
-      console.log('Test post created with ID:', docRef.id)
     } catch (error) {
-      console.error('Test failed:', error)
       setStatus('Test failed: ' + (error as Error).message)
     }
   }

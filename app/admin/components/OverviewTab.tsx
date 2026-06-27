@@ -92,7 +92,6 @@ export const OverviewTab = ({ setActiveTab }: OverviewTabProps) => {
                     })
                 }
             } catch (error) {
-                console.error('Failed to load analytics:', error)
             } finally {
                 if (active) setIsLoading(false)
             }

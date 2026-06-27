@@ -9,27 +9,28 @@ export default function GalleryPage() {
     const { config } = useSiteConfig()
 
     return (
-        <main className="min-h-screen bg-[#fafafa]">
-            
-            <div className="pt-24 md:pt-32 pb-16 md:pb-20">
+        <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
+
+            <div className="py-8 md:py-12">
                 <div className="container-custom px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="text-center mb-8 md:mb-12"
+                        transition={{ duration: 0.7 }}
                     >
-                        <h1 className="text-xl md:text-4xl font-semibold text-secondary-900 mb-4 tracking-tight">
-                            Our <span className="text-primary-600 font-bold">Gallery</span>
+                        <span className="text-[#2563EB] font-semibold tracking-[0.2em] text-xs mb-2 block">
+                            OUR GALLERY
+                        </span>
+                        <h1 className="text-xl md:text-3xl font-bold text-[#0F172A] mb-3 tracking-tight">
+                            Visual <span className="text-[#2563EB]">Showcase</span>
                         </h1>
-                        <p className="max-w-xl mx-auto text-secondary-500 font-medium text-sm md:text-lg leading-relaxed">
+                        <p className="text-[#64748B] text-sm max-w-xl leading-relaxed mb-6">
                             {config.siteDescription || 'Visual representation of our professional cleaning and maintenance services across Ghana.'}
                         </p>
-                        <div className="w-10 md:w-12 h-0.5 bg-primary-500 mx-auto mt-4 md:mt-6 rounded-full" />
                     </motion.div>
-                </div>
 
-                <Gallery />
+                    <Gallery />
+                </div>
             </div>
 
         </main>

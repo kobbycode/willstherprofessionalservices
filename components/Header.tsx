@@ -139,39 +139,14 @@ const Header = () => {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-premium">
-      {/* Top utility bar - hidden on mobile */}
-      <div className="hidden md:block bg-primary-950 text-white/90 py-2 border-b border-white/10">
-        <div className="container-custom">
-          <div className="flex items-center justify-between text-base">
-            <div className="flex items-center space-x-4 lg:space-x-6">
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-primary-200" />
-                <a href={`tel:${config.contactPhone || '0208267704'}`} className="font-medium hover:text-primary-200 transition-colors">
-                  {config.contactPhone || '0208267704'}
-                </a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-primary-200" />
-                <a href={`mailto:${config.contactEmail || 'willstherprofessionalservices@gmail.com'}`} className="font-medium hover:text-primary-200 transition-colors">
-                  {config.contactEmail || 'willstherprofessionalservices@gmail.com'}
-                </a>
-              </div>
-            </div>
-            <div className="text-primary-200 text-sm">
-              Mon-Sat: 8:00am - 5:00pm
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl shadow-premium">
       {/* Main header */}
       <div className="bg-primary-900 shadow-lg">
         <div className="container-custom">
           <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className="flex items-center group relative overflow-hidden rounded-xl border border-white/10 shadow-premium">
+              <Link href="/" className="flex items-center group relative border border-white/10 shadow-premium">
                 <Image
                   src="/logo-v2.jpg"
                   alt="Willsther Logo"
@@ -184,44 +159,63 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
-              {navigation.map((item) => (
-                item.isHash ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleNavigation(item)}
-                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${isActive(item) ? 'underline underline-offset-4' : ''
-                      }`}
-                  >
-                    {item.name}
-                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
-                  </button>
-                ) : (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`px-4 py-2 text-white hover:text-primary-100 font-medium rounded-lg hover:bg-primary-700 transition-all duration-200 relative group ${isActive(item) ? 'underline underline-offset-4' : ''
-                      }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
-                  </Link>
-                )
-              ))}
-            </nav>
+            {/* Desktop Navigation + Contact Info */}
+            <div className="hidden lg:flex items-center gap-3">
+              <nav className="flex items-center">
+                {navigation.map((item) => (
+                  item.isHash ? (
+                    <button
+                      key={item.name}
+                      onClick={() => handleNavigation(item)}
+                      className={`px-3 py-1.5 text-white hover:text-primary-100 text-sm font-medium hover:bg-primary-700 transition-all duration-200 relative group ${isActive(item) ? 'underline underline-offset-4' : ''
+                        }`}
+                    >
+                      {item.name}
+                      <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+                    </button>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`px-3 py-1.5 text-white hover:text-primary-100 text-sm font-medium hover:bg-primary-700 transition-all duration-200 relative group ${isActive(item) ? 'underline underline-offset-4' : ''
+                        }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                      <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-white group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+                    </Link>
+                  )
+                ))}
+              </nav>
 
-            {/* CTA Buttons - hidden on mobile */}
-            <div className="hidden lg:flex items-center gap-4">
+              <div className="w-px h-5 bg-white/20" />
+
+              <a href={`tel:${config.contactPhone || '0208267704'}`} className="p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors" aria-label="Call us">
+                <Phone size={16} />
+              </a>
+
+              <div className="w-px h-5 bg-white/20" />
+
+              <a href={`mailto:${config.contactEmail || 'willstherprofessionalservices@gmail.com'}`} className="p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors" aria-label="Email us">
+                <Mail size={16} />
+              </a>
+
+              <div className="w-px h-5 bg-white/20" />
+
+              <span className="text-white/60 text-[11px] font-medium whitespace-nowrap">
+                Mon-Sat: 8:00am - 5:00pm
+              </span>
+
+              <div className="w-px h-5 bg-white/20" />
+
               <Link
                 href="/wishlist"
-                className="relative p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
+                className="relative p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors"
                 aria-label="Wishlist"
               >
-                <Heart size={24} />
+                <Heart size={18} />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-primary-600">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center border border-primary-600">
                     {wishlistCount}
                   </span>
                 )}
@@ -229,12 +223,12 @@ const Header = () => {
 
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors group"
+                className="relative p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors"
                 aria-label="Open cart"
               >
-                <ShoppingBag size={24} />
+                <ShoppingBag size={18} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-primary-600">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center border border-primary-600">
                     {cartCount}
                   </span>
                 )}
@@ -242,7 +236,7 @@ const Header = () => {
 
               <button
                 onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-black py-3.5 sm:py-3 px-6 rounded-xl shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5 font-outfit uppercase tracking-wider text-sm"
+                className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 shadow-lg hover:shadow-primary-600/20 transition-all duration-300 hover:-translate-y-0.5 font-outfit uppercase tracking-wider text-xs"
               >
                 Get Quote
               </button>
@@ -252,11 +246,11 @@ const Header = () => {
             <div className="flex items-center gap-2 lg:hidden">
               <Link
                 href="/wishlist"
-                className="p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
+                className="p-3 sm:p-2 text-white hover:bg-primary-700 transition-colors relative"
               >
                 <Heart className="w-5 h-5" />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center border-2 border-primary-600">
                     {wishlistCount}
                   </span>
                 )}
@@ -264,11 +258,11 @@ const Header = () => {
 
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="p-3 sm:p-2 text-white hover:bg-primary-700 rounded-lg transition-colors relative"
+                className="p-3 sm:p-2 text-white hover:bg-primary-700 transition-colors relative"
               >
                 <ShoppingBag className="w-5 h-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-primary-600">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center border-2 border-primary-600">
                     {cartCount}
                   </span>
                 )}
@@ -276,7 +270,7 @@ const Header = () => {
 
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-3 sm:p-2 rounded-lg text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
+                className="p-3 sm:p-2 text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200"
                 aria-label="Toggle mobile menu"
               >
                 {isMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
@@ -296,7 +290,7 @@ const Header = () => {
                   <button
                     key={item.name}
                     onClick={() => handleNavigation(item)}
-                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
                       }`}
                   >
                     {item.name}
@@ -305,7 +299,7 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 rounded-lg transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
+                    className={`block w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base font-medium text-white hover:text-primary-100 hover:bg-primary-700 transition-colors duration-200 ${isActive(item) ? 'underline underline-offset-4' : ''
                       }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -316,7 +310,7 @@ const Header = () => {
               <div className="pt-3 sm:pt-4 border-t border-primary-500">
                 <button
                   onClick={() => handleNavigation({ href: '#contact', isHash: true })}
-                  className="block w-full text-center bg-white hover:bg-primary-50 text-primary-600 font-black py-3 px-4 md:px-6 rounded-lg shadow-lg transition-all duration-300 text-xs sm:text-sm md:text-base font-outfit uppercase tracking-wider"
+                  className="block w-full text-center bg-white hover:bg-primary-50 text-primary-600 font-black py-3 px-4 md:px-6 shadow-lg transition-all duration-300 text-xs sm:text-sm md:text-base font-outfit uppercase tracking-wider"
                 >
                   Get Quote
                 </button>

@@ -73,7 +73,6 @@ export const BlogManagement = () => {
             const { posts: list } = await res.json()
             setPosts(list)
         } catch (e) {
-            console.error('Failed to load posts:', e)
             toast.error('Failed to load posts.')
             setPosts([])
         } finally {
@@ -106,7 +105,6 @@ export const BlogManagement = () => {
                         setPosts(list)
                     })
                 } catch (e) {
-                    console.error('Subscription error:', e)
                 }
             })()
         return () => { if (unsubscribe) unsubscribe() }

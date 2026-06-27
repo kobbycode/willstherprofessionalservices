@@ -107,7 +107,6 @@ export default function ProfilePage() {
       const dbInstance = getDb()
       setDb(dbInstance)
     } catch (error) {
-      console.error('Failed to initialize Firebase services:', error)
     }
   }, [])
 
@@ -279,8 +278,6 @@ export default function ProfilePage() {
           firestoreSuccess = true
         } catch (firestoreError) {
           retryCount++
-          console.error(`Firestore update attempt ${retryCount} failed:`, firestoreError)
-
           if (retryCount >= maxRetries) {
             // If all retries fail, show error but don't crash
             toast.error('Profile update failed due to database connection issues. Please try again later.')
@@ -305,11 +302,9 @@ export default function ProfilePage() {
       try {
         await refreshUser()
       } catch (refreshError) {
-        console.error('Failed to refresh user data:', refreshError)
         // This is not critical, so we don't show an error to the user
       }
     } catch (error) {
-      console.error('Error updating profile:', error)
       const err: any = error
       const details = [err?.code, err?.message].filter(Boolean).join(' - ')
       toast.error(`Failed to update profile${details ? `: ${details}` : ''}`)
@@ -347,7 +342,6 @@ export default function ProfilePage() {
       setProfileData(prev => ({ ...prev, avatar: previewUrl }))
       toast.success('Image selected. Click "Save Changes" to upload.')
     } catch (error) {
-      console.error('Error preparing avatar preview:', error)
       toast.error('Failed to prepare image preview')
     }
   }
@@ -396,7 +390,6 @@ export default function ProfilePage() {
         confirmPassword: ''
       })
     } catch (error: any) {
-      console.error('Error changing password:', error)
       if (error.code === 'auth/wrong-password') {
         toast.error('Current password is incorrect')
       } else if (error.code === 'auth/weak-password') {
@@ -558,7 +551,6 @@ export default function ProfilePage() {
 
                                 toast.success('Profile picture reset to default')
                               } catch (error) {
-                                console.error('Error resetting profile picture:', error)
                                 toast.error('Failed to reset profile picture')
                               }
                             }}

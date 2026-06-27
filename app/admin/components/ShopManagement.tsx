@@ -72,7 +72,6 @@ export default function ShopManagement() {
             setProducts(productsData)
             setIsLoading(false)
         }, (err) => {
-            console.error("Error fetching products:", err)
             toast.error("Failed to load products")
             setIsLoading(false)
         })

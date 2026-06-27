@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
       fileName 
     })
   } catch (error: any) {
-    console.error('Test upload error:', error)
     return NextResponse.json({ 
       error: 'Upload failed', 
       details: error.message 

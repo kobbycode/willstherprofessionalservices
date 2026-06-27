@@ -90,7 +90,6 @@ export const GalleryConfig = ({ config, onChange, onSave }: GalleryConfigProps) 
                 throw new Error('Upload returned empty URL')
             }
         } catch (error) {
-            console.error('Upload error:', error)
             toast.error('Synchronization failed. Please try again.', { id: toastId })
         } finally {
             setIsUploading(null)

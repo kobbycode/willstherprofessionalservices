@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, savedAt: new Date().toISOString(), data: configData })
   } catch (error) {
-    console.error('Error saving site config:', error)
     return NextResponse.json(
       { error: 'Failed to save configuration' },
       { status: 500 }

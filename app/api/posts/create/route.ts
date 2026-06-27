@@ -49,7 +49,6 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ id: docRef.id })
   } catch (e) {
-    console.error('API route: Failed to create post:', e)
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 }

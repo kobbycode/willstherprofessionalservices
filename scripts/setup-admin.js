@@ -23,17 +23,12 @@ const db = getFirestore(app);
 
 async function setupAdmin() {
   try {
-    // Create admin user
     const adminEmail = 'admin@willsther.com';
-    const adminPassword = 'admin123'; // Change this to a secure password
+    const adminPassword = 'admin123';
     
-    console.log('Creating admin user...');
     const userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
     const user = userCredential.user;
     
-    console.log('Admin user created successfully:', user.uid);
-    
-    // Create user document in Firestore
     await setDoc(doc(db, 'users', user.uid), {
       name: 'Admin User',
       email: adminEmail,
@@ -56,15 +51,8 @@ async function setupAdmin() {
       updatedAt: new Date()
     });
     
-    console.log('Admin user document created in Firestore');
-    console.log('Setup complete! You can now login with:');
-    console.log('Email:', adminEmail);
-    console.log('Password:', adminPassword);
-    
   } catch (error) {
-    console.error('Error setting up admin:', error);
     if (error.code === 'auth/email-already-in-use') {
-      console.log('Admin user already exists');
     }
   }
 }

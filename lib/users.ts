@@ -55,7 +55,6 @@ export async function fetchUsers(): Promise<User[]> {
       }
     })
   } catch (error) {
-    console.error('Error fetching users:', error)
     return []
   }
 }
@@ -85,7 +84,6 @@ export async function fetchUserById(id: string): Promise<User | null> {
       permissions: data.permissions || []
     }
   } catch (error) {
-    console.error('Error fetching user:', error)
     return null
   }
 }
@@ -143,7 +141,6 @@ export async function createUserWithAuth(userData: NewUserInput): Promise<string
 
     return docRef.id
   } catch (error) {
-    console.error('Error creating user with auth:', error)
     return null
   }
 }
@@ -173,7 +170,6 @@ export async function createUser(userData: NewUserInput): Promise<string | null>
 
     return docRef.id
   } catch (error) {
-    console.error('Error creating user:', error)
     return null
   }
 }
@@ -189,7 +185,6 @@ export async function updateUser(id: string, userData: Partial<NewUserInput>): P
     })
     return true
   } catch (error) {
-    console.error('Error updating user:', error)
     return false
   }
 }
@@ -202,7 +197,6 @@ export async function deleteUser(id: string): Promise<boolean> {
     await deleteDoc(userRef)
     return true
   } catch (error) {
-    console.error('Error deleting user:', error)
     return false
   }
 }
@@ -218,7 +212,6 @@ export async function updateUserStatus(id: string, status: 'active' | 'inactive'
     })
     return true
   } catch (error) {
-    console.error('Error updating user status:', error)
     return false
   }
 }
@@ -234,7 +227,6 @@ export async function updateUserRole(id: string, role: 'super_admin' | 'admin' |
     })
     return true
   } catch (error) {
-    console.error('Error updating user role:', error)
     return false
   }
 }
@@ -261,7 +253,6 @@ export async function getUserStats(): Promise<{
       users: users.filter(u => u.role === 'user').length
     }
   } catch (error) {
-    console.error('Error getting user stats:', error)
     return {
       total: 0,
       active: 0,
@@ -314,6 +305,5 @@ export async function seedInitialUsers(): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('Error seeding initial users:', error)
   }
 }

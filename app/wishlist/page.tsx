@@ -4,80 +4,64 @@ import ProductCard from '@/components/ProductCard'
 import { useShop } from '@/context/ShopContext'
 import { useSiteConfig } from '@/lib/site-config'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, ShoppingBag, ArrowLeft, Trash2 } from 'lucide-react'
+import { Heart, ShoppingBag, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default function WishlistPage() {
-    const { wishlist, clearCart } = useShop() // wishlist is products
+    const { wishlist } = useShop()
     const { config } = useSiteConfig()
 
     return (
-        <main className="min-h-screen bg-white flex flex-col pt-[56px] md:pt-[118px]">
+        <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
 
-            {/* Premium Hero Section */}
-            <div className="relative bg-white text-secondary-900 py-14 md:py-20 px-4 overflow-hidden border-b border-gray-100">
-                {/* Background animations */}
-                <div className="absolute inset-0">
-                    <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary-50 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse" />
-                    <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-secondary-50 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse delay-700" />
-                </div>
-
-                <div className="relative container mx-auto text-center max-w-4xl">
+            {/* Hero */}
+            <div className="bg-white border-b border-[#E2E8F0] py-10 md:py-14">
+                <div className="container-custom px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-4 md:mb-6 text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        className="text-left"
                     >
-                        <Heart size={12} fill="currentColor" className="text-primary-500" />
-                        <span>My Favorites</span>
+                        <span className="text-[#2563EB] font-semibold tracking-[0.2em] text-xs mb-2 block">
+                            <Heart className="w-3 h-3 inline mr-1" fill="currentColor" />
+                            FAVORITES
+                        </span>
+                        <h1 className="text-xl md:text-3xl font-bold text-[#0F172A] mb-2 tracking-tight">
+                            Your Saved <span className="text-[#2563EB]">Items</span>
+                        </h1>
+                        <p className="text-[#64748B] text-sm max-w-lg leading-relaxed">
+                            {wishlist.length > 0
+                                ? `You have ${wishlist.length} item${wishlist.length === 1 ? '' : 's'} saved for later.`
+                                : 'Products you love will appear here for easy access.'}
+                        </p>
                     </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-xl md:text-4xl lg:text-5xl font-semibold mb-4 md:mb-6 tracking-tight text-secondary-900"
-                    >
-                        Your Curated <span className="text-primary-600 font-bold">Collection</span>
-                    </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-sm md:text-base text-secondary-600 max-w-xl mx-auto leading-relaxed"
-                    >
-                        {wishlist.length > 0
-                            ? `You have ${wishlist.length} premium item${wishlist.length === 1 ? '' : 's'} saved for later.`
-                            : 'Save the products you love and they will appear here for easy access.'}
-                    </motion.p>
                 </div>
             </div>
 
-            <div className="flex-grow py-8 md:py-12">
-                <div className="container-custom">
+            <div className="py-8 md:py-10">
+                <div className="container-custom px-4">
                     <AnimatePresence mode="wait">
                         {wishlist.length === 0 ? (
                             <motion.div
                                 key="empty"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="max-w-md mx-auto text-center py-12 md:py-16 px-4 md:px-8 bg-white rounded-2xl shadow-sm border border-gray-100"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="max-w-md mx-auto text-center py-12 md:py-16 px-4 bg-white shadow-sm border border-[#E2E8F0]"
                             >
-                                <div className="w-14 h-14 md:w-16 md:h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6 shadow-inner">
-                                    <Heart size={32} className="text-red-400" />
+                                <div className="w-14 h-14 bg-[#F1F5F9] flex items-center justify-center mx-auto mb-4">
+                                    <Heart size={24} className="text-[#64748B]" />
                                 </div>
-                                <h2 className="text-base md:text-xl font-semibold text-gray-900 mb-3">No favorites yet</h2>
-                                <p className="text-gray-500 mb-6 md:mb-8 text-sm leading-relaxed">
-                                    Browse our shop and tap the heart icon to start building your personal collection of professional supplies.
+                                <h2 className="text-base font-bold text-[#0F172A] mb-2">Your wishlist is empty</h2>
+                                <p className="text-[#64748B] text-xs mb-6">
+                                    Browse our shop and tap the heart icon to save products you love.
                                 </p>
                                 <Link
                                     href="/shop"
-                                    className="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-purple-600 text-white text-sm font-semibold uppercase tracking-wider rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/10 active:scale-95 group"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white text-xs font-semibold uppercase tracking-wider transition-all"
                                 >
-                                    <ShoppingBag size={16} className="group-hover:animate-bounce" />
-                                    <span>Start Shopping</span>
+                                    <ShoppingBag size={14} />
+                                    <span>Browse Shop</span>
                                 </Link>
                             </motion.div>
                         ) : (
@@ -87,21 +71,21 @@ export default function WishlistPage() {
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                             >
-                                <div className="flex items-center justify-between mb-8">
-                                    <h2 className="text-sm md:text-lg font-semibold text-gray-900 flex items-center gap-2 md:gap-3">
-                                        <div className="w-1 h-6 bg-red-500 rounded-full" />
-                                        Saved Items
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
+                                        <span className="w-0.5 h-4 bg-[#2563EB]" />
+                                        Saved Items ({wishlist.length})
                                     </h2>
                                     <Link
                                         href="/shop"
-                                        className="text-xs md:text-[13px] font-semibold text-purple-600 uppercase tracking-wider hover:text-purple-700 inline-flex py-2.5 items-center gap-2 group"
+                                        className="text-xs font-semibold text-[#2563EB] hover:text-[#1d4ed8] uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
                                     >
-                                        <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                                        <ArrowLeft size={12} />
                                         Continue Shopping
                                     </Link>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
                                     {wishlist.map((product) => (
                                         <ProductCard
                                             key={product.id}

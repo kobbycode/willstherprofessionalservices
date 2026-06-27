@@ -58,12 +58,9 @@ export default function DebugFirebase() {
         
         // Step 7: Test auth state
         addLog('Testing auth state...')
-        console.log('Firebase App:', app)
-        console.log('Firebase Auth:', auth)
         addLog('✅ Firebase initialization complete!')
         
       } catch (err: any) {
-        console.error('Firebase debug failed:', err)
         setError(err.message)
         addLog(`❌ Error: ${err.message}`)
       }

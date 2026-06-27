@@ -73,7 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
         }
       } catch (error) {
-        console.error('Failed to initialize Firebase in AuthContext:', error)
         setFirebaseReady(false)
         setLoading(false)
       }
@@ -159,13 +158,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return defaultUser
       }
     } catch (error) {
-      console.error('Error loading user data:', error)
-      console.error('Error details:', {
-        code: error instanceof Error ? error.message : 'Unknown error',
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : 'No stack trace'
-      })
-
       // If it's a timeout or connection error, return a basic user object
       if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('400'))) {
         return {
@@ -206,7 +198,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null)
         }
       } catch (error) {
-        console.error('AuthContext: Error in auth state change:', error)
         setUser(null)
       } finally {
         setLoading(false)
@@ -222,7 +213,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signOut(auth)
       setUser(null)
     } catch (error) {
-      console.error('Error signing out:', error)
     }
   }
 
@@ -255,7 +245,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null
       }
     } catch (error) {
-      console.error('Error refreshing user:', error)
       setUser(null)
       return null
     }

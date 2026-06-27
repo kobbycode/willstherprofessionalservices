@@ -87,7 +87,6 @@ export default function AnalyticsPage() {
 
       // Add a timeout to prevent hanging
       const timeoutId = setTimeout(() => {
-        console.warn('Analytics loading timeout - setting default data')
         const defaultAnalytics: AnalyticsData = {
           blogStats: {
             totalPosts: 0,
@@ -134,28 +133,24 @@ export default function AnalyticsPage() {
         try {
           posts = await fetchPosts(false) // Get all posts including drafts
         } catch (error) {
-          console.error('Error loading posts:', error)
           posts = []
         }
 
         try {
           categories = await fetchCategories()
         } catch (error) {
-          console.error('Error loading categories:', error)
           categories = []
         }
 
         try {
           users = await fetchUsers()
         } catch (error) {
-          console.error('Error loading users:', error)
           users = []
         }
 
         try {
           userStats = await getUserStats()
         } catch (error) {
-          console.error('Error loading user stats:', error)
           userStats = { total: 0, active: 0, inactive: 0, pending: 0, admins: 0, editors: 0, users: 0 }
         }
 
@@ -248,7 +243,6 @@ export default function AnalyticsPage() {
         clearTimeout(timeoutId) // Clear the timeout
         setAnalytics(analyticsData)
       } catch (error) {
-        console.error('Error loading analytics:', error)
         clearTimeout(timeoutId) // Clear the timeout
         // Set default analytics data even if there's an error
         const defaultAnalytics: AnalyticsData = {

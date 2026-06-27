@@ -38,7 +38,6 @@ export function getFirebaseApp(): FirebaseApp {
       try {
         app = initializeApp(firebaseConfig)
       } catch (error) {
-        console.error('Failed to initialize Firebase app:', error)
         throw error
       }
     }
@@ -56,7 +55,6 @@ export function getDb(): Firestore {
       const firebaseApp = getFirebaseApp()
       db = getFirestore(firebaseApp)
     } catch (error) {
-      console.error('Failed to initialize Firestore:', error)
       throw error
     }
   }
@@ -69,7 +67,6 @@ export function getStorageClient(): FirebaseStorage {
       const firebaseApp = getFirebaseApp()
       storage = getStorage(firebaseApp)
     } catch (error) {
-      console.error('Failed to initialize Firebase Storage:', error)
       throw error
     }
   }
@@ -86,7 +83,6 @@ export function getAuth(): Auth {
       const firebaseApp = getFirebaseApp()
       auth = getFirebaseAuth(firebaseApp)
     } catch (error) {
-      console.error('Failed to initialize Firebase auth:', error)
       throw error
     }
   }
@@ -103,7 +99,6 @@ export async function getClientAnalytics(): Promise<Analytics | undefined> {
       return analytics
     }
   } catch (error) {
-    console.error('Failed to initialize Analytics:', error)
     return undefined
   }
   return undefined
@@ -122,7 +117,6 @@ if (typeof window !== 'undefined') {
     // Also pre-initialize auth to maintain session
     const auth = getAuth()
   } catch (error) {
-    console.error('Failed to pre-initialize Firebase:', error)
   }
 }
 

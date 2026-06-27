@@ -56,7 +56,6 @@ export async function createContactSubmission(input: NewContactInput): Promise<s
     const ref = await addDoc(col, docData)
     return ref.id
   } catch (error) {
-    console.error('Error creating contact submission:', error)
     throw error
   }
 }
@@ -85,7 +84,6 @@ export async function fetchContactSubmissions(take = 100): Promise<ContactSubmis
     })
     return items.slice(0, take)
   } catch (error) {
-    console.error('Error fetching contact submissions:', error)
     throw error
   }
 }
@@ -96,7 +94,6 @@ export async function updateContactStatus(id: string, status: 'new' | 'in_progre
     const ref = doc(db, COLLECTION, id)
     await updateDoc(ref, { status, updatedAt: serverTimestamp() })
   } catch (error) {
-    console.error('Error updating contact status:', error)
     throw error
   }
 }
@@ -107,7 +104,6 @@ export async function updateContact(id: string, input: Partial<NewContactInput>)
     const ref = doc(db, COLLECTION, id)
     await setDoc(ref, { ...input, updatedAt: serverTimestamp() }, { merge: true })
   } catch (error) {
-    console.error('Error updating contact:', error)
     throw error
   }
 }
@@ -118,7 +114,6 @@ export async function deleteContactSubmission(id: string): Promise<void> {
     const ref = doc(db, COLLECTION, id)
     await deleteDoc(ref)
   } catch (error) {
-    console.error('Error deleting contact submission:', error)
     throw error
   }
 }

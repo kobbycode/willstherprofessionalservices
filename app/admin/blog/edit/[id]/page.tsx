@@ -67,7 +67,6 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
       setImageUrl(postData.image || '')
       setImagePreview(postData.image || '')
     } catch (error) {
-      console.error('Failed to load data:', error)
       toast.error('Failed to load post data')
     } finally {
       setIsLoading(false)
@@ -108,7 +107,6 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
       setImagePreview(url)
       toast.success('Image uploaded successfully')
     } catch (error) {
-      console.error('Upload failed:', error)
       toast.error('Failed to upload image')
     } finally {
       setIsUploading(false)
@@ -140,7 +138,6 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
       })
       toast.success('Draft saved successfully')
     } catch (error) {
-      console.error('Save failed:', error)
       toast.error('Failed to save draft')
     } finally {
       setIsSaving(false)
@@ -167,7 +164,6 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
       toast.success('Post published successfully')
       router.push('/admin')
     } catch (error) {
-      console.error('Publish failed:', error)
       toast.error('Failed to publish post')
     } finally {
       setIsPublishing(false)
@@ -188,7 +184,6 @@ export default function EditBlogPost({ params }: { params: { id: string } }) {
       setNewCategory('')
       toast.success('Category added')
     } catch (error) {
-      console.error('Failed to add category:', error)
       toast.error('Failed to add category')
     } finally {
       setIsAddingCategory(false)

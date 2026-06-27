@@ -20,10 +20,7 @@ export default function TestPublishedPosts() {
         const all = await fetchPosts(false, 100)
         setAllPosts(all)
         
-        console.log('Published posts:', published)
-        console.log('All posts:', all)
       } catch (error) {
-        console.error('Error fetching posts:', error)
       } finally {
         setLoading(false)
       }

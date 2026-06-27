@@ -8,10 +8,20 @@ import { notFound } from 'next/navigation'
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { fetchPostById, fetchPosts, type BlogPost } from '@/lib/blog'
 import { formatDateHuman } from '@/lib/date'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
+import { motion } from 'framer-motion'
+import DOMPurify from 'dompurify'
+
+function extractHtmlHeadings(html: string): { title: string; level: number }[] {
+  const headings: { title: string; level: number }[] = []
+  const regex = /<h([2-3])(?:\s[^>]*)?>(.*?)<\/h\1>/gi
+  let match
+  while ((match = regex.exec(html)) !== null) {
+    const level = parseInt(match[1])
+    const title = match[2].replace(/<[^>]*>/g, '').trim()
+    if (title) headings.push({ title, level })
+  }
+  return headings
+}
 
 export default function BlogPostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<BlogPost | null>(null)
@@ -19,14 +29,12 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   const [readingProgress, setReadingProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Memoize the load function to prevent unnecessary re-renders
   const loadPost = useCallback(async () => {
     setIsLoading(true)
     try {
-      // Load post and related posts in parallel for better performance
       const [p, all] = await Promise.all([
         fetchPostById(params.id),
-        fetchPosts(true, 6) // Fetch only 6 related posts instead of 12
+        fetchPosts(true, 6)
       ])
 
       if (!p || p.status !== 'published') {
@@ -35,18 +43,15 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
       }
       setPost(p)
 
-      // Increment view count
       try {
         const { incrementViews } = await import('@/lib/blog')
         await incrementViews(params.id)
       } catch (e) {
-        console.error('Failed to increment views:', e)
+        
       }
 
-      // Filter related posts to only show published ones
       setRelated(all.filter((x) => x.id !== p.id && x.category === p.category && x.status === 'published').slice(0, 3))
     } catch (error) {
-      console.error('Failed to load post:', error)
       notFound()
     } finally {
       setIsLoading(false)
@@ -70,43 +75,56 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
     return () => window.removeEventListener('scroll', update)
   }, [])
 
-  // Memoize table of contents to prevent recalculation
   const tableOfContents = useMemo(() => {
     if (!post?.content) return []
+    const htmlHeadings = extractHtmlHeadings(post.content)
+    if (htmlHeadings.length > 0) return htmlHeadings
     return post.content.split('\n')
-      .map((line, index) => {
+      .map((line) => {
         if (line.startsWith('## ')) {
-          const title = line.replace('## ', '')
-          return { title, index }
+          return { title: line.replace('## ', ''), level: 2 }
         }
         return null
       })
-      .filter(Boolean)
+      .filter(Boolean) as { title: string; level: number }[]
+  }, [post?.content])
+
+  const sanitizedContent = useMemo(() => {
+    if (!post?.content) return ''
+    return DOMPurify.sanitize(post.content, {
+      ALLOWED_TAGS: [
+        'p', 'br', 'b', 'strong', 'i', 'em', 'u', 's', 'strike',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
+        'a', 'img', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+        'span', 'div', 'sub', 'sup', 'del', 'ins', 'mark'
+      ],
+      ALLOWED_ATTR: [
+        'href', 'target', 'rel', 'src', 'alt', 'width', 'height',
+        'class', 'style', 'id', 'title'
+      ]
+    })
   }, [post?.content])
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="pt-20">
-          <div className="container-custom px-4 py-6 md:py-12">
-            <div className="flex flex-col gap-6 md:gap-8">
-              <Skeleton className="h-10 w-48 rounded-xl" />
-                <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium overflow-hidden border border-gray-100">
-                  <Skeleton className="h-48 md:h-[500px] w-full" />
-                  <div className="p-6 md:p-8 space-y-4 md:space-y-6">
-                  <div className="flex gap-4">
-                    <Skeleton className="h-6 w-24 rounded-full" />
-                    <Skeleton className="h-6 w-32 rounded-full" />
-                  </div>
-                  <Skeleton className="h-12 w-3/4 rounded-xl" />
-                  <Skeleton className="h-6 w-1/4 rounded-xl" />
-                  <div className="space-y-4 pt-8">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
+      <div className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
+        <div className="container-custom py-8 md:py-12">
+          <div className="flex flex-col gap-6 md:gap-8 max-w-3xl mx-auto">
+            <Skeleton className="h-8 w-32" />
+            <div className="bg-white shadow-sm border border-[#E2E8F0]">
+              <Skeleton className="h-48 md:h-96 w-full" />
+              <div className="p-5 md:p-8 space-y-4">
+                <div className="flex gap-4">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-4 w-1/4" />
+                <div className="space-y-3 pt-6">
+                  {[...Array(8)].map((_, i) => (
+                    <Skeleton key={i} className={`h-3 ${i % 3 === 0 ? 'w-4/5' : 'w-full'}`} />
+                  ))}
                 </div>
               </div>
             </div>
@@ -119,29 +137,42 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   if (!post) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="pt-20">
-        <div className="bg-primary-900 shadow-premium border-b border-white/10 mt-6 md:mt-8">
-          <div className="container-custom px-4 py-6">
-            <div className="flex items-center justify-between">
-              <Link href="/blog" className="flex items-center space-x-2 text-primary-100 hover:text-accent-500 transition-colors duration-200 group">
-                <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
-                <span className="font-medium text-sm md:text-base">Back to Blog</span>
-              </Link>
-              <div className="flex items-center space-x-4">
-                <button className="flex items-center space-x-2 text-primary-100 hover:text-accent-500 transition-colors duration-200">
-                  <Share2 className="w-4 h-4" />
-                  <span className="text-sm md:text-base font-medium">Share Article</span>
-                </button>
-              </div>
-            </div>
+    <div className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px]">
+
+      {/* Reading Progress Bar */}
+      <div className="fixed top-[56px] md:top-[110px] left-0 w-full h-1 bg-[#E2E8F0] z-50">
+        <div className="bg-[#2563EB] h-full transition-all duration-300" style={{ width: `${readingProgress}%` }} />
+      </div>
+
+      {/* Top Navigation */}
+      <div className="bg-white border-b border-[#E2E8F0]">
+        <div className="container-custom py-3">
+          <div className="flex items-center justify-between">
+            <Link href="/blog" className="inline-flex items-center gap-1.5 text-[#64748B] hover:text-[#2563EB] text-xs font-semibold uppercase tracking-widest transition-colors group">
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Back to Blog
+            </Link>
+            <button className="inline-flex items-center gap-1.5 text-[#64748B] hover:text-[#2563EB] text-xs font-semibold uppercase tracking-widest transition-colors">
+              <Share2 className="w-3.5 h-3.5" />
+              Share
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="container-custom px-4 py-6 md:py-12">
-          <div className="mb-6 md:mb-12">
-            <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium overflow-hidden border border-gray-100">
-              <div className="relative h-48 md:h-96 lg:h-[500px] xl:h-[600px] overflow-hidden">
+      <div className="container-custom py-6 md:py-10">
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 max-w-6xl mx-auto">
+
+          {/* Main Content */}
+          <div className="min-w-0">
+            {/* Featured Image */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white shadow-sm border border-[#E2E8F0] mb-8"
+            >
+              <div className="relative h-48 md:h-[420px] overflow-hidden">
                 <Image
                   src={post.image || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80'}
                   alt={post.title}
@@ -149,117 +180,187 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
                   className="object-cover"
                   priority
                 />
-                <div className="absolute top-6 left-6 z-10">
-                  <span className="bg-primary-900 text-accent-500 px-4 py-1.5 rounded-none text-xs md:text-sm font-bold tracking-wider uppercase shadow-lg">
-                    {post.category}
-                  </span>
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-[#2563EB] text-white px-3 py-1 text-[11px] font-bold tracking-wider uppercase">{post.category}</span>
                 </div>
               </div>
-              <div className="p-4 md:p-10">
-                <div className="flex flex-wrap items-center gap-3 md:gap-4 text-sm md:text-base text-secondary-500 mb-4 md:mb-6">
-                  <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-xs md:text-sm font-bold uppercase tracking-wide">
-                    {post.category}
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
+              <div className="p-5 md:p-8 lg:p-10">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-[#64748B] mb-3">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
                     <span>{formatDateHuman(post.date, 'en-GB')}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4" />
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
                     <span>{post.readTime}</span>
                   </div>
                 </div>
-                <h1 className="text-xl md:text-5xl lg:text-6xl font-extrabold text-secondary-900 mb-6 md:mb-8 leading-tight">
-                  {post.title}
-                </h1>
-                <div className="flex items-center space-x-3 md:space-x-4 text-sm md:text-base text-secondary-500 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-100">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
-                      {post.author.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-bold text-secondary-900">{post.author}</p>
-                      <p className="text-xs md:text-sm">Expert Contributor</p>
-                    </div>
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#0F172A] mb-4 leading-tight">{post.title}</h1>
+                <div className="flex items-center gap-3 pb-4 border-b border-[#E2E8F0]">
+                  <div className="w-9 h-9 bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB] font-bold text-sm">{post.author.charAt(0)}</div>
+                  <div>
+                    <p className="font-semibold text-[#0F172A] text-sm">{post.author}</p>
+                    <p className="text-xs text-[#64748B]">Contributor</p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
+                {(post.tags || []).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {(post.tags || []).map((tag, index) => (
+                      <span key={index} className="bg-[#F1F5F9] text-[#64748B] px-2.5 py-0.5 text-[11px] font-medium">#{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Article Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="bg-white shadow-sm border border-[#E2E8F0] p-5 md:p-8 lg:p-10 mb-8"
+            >
+              <div
+                className="prose prose-base md:prose-lg max-w-none
+                  prose-headings:text-[#0F172A] prose-headings:font-bold prose-headings:tracking-tight
+                  prose-h2:text-xl md:prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+                  prose-h3:text-lg md:prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+                  prose-p:text-[#475569] prose-p:leading-[1.75] prose-p:mb-5
+                  prose-a:text-[#2563EB] prose-a:font-medium prose-a:no-underline hover:prose-a:text-[#1d4ed8] hover:prose-a:underline
+                  prose-strong:text-[#0F172A] prose-strong:font-semibold
+                  prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-1.5 prose-ul:mb-5
+                  prose-ol:list-decimal prose-ol:pl-6 prose-ol:space-y-1.5 prose-ol:mb-5
+                  prose-li:text-[#475569] prose-li:leading-relaxed
+                  prose-blockquote:border-l-4 prose-blockquote:border-[#2563EB] prose-blockquote:bg-[#F8FAFC] prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:not-italic
+                  prose-blockquote:p-4 prose-blockquote:my-6
+                  prose-img:shadow-sm prose-img:my-8 prose-img:mx-auto
+                  prose-hr:border-[#E2E8F0] prose-hr:my-10
+                  prose-code:bg-[#F1F5F9] prose-code:text-[#0F172A] prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-normal
+                  prose-pre:bg-[#1E293B] prose-pre:text-[#E2E8F0] prose-pre:shadow-sm prose-pre:my-6
+                  prose-table:w-full prose-table:border-collapse prose-table:my-8
+                  prose-th:bg-[#F8FAFC] prose-th:text-[#0F172A] prose-th:font-semibold prose-th:px-4 prose-th:py-3 prose-th:border prose-th:border-[#E2E8F0]
+                  prose-td:px-4 prose-td:py-3 prose-td:border prose-td:border-[#E2E8F0] prose-td:text-[#475569]"
+              >
+                <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+              </div>
+            </motion.div>
+
+            {/* Tags */}
+            {(post.tags || []).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="bg-white shadow-sm border border-[#E2E8F0] p-4 md:p-6 mb-8"
+              >
+                <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-1.5">
                   {(post.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-secondary-50 text-secondary-600 px-4 py-1.5 rounded-lg text-sm md:text-base font-medium border border-gray-100">#{tag}</span>
+                    <span key={index} className="bg-[#F1F5F9] text-[#64748B] px-2.5 py-1 text-[11px] font-medium">#{tag}</span>
                   ))}
                 </div>
-              </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="hidden lg:block">
+            <div className="sticky top-[130px] space-y-6">
+              {/* Table of Contents */}
+              {tableOfContents.length > 0 && (
+                <div className="bg-white shadow-sm border border-[#E2E8F0] p-4">
+                  <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-[#2563EB]" />
+                    In this article
+                  </h3>
+                  <nav className="space-y-1">
+                    {tableOfContents.map((item, index) => (
+                      <div
+                        key={index}
+                        className={`text-xs ${item.level === 3 ? 'pl-4' : ''}`}
+                      >
+                        <span className="block text-[#64748B] py-1 border-l-2 border-[#E2E8F0] pl-3 cursor-default">
+                          {item.title}
+                        </span>
+                      </div>
+                    ))}
+                  </nav>
+                </div>
+              )}
+
+              {/* Related Posts */}
+              {related.length > 0 && (
+                <div className="bg-white shadow-sm border border-[#E2E8F0] p-4">
+                  <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-3">Related Articles</h3>
+                  <div className="space-y-3">
+                    {related.map((rp) => (
+                      <Link key={rp.id} href={`/blog/${rp.id}`} className="group block p-3 bg-[#F8FAFC] hover:bg-[#F1F5F9] transition-colors border border-[#E2E8F0]">
+                        <h4 className="text-xs font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mb-1 line-clamp-2">{rp.title}</h4>
+                        <p className="text-[11px] text-[#64748B] line-clamp-2 mb-2">{rp.excerpt}</p>
+                        <div className="flex items-center gap-2 text-[10px] text-[#94A3B8]">
+                          <div className="flex items-center gap-0.5">
+                            <Calendar className="w-2.5 h-2.5" />
+                            <span>{formatDateHuman(rp.date, 'en-GB')}</span>
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            <Clock className="w-2.5 h-2.5" />
+                            <span>{rp.readTime}</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium p-4 md:p-12 mb-6 md:mb-12 border border-gray-100">
-            <div className="mb-8 md:mb-10 p-4 md:p-6 bg-primary-50/50 rounded-2xl border border-primary-100 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100/50 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover:scale-110"></div>
-              <h3 className="text-base md:text-xl font-bold text-primary-900 mb-3 md:mb-4 flex items-center relative z-10">
-                <BookOpen className="w-5 h-5 md:w-6 md:h-6 mr-3 text-accent-600" />
-                Core Topics in this Article
-              </h3>
-              <div className="space-y-3 relative z-10">
-                {tableOfContents.map((item, index) => (
-                  <div key={index} className="ml-2 group/item">
-                    <a href={`#section-${item?.index || index}`} className="text-secondary-700 hover:text-primary-900 text-sm md:text-base transition-all duration-200 flex items-center">
-                      <span className="w-1.5 h-1.5 bg-accent-500 rounded-full mr-3 opacity-0 group-hover/item:opacity-100 transition-opacity"></span>
-                      {item?.title || ''}
-                    </a>
-                  </div>
+        </div>
+
+        {/* Related Posts Grid (bottom) */}
+        {related.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-10 max-w-6xl mx-auto"
+          >
+            <div className="bg-white shadow-sm border border-[#E2E8F0] p-5 md:p-8">
+              <span className="text-[#2563EB] font-semibold tracking-[0.2em] text-xs mb-2 block">RELATED</span>
+              <h3 className="text-lg md:text-2xl font-bold text-[#0F172A] mb-5">More in {post.category}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {related.map((rp) => (
+                  <Link key={rp.id} href={`/blog/${rp.id}`} className="group block bg-[#F8FAFC] border border-[#E2E8F0] p-4 hover:bg-[#F1F5F9] transition-colors">
+                    <span className="text-[#2563EB] text-[11px] font-semibold tracking-wider uppercase">{rp.category}</span>
+                    <h4 className="text-sm font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mt-1 mb-2 line-clamp-2">{rp.title}</h4>
+                    <p className="text-xs text-[#64748B] line-clamp-2 mb-3">{rp.excerpt}</p>
+                    <div className="flex items-center gap-3 text-[11px] text-[#94A3B8]">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDateHuman(rp.date, 'en-GB')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{rp.readTime}</span>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
+          </motion.div>
+        )}
 
-            <div className="prose prose-lg max-w-none prose-headings:text-primary-900 prose-headings:font-bold prose-a:text-accent-600 hover:prose-a:text-accent-700 prose-img:rounded-3xl prose-img:shadow-premium text-secondary-700 leading-relaxed">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
-                {post.content}
-              </ReactMarkdown>
-            </div>
-          </div>
-
-          <div className="fixed bottom-0 left-0 w-full h-1.5 bg-gray-100 z-50">
-            <div className="bg-accent-500 h-full transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" style={{ width: `${readingProgress}%` }}></div>
-          </div>
-
-          <div className="flex items-center space-x-2 text-sm md:text-base text-secondary-500 mb-4 md:mb-6">
-            <BookOpen className="w-4 h-4" />
-            <span>Estimated reading time: {post.readTime}</span>
-          </div>
-
-          <div className="bg-white rounded-2xl md:rounded-3xl shadow-premium p-6 md:p-12 mb-8 md:mb-12 border border-gray-100">
-            <h3 className="text-xl md:text-3xl font-bold text-secondary-900 mb-6 md:mb-8">Related Strategy & Insights</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {related.map((relatedPost) => (
-                <Link key={relatedPost.id} href={`/blog/${relatedPost.id}`} className="group block">
-                  <div className="bg-primary-50/30 rounded-2xl p-4 md:p-6 hover:bg-primary-50 transition-all duration-500 border border-transparent hover:border-primary-100 hover:shadow-premium group">
-                    <h4 className="text-base md:text-xl font-bold text-secondary-900 group-hover:text-primary-900 transition-colors duration-200 mb-2 md:mb-3 line-clamp-2">{relatedPost.title}</h4>
-                    <p className="text-sm md:text-base text-secondary-600 line-clamp-3 mb-3 md:mb-4">{relatedPost.excerpt}</p>
-                    <div className="flex items-center space-x-3 md:space-x-4 text-xs md:text-sm text-secondary-500">
-                      <div className="flex items-center">
-                        <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                        <span>{formatDateHuman(relatedPost.date, 'en-GB')}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="w-3.5 h-3.5 mr-1.5" />
-                        <span>{relatedPost.readTime}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-6 md:bottom-8 right-6 md:right-8 bg-primary-900 text-accent-500 p-3 md:p-4 rounded-full shadow-premium hover:shadow-premium-hover transition-all duration-300 hover:scale-110 z-40 border border-white/10 active:scale-90"
-            aria-label="Back to top"
-          >
-            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 rotate-90" />
-          </button>
-        </div>
       </div>
+
+      {/* Back to Top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-6 right-6 bg-[#0F172A] text-white p-3 shadow-sm hover:shadow-md transition-all hover:scale-105 z-40"
+        aria-label="Back to top"
+      >
+        <ArrowLeft className="w-4 h-4 rotate-90" />
+      </button>
     </div>
   )
 }

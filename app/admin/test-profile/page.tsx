@@ -25,12 +25,6 @@ export default function TestProfilePage() {
         setDb(dbInstance)
         setStorage(storageInstance)
         
-        console.log('Firebase services initialized:', {
-          auth: !!authInstance,
-          db: !!dbInstance,
-          storage: !!storageInstance
-        })
-        
         // Run debug function
         debugFirebaseConfig()
         
@@ -41,7 +35,6 @@ export default function TestProfilePage() {
           }
         }
       } catch (error) {
-        console.error('Firebase init error:', error)
       } finally {
         setLoading(false)
       }
@@ -56,14 +49,9 @@ export default function TestProfilePage() {
 
     setUploadStatus('Uploading...')
     try {
-      console.log('Test upload starting...')
-      console.log('File:', file.name, file.size, file.type)
-      
       const url = await uploadImage(file, 'test-uploads')
       setUploadStatus(`Upload successful: ${url}`)
-      console.log('Test upload completed:', url)
     } catch (error: any) {
-      console.error('Test upload failed:', error)
       setUploadStatus(`Upload failed: ${error.code || error.message || error}`)
     }
   }

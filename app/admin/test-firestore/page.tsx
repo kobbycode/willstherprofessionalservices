@@ -85,7 +85,6 @@ export default function TestFirestorePage() {
         addLog('All Firestore tests passed!')
 
       } catch (error) {
-        console.error('Firestore test error:', error)
         addLog(`Error: ${error}`)
         setTestStatus('error')
       }

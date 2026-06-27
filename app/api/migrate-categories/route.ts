@@ -103,7 +103,6 @@ export async function GET() {
         })
 
     } catch (error: any) {
-        console.error('Migration failed:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }

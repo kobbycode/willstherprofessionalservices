@@ -30,7 +30,6 @@ export default function TestStoragePage() {
       const url = await uploadImage(file, 'test-uploads')
       setResult(url)
     } catch (err) {
-      console.error('Upload failed:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setUploading(false)

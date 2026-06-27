@@ -25,7 +25,6 @@ export default function TestStoragePage() {
       setImageUrl(url)
       setUploadStatus('Upload successful!')
     } catch (error) {
-      console.error('Storage test failed:', error)
       setUploadStatus(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }

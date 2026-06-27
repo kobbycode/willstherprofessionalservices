@@ -10,8 +10,9 @@
     "test:image-upload": "node scripts/test-image-upload.js"
   },
   "dependencies": {
-    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/typography": "^0.5.20",
     "critters": "^0.0.23",
+    "dompurify": "^3.4.11",
     "dotenv": "^17.2.3",
     "firebase": "^12.1.0",
     "firebase-admin": "^13.4.0",

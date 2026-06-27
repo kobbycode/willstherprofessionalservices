@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { getDb } from '@/lib/firebase'
-import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore'
 import ProductCard from '@/components/ProductCard'
 import { Product } from '@/types/product'
 import { useSiteConfig } from '@/lib/site-config'
-import { Search, ShoppingBag, Filter } from 'lucide-react'
+import { Search, ShoppingBag, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import Skeleton from '@/components/Skeleton'
+import Link from 'next/link'
+
+const PRODUCTS_PER_PAGE = 12
 
 export default function ShopPage() {
     const [products, setProducts] = useState<Product[]>([])
@@ -17,6 +20,7 @@ export default function ShopPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('All')
     const [hideOutOfStock, setHideOutOfStock] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
     const { config } = useSiteConfig()
 
     const categories = ['All', ...Array.from(new Set(products.map(p => p.category || 'General')))]
@@ -27,8 +31,7 @@ export default function ShopPage() {
 
         const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(100))
 
-        // Real-time listener for products
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        getDocs(q).then((snapshot) => {
             const productsData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -36,12 +39,9 @@ export default function ShopPage() {
             setProducts(productsData)
             setFilteredProducts(productsData)
             setIsLoading(false)
-        }, (err) => {
-            console.error("Error fetching products:", err)
+        }).catch((err) => {
             setIsLoading(false)
         })
-
-        return () => unsubscribe()
     }, [])
 
     useEffect(() => {
@@ -63,142 +63,166 @@ export default function ShopPage() {
         }
 
         setFilteredProducts(result)
+        setCurrentPage(1)
     }, [searchTerm, selectedCategory, hideOutOfStock, products])
 
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE))
+    const pageProducts = useMemo(() => {
+        const start = (currentPage - 1) * PRODUCTS_PER_PAGE
+        return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE)
+    }, [filteredProducts, currentPage])
+
     return (
-        <main className="min-h-screen bg-[#fafafa] pt-[56px] md:pt-[118px]">
+        <main className="min-h-screen bg-[#F8FAFC] pt-[56px] md:pt-[110px] pb-10 md:pb-16">
 
-            {/* Hero Section */}
-            <div             className="relative bg-white text-secondary-900 pt-14 pb-14 md:pt-20 md:pb-20 px-4 overflow-hidden border-b border-gray-100">
-                {/* Dynamic Background Elements */}
-                <div className="absolute inset-0">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-100/50 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary-100/50 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse delay-700" />
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02]" />
-                </div>
-
-                <div className="relative container mx-auto text-center max-w-4xl">
+            {/* HERO HEADER */}
+            <section className="bg-[#F8FAFC] py-6 md:py-8">
+                <div className="container-custom">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 mb-4 md:mb-6 text-xs sm:text-[12px] font-bold text-primary-600 uppercase tracking-widest shadow-sm"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7 }}
                     >
-                        <ShoppingBag size={12} />
-                        <span>Professional Cleaning Supplies</span>
+                        <span className="text-[#2563EB] font-semibold tracking-[0.2em] text-[11px] mb-2 block">
+                            SHOP COLLECTION
+                        </span>
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0F172A] tracking-tight mb-2">
+                            Our Premium <span className="text-[#2563EB]">Shop</span>
+                        </h1>
+                        <p className="text-[#64748B] text-sm max-w-xl leading-relaxed">
+                            Equip yourself with the same high-performance products our professionals use.
+                            Quality guaranteed for every surface.
+                        </p>
                     </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xl md:text-3xl lg:text-4xl font-semibold mb-4 md:mb-6 tracking-tight text-secondary-900"
-                    >
-                        Our Premium <span className="text-primary-600 font-bold">Shop</span>
-                    </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-sm md:text-base text-secondary-600 max-w-xl mx-auto leading-relaxed"
-                    >
-                        Equip yourself with the same high-performance products our professionals use.
-                        Quality guaranteed for every surface.
-                    </motion.p>
                 </div>
-            </div>
+            </section>
 
-            <div className="container mx-auto px-4 -mt-12 relative z-10 pb-24">
+            <div className="container-custom pb-16">
                 {/* Search & Filter Bar */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-white rounded-2xl shadow-xl shadow-secondary-900/5 border border-gray-100 p-4 md:p-5 mb-7 md:mb-10"
+                    className="bg-white shadow-sm border border-[#E2E8F0] p-3 md:p-4 mb-6"
                 >
-                    <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-center">
+                    <div className="flex flex-col lg:flex-row gap-2 items-center">
                         <div className="relative flex-1 w-full">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors" size={16} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B] transition-colors" size={14} />
                             <input
                                 type="text"
                                 placeholder="Search our catalog..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50/50 border-none focus:ring-1 focus:ring-purple-200 outline-none transition-all text-sm text-gray-900 font-medium placeholder:text-gray-400"
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-[#E2E8F0] text-sm text-[#0F172A] font-medium placeholder:text-[#64748B] outline-none transition-all focus:border-[#2563EB]"
                             />
                         </div>
 
-                        <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar py-1">
+                        <div className="flex items-center gap-1.5 w-full lg:w-auto overflow-x-auto no-scrollbar py-1">
                             {categories.map(category => (
                                 <button
                                     key={category}
                                     onClick={() => setSelectedCategory(category)}
-                                    className={`
-                                        px-4 py-2.5 sm:py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-sm sm:text-[13px] uppercase tracking-wider
+                                    className={`px-3 py-1.5 whitespace-nowrap transition-all font-semibold text-xs uppercase tracking-wider
                                         ${selectedCategory === category
-                                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-200'
-                                            : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'}
+                                            ? 'bg-[#2563EB] text-white'
+                                            : 'bg-white text-[#64748B] hover:bg-[#F1F5F9] border border-[#E2E8F0]'}
                                     `}
                                 >
                                     {category}
                                 </button>
                             ))}
-                            <div className="w-px h-6 bg-gray-200 mx-1" />
+                            <div className="w-px h-5 bg-[#E2E8F0] mx-1" />
                             <button
                                 onClick={() => setHideOutOfStock(v => !v)}
-                                className={`px-4 py-2.5 sm:py-2 rounded-lg whitespace-nowrap transition-all font-semibold text-sm sm:text-[13px] uppercase tracking-wider flex items-center gap-2 ${hideOutOfStock
-                                    ? 'bg-red-600 text-white shadow-lg shadow-red-200'
-                                    : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'}`}
+                                className={`px-3 py-1.5 whitespace-nowrap transition-all font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 ${hideOutOfStock
+                                    ? 'bg-red-500 text-white'
+                                    : 'bg-white text-[#64748B] hover:bg-[#F1F5F9] border border-[#E2E8F0]'}`}
                             >
-                                <Filter size={14} />
+                                <Filter size={12} />
                                 {hideOutOfStock ? 'In Stock Only' : 'Show All'}
                             </button>
                         </div>
                     </div>
                 </motion.div>
 
-                {/* Results Header */}
-                <div className="flex justify-between items-center mb-6 px-2">
-                    <h2 className="text-xs sm:text-[12px] font-semibold text-gray-400 uppercase tracking-[0.2em]">
+                {/* Results Count */}
+                <div className="flex justify-between items-center mb-4 px-1">
+                    <h2 className="text-[11px] font-semibold text-[#64748B] uppercase tracking-[0.2em]">
                         Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
                     </h2>
-                    <div className="h-px flex-1 bg-gray-100 ml-6 hidden md:block" />
+                    <div className="h-px flex-1 bg-[#E2E8F0] ml-4 hidden md:block" />
                 </div>
 
                 {/* Product Grid */}
                 {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {[...Array(8)].map((_, i) => (
-                            <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 p-0">
-                                <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                                <div className="p-4 md:p-5 space-y-4">
-                                    <Skeleton className="h-4 w-3/4" />
-                                    <Skeleton className="h-6 w-1/3" />
-                                    <div className="flex gap-2 pt-2">
-                                        <Skeleton className="flex-1 h-10 rounded-lg" />
-                                        <Skeleton className="w-10 h-10 rounded-lg" />
+                            <div key={i} className="bg-white border border-[#E2E8F0] p-0">
+                                <Skeleton className="aspect-[4/3] w-full" />
+                                <div className="p-3 space-y-3">
+                                    <Skeleton className="h-3 w-3/4" />
+                                    <Skeleton className="h-5 w-1/3" />
+                                    <div className="flex gap-2 pt-1">
+                                        <Skeleton className="flex-1 h-8" />
+                                        <Skeleton className="w-8 h-8" />
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                        {filteredProducts.map(product => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                contactPhone={config.contactPhone}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-14 md:py-20 bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm border-dashed">
-                        <div className="w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                            <ShoppingBag className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {pageProducts.map(product => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                    contactPhone={config.contactPhone}
+                                />
+                            ))}
                         </div>
-                        <h3 className="text-sm md:text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-                        <p className="text-sm text-gray-500 max-w-xs mx-auto mb-4 md:mb-6">
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-1.5 mt-8">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-white border border-[#E2E8F0] text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]"
+                                >
+                                    <ChevronLeft size={12} />
+                                    Prev
+                                </button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`w-8 h-8 text-[11px] font-semibold transition-all border ${page === currentPage
+                                            ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                                            : 'bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]'
+                                            }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-white border border-[#E2E8F0] text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB]"
+                                >
+                                    Next
+                                    <ChevronRight size={12} />
+                                </button>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="text-center py-10 md:py-14 bg-white border border-[#E2E8F0] shadow-sm">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-[#F1F5F9] flex items-center justify-center mx-auto mb-2">
+                            <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-[#64748B]" />
+                        </div>
+                        <h3 className="text-sm font-bold text-[#0F172A] mb-1">No products found</h3>
+                        <p className="text-xs text-[#64748B] max-w-xs mx-auto mb-3">
                             {searchTerm
                                 ? `We couldn't find any products matching "${searchTerm}"`
                                 : "Check back later for new professional supplies!"}
@@ -206,7 +230,7 @@ export default function ShopPage() {
                         {searchTerm && (
                             <button
                                 onClick={() => setSearchTerm('')}
-                                className="text-purple-600 text-sm font-semibold hover:underline py-2.5"
+                                className="text-[#2563EB] text-xs font-semibold py-2"
                             >
                                 Clear Search
                             </button>

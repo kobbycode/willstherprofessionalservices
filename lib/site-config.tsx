@@ -344,7 +344,7 @@ function deepMerge(defaults: any, override: any): any {
 
 import { useEffect, useState, useCallback, useMemo, createContext, useContext, useRef } from 'react'
 import { getDb } from './firebase'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 
 interface SiteContextType {
 	config: SiteConfig
@@ -365,39 +365,35 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const db = getDb()
-		let seeded = false
-		const unsub = onSnapshot(doc(db, 'config', 'site'), (snap) => {
+		const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
+
+		getDoc(doc(db, 'config', 'site')).then((snap) => {
 			if (snap.exists()) {
 				const remoteData = snap.data() as Partial<SiteConfig>
-				const arrayKeys: (keyof SiteConfig)[] = ['heroSlides', 'gallery', 'testimonials', 'services']
 
-				// Seed empty arrays from defaults on first load only
-				if (!seeded) {
-					seeded = true
-					let needsSeed = false
-					const seedPayload: Record<string, any> = {}
-					for (const key of arrayKeys) {
-						if (
-							Array.isArray(remoteData[key]) &&
-							remoteData[key]!.length === 0 &&
-							Array.isArray(defaultSiteConfig[key]) &&
-							(defaultSiteConfig[key] as any[]).length > 0
-						) {
-							seedPayload[key] = defaultSiteConfig[key]
-							needsSeed = true
-						}
-					}
-					if (needsSeed) {
-						fetch('/api/config/save', {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({ _merge: true, ...seedPayload }),
-						}).catch(() => {})
+				// Seed empty arrays from defaults on first load
+				let needsSeed = false
+				const seedPayload: Record<string, any> = {}
+				for (const key of arrayKeys) {
+					if (
+						Array.isArray(remoteData[key]) &&
+						remoteData[key]!.length === 0 &&
+						Array.isArray(defaultSiteConfig[key]) &&
+						(defaultSiteConfig[key] as any[]).length > 0
+					) {
+						seedPayload[key] = defaultSiteConfig[key]
+						needsSeed = true
 					}
 				}
+				if (needsSeed) {
+					fetch('/api/config/save', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ _merge: true, ...seedPayload }),
+					}).catch(() => {})
+				}
 
-			setConfigState((prev) => {
-				// Strip empty arrays from remote so deepMerge doesn't override defaults
+				setConfigState((prev) => {
 					const cleanRemote = { ...remoteData }
 					for (const key of arrayKeys) {
 						if (Array.isArray(cleanRemote[key]) && cleanRemote[key]!.length === 0) {
@@ -418,8 +414,9 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 				})
 			}
 			setIsLoaded(true)
+		}).catch(() => {
+			setIsLoaded(true)
 		})
-		return () => unsub()
 	}, [])
 
 	const setConfig = useCallback((next: SiteConfig | ((prev: SiteConfig) => SiteConfig)) => {

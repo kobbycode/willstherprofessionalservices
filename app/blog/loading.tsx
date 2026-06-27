@@ -6,7 +6,7 @@ export default function Loading() {
             <div className="pt-20">
                 {/* Blog Header Skeleton */}
                 <div className="bg-white border-b border-gray-100 mt-8">
-                    <div className="container-custom px-4 py-8">
+                    <div className="container-custom py-8">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <Skeleton className="h-4 w-32" />
                             <Skeleton className="h-10 w-64 md:w-80" />
@@ -14,7 +14,7 @@ export default function Loading() {
                     </div>
                 </div>
 
-                <div className="container-custom px-4 py-8 md:py-12">
+                <div className="container-custom py-8 md:py-12">
                     {/* Search and Categories Skeleton */}
                     <div className="mb-8 md:mb-12">
                         <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-between">

@@ -8,44 +8,41 @@ import Image from 'next/image'
 const Clients = () => {
   const { config } = useSiteConfig()
   const clients = Array.isArray(config.clients) ? config.clients : []
-  return (
-    <section className="section-padding relative overflow-hidden bg-white">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-100 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100 rounded-full blur-[100px] -z-10" />
-      </div>
 
-      <div className="container-custom relative z-10">
+  return (
+    <section className="bg-[#F8FAFC] py-16 md:py-24">
+      <div className="container-custom">
+        {/* SECTION HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mb-8 md:mb-16"
+          transition={{ duration: 0.7 }}
+          className="mb-12"
         >
-          <span className="text-primary-600 font-bold tracking-[0.4em] uppercase text-xs sm:text-[11px] mb-3 block">
-            Our Clients
+          <span className="text-[#2563EB] font-semibold tracking-[0.2em] text-xs mb-3 block">
+            OUR CLIENTS
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-secondary-900 mb-4 font-outfit tracking-tight uppercase">
-            Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-blue-500 italic">Industry Leaders</span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0F172A] tracking-tight mb-3">
+            Trusted by Industry Leaders
           </h2>
-          <div className="w-12 h-1 bg-gradient-to-r from-primary-500 to-blue-400 mx-auto mb-4 md:mb-6 rounded-full" />
-          <p className="text-sm md:text-base md:text-lg text-secondary-600 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-[#64748B] text-sm max-w-xl leading-relaxed">
             We are proud to serve a diverse range of prestigious clients across multiple sectors.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
+        {/* CLIENTS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {clients.map((client, index) => (
             <motion.div
               key={client.id || index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
               viewport={{ once: true }}
-              className="bg-white border border-secondary-100 rounded-2xl md:rounded-[2.5rem] p-6 md:p-8 text-center group hover:shadow-xl hover:shadow-primary-500/5 transition-all duration-300 hover:-translate-y-1"
+              className="bg-white shadow-sm p-6 text-center group hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col items-center"
             >
-              <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 flex items-center justify-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 mb-4 flex items-center justify-center">
                 {client.logoUrl ? (
                   <Image
                     src={client.logoUrl}
@@ -56,12 +53,12 @@ const Clients = () => {
                     className="object-contain max-w-full max-h-full"
                   />
                 ) : (
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                    <Building2 className="w-6 h-6 md:w-7 md:h-7 text-primary-600" />
+                  <div className="w-12 h-12 bg-[#2563EB]/10 flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-[#2563EB]" />
                   </div>
                 )}
               </div>
-              <p className="text-xs sm:text-[12px] font-bold text-secondary-900 uppercase tracking-wider leading-tight">
+              <p className="text-xs font-bold text-[#0F172A] uppercase tracking-wider leading-tight">
                 {client.name}
               </p>
             </motion.div>

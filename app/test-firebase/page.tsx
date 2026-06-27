@@ -21,13 +21,9 @@ export default function TestFirebase() {
         const auth = getAuth()
         setStatus('Firebase Auth initialized successfully')
         
-        console.log('Firebase App:', app)
-        console.log('Firebase Auth:', auth)
-        
         setStatus('✅ All Firebase services working correctly!')
         setIsLoading(false)
       } catch (err: any) {
-        console.error('Firebase test failed:', err)
         setError(err.message)
         setStatus('❌ Firebase test failed')
         setIsLoading(false)
