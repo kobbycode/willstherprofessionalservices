@@ -286,6 +286,7 @@ const AdminDashboard = () => {
                 <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-4 px-4">Website Content</h2>
                 <div className="space-y-1.5">
                   {[
+                    { id: 'shop', label: 'Shop', icon: ShoppingBag },
                     { id: 'hero', label: 'Hero Section', icon: ImageIcon },
                     { id: 'services', label: 'Services', icon: Wrench },
                     { id: 'about', label: 'About Section', icon: Quote },
