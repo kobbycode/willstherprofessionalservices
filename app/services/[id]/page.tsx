@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import MaintenanceMode from '@/components/MaintenanceMode'
@@ -9,6 +9,8 @@ import { useSiteConfig } from '@/lib/site-config'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, CheckCircle, Clock } from 'lucide-react'
 import Skeleton from '@/components/Skeleton'
+import { getDb } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
 
 interface Service {
     id: string
@@ -24,6 +26,7 @@ export const dynamic = 'force-dynamic'
 export default function ServiceDetails() {
     const { config } = useSiteConfig()
     const params = useParams()
+    const router = useRouter()
     const [service, setService] = useState<Service | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -32,13 +35,12 @@ export default function ServiceDetails() {
         const fetchService = async () => {
             if (!params || !params.id) return
             try {
-                const res = await fetch(`/api/services/${params.id}`)
-                if (!res.ok) {
-                    if (res.status === 404) throw new Error('Service not found')
-                    throw new Error('Failed to fetch service details')
+                const db = getDb()
+                const snap = await getDoc(doc(db, 'services', params.id as string))
+                if (!snap.exists()) {
+                    throw new Error('Service not found')
                 }
-                const data = await res.json()
-                setService(data.service)
+                setService({ id: snap.id, ...snap.data() } as Service)
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'An error occurred')
             } finally {
@@ -217,12 +219,36 @@ export default function ServiceDetails() {
 
                                     <hr className="border-[#E2E8F0]" />
 
-                                    <Link
-                                        href="/#contact"
-                                        className="block w-full text-center bg-[#2563EB] hover:bg-[#1d4ed8] text-white text-sm font-semibold py-2.5 px-5 transition-all"
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const scrollToContact = () => {
+                                                const el = document.getElementById('contact')
+                                                if (el) {
+                                                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                                }
+                                            }
+                                            if (window.location.pathname === '/') {
+                                                scrollToContact()
+                                            } else {
+                                                router.push('/#contact')
+                                                let attempts = 0
+                                                const tryScroll = () => {
+                                                    const el = document.getElementById('contact')
+                                                    if (el) {
+                                                        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                                    } else if (attempts < 50) {
+                                                        attempts++
+                                                        setTimeout(tryScroll, 100)
+                                                    }
+                                                }
+                                                setTimeout(tryScroll, 300)
+                                            }
+                                        }}
+                                        className="block w-full text-center bg-[#2563EB] hover:bg-[#1d4ed8] text-white text-sm font-semibold py-2.5 px-5 transition-all cursor-pointer"
                                     >
                                         Contact Us Now
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>
