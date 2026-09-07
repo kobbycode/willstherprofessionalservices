@@ -32,7 +32,7 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
     const [settings, setSettings] = useState({
         siteName: config.siteName || 'Willsther Professional Services',
         siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
-        contactEmail: config.contactEmail || 'info@willsther.com',
+        contactEmail: config.contactEmail || 'management@willstherprofessionalservices.com',
         contactPhone: config.contactPhone || '0208267704',
         maintenanceMode: !!config.maintenanceMode,
         address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
@@ -42,7 +42,7 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
         setSettings({
             siteName: config.siteName || 'Willsther Professional Services',
             siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
-            contactEmail: config.contactEmail || 'info@willsther.com',
+            contactEmail: config.contactEmail || 'management@willstherprofessionalservices.com',
             contactPhone: config.contactPhone || '0208267704',
             maintenanceMode: !!config.maintenanceMode,
             address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'
@@ -74,7 +74,7 @@ export const WebsiteSettings = ({ config, onChange, onSave }: WebsiteSettingsPro
         setSettings({
             siteName: config.siteName || 'Willsther Professional Services',
             siteDescription: config.siteDescription || 'Professional cleaning and maintenance services',
-            contactEmail: config.contactEmail || 'info@willsther.com',
+            contactEmail: config.contactEmail || 'management@willstherprofessionalservices.com',
             contactPhone: config.contactPhone || '0208267704',
             maintenanceMode: !!config.maintenanceMode,
             address: config.footer?.address || 'Mahogany Street, #7 New Achimota, Accra, Ghana'

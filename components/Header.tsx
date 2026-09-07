@@ -196,7 +196,7 @@ const Header = () => {
 
               <div className="w-px h-5 bg-white/20" />
 
-              <a href={`mailto:${config.contactEmail || 'willstherprofessionalservices@gmail.com'}`} className="p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors" aria-label="Email us">
+              <a href={`mailto:${config.contactEmail || 'management@willstherprofessionalservices.com'}`} className="p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors" aria-label="Email us">
                 <Mail size={16} />
               </a>
 

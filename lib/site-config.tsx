@@ -131,7 +131,7 @@ export type ConfigOnChange = (next: ConfigUpdate) => void
 export const defaultSiteConfig: SiteConfig = {
 	siteName: 'Willsther Professional Services',
 	siteDescription: 'Professional cleaning and maintenance services',
-	contactEmail: 'willstherprofessionalservices@gmail.com',
+	contactEmail: 'management@willstherprofessionalservices.com',
 	contactPhone: '0208267704',
 	maintenanceMode: false,
 	systemSettings: {

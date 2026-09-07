@@ -18,7 +18,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email Address',
-      details: [config.contactEmail || 'willstherprofessionalservices@gmail.com'],
+      details: [config.contactEmail || 'management@willstherprofessionalservices.com'],
     },
     {
       icon: MapPin,
