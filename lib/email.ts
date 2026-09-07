@@ -27,7 +27,7 @@ export function openEmailCompose(to: string, subject?: string, body?: string): v
 
   const params = new URLSearchParams()
   if (to) params.set('to', to)
-  if (subject) params.set('su', subject)
+  if (subject) params.set('subject', subject)
   if (body) params.set('body', body)
 
   let fellBack = false
@@ -48,7 +48,7 @@ export function openEmailCompose(to: string, subject?: string, body?: string): v
   document.addEventListener('visibilitychange', onVisibility)
 
   try {
-    window.location.href = `googlegmail://co?${params.toString()}`
+    window.location.href = `googlegmail:///co?${params.toString()}`
   } catch {
     clearTimeout(timer)
     document.removeEventListener('visibilitychange', onVisibility)
