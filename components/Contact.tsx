@@ -115,7 +115,7 @@ const Contact = () => {
                 <div className="w-10 h-10 bg-[#2563EB] flex items-center justify-center flex-shrink-0">
                   <info.icon className="w-5 h-5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <h4 className="font-bold text-[#0F172A] text-xs uppercase tracking-wider mb-1">{info.title}</h4>
                   {info.details.map((detail, detailIndex) => {
                     const isPhone = info.title.toLowerCase().includes('phone')
@@ -123,7 +123,7 @@ const Contact = () => {
 
                     if (isPhone) {
                       return (
-                        <a key={detailIndex} href={`tel:${detail.split(' / ')[0]}`} className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors block">
+                        <a key={detailIndex} href={`tel:${detail.split(' / ')[0]}`} className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors block break-words">
                           {detail}
                         </a>
                       )
@@ -137,14 +137,14 @@ const Contact = () => {
                             e.preventDefault()
                             openEmailCompose(detail)
                           }}
-                          className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors block"
+                          className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors block break-all"
                         >
                           {detail}
                         </a>
                       )
                     }
                     return (
-                      <p key={detailIndex} className="text-[#64748B] text-sm">{detail}</p>
+                      <p key={detailIndex} className="text-[#64748B] text-sm break-words">{detail}</p>
                     )
                   })}
                 </div>
