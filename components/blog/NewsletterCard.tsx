@@ -4,7 +4,7 @@ import { Mail, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { useSiteConfig } from '@/lib/site-config'
-import { composeEmailHref } from '@/lib/email'
+import { openEmailCompose } from '@/lib/email'
 
 export default function NewsletterCard() {
   const [email, setEmail] = useState('')
@@ -12,12 +12,11 @@ export default function NewsletterCard() {
 
   const handleSubscribe = () => {
     const to = config.contactEmail || 'management@willstherprofessionalservices.com'
-    const href = composeEmailHref(
+    openEmailCompose(
       to,
       'Newsletter Subscription Request',
       `Please subscribe me to the Willsther Professional Services newsletter.\n\nMy email: ${email.trim() || '[not provided]'}`
     )
-    window.location.href = href
     setEmail('')
   }
 

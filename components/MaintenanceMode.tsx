@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Wrench, Clock, Mail } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site-config'
+import { gmailComposeHref } from '@/lib/email'
 import { memo } from 'react'
 
 const MaintenanceMode = memo(() => {
@@ -42,7 +43,9 @@ const MaintenanceMode = memo(() => {
               Contact us directly for urgent matters
             </p>
             <a
-              href={`mailto:${config.contactEmail}`}
+              href={gmailComposeHref(config.contactEmail || 'management@willstherprofessionalservices.com')}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
             >
               <Mail className="w-4 h-4" />

@@ -5,7 +5,7 @@ import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin, ArrowRight
 import Link from 'next/link'
 import { useState } from 'react'
 import { useSiteConfig } from '@/lib/site-config'
-import { composeEmailHref } from '@/lib/email'
+import { gmailComposeHref, openEmailCompose } from '@/lib/email'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -16,12 +16,11 @@ const Footer = () => {
     e.preventDefault()
     const to = config.contactEmail || 'management@willstherprofessionalservices.com'
     const email = newsletterEmail.trim()
-    const href = composeEmailHref(
+    openEmailCompose(
       to,
       'Newsletter Subscription Request',
       `Please subscribe me to the Willsther Professional Services newsletter.\n\nMy email: ${email || '[not provided]'}`
     )
-    window.location.href = href
     setNewsletterEmail('')
   }
 
@@ -132,7 +131,9 @@ const Footer = () => {
             </form>
             <div className="mt-6 flex gap-3">
               <a
-                href={`mailto:${config.contactEmail || 'management@willstherprofessionalservices.com'}`}
+                href={gmailComposeHref(config.contactEmail || 'management@willstherprofessionalservices.com')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-white/5 border border-white/10 flex items-center justify-center text-[#94A3B8] hover:bg-[#2563EB] hover:text-white hover:border-[#2563EB] transition-all duration-300"
                 title="Email us"
               >
