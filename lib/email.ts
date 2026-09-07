@@ -17,51 +17,12 @@ export function gmailComposeHref(to: string, subject?: string, body?: string): s
 }
 
 export function openEmailCompose(to: string, subject?: string, body?: string): void {
-  const webUrl = gmailComposeHref(to, subject, body)
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 
-  if (!isMobile) {
-    window.open(webUrl, '_blank', 'noopener,noreferrer')
+  if (isMobile) {
+    window.location.href = composeEmailHref(to, subject, body)
     return
   }
 
-  const params = new URLSearchParams()
-  if (to) params.set('to', to)
-  if (subject) params.set('subject', subject)
-  if (body) params.set('body', body)
-  const appUrl = `googlegmail://co?${params.toString()}`
-
-  let settled = false
-  let fallbackTimer: number | null = null
-  const cleanup = () => {
-    if (settled) return
-    settled = true
-    window.removeEventListener('pagehide', onPageHide)
-    document.removeEventListener('visibilitychange', onVisibility)
-    if (fallbackTimer !== null) {
-      window.clearTimeout(fallbackTimer)
-      fallbackTimer = null
-    }
-  }
-  const fallback = () => {
-    if (settled) return
-    window.location.href = webUrl
-  }
-  const onVisibility = () => {
-    if (document.hidden || document.visibilityState === 'hidden') {
-      cleanup()
-    }
-  }
-  const onPageHide = () => cleanup()
-
-  document.addEventListener('visibilitychange', onVisibility)
-  window.addEventListener('pagehide', onPageHide)
-
-  try {
-    window.location.href = appUrl
-  } catch {
-    fallback()
-  }
-
-  fallbackTimer = window.setTimeout(fallback, 2500)
+  window.open(gmailComposeHref(to, subject, body), '_blank', 'noopener,noreferrer')
 }

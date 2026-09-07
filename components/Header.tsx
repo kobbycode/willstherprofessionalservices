@@ -7,7 +7,7 @@ import { Phone, Mail, Menu, X, ShoppingBag, Heart } from 'lucide-react'
 import Image from 'next/image'
 import { useShop } from '@/context/ShopContext'
 import { useSiteConfig } from '@/lib/site-config'
-import { gmailComposeHref } from '@/lib/email'
+import { gmailComposeHref, openEmailCompose } from '@/lib/email'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -197,7 +197,15 @@ const Header = () => {
 
               <div className="w-px h-5 bg-white/20" />
 
-              <a href={gmailComposeHref(config.contactEmail || 'management@willstherprofessionalservices.com')} target="_blank" rel="noopener noreferrer" className="p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors" aria-label="Email us">
+              <a
+  href={gmailComposeHref(config.contactEmail || 'management@willstherprofessionalservices.com')}
+  onClick={(e) => {
+    e.preventDefault()
+    openEmailCompose(config.contactEmail || 'management@willstherprofessionalservices.com')
+  }}
+  className="p-2 text-white/80 hover:text-white hover:bg-primary-700 transition-colors"
+  aria-label="Email us"
+>
                 <Mail size={16} />
               </a>
 

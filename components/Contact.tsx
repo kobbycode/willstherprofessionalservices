@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Linkedin, Send } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site-config'
-import { gmailComposeHref } from '@/lib/email'
+import { gmailComposeHref, openEmailCompose } from '@/lib/email'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { createContactSubmission } from '@/lib/contacts'
@@ -130,7 +130,15 @@ const Contact = () => {
                     }
                     if (isEmail) {
                       return (
-                        <a key={detailIndex} href={gmailComposeHref(detail)} target="_blank" rel="noopener noreferrer" className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors block">
+                        <a
+                          key={detailIndex}
+                          href={gmailComposeHref(detail)}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            openEmailCompose(detail)
+                          }}
+                          className="text-[#64748B] text-sm hover:text-[#2563EB] transition-colors block"
+                        >
                           {detail}
                         </a>
                       )
