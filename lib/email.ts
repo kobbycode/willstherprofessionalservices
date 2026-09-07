@@ -29,29 +29,39 @@ export function openEmailCompose(to: string, subject?: string, body?: string): v
   if (to) params.set('to', to)
   if (subject) params.set('subject', subject)
   if (body) params.set('body', body)
+  const appUrl = `googlegmail://co?${params.toString()}`
 
-  let fellBack = false
-  const fallback = () => {
-    if (fellBack) return
-    fellBack = true
-    window.location.href = webUrl
-  }
-
-  const timer = setTimeout(fallback, 1000)
-
-  const onVisibility = () => {
-    const hidden = document.hidden || document.visibilityState === 'hidden'
-    if (!hidden) {
-      clearTimeout(timer)
+  let settled = false
+  let fallbackTimer: number | null = null
+  const cleanup = () => {
+    if (settled) return
+    settled = true
+    window.removeEventListener('pagehide', onPageHide)
+    document.removeEventListener('visibilitychange', onVisibility)
+    if (fallbackTimer !== null) {
+      window.clearTimeout(fallbackTimer)
+      fallbackTimer = null
     }
   }
+  const fallback = () => {
+    if (settled) return
+    window.location.href = webUrl
+  }
+  const onVisibility = () => {
+    if (document.hidden || document.visibilityState === 'hidden') {
+      cleanup()
+    }
+  }
+  const onPageHide = () => cleanup()
+
   document.addEventListener('visibilitychange', onVisibility)
+  window.addEventListener('pagehide', onPageHide)
 
   try {
-    window.location.href = `googlegmail:///co?${params.toString()}`
+    window.location.href = appUrl
   } catch {
-    clearTimeout(timer)
-    document.removeEventListener('visibilitychange', onVisibility)
     fallback()
   }
+
+  fallbackTimer = window.setTimeout(fallback, 2500)
 }
