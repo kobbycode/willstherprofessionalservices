@@ -3,9 +3,23 @@
 import { Mail, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { useSiteConfig } from '@/lib/site-config'
+import { composeEmailHref } from '@/lib/email'
 
 export default function NewsletterCard() {
   const [email, setEmail] = useState('')
+  const { config } = useSiteConfig()
+
+  const handleSubscribe = () => {
+    const to = config.contactEmail || 'management@willstherprofessionalservices.com'
+    const href = composeEmailHref(
+      to,
+      'Newsletter Subscription Request',
+      `Please subscribe me to the Willsther Professional Services newsletter.\n\nMy email: ${email.trim() || '[not provided]'}`
+    )
+    window.location.href = href
+    setEmail('')
+  }
 
   return (
     <motion.div
@@ -28,12 +42,7 @@ export default function NewsletterCard() {
           className="flex-1 min-w-0 px-4 py-3 text-sm text-[#0F172A] bg-white outline-none placeholder:text-[#94A3B8]"
         />
         <button
-          onClick={() => {
-            if (email) {
-              alert('Subscribed! (demo)')
-              setEmail('')
-            }
-          }}
+          onClick={handleSubscribe}
           className="bg-white text-[#2563EB] hover:bg-[#F8FAFC] px-4 py-3 font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-1 flex-shrink-0"
         >
           Subscribe
